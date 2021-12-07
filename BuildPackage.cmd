@@ -1,0 +1,1 @@
+nuget pack src\DcslGs.Template.nuspec -OutputDirectory nupkg

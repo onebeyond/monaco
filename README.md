@@ -1,5 +1,7 @@
 # Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+This project provides a solution template for scaffolding a .NET 6 solution with the most basic structure required to run a REST API with EF Core and the standard architecture used in current .NET projects. 
+
+Also, it provides some basic business components as example of real life implementation logic.
 
 # Getting Started
 TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:

@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "DCSL GuideSmiths",
+  "classifications": [ "Web", "Solution" ],
+  "name": "DCSL-GS REST API Solution Template",
+  "description": "Solution template for DCSL GuideSmiths .NET REST API projects",
+  "groupIdentity": "DcslGs.Template",
+  "identity": "DcslGs.Template.Solution",
+  "shortName": "dcslgs-solution",
+  "preferNameDirectory": true,
+  "sourceName": "DcslGs.Template",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "primaryOutputs": [
+    {
+      "path": "DcslGs.Template.sln"
+    }
+  ],
+  "symbols": {
+    "excludecommon": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "displayName": "Exclude Common projects",
+      "description": "Exclude all the Common.* projects from the solution generated"
+    },
+    "includeFilesSupport": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "displayName": "Include files support and structure",
+      "description": "Include support for Azure BlobStorage and file handling structure"
+    },
+    "includeMassTransitSupport": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "displayName": "Include MassTransit support",
+      "description": "Includes support for MassTransit and integration events"
+    } 
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "condition": "(excludecommon)",
+          "exclude": [
+            "nuget.config",
+            "realm-export-template.json",
+            "DcslGs.Template.Common.*/**/*"
+          ]
+        },
+				{
+					"condition": "(!includeFilesSupport)",
+					"exclude": [
+						"DcslGs.Template.Common.BlobStorage/**/*",
+						"DcslGs.Template.Application/Commands/File/**/*",
+						"DcslGs.Template.Application/DTOs/Extensions/FileExtensions.cs",
+						"DcslGs.Template.Application/DTOs/File*.cs",
+						"DcslGs.Template.Application/DTOs/ImageDto.cs",
+						"DcslGs.Template.Application/Queries/File/**/*",
+						"DcslGs.Template.Application/Queries/Image/**/*",
+						"DcslGs.Template.Application/Validators/File*.cs",
+						"DcslGs.Template.Api/Controllers/FilesController.cs",
+						"DcslGs.Template.Api/Controllers/ImagesController.cs",
+						"DcslGs.Template.Infrastructure/Services/**/*",
+						"DcslGs.Template.Infrastructure/EntityConfigurations/DocumentEntityConfiguration.cs",
+						"DcslGs.Template.Infrastructure/EntityConfigurations/FileEntityConfiguration.cs",
+						"DcslGs.Template.Infrastructure/EntityConfigurations/ImageEntityConfiguration.cs",
+						"DcslGs.Template.Domain/Model/Document.cs",
+						"DcslGs.Template.Domain/Model/File.cs",
+						"DcslGs.Template.Domain/Model/Image.cs"
+					]
+				},
+				{
+					"condition": "(!includeMassTransitSupport)",
+					"exclude": [
+						"DcslGs.Template.Common.Messaging.Messages/**/*"
+					]
+				}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+dotnet nuget push --source "guidesmiths" --api-key az %1
