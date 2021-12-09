@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>DcslGs.Template.Solution.nuspec</id>
-		<version>0.0.1-alpha1</version>
+		<version>0.0.1-alpha2</version>
 		<description>
 			Solution template for DCSL GuideSmiths .NET projects
 		</description>

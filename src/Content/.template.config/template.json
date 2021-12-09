@@ -33,13 +33,20 @@
       "displayName": "Include files support and structure",
       "description": "Include support for Azure BlobStorage and file handling structure"
     },
-    "includeMassTransitSupport": {
-      "type": "parameter",
-      "datatype": "bool",
-      "defaultValue": "false",
-      "displayName": "Include MassTransit support",
-      "description": "Includes support for MassTransit and integration events"
-    } 
+		"includeMassTransitSupport": {
+			"type": "parameter",
+			"datatype": "bool",
+			"defaultValue": "false",
+			"displayName": "Include MassTransit support",
+			"description": "Includes support for MassTransit and integration events"
+		},
+    "includeApiGateway": {
+			"type": "parameter",
+			"datatype": "bool",
+			"defaultValue": "false",
+			"displayName": "Include API Gateway",
+			"description": "Includes API Gateway project with Ocelot implementation"
+		}
   },
   "sources": [
     {
@@ -79,7 +86,13 @@
 					"exclude": [
 						"DcslGs.Template.Common.Messaging.Messages/**/*"
 					]
-				}
+				},
+	      {
+					"condition": "(!includeApiGateway)",
+					"exclude": [
+						"DcslGs.Template.Common.ApiGateway/**/*"
+					]
+	      }
       ]
     }
   ]

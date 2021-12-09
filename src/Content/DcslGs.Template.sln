@@ -22,8 +22,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Common.Doma
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Common.Api", "DcslGs.Template.Common.Api\DcslGs.Template.Common.Api.csproj", "{78120DEF-B581-4D6B-92D7-1735070ACB7F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Common.ApiGateway", "DcslGs.Template.Common.ApiGateway\DcslGs.Template.Common.ApiGateway.csproj", "{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Common.Application", "DcslGs.Template.Common.Application\DcslGs.Template.Common.Application.csproj", "{BFD5F082-8402-45DE-8ABA-EBB354BD2858}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Common.Infrastructure", "DcslGs.Template.Common.Infrastructure\DcslGs.Template.Common.Infrastructure.csproj", "{23E5BE73-89F8-4EFE-8F28-27987C4E2DCD}"
@@ -37,6 +35,10 @@ EndProject
 #endif
 #if (includeMassTransitSupport)
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Common.Messaging.Messages", "DcslGs.Template.Common.Messaging.Messages\DcslGs.Template.Common.Messaging.Messages.csproj", "{45B82388-702E-4485-BEB5-995051DB9952}"
+EndProject
+#endif
+#if (includeApiGateway)
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Common.ApiGateway", "DcslGs.Template.Common.ApiGateway\DcslGs.Template.Common.ApiGateway.csproj", "{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}"
 EndProject
 #endif
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{920A23AF-59DA-4453-B825-0549B1C04F5B}"
@@ -74,10 +76,6 @@ Global
 		{78120DEF-B581-4D6B-92D7-1735070ACB7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78120DEF-B581-4D6B-92D7-1735070ACB7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78120DEF-B581-4D6B-92D7-1735070ACB7F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BFD5F082-8402-45DE-8ABA-EBB354BD2858}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BFD5F082-8402-45DE-8ABA-EBB354BD2858}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BFD5F082-8402-45DE-8ABA-EBB354BD2858}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -104,6 +102,12 @@ Global
 		{45B82388-702E-4485-BEB5-995051DB9952}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45B82388-702E-4485-BEB5-995051DB9952}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45B82388-702E-4485-BEB5-995051DB9952}.Release|Any CPU.Build.0 = Release|Any CPU
+		#endif
+		#if (includeApiGateway)
+		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}.Release|Any CPU.Build.0 = Release|Any CPU
 		#endif
 		{E5781B96-E0CA-4762-9412-C4202E0CA08F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E5781B96-E0CA-4762-9412-C4202E0CA08F}.Debug|Any CPU.Build.0 = Debug|Any CPU
@@ -147,7 +151,6 @@ Global
 		#if (!excludecommon)
 		{35484293-234F-40DA-B430-A95170EDE449} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{78120DEF-B581-4D6B-92D7-1735070ACB7F} = {8BFE9C37-2620-4156-88B8-286537954C5E}
-		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{BFD5F082-8402-45DE-8ABA-EBB354BD2858} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{23E5BE73-89F8-4EFE-8F28-27987C4E2DCD} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{605588FC-AC96-43A2-BFD9-2A6F27790202} = {8BFE9C37-2620-4156-88B8-286537954C5E}
@@ -156,6 +159,9 @@ Global
 		#endif
 		#if (includeMassTransitSupport)
 		{45B82388-702E-4485-BEB5-995051DB9952} = {8BFE9C37-2620-4156-88B8-286537954C5E}
+		#endif
+		#if (includeApiGateway)
+		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		#endif
 		{426A6AB4-95F6-46AC-AB6D-98C4612F74E5} = {35484293-234F-40DA-B430-A95170EDE449}
 		{E5781B96-E0CA-4762-9412-C4202E0CA08F} = {920A23AF-59DA-4453-B825-0549B1C04F5B}
