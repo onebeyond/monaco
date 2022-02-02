@@ -32,6 +32,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Common.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Common.Domain", "DcslGs.Template.Common.Domain\DcslGs.Template.Common.Domain.csproj", "{0FB378C2-9DE1-437F-8A62-774747105CE5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DcslGs.Template.Common.Api.Application", "DcslGs.Template.Common.Api.Application\DcslGs.Template.Common.Api.Application.csproj", "{F733BD0F-4C55-4E65-92E8-837191C37357}"
+EndProject
 #endif
 #if (includeMassTransitSupport)
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Common.Messaging.Messages", "DcslGs.Template.Common.Messaging.Messages\DcslGs.Template.Common.Messaging.Messages.csproj", "{45B82388-702E-4485-BEB5-995051DB9952}"
@@ -58,7 +60,7 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Infrastructure.Migrations", "DcslGs.Template.Infrastructure.Migrations\DcslGs.Template.Infrastructure.Migrations.csproj", "{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}"
 EndProject
 #if (includeFilesSupport)
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DcslGs.Template.Common.BlobStorage", "DcslGs.Template.Common.BlobStorage\DcslGs.Template.Common.BlobStorage.csproj", "{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Common.BlobStorage", "DcslGs.Template.Common.BlobStorage\DcslGs.Template.Common.BlobStorage.csproj", "{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}"
 EndProject
 #endif
 Global
@@ -96,6 +98,10 @@ Global
 		{0FB378C2-9DE1-437F-8A62-774747105CE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0FB378C2-9DE1-437F-8A62-774747105CE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0FB378C2-9DE1-437F-8A62-774747105CE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F733BD0F-4C55-4E65-92E8-837191C37357}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F733BD0F-4C55-4E65-92E8-837191C37357}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F733BD0F-4C55-4E65-92E8-837191C37357}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F733BD0F-4C55-4E65-92E8-837191C37357}.Release|Any CPU.Build.0 = Release|Any CPU
 		#endif
 		#if (includeMassTransitSupport)
 		{45B82388-702E-4485-BEB5-995051DB9952}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -150,12 +156,14 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		#if (!excludecommon)
 		{35484293-234F-40DA-B430-A95170EDE449} = {8BFE9C37-2620-4156-88B8-286537954C5E}
+		{426A6AB4-95F6-46AC-AB6D-98C4612F74E5} = {35484293-234F-40DA-B430-A95170EDE449}
 		{78120DEF-B581-4D6B-92D7-1735070ACB7F} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{BFD5F082-8402-45DE-8ABA-EBB354BD2858} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{23E5BE73-89F8-4EFE-8F28-27987C4E2DCD} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{605588FC-AC96-43A2-BFD9-2A6F27790202} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{B82D784A-81A2-46C5-A966-B472B8FCAD46} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{0FB378C2-9DE1-437F-8A62-774747105CE5} = {8BFE9C37-2620-4156-88B8-286537954C5E}
+		{F733BD0F-4C55-4E65-92E8-837191C37357} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		#endif
 		#if (includeMassTransitSupport)
 		{45B82388-702E-4485-BEB5-995051DB9952} = {8BFE9C37-2620-4156-88B8-286537954C5E}

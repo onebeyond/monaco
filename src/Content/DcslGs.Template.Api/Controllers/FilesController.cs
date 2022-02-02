@@ -1,16 +1,17 @@
-﻿using System.Net;
+﻿#if includeFilesSupport
 using DcslGs.Template.Api.Auth;
 using DcslGs.Template.Application.Commands.File;
 using DcslGs.Template.Application.DTOs;
 using DcslGs.Template.Application.Queries.File;
-using FluentValidation.AspNetCore;
+using DcslGs.Template.Common.Api.Application;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace DcslGs.Template.Api.Controllers
 {
-    [Route("api/v{apiVersion:apiVersion}/[controller]")]
+	[Route("api/v{apiVersion:apiVersion}/[controller]")]
     [ApiController]
     public class FilesController : ControllerBase
     {
@@ -23,29 +24,19 @@ namespace DcslGs.Template.Api.Controllers
 
         [HttpPost]
         [Authorize(Scopes.FilesWrite)]
-        public async Task<IActionResult> Post(ApiVersion apiVersion, [FromForm] IFormFile file)
+        public Task<ActionResult<Guid>> Post(ApiVersion apiVersion, [FromForm] IFormFile file)
         {
-            var cmd = new FileCreateCommand(file.OpenReadStream(), file.FileName, file.ContentType);
-            var result = await _mediator.Send(cmd);
-
-            if (result.ValidationResult.IsValid)
-                return Created($"api/v{apiVersion}/files/{result.Result}", result.Result);
-
-            result.ValidationResult.AddToModelState(ModelState, null);
-            return BadRequest(ModelState);
-        }
+			return _mediator.ExecuteCommandAsync(new FileCreateCommand(file.OpenReadStream(), file.FileName, file.ContentType),
+												 ModelState,
+												 "api/v1/files/{0}");
+		}
 
         [HttpGet("{id}")]
         [Authorize(Scopes.FilesRead)]
-        public async Task<ActionResult<FileDto>> Get(Guid id)
+        public Task<ActionResult<FileDto>> Get(Guid id)
         {
-            var result = await _mediator.Send(new GetFileByIdQuery(id));
-
-            if (result == null)
-                return NotFound();
-
-            return Ok(result);
-        }
+			return _mediator.ExecuteQueryAsync(new GetFileByIdQuery(id));
+		}
 
         [HttpGet("{id}/Download")]
         [Authorize(Scopes.FilesRead)]
@@ -63,18 +54,11 @@ namespace DcslGs.Template.Api.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Scopes.FilesWrite)]
-        public async Task<IActionResult> Delete(Guid id)
+        public Task<IActionResult> Delete(Guid id)
         {
-            var result = await _mediator.Send(new FileDeleteCommand(id));
-
-            if (result.ItemNotFound)
-                return NotFound();
-
-            if (result.ValidationResult.IsValid)
-                return Ok();
-
-            result.ValidationResult.AddToModelState(ModelState, null);
-            return BadRequest(ModelState);
-        }
+			return _mediator.ExecuteCommandAsync(new FileDeleteCommand(id),
+												 ModelState);
+		}
     }
 }
+#endif

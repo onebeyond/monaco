@@ -1,4 +1,5 @@
-﻿using DcslGs.Template.Api.Auth;
+﻿#if includeFilesSupport
+using DcslGs.Template.Api.Auth;
 using DcslGs.Template.Application.DTOs;
 using DcslGs.Template.Application.Queries.File;
 using DcslGs.Template.Application.Queries.Image;
@@ -6,6 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using DcslGs.Template.Common.Api.Application;
 
 namespace DcslGs.Template.Api.Controllers
 {
@@ -22,27 +24,17 @@ namespace DcslGs.Template.Api.Controllers
 
         [HttpGet("{id}")]
         [Authorize(Scopes.FilesRead)]
-        public async Task<ActionResult<ImageDto>> Get(Guid id)
+        public Task<ActionResult<ImageDto>> Get(Guid id)
         {
-            var result = await _mediator.Send(new GetImageByIdQuery(id));
-
-            if (result == null)
-                return NotFound();
-
-            return Ok(result);
-        }
+			return _mediator.ExecuteQueryAsync(new GetImageByIdQuery(id));
+		}
 
         [HttpGet("{id}/Thumbnail")]
         [Authorize(Scopes.FilesRead)]
-        public async Task<ActionResult<ImageDto>> GetThumbnail(Guid id)
+        public Task<ActionResult<ImageDto>> GetThumbnail(Guid id)
         {
-            var result = await _mediator.Send(new GetThumbnailByImageIdQuery(id));
-
-            if (result == null)
-                return NotFound();
-
-            return Ok(result);
-        }
+			return _mediator.ExecuteQueryAsync(new GetThumbnailByImageIdQuery(id));
+		}
 
         [HttpGet("{id}/Download")]
         [Authorize(Scopes.FilesRead)]
@@ -73,3 +65,4 @@ namespace DcslGs.Template.Api.Controllers
         }
     }
 }
+#endif

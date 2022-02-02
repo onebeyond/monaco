@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DcslGs.Template.Application\DcslGs.Template.Application.csproj" />
+    <ProjectReference Include="..\DcslGs.Template.Common.Api.Application\DcslGs.Template.Common.Api.Application.csproj" />
     <ProjectReference Include="..\DcslGs.Template.Common.Api\DcslGs.Template.Common.Api.csproj" />
     <ProjectReference Include="..\DcslGs.Template.Common.Serilog\DcslGs.Template.Common.Serilog.csproj" />
     <ProjectReference Include="..\DcslGs.Template.Infrastructure.Migrations\DcslGs.Template.Infrastructure.Migrations.csproj" />

@@ -1,7 +1,8 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using DcslGs.Template.Application.DTOs;
+﻿using DcslGs.Template.Application.DTOs;
 using DcslGs.Template.Application.Queries.Country;
+using DcslGs.Template.Common.Api.Application;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DcslGs.Template.Api.Controllers;
 
@@ -22,13 +23,10 @@ public class CountriesController : ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public async Task<ActionResult<List<CountryDto>>> Get()
-    {
-        var query = new GetCountryListQuery(Request.Query);
-        var result = await _mediator.Send(query);
-
-        return Ok(result);
-    }
+    public Task<ActionResult<List<CountryDto>>> Get()
+	{
+		return _mediator.ExecuteQueryAsync(new GetCountryListQuery(Request.Query));
+	}
 
     /// <summary>
     /// Gets a country by Id
@@ -36,14 +34,8 @@ public class CountriesController : ControllerBase
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpGet("{id}")]
-    public async Task<ActionResult<CountryDto>> Get(Guid id)
-    {
-        var query = new GetCountryByIdQuery(id);
-        var item = await _mediator.Send(query);
-
-        if (item == null)
-            return NotFound();
-
-        return Ok(item);
-    }
+    public Task<ActionResult<CountryDto>> Get(Guid id)
+	{
+		return _mediator.ExecuteQueryAsync(new GetCountryByIdQuery(id));
+	}
 }
