@@ -3,7 +3,7 @@ using DcslGs.Template.Common.Domain.Model;
 
 namespace DcslGs.Template.Common.Application.Queries;
 
-public abstract class QueryPagedBase<T> : QueryBase<Page<T>>
+public abstract class QueryPagedBase<T> : QueryBase<Page<T>?>
 {
     protected QueryPagedBase(IEnumerable<KeyValuePair<string, StringValues>> queryString) : base(queryString)
     {

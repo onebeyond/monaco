@@ -117,11 +117,11 @@ public static class MediatorExtensions
 
 		if (result.ValidationResult.IsValid)
 			return responseType switch
-			{
-				ResponseType.Ok => new OkResult(),
-				ResponseType.NoContent => new NoContentResult(),
-				_ => throw new ArgumentOutOfRangeException(nameof(responseType), responseType, null)
-			};
+				   {
+					   ResponseType.Ok => new OkResult(),
+					   ResponseType.NoContent => new NoContentResult(),
+					   _ => throw new ArgumentOutOfRangeException(nameof(responseType), responseType, null)
+				   };
 
 		result.ValidationResult.AddToModelState(modelState, null);
 		return new BadRequestObjectResult(modelState);
