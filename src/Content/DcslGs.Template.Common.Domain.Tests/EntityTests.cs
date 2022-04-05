@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DcslGs.Template.Common.Domain.Model;
-using DcslGs.Template.Common.Domain.Tests.AutoFixture;
+using DcslGs.Template.Common.Tests.Factories;
 using Xunit;
 
 namespace DcslGs.Template.Common.Domain.Tests;

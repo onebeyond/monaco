@@ -4,7 +4,7 @@ using Moq;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using DcslGs.Template.Common.Domain.Model;
-using DcslGs.Template.Common.Domain.Tests.AutoFixture;
+using DcslGs.Template.Common.Tests.Factories;
 using Xunit;
 
 namespace DcslGs.Template.Common.Domain.Tests;

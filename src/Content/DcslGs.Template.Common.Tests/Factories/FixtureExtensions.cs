@@ -23,4 +23,22 @@ public static class FixtureExtensions
 
         return fixture;
     }
+
+	public static IFixture RegisterMockFactories(this IFixture fixture)
+	{
+		fixture.Behaviors
+			   .OfType<ThrowingRecursionBehavior>()
+			   .ToList()
+			   .ForEach(b => fixture.Behaviors.Remove(b));
+
+		fixture.Behaviors
+			   .Add(new OmitOnRecursionBehavior(1));
+
+		fixture.Customize(new AutoMoqCustomization());
+
+		fixture.RegisterCompanyMock()
+			   .RegisterCountryMock();
+
+		return fixture;
+	}
 }

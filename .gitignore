@@ -362,4 +362,4 @@ MigrationBackup/
 FodyWeavers.xsd
 
 /nupkg
-/.idea/**/*
+.idea/

@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DcslGs.Template.Common.Domain\DcslGs.Template.Common.Domain.csproj" />
+    <ProjectReference Include="..\DcslGs.Template.Common.Tests\DcslGs.Template.Common.Tests.csproj" />
   </ItemGroup>
 
 </Project>

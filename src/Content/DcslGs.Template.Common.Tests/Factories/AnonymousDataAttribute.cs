@@ -5,9 +5,9 @@ namespace DcslGs.Template.Common.Tests.Factories;
 
 public class AnonymousDataAttribute : AutoDataAttribute
 {
-    private static readonly Func<IFixture> fixture = () => new Fixture().RegisterFactories();
-
-    public AnonymousDataAttribute() : base(fixture)
-    {
-    }
+	public AnonymousDataAttribute(bool mockedData = false) : base(() => mockedData
+																			? new Fixture().RegisterMockFactories()
+																			: new Fixture().RegisterFactories())
+	{
+	}
 }
