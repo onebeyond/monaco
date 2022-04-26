@@ -23,19 +23,15 @@ public class CountriesController : ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public Task<ActionResult<List<CountryDto>>> Get()
-	{
-		return _mediator.ExecuteQueryAsync(new GetCountryListQuery(Request.Query));
-	}
+    public Task<ActionResult<List<CountryDto>>> Get() => 
+		_mediator.ExecuteQueryAsync(new GetCountryListQuery(Request.Query));
 
-    /// <summary>
+	/// <summary>
     /// Gets a country by Id
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    [HttpGet("{id}")]
-    public Task<ActionResult<CountryDto>> Get(Guid id)
-	{
-		return _mediator.ExecuteQueryAsync(new GetCountryByIdQuery(id));
-	}
+    [HttpGet("{id:guid}")]
+    public Task<ActionResult<CountryDto>> Get(Guid id) =>
+		_mediator.ExecuteQueryAsync(new GetCountryByIdQuery(id));
 }

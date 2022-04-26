@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace DcslGs.Template.Application.Validators;
 
-public class FileCreateCommandValidator : AbstractValidator<FileCreateCommand>
+public sealed class FileCreateCommandValidator : AbstractValidator<FileCreateCommand>
 {
     public FileCreateCommandValidator()
     {

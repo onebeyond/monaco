@@ -5,25 +5,23 @@ namespace DcslGs.Template.Application.DTOs.Extensions;
 
 public static class CountryExtensions
 {
-    public static CountryDto? Map(this Country? value)
-    {
-        if (value == null)
-            return null;
+	public static CountryDto? Map(this Country? value)
+	{
+		if (value == null)
+			return null;
 
-        var dto = new CountryDto
-                  {
-                      Id = value.Id,
-                      Name = value.Name
-                  };
-        return dto;
-    }
+		var dto = new CountryDto
+				  {
+					  Id = value.Id,
+					  Name = value.Name
+				  };
+		return dto;
+	}
 
-    public static Dictionary<string, Expression<Func<Country, object>>> GetMappedFields()
-    {
-        return new()
-               {
-                   {nameof(CountryDto.Id), x => x.Id},
-                   {nameof(CountryDto.Name), x => x.Name}
-               };
-    }
+	public static Dictionary<string, Expression<Func<Country, object>>> GetMappedFields() =>
+		new()
+		{
+			[nameof(CountryDto.Id)] = x => x.Id,
+			[nameof(CountryDto.Name)] = x => x.Name
+		};
 }

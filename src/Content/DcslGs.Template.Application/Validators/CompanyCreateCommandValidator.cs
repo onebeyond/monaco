@@ -7,7 +7,7 @@ using DcslGs.Template.Infrastructure.Context;
 
 namespace DcslGs.Template.Application.Validators;
 
-public class CompanyCreateCommandValidator : AbstractValidator<CompanyCreateCommand>
+public sealed class CompanyCreateCommandValidator : AbstractValidator<CompanyCreateCommand>
 {
     public CompanyCreateCommandValidator(AppDbContext dbContext)
     {

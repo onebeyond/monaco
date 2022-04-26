@@ -2,7 +2,7 @@
 
 namespace DcslGs.Template.Application.Commands.Company;
 
-public class CompanyEditCommand : CommandBase
+public record CompanyEditCommand : CommandBase
 {
     protected CompanyEditCommand() {}
 
@@ -26,12 +26,12 @@ public class CompanyEditCommand : CommandBase
         CountryId = countryId;
     }
 
-    public string Name { get; private set; }
-    public string Email { get; private set; }
-    public string WebSiteUrl { get; private set; }
-    public string Address { get; private set; }
-    public string City { get; private set; }
-    public string County { get; private set; }
-    public string PostCode { get; private set; }
-    public Guid CountryId { get; private set; }
+    public string Name { get; }
+    public string Email { get; }
+    public string WebSiteUrl { get; }
+    public string Address { get; }
+    public string City { get; }
+    public string County { get; }
+    public string PostCode { get; }
+    public Guid CountryId { get; }
 }

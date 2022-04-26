@@ -6,7 +6,7 @@ using DcslGs.Template.Infrastructure.Context;
 
 namespace DcslGs.Template.Application.Validators;
 
-public class CompanyDeleteCommandValidator : AbstractValidator<CompanyDeleteCommand>
+public sealed class CompanyDeleteCommandValidator : AbstractValidator<CompanyDeleteCommand>
 {
     public CompanyDeleteCommandValidator(AppDbContext dbContext)
     {

@@ -24,21 +24,17 @@ namespace DcslGs.Template.Api.Controllers
 
         [HttpPost]
         [Authorize(Scopes.FilesWrite)]
-        public Task<ActionResult<Guid>> Post(ApiVersion apiVersion, [FromForm] IFormFile file)
-        {
-			return _mediator.ExecuteCommandAsync(new FileCreateCommand(file.OpenReadStream(), file.FileName, file.ContentType),
-												 ModelState,
-												 "api/v1/files/{0}");
-		}
+        public Task<ActionResult<Guid>> Post(ApiVersion apiVersion, [FromForm] IFormFile file) =>
+			_mediator.ExecuteCommandAsync(new FileCreateCommand(file.OpenReadStream(), file.FileName, file.ContentType),
+										  ModelState,
+										  "api/v1/files/{0}");
 
-        [HttpGet("{id}")]
+		[HttpGet("{id:guid}")]
         [Authorize(Scopes.FilesRead)]
-        public Task<ActionResult<FileDto>> Get(Guid id)
-        {
-			return _mediator.ExecuteQueryAsync(new GetFileByIdQuery(id));
-		}
+        public Task<ActionResult<FileDto>> Get(Guid id) =>
+			_mediator.ExecuteQueryAsync(new GetFileByIdQuery(id));
 
-        [HttpGet("{id}/Download")]
+		[HttpGet("{id:guid}/Download")]
         [Authorize(Scopes.FilesRead)]
         [ProducesResponseType(typeof(FileContentResult), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -52,13 +48,11 @@ namespace DcslGs.Template.Api.Controllers
             return File(result.FileContent, result.ContentType, result.FileName);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:guid}")]
         [Authorize(Scopes.FilesWrite)]
-        public Task<IActionResult> Delete(Guid id)
-        {
-			return _mediator.ExecuteCommandAsync(new FileDeleteCommand(id),
-												 ModelState);
-		}
-    }
+        public Task<IActionResult> Delete(Guid id) =>
+			_mediator.ExecuteCommandAsync(new FileDeleteCommand(id),
+										  ModelState);
+	}
 }
 #endif

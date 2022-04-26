@@ -46,25 +46,22 @@ public static class FileExtensions
                };
     }
 
-    public static File Map(this FileCreateCommand value, Guid id, FileTypeEnum fileType)
-    {
-        return fileType switch
-               {
-                   FileTypeEnum.Image => new Image(id,
-                                                   Path.GetFileNameWithoutExtension(value.FileName),
-                                                   Path.GetExtension(value.FileName),
-                                                   value.Stream.Length,
-                                                   value.ContentType,
-                                                   true,
-                                                   0,
-                                                   0),
-
-                   _ => new Document(id,
-                                     Path.GetFileNameWithoutExtension(value.FileName),
-                                     Path.GetExtension(value.FileName),
-                                     value.Stream.Length,
-                                     value.ContentType,
-                                     true)
-               };
-    }
+    public static File Map(this FileCreateCommand value, Guid id, FileTypeEnum fileType) =>
+		fileType switch
+		{
+			FileTypeEnum.Image => new Image(id,
+											Path.GetFileNameWithoutExtension(value.FileName),
+											Path.GetExtension(value.FileName),
+											value.Stream.Length,
+											value.ContentType,
+											true,
+											0,
+											0),
+			_ => new Document(id,
+							  Path.GetFileNameWithoutExtension(value.FileName),
+							  Path.GetExtension(value.FileName),
+							  value.Stream.Length,
+							  value.ContentType,
+							  true)
+		};
 }

@@ -5,27 +5,27 @@ using MediatR;
 
 namespace DcslGs.Template.Application.Commands.File;
 
-public class FileCommandsHandlers : IRequestHandler<FileCreateCommand, ICommandResult<Guid>>,
-                                    IRequestHandler<FileDeleteCommand, ICommandResult>
+public sealed class FileCommandsHandlers : IRequestHandler<FileCreateCommand, ICommandResult<Guid>>,
+										   IRequestHandler<FileDeleteCommand, ICommandResult>
 {
-    private readonly IFileService _fileService;
+	private readonly IFileService _fileService;
 
-    public FileCommandsHandlers(IFileService fileService)
-    {
-        _fileService = fileService;
-    }
+	public FileCommandsHandlers(IFileService fileService)
+	{
+		_fileService = fileService;
+	}
 
-    public async Task<ICommandResult<Guid>> Handle(FileCreateCommand request, CancellationToken cancellationToken)
-    {
-        var file = await _fileService.Upload(request.Stream, request.FileName, request.ContentType, cancellationToken);
+	public async Task<ICommandResult<Guid>> Handle(FileCreateCommand request, CancellationToken cancellationToken)
+	{
+		var file = await _fileService.Upload(request.Stream, request.FileName, request.ContentType, cancellationToken);
 
-        return new CommandResult<Guid>(file.Id);
-    }
+		return new CommandResult<Guid>(file.Id);
+	}
 
-    public async Task<ICommandResult> Handle(FileDeleteCommand request, CancellationToken cancellationToken)
-    {
-        await _fileService.Delete(request.Id, cancellationToken);
+	public async Task<ICommandResult> Handle(FileDeleteCommand request, CancellationToken cancellationToken)
+	{
+		await _fileService.Delete(request.Id, cancellationToken);
 
-        return new CommandResult();
-    }
+		return new CommandResult();
+	}
 }

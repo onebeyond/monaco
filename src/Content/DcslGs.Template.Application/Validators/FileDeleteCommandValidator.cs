@@ -6,7 +6,7 @@ using File = DcslGs.Template.Domain.Model.File;
 
 namespace DcslGs.Template.Application.Validators;
 
-public class FileDeleteCommandValidator : AbstractValidator<FileDeleteCommand>
+public sealed class FileDeleteCommandValidator : AbstractValidator<FileDeleteCommand>
 {
     public FileDeleteCommandValidator(AppDbContext dbContext)
     {

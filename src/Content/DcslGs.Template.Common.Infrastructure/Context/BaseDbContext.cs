@@ -34,22 +34,15 @@ public abstract class BaseDbContext : DbContext, IUnitOfWork
 
         modelBuilder.Ignore<DomainEvent>();
 
-        var onlyBaseConfigsToRegister = GetConfigurationsAssembly().GetTypes()
-                                                                   .Where(t => t.GetInterfaces()
-                                                                                .Any(gi => gi.IsGenericType &&
-                                                                                           gi.GetGenericTypeDefinition() == typeof(IEntityTypeConfiguration<>)) &&
-                                                                               t != typeof(EntityTypeConfigurationBase<>) &&
-                                                                               !((t.BaseType?.IsGenericType ?? false) &&
-                                                                                 t.BaseType?.GetGenericTypeDefinition() == typeof(EntityTypeConfigurationBase<>)))
-                                                                   .ToList();
-
-        var derivedConfigsToRegister = GetConfigurationsAssembly().GetTypes()
-                                                                  .Where(t => (t.BaseType?.IsGenericType ?? false) &&
-                                                                              t.BaseType?.GetGenericTypeDefinition() == typeof(EntityTypeConfigurationBase<>))
-                                                                  .ToList();
-
-        onlyBaseConfigsToRegister.ForEach(t => modelBuilder.ApplyConfiguration((dynamic)Activator.CreateInstance(t)));
-        derivedConfigsToRegister.ForEach(t => modelBuilder.ApplyConfiguration((dynamic)Activator.CreateInstance(t, _env)));
+		//This will apply all configurations that inherit from IEntityTypeConfiguration<T> and have a parameterless constructor
+        modelBuilder.ApplyConfigurationsFromAssembly(GetConfigurationsAssembly());
+		
+		//For the ones deriving from EntityTypeConfigurationBase<T>, we process scan and apply them as follows:
+		var derivedConfigsToRegister = GetConfigurationsAssembly().GetTypes()
+																  .Where(t => (t.BaseType?.IsGenericType ?? false) &&
+																			  t.BaseType?.GetGenericTypeDefinition() == typeof(EntityTypeConfigurationBase<>))
+																  .ToList();
+        derivedConfigsToRegister.ForEach(t => modelBuilder.ApplyConfiguration((dynamic)Activator.CreateInstance(t, _env)!));
     }
 
     public virtual async Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken = default)

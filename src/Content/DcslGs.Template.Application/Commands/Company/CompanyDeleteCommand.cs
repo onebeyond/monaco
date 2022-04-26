@@ -2,7 +2,7 @@
 
 namespace DcslGs.Template.Application.Commands.Company;
 
-public class CompanyDeleteCommand : CommandBase
+public record CompanyDeleteCommand : CommandBase
 {
     public CompanyDeleteCommand(Guid id) : base(id)
     {

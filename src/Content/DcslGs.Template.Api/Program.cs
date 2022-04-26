@@ -76,8 +76,7 @@ builder.Services
 
 #if includeMassTransitSupport
 builder.Services
-	   .AddMassTransit(x => x.UsingAzureServiceBus((_, cfg) => cfg.Host(configuration["MessageBus:ASBConnectionString"])))
-	   .AddMassTransitHostedService();
+	   .AddMassTransit(x => x.UsingAzureServiceBus((_, cfg) => cfg.Host(configuration["MessageBus:ASBConnectionString"])));
 #endif
 
 #if includeFilesSupport

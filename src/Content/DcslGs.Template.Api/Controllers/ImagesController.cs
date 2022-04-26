@@ -22,21 +22,17 @@ namespace DcslGs.Template.Api.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         [Authorize(Scopes.FilesRead)]
-        public Task<ActionResult<ImageDto>> Get(Guid id)
-        {
-			return _mediator.ExecuteQueryAsync(new GetImageByIdQuery(id));
-		}
+        public Task<ActionResult<ImageDto>> Get(Guid id) =>
+			_mediator.ExecuteQueryAsync(new GetImageByIdQuery(id));
 
-        [HttpGet("{id}/Thumbnail")]
+		[HttpGet("{id:guid}/Thumbnail")]
         [Authorize(Scopes.FilesRead)]
-        public Task<ActionResult<ImageDto>> GetThumbnail(Guid id)
-        {
-			return _mediator.ExecuteQueryAsync(new GetThumbnailByImageIdQuery(id));
-		}
+        public Task<ActionResult<ImageDto>> GetThumbnail(Guid id) =>
+			_mediator.ExecuteQueryAsync(new GetThumbnailByImageIdQuery(id));
 
-        [HttpGet("{id}/Download")]
+		[HttpGet("{id:guid}/Download")]
         [Authorize(Scopes.FilesRead)]
         [ProducesResponseType(typeof(FileContentResult), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -50,7 +46,7 @@ namespace DcslGs.Template.Api.Controllers
             return File(result.FileContent, result.ContentType, result.FileName);
         }
 
-        [HttpGet("{id}/Thumbnail/Download")]
+        [HttpGet("{id:guid}/Thumbnail/Download")]
         [Authorize(Scopes.FilesRead)]
         [ProducesResponseType(typeof(FileContentResult), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
