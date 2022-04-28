@@ -40,7 +40,8 @@ builder.Host
 																								 new OperationTelemetryConverter(),
 																								 LogEventLevel.Information)
 																	.Filter.ByExcluding(x => x.Properties.ContainsKey("AuditEntries")))
-											  .WriteTo.Logger(l => l.WriteTo.ApplicationInsights(context.Configuration["ApplicationInsights:InstrumentationKey"],
+											  .WriteTo.Logger(l => l.WriteTo.Console()
+																	.WriteTo.ApplicationInsights(context.Configuration["ApplicationInsights:InstrumentationKey"],
 																								 new AuditEventTelemetryConverter())
 																	.Filter.ByIncludingOnly(x => x.Properties.ContainsKey("AuditEntries")))
 											  .Enrich.WithOperationId()

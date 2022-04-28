@@ -1,4 +1,5 @@
-﻿using DcslGs.Template.Common.Application.Commands;
+﻿#if includeFilesSupport
+using DcslGs.Template.Common.Application.Commands;
 using DcslGs.Template.Common.Application.Commands.Contracts;
 using DcslGs.Template.Infrastructure.Services.Contracts;
 using MediatR;
@@ -29,3 +30,4 @@ public sealed class FileCommandsHandlers : IRequestHandler<FileCreateCommand, IC
 		return new CommandResult();
 	}
 }
+#endif

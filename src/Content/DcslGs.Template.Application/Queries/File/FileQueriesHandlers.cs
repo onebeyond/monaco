@@ -1,4 +1,5 @@
-﻿using DcslGs.Template.Application.DTOs;
+﻿#if includeFilesSupport
+using DcslGs.Template.Application.DTOs;
 using DcslGs.Template.Application.DTOs.Extensions;
 using DcslGs.Template.Common.BlobStorage.Contracts;
 using DcslGs.Template.Infrastructure.Context;
@@ -51,3 +52,4 @@ public sealed class FileQueriesHandlers : IRequestHandler<GetFileByIdQuery, File
 		return item;
 	}
 }
+#endif

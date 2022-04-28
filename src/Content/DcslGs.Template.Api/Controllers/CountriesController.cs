@@ -23,7 +23,7 @@ public class CountriesController : ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public Task<ActionResult<List<CountryDto>>> Get() => 
+    public Task<ActionResult<List<CountryDto>>> Get() =>
 		_mediator.ExecuteQueryAsync(new GetCountryListQuery(Request.Query));
 
 	/// <summary>
@@ -32,6 +32,6 @@ public class CountriesController : ControllerBase
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpGet("{id:guid}")]
-    public Task<ActionResult<CountryDto>> Get(Guid id) =>
+    public Task<ActionResult<CountryDto?>> Get(Guid id) =>
 		_mediator.ExecuteQueryAsync(new GetCountryByIdQuery(id));
 }
