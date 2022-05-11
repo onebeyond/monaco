@@ -27,19 +27,19 @@ public static class SortingExtensions
         Expression<Func<IOrderedQueryable<T>>> sortMethod;
         if (firstSort)
         {
-            if (ascending) sortMethod = () => source.OrderBy<T, object>(k => null);
-            else sortMethod = () => source.OrderByDescending<T, object>(k => null);
+            if (ascending) sortMethod = () => source.OrderBy<T, object>(k => null!);
+            else sortMethod = () => source.OrderByDescending<T, object>(k => null!);
         }
         else
         {
-            if (ascending) sortMethod = () => ((IOrderedQueryable<T>)source).ThenBy<T, object>(k => null);
-            else sortMethod = () => ((IOrderedQueryable<T>)source).ThenByDescending<T, object>(k => null);
+            if (ascending) sortMethod = () => ((IOrderedQueryable<T>)source).ThenBy<T, object>(k => null!);
+            else sortMethod = () => ((IOrderedQueryable<T>)source).ThenByDescending<T, object>(k => null!);
         }
 
         var methodCallExpression = (MethodCallExpression)sortMethod.Body;
         var method = methodCallExpression.Method.GetGenericMethodDefinition();
         var genericSortMethod = method.MakeGenericMethod(typeof(T), bodyExpression.Type);
-        var orderedQuery = (IOrderedQueryable<T>)genericSortMethod.Invoke(source, new object[] { source, sortLambda });
+        var orderedQuery = (IOrderedQueryable<T>)genericSortMethod.Invoke(source, new object[] { source, sortLambda })!;
         return orderedQuery;
     }
 
@@ -60,7 +60,7 @@ public static class SortingExtensions
     }
 
     public static (Dictionary<string, Expression<Func<T, object>>> sortMapLower, Dictionary<string, bool> lstSort)
-        GetData<T>(string[] sortFields, string defaultSortField, Dictionary<string, Expression<Func<T, object>>> sortMap)
+        GetData<T>(IEnumerable<string> sortFields, string defaultSortField, Dictionary<string, Expression<Func<T, object>>> sortMap)
     {
         //convert a Dictionary with Keys into lowercase to ease searching
         var sortMapLower = sortMap.ToDictionary(x => x.Key.ToLower(), x => x.Value);
@@ -79,21 +79,21 @@ public static class SortingExtensions
         Expression<Func<IOrderedEnumerable<T>>> sortMethod;
         if (firstSort)
         {
-            if (ascending) sortMethod = () => source.OrderBy<T, object>(k => null);
-            else sortMethod = () => source.OrderByDescending<T, object>(k => null);
+            if (ascending) sortMethod = () => source.OrderBy<T, object>(k => null!);
+            else sortMethod = () => source.OrderByDescending<T, object>(k => null!);
         }
         else
         {
-            if (ascending) sortMethod = () => ((IOrderedEnumerable<T>)source).ThenBy<T, object>(k => null);
-            else sortMethod = () => ((IOrderedEnumerable<T>)source).ThenByDescending<T, object>(k => null);
+            if (ascending) sortMethod = () => ((IOrderedEnumerable<T>)source).ThenBy<T, object>(k => null!);
+            else sortMethod = () => ((IOrderedEnumerable<T>)source).ThenByDescending<T, object>(k => null!);
         }
 
-        if (!(sortMethod.Body is MethodCallExpression methodCallExpression))
+        if (sortMethod.Body is not MethodCallExpression methodCallExpression)
             throw new Exception("oops");
 
         var meth = methodCallExpression.Method.GetGenericMethodDefinition();
         var genericSortMethod = meth.MakeGenericMethod(typeof(T), bodyExpression.Type);
-        var orderedQuery = (IOrderedEnumerable<T>)genericSortMethod.Invoke(source, new object[] { source, sortLambda.Compile() });
+        var orderedQuery = (IOrderedEnumerable<T>)genericSortMethod.Invoke(source, new object[] { source, sortLambda.Compile() })!;
         return orderedQuery;
     }
 

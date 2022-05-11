@@ -68,8 +68,8 @@ public static class FilterExtensions
 	}
 
 	private static (Dictionary<string, Expression<Func<T, object>>> filterMapLower,
-		IEnumerable<KeyValuePair<string, IEnumerable<string>>>,
-		ExpressionStarter<T>)
+					IEnumerable<KeyValuePair<string, IEnumerable<string?>>>,
+					ExpressionStarter<T>)
 		GetData<T>(IEnumerable<KeyValuePair<string, StringValues>> queryString,
 				   Dictionary<string, Expression<Func<T, object>>> filterMap,
 				   bool defaultCondition)
@@ -85,7 +85,7 @@ public static class FilterExtensions
 		return (filterMapLower, filterList, predicate);
 	}
 
-	private static Expression<Func<T, bool>> GetOperationExpression<T>(string fieldKey, Expression<Func<T, object>> fieldMap, object value, bool toLowerCase = false)
+	private static Expression<Func<T, bool>> GetOperationExpression<T>(string fieldKey, Expression<Func<T, object>> fieldMap, object? value, bool toLowerCase = false)
 	{
 		//Obtain expression Type and based on it y choose the method for the operation on the DB depending on if it's a String or any other type
 		var bodyExpression = fieldMap.Body.NodeType == ExpressionType.Convert ? ((UnaryExpression)fieldMap.Body).Operand : fieldMap.Body;
@@ -99,7 +99,7 @@ public static class FilterExtensions
 		else if (type == typeof(string)) //Handles string values
 		{
 			expression = toLowerCase //If it's needed, applies lower case to entire string to ignore casing differences
-							 ? Expression.Call(bodyExpression, type.GetMethod("ToLower", new Type[0]))
+							 ? Expression.Call(bodyExpression, type.GetMethod("ToLower", Type.EmptyTypes)!)
 							 : bodyExpression;
 
 			var strValue = (string)value;
@@ -113,22 +113,22 @@ public static class FilterExtensions
 			else
 			{
 				expression = Expression.Call(expression,
-											 type.GetMethod("Contains", new[] { type }),
+											 type.GetMethod("Contains", new[] { type })!,
 											 Expression.Constant(Convert.ChangeType(strValue, type)));
 				if (not) expression = Expression.Not(expression);
 			}
 		}
 		else if (type.IsAssignableFrom(typeof(Guid))) //Handles Guid values
-			expression = value.ToString().StartsWith('!')
-							 ? Expression.NotEqual(bodyExpression, Expression.Constant(Guid.Parse(value.ToString()[1..]), type))
-							 : Expression.Equal(bodyExpression, Expression.Constant(Guid.Parse(value.ToString()), type));
+			expression = value.ToString()!.StartsWith('!')
+							 ? Expression.NotEqual(bodyExpression, Expression.Constant(Guid.Parse(value.ToString()![1..]), type))
+							 : Expression.Equal(bodyExpression, Expression.Constant(Guid.Parse(value.ToString()!), type));
 		else if (type.IsAssignableFrom(typeof(DateTime)) && fieldKey.EndsWith("from")) //Handles DateTime values whose param name ends with From (range start)
-			expression = Expression.GreaterThanOrEqual(bodyExpression, Expression.Constant(DateTime.Parse(value.ToString()), type));
+			expression = Expression.GreaterThanOrEqual(bodyExpression, Expression.Constant(DateTime.Parse(value.ToString()!), type));
 		else if (type.IsAssignableFrom(typeof(DateTime)) && fieldKey.EndsWith("to")) //Handles DateTime values whose param name ends with To (range end)
-			expression = Expression.LessThanOrEqual(bodyExpression, Expression.Constant(DateTime.Parse(value.ToString()), type));
+			expression = Expression.LessThanOrEqual(bodyExpression, Expression.Constant(DateTime.Parse(value.ToString()!), type));
 		else //Handles all other generic cases (numbers, booleans, etc)
-			expression = value.ToString().StartsWith('!')
-							 ? Expression.NotEqual(bodyExpression, Expression.Constant(Convert.ChangeType(value.ToString()[1..], type)))
+			expression = value.ToString()!.StartsWith('!')
+							 ? Expression.NotEqual(bodyExpression, Expression.Constant(Convert.ChangeType(value.ToString()![1..], type)))
 							 : Expression.Equal(bodyExpression, Expression.Constant(Convert.ChangeType(value, type)));
 
 		//Create and return the lambda expression that represents the operation to run

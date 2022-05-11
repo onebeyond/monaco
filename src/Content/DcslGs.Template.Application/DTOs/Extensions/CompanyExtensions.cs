@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using DcslGs.Template.Application.Commands.Company;
+using DcslGs.Template.Application.Features.Company.Commands;
 using DcslGs.Template.Domain.Model;
 
 namespace DcslGs.Template.Application.DTOs.Extensions;
@@ -25,27 +25,6 @@ public static class CompanyExtensions
 				   Country = expandCountry ? value.Country.Map() : null
 			   };
 	}
-
-	public static CompanyCreateCommand MapCreateCommand(this CompanyCreateEditDto value) =>
-		new(value.Name,
-			value.Email,
-			value.WebSiteUrl,
-			value.Address,
-			value.City,
-			value.County,
-			value.PostCode,
-			value.CountryId);
-
-	public static CompanyEditCommand MapEditCommand(this CompanyCreateEditDto value, Guid id) =>
-		new(id,
-			value.Name,
-			value.Email,
-			value.WebSiteUrl,
-			value.Address,
-			value.City,
-			value.County,
-			value.PostCode,
-			value.CountryId);
 
 	public static Company Map(this CompanyCreateCommand value, Country country) =>
 		new(value.Name,

@@ -55,9 +55,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Api", "Dcsl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Domain", "DcslGs.Template.Domain\DcslGs.Template.Domain.csproj", "{6B21DD04-2484-490C-B108-CC01148B9FC4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Infrastructure", "DcslGs.Template.Infrastructure\DcslGs.Template.Infrastructure.csproj", "{71313461-6A79-47B3-AEB9-5668A88935F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Application.Infrastructure", "DcslGs.Template.Application.Infrastructure\DcslGs.Template.Application.Infrastructure.csproj", "{71313461-6A79-47B3-AEB9-5668A88935F2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Infrastructure.Migrations", "DcslGs.Template.Infrastructure.Migrations\DcslGs.Template.Infrastructure.Migrations.csproj", "{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Application.Infrastructure.Migrations", "DcslGs.Template.Application.Infrastructure.Migrations\DcslGs.Template.Application.Infrastructure.Migrations.csproj", "{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}"
 EndProject
 #if (includeFilesSupport)
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DcslGs.Template.Common.BlobStorage", "DcslGs.Template.Common.BlobStorage\DcslGs.Template.Common.BlobStorage.csproj", "{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}"

@@ -202,7 +202,7 @@ public static class QueryExtensions
 
 	public static async Task<TResult?> ExecuteQueryAsync<T, TResult>(this QueryByIdBase<TResult?> request,
 																	 BaseDbContext dbContext,
-																	 Func<T, TResult?> selector,
+																	 Func<T?, TResult?> selector,
 																	 CancellationToken cancellationToken) where T : Entity
     {
         var item = await dbContext.Set<T>()
@@ -214,7 +214,7 @@ public static class QueryExtensions
 
     public static async Task<TResult?> ExecuteQueryAsync<TReq, T, TResult>(this TReq request,
                                                                            BaseDbContext dbContext,
-                                                                           Func<T, TResult?> selector,
+                                                                           Func<T?, TResult?> selector,
                                                                            Func<TReq, Expression<Func<T, bool>>> expression,
                                                                            CancellationToken cancellationToken) where TReq : QueryByIdBase<TResult>
                                                                                                                 where T : Entity

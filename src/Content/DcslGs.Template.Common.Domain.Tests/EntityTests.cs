@@ -190,15 +190,15 @@ public class EntityTests
     [Fact(DisplayName = "Entity instance null equals (operator) null as same succeeds")]
     public void EntityInstanceNullEqualsOperatorNullAsSameSucceeds()
     {
-        ((Entity)null == null).Should().BeTrue();
+        (null as Entity == null).Should().BeTrue();
     }
 
     [Trait("Common domain Entities", "Base Entity")]
     [Theory(DisplayName = "Entity instance equals (operator) null as different succeeds")]
     [AnonymousData]
-    public void EntityInstanceNotEqualsOperatorNullAsDifferentSucceeds(Entity sut)
+    public void EntityInstanceNotEqualsOperatorNullAsDifferentSucceeds(Entity? sut)
     {
-        (sut != null).Should().BeTrue();
+		(sut != null).Should().BeTrue();
     }
 
     [Trait("Common domain Entities", "Base Entity")]

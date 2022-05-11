@@ -1,4 +1,5 @@
-﻿using DcslGs.Template.Common.Domain.Model;
+﻿using Dawn;
+using DcslGs.Template.Common.Domain.Model;
 
 namespace DcslGs.Template.Domain.Model;
 
@@ -17,8 +18,11 @@ public class Company : Entity
                    string postCode,
                    Country country)
     {
-        Name = name;
-        Email = email;
+        Name = Guard.Argument(name, nameof(name))
+					.NotEmpty()
+					.MaxLength(100);
+		Email = Guard.Argument(email, nameof(email))
+					 .NotEmpty();
         WebSiteUrl = webSiteUrl;
         Address = address;
         City = city;

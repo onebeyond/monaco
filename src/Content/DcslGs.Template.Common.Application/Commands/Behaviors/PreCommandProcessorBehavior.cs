@@ -2,6 +2,7 @@
 using MediatR;
 using DcslGs.Template.Common.Application.Commands.Contracts;
 using DcslGs.Template.Common.Application.Validators;
+using DcslGs.Template.Common.Application.Validators.Extensions;
 
 namespace DcslGs.Template.Common.Application.Commands.Behaviors;
 
@@ -33,7 +34,7 @@ public class PreCommandProcessorBehavior<TCommand> : IPipelineBehavior<TCommand,
 /// </summary>
 /// <typeparam name="TCommand">The type of Command to process</typeparam>
 /// <typeparam name="TResult">The type of data to return along with the CommandResult</typeparam>
-public class PreCommandProcessorBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, ICommandResult<TResult>> where TCommand : CommandBase<TResult>
+public class PreCommandProcessorBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, ICommandResult<TResult?>> where TCommand : CommandBase<TResult?>
 {
     protected readonly IValidator<TCommand> Validator;
 
@@ -42,11 +43,13 @@ public class PreCommandProcessorBehavior<TCommand, TResult> : IPipelineBehavior<
         Validator = validator;
     }
 
-    public virtual async Task<ICommandResult<TResult>> Handle(TCommand request, CancellationToken cancellationToken, RequestHandlerDelegate<ICommandResult<TResult>> next)
+    public virtual async Task<ICommandResult<TResult?>> Handle(TCommand request,
+															   CancellationToken cancellationToken,
+															   RequestHandlerDelegate<ICommandResult<TResult?>> next)
     {
         var validationResult = await Validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
-            return new CommandResult<TResult>(validationResult, default);
+            return new CommandResult<TResult?>(validationResult, default);
 
         return await next();
     }
@@ -80,7 +83,7 @@ public class PreCommandProcessorExistsBehavior<TCommand> : IPipelineBehavior<TCo
 /// </summary>
 /// <typeparam name="TCommand">The type of the Command to process</typeparam>
 /// <typeparam name="TResult">The type of data to return along with the CommandResult</typeparam>
-public class PreCommandProcessorExistsBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, ICommandResult<TResult>> where TCommand : CommandBase<TResult>
+public class PreCommandProcessorExistsBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, ICommandResult<TResult?>> where TCommand : CommandBase<TResult?>
 {
     protected readonly IValidator<TCommand> Validator;
 
@@ -89,11 +92,15 @@ public class PreCommandProcessorExistsBehavior<TCommand, TResult> : IPipelineBeh
         Validator = validator;
     }
 
-    public virtual async Task<ICommandResult<TResult>> Handle(TCommand request, CancellationToken cancellationToken, RequestHandlerDelegate<ICommandResult<TResult>> next)
+    public virtual async Task<ICommandResult<TResult?>> Handle(TCommand request,
+															   CancellationToken cancellationToken,
+															   RequestHandlerDelegate<ICommandResult<TResult?>> next)
     {
-        var validationResult = await Validator.ValidateAsync(request, options => options.IncludeRuleSets(ValidatorsExtensions.ExistsRulesetName), cancellationToken);
+        var validationResult = await Validator.ValidateAsync(request,
+															 options => options.IncludeRuleSets(ValidatorsExtensions.ExistsRulesetName),
+															 cancellationToken);
         if (!validationResult.IsValid)
-            return new CommandResult<TResult>(true, default);
+            return new CommandResult<TResult?>(true, default);
 
         return await next();
     }

@@ -26,4 +26,10 @@
     <ProjectReference Include="..\DcslGs.Template.Common.Tests\DcslGs.Template.Common.Tests.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\File\Commands" />
+    <Folder Include="Features\File\Queries" />
+    <Folder Include="Features\Image\Queries" />
+  </ItemGroup>
+
 </Project>

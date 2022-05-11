@@ -2,6 +2,7 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
 using DcslGs.Template.Common.BlobStorage.Contracts;
+using Microsoft.Extensions.Options;
 
 namespace DcslGs.Template.Common.BlobStorage;
 
@@ -9,10 +10,10 @@ public class BlobStorageService : IBlobStorageService
 {
     private readonly BlobContainerClient _containerClient;
 
-    public BlobStorageService(string containerName, string connectionString)
+    public BlobStorageService(IOptions<BlobStorageServiceOptions> options)
     {
-        var serviceClient = new BlobServiceClient(connectionString);
-        _containerClient = serviceClient.GetBlobContainerClient(containerName);
+		var serviceClient = new BlobServiceClient(options.Value.ConnectionString);
+        _containerClient = serviceClient.GetBlobContainerClient(options.Value.ContainerName);
     }
 
     public async Task<Guid> UploadTempFileAsync(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)

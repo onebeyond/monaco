@@ -7,21 +7,34 @@ namespace DcslGs.Template.Common.Infrastructure.Context.Extensions;
 
 public static class PagingExtensions
 {
-    public static async Task<Page<TResult>> ToPageAsync<T, TResult>(this IQueryable<T> query, int offset, int limit, Func<T, TResult> selector, CancellationToken cancellationToken = default)
+    public static async Task<Page<TResult>> ToPageAsync<T, TResult>(this IQueryable<T> query,
+																	int offset,
+																	int limit,
+																	Func<T, TResult> selector,
+																	CancellationToken cancellationToken = default)
     {
         var totalItems = await query.CountAsync(cancellationToken);
         var list = await query.Skip(offset).Take(limit).ToListAsync(cancellationToken);
         return new Page<TResult>(list.Select(selector), offset, limit, totalItems);
     }
 
-    public static async Task<Page<TResult>> ToPageComputedAsync<T, TResult>(this IQueryable<T> query, int offset, int limit, Expression<Func<T, TResult>> selector, CancellationToken cancellationToken = default)
+    public static async Task<Page<TResult>> ToPageComputedAsync<T, TResult>(this IQueryable<T> query,
+																			int offset,
+																			int limit,
+																			Expression<Func<T, TResult>> selector,
+																			CancellationToken cancellationToken = default)
     {
         var totalItems = await query.CountAsync(cancellationToken);
         var list = await query.Skip(offset).Take(limit).Select(selector).DecompileAsync().ToListAsync(cancellationToken);
         return new Page<TResult>(list, offset, limit, totalItems);
     }
 
-    public static async Task<Page<TResult>> ToPageAsync<T, TKey, TResult>(this IQueryable<T> query, int offset, int limit, Func<T, TResult> selector, Expression<Func<T, TKey>> orderBy, CancellationToken cancellationToken = default)
+    public static async Task<Page<TResult>> ToPageAsync<T, TKey, TResult>(this IQueryable<T> query,
+																		  int offset,
+																		  int limit,
+																		  Func<T, TResult> selector,
+																		  Expression<Func<T, TKey>>? orderBy,
+																		  CancellationToken cancellationToken = default)
     {
         var count = await query.CountAsync(cancellationToken);
         if (orderBy != null)
@@ -34,8 +47,8 @@ public static class PagingExtensions
                                                                                 int offset,
                                                                                 int limit,
                                                                                 Func<T, TResult> selector,
-                                                                                Expression<Func<T, TKey>> orderBy,
-                                                                                Expression<Func<T, TSec>> thenBy,
+                                                                                Expression<Func<T, TKey>>? orderBy,
+                                                                                Expression<Func<T, TSec>>? thenBy,
                                                                                 CancellationToken cancellationToken = default)
     {
         var totalItems = await query.CountAsync(cancellationToken);
@@ -52,23 +65,23 @@ public static class PagingExtensions
                                                                Expression<Func<T, TKey>> orderBy,
                                                                Expression<Func<T, TSec>> thenBy)
     {
-        Page<TResult> page = null;
+        Page<TResult>? page = null;
         Task.Run(async () => page = await ToPageAsync(query, offset, limit, selector, orderBy, thenBy)).Wait();
-        return page;
+        return page!;
     }
 
     public static Page<TResult> ToPage<T, TResult>(this IQueryable<T> query, int offset, int limit, Func<T, TResult> selector)
     {
-        Page<TResult> page = null;
+        Page<TResult>? page = null;
         Task.Run(async () => page = await ToPageAsync(query, offset, limit, selector)).Wait();
-        return page;
+        return page!;
     }
 
     public static Page<TResult> ToPage<T, TKey, TResult>(this IQueryable<T> query, int offset, int limit, Func<T, TResult> selector, Expression<Func<T, TKey>> orderBy)
     {
-        Page<TResult> page = null;
+        Page<TResult>? page = null;
         Task.Run(async () => page = await ToPageAsync(query, offset, limit, selector, orderBy)).Wait();
-        return page;
+        return page!;
     }
 
     public static Page<TResult> ToPage<T, TResult>(this IEnumerable<T> enumerable, int offset, int limit, Func<T, TResult> selector)

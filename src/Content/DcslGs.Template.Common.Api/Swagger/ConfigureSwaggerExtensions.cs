@@ -11,62 +11,16 @@ namespace DcslGs.Template.Common.Api.Swagger;
 
 public static class ConfigureSwaggerExtensions
 {
-    public static IServiceCollection ConfigureSwagger(this IServiceCollection services,
-                                                      string authority,
-                                                      string apiName,
-                                                      List<string> scopesList,
-                                                      string apiDescription,
-                                                      string title,
-                                                      string description,
-                                                      string contactName,
-                                                      string contactEmail,
-                                                      string termsOfServiceUrl)
-    {
-        var scopes = new Dictionary<string, string>(scopesList.ToDictionary(x => x, _ => "")) { { apiName, apiDescription } };
-
-        return services.AddTransient<IConfigureOptions<SwaggerGenOptions>, SwaggerOptions>(provider => new SwaggerOptions(provider.GetRequiredService<IApiVersionDescriptionProvider>(),
-                                                                                                                          title,
-                                                                                                                          description,
-                                                                                                                          contactName,
-                                                                                                                          contactEmail,
-                                                                                                                          termsOfServiceUrl))
-                       .AddSwaggerGen(options =>
-                                      {
-                                          //Add security for authenticated APIs
-                                          options.AddSecurityDefinition("oauth2",
-                                                                        new OpenApiSecurityScheme
-                                                                        {
-                                                                            Type = SecuritySchemeType.OAuth2,
-                                                                            Flows = new OpenApiOAuthFlows
-                                                                                    {
-                                                                                        AuthorizationCode = new OpenApiOAuthFlow
-                                                                                                            {
-                                                                                                                AuthorizationUrl = new Uri($"{authority}/protocol/openid-connect/auth"),
-                                                                                                                TokenUrl = new Uri($"{authority}/protocol/openid-connect/token"),
-                                                                                                                Scopes = scopes
-                                                                                                            }
-                                                                                    }
-                                                                        });
-                                          // add a custom operation filter which sets default values
-                                          options.OperationFilter<SwaggerDefaultValues>();
-                                          options.OperationFilter<AuthorizeCheckOperationFilter>(apiName);
-                                          // integrate xml comments
-                                          var xmlFiles = Directory.GetFiles(AppContext.BaseDirectory, "*.xml");
-                                          foreach (var xmlFile in xmlFiles)
-                                              options.IncludeXmlComments(xmlFile);
-                                      });
-    }
-
-    public static IServiceCollection ConfigureApiVersionSwagger(this IServiceCollection services,
-                                                                string authority,
-                                                                string apiName,
-                                                                List<string> scopes,
-                                                                string apiDescription,
-                                                                string title,
-                                                                string description,
-                                                                string contactName,
-                                                                string contactEmail,
-                                                                string termsOfServiceUrl)
+	public static IServiceCollection ConfigureApiVersionSwagger(this IServiceCollection services,
+																string authority,
+																string apiName,
+																List<string> scopes,
+																string apiDescription,
+																string title,
+																string description,
+																string contactName,
+																string contactEmail,
+																string termsOfServiceUrl)
     {
         return services.AddApiVersioning(options =>
                                          {
@@ -90,25 +44,65 @@ public static class ConfigureSwaggerExtensions
                                          contactEmail,
                                          termsOfServiceUrl);
     }
+	
+	public static IServiceCollection ConfigureSwagger(this IServiceCollection services,
+													  string authority,
+													  string apiName,
+													  List<string> scopesList,
+													  string apiDescription,
+													  string title,
+													  string description,
+													  string contactName,
+													  string contactEmail,
+													  string termsOfServiceUrl) =>
+		services.AddTransient<IConfigureOptions<SwaggerGenOptions>, SwaggerOptions>(provider => new SwaggerOptions(provider.GetRequiredService<IApiVersionDescriptionProvider>(),
+																												   title,
+																												   description,
+																												   contactName,
+																												   contactEmail,
+																												   termsOfServiceUrl))
+				.AddSwaggerGen(options =>
+							   {
+								   //Add security for authenticated APIs
+								   options.AddSecurityDefinition("oauth2",
+																 new OpenApiSecurityScheme
+																 {
+																	 Type = SecuritySchemeType.OAuth2,
+																	 Flows = new OpenApiOAuthFlows
+																			 {
+																				 AuthorizationCode = new OpenApiOAuthFlow
+																									 {
+																										 AuthorizationUrl = new Uri($"{authority}/protocol/openid-connect/auth"),
+																										 TokenUrl = new Uri($"{authority}/protocol/openid-connect/token"),
+																										 Scopes = new Dictionary<string, string>(scopesList.ToDictionary(x => x, _ => "")) { { apiName, apiDescription } }
+																									 }
+																			 }
+																 });
+								   // add a custom operation filter which sets default values
+								   options.OperationFilter<SwaggerDefaultValues>();
+								   options.OperationFilter<AuthorizeCheckOperationFilter>(apiName);
+								   // integrate xml comments
+								   var xmlFiles = Directory.GetFiles(AppContext.BaseDirectory, "*.xml");
+								   foreach (var xmlFile in xmlFiles)
+									   options.IncludeXmlComments(xmlFile);
+							   });
 
-    public static IApplicationBuilder UseSwaggerConfiguration(this IApplicationBuilder app,
-                                                              IApiVersionDescriptionProvider provider,
-                                                              string clientId,
-                                                              string appName)
-    {
-        return app.UseSwagger() // Enable middleware to serve generated Swagger as a JSON endpoint.
-                  .UseSwaggerUI(options =>
-                                {    // build a swagger endpoint for each discovered API version
-                                    foreach (var description in provider.ApiVersionDescriptions)
-                                        options.SwaggerEndpoint($"{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
-                                    options.OAuthClientId(clientId);
-                                    options.OAuthAppName(appName);
-                                    options.OAuthScopeSeparator(" ");
-                                    options.OAuthUsePkce();
-                                });
-    }
+	public static IApplicationBuilder UseSwaggerConfiguration(this IApplicationBuilder app,
+															  string clientId,
+															  string appName) =>
+		app.UseSwagger() // Enable middleware to serve generated Swagger as a JSON endpoint.
+		   .UseSwaggerUI(options =>
+						 {	// build a swagger endpoint for each discovered API version
+							 var provider = app.ApplicationServices.GetRequiredService<IApiVersionDescriptionProvider>();
+							 foreach (var description in provider.ApiVersionDescriptions)
+								 options.SwaggerEndpoint($"{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
+							 options.OAuthClientId(clientId);
+							 options.OAuthAppName(appName);
+							 options.OAuthScopeSeparator(" ");
+							 options.OAuthUsePkce();
+						 });
 
-    /// <summary>
+	/// <summary>
     /// Configures the Swagger generation options.
     /// </summary>
     /// <remarks>This allows API versioning to define a Swagger document per API version after the

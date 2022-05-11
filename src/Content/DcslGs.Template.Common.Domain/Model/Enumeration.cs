@@ -45,5 +45,5 @@ public abstract class Enumeration : Entity, IComparable
         return matchingItem ?? throw new InvalidOperationException($"'{value}' is not a valid {description} in {typeof(TResult)}");
     }
 
-    public int CompareTo(object other) => Id.CompareTo(((Enumeration)other).Id);
+    public int CompareTo(object? other) => Id.CompareTo(((Enumeration)other!).Id);
 }

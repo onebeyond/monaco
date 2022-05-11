@@ -26,28 +26,28 @@ public class AuditEventTelemetryConverter : TelemetryConverterBase
 
         if (TryGetScalarProperty(logEvent, OperationId, out var operationId))
         {
-            telemetry.Context.Operation.Id = operationId.ToString();
-            telemetry.Name = $"Audit Trail for OperationId: {operationId.ToString().Trim('\"')}";
+            telemetry.Context.Operation.Id = operationId!.ToString();
+            telemetry.Name = $"Audit Trail for OperationId: {operationId.ToString()?.Trim('\"') ?? string.Empty}";
         }
 			
         if (TryGetScalarProperty(logEvent, ParentId, out var parentId))
-            telemetry.Context.Operation.ParentId = parentId.ToString();
+            telemetry.Context.Operation.ParentId = parentId!.ToString();
 
         if (TryGetScalarProperty(logEvent, UserId, out var userId))
-            telemetry.Context.User.Id = userId.ToString();
+            telemetry.Context.User.Id = userId!.ToString();
 
         if (TryGetScalarProperty(logEvent, UserName, out var username))
-            telemetry.Context.User.AccountId = username.ToString();
+            telemetry.Context.User.AccountId = username!.ToString();
 
         yield return telemetry;
     }
 
-    private bool TryGetScalarProperty(LogEvent logEvent, string propertyName, out object value)
+    private bool TryGetScalarProperty(LogEvent logEvent, string propertyName, out object? value)
     {
         var hasScalarValue = logEvent.Properties.TryGetValue(propertyName, out var someValue) &&
-                             someValue is ScalarValue;
+							 someValue is ScalarValue;
 
-        value = hasScalarValue ? ((ScalarValue)someValue).Value : default;
+        value = hasScalarValue ? ((ScalarValue)someValue!).Value : default;
 
         return hasScalarValue;
     }

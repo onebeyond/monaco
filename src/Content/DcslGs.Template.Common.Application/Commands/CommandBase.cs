@@ -3,7 +3,7 @@ using DcslGs.Template.Common.Application.Commands.Contracts;
 
 namespace DcslGs.Template.Common.Application.Commands;
 
-public abstract record CommandBase : IRequest<ICommandResult>
+public abstract class CommandBase : IRequest<ICommandResult>
 {
     protected CommandBase()
     {
@@ -17,7 +17,7 @@ public abstract record CommandBase : IRequest<ICommandResult>
     public Guid Id { get; init; }
 }
 
-public abstract record CommandBase<TResult> : IRequest<ICommandResult<TResult>>
+public abstract class CommandBase<TResult> : IRequest<ICommandResult<TResult>>
 {
     protected CommandBase()
     {

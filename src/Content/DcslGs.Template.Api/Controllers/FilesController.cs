@@ -1,8 +1,8 @@
 ﻿#if includeFilesSupport
 using DcslGs.Template.Api.Auth;
-using DcslGs.Template.Application.Commands.File;
+using DcslGs.Template.Application.Features.File.Commands;
 using DcslGs.Template.Application.DTOs;
-using DcslGs.Template.Application.Queries.File;
+using DcslGs.Template.Application.Features.File.Queries;
 using DcslGs.Template.Common.Api.Application;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -24,10 +24,11 @@ namespace DcslGs.Template.Api.Controllers
 
         [HttpPost]
         [Authorize(Scopes.FilesWrite)]
-        public Task<ActionResult<Guid>> Post(ApiVersion apiVersion, [FromForm] IFormFile file) =>
+        public Task<ActionResult<Guid>> Post([FromRoute] ApiVersion apiVersion, [FromForm] IFormFile file) =>
 			_mediator.ExecuteCommandAsync(new FileCreateCommand(file.OpenReadStream(), file.FileName, file.ContentType),
 										  ModelState,
-										  "api/v1/files/{0}");
+										  "api/v{0}/files/{1}",
+										  apiVersion);
 
 		[HttpGet("{id:guid}")]
         [Authorize(Scopes.FilesRead)]

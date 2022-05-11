@@ -1,4 +1,4 @@
-﻿using DcslGs.Template.Application.Commands.File;
+﻿// using DcslGs.Template.Application.Features.File.Commands;
 using DcslGs.Template.Common.BlobStorage;
 using DcslGs.Template.Domain.Model;
 using File = DcslGs.Template.Domain.Model.File;
@@ -46,22 +46,22 @@ public static class FileExtensions
                };
     }
 
-    public static File Map(this FileCreateCommand value, Guid id, FileTypeEnum fileType) =>
-		fileType switch
-		{
-			FileTypeEnum.Image => new Image(id,
-											Path.GetFileNameWithoutExtension(value.FileName),
-											Path.GetExtension(value.FileName),
-											value.Stream.Length,
-											value.ContentType,
-											true,
-											0,
-											0),
-			_ => new Document(id,
-							  Path.GetFileNameWithoutExtension(value.FileName),
-							  Path.GetExtension(value.FileName),
-							  value.Stream.Length,
-							  value.ContentType,
-							  true)
-		};
+  //   public static File Map(this FileCreateCommand value, Guid id, FileTypeEnum fileType) =>
+		// fileType switch
+		// {
+		// 	FileTypeEnum.Image => new Image(id,
+		// 									Path.GetFileNameWithoutExtension(value.FileName),
+		// 									Path.GetExtension(value.FileName),
+		// 									value.Stream.Length,
+		// 									value.ContentType,
+		// 									true,
+		// 									0,
+		// 									0),
+		// 	_ => new Document(id,
+		// 					  Path.GetFileNameWithoutExtension(value.FileName),
+		// 					  Path.GetExtension(value.FileName),
+		// 					  value.Stream.Length,
+		// 					  value.ContentType,
+		// 					  true)
+		// };
 }

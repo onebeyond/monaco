@@ -25,7 +25,7 @@ public static class BehaviorExtensions
         //And adds the corresponding scoped behavior for all the detected commands (only for validation checks)
         commandBaseResultTypes.ForEach(t =>
                                        {
-                                           var tResult = t.BaseType.GenericTypeArguments.First();
+                                           var tResult = t.BaseType!.GenericTypeArguments.First();
                                            services.AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(ICommandResult<>).MakeGenericType(tResult)),
                                                               typeof(PreCommandProcessorExistsBehavior<,>).MakeGenericType(t, tResult))
                                                    .AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(ICommandResult<>).MakeGenericType(tResult)),

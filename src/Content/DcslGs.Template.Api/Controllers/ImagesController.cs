@@ -1,8 +1,8 @@
 ﻿#if includeFilesSupport
 using DcslGs.Template.Api.Auth;
 using DcslGs.Template.Application.DTOs;
-using DcslGs.Template.Application.Queries.File;
-using DcslGs.Template.Application.Queries.Image;
+using DcslGs.Template.Application.Features.File.Queries;
+using DcslGs.Template.Application.Features.Image.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

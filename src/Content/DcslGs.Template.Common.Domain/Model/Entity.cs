@@ -87,7 +87,7 @@ public abstract class Entity : IEntity
         return a.Equals(b);
     }
 
-    public static bool operator !=(Entity a, Entity b) => !(a == b);
+    public static bool operator !=(Entity? a, Entity? b) => !(a == b);
 
     public override int GetHashCode() => $"{GetRealType()}{Id}".GetHashCode();
 

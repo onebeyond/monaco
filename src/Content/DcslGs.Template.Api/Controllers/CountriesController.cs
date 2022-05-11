@@ -1,12 +1,11 @@
 ﻿using DcslGs.Template.Application.DTOs;
-using DcslGs.Template.Application.Queries.Country;
+using DcslGs.Template.Application.Features.Country.Queries;
 using DcslGs.Template.Common.Api.Application;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DcslGs.Template.Api.Controllers;
 
-[ApiVersion("1")]
 [Route("api/v{apiVersion:apiVersion}/[controller]")]
 [ApiController]
 public class CountriesController : ControllerBase

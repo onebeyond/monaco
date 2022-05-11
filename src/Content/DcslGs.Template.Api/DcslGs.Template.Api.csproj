@@ -7,19 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="logs\**" />
-    <Content Remove="logs\**" />
-    <EmbeddedResource Remove="logs\**" />
-    <None Remove="logs\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="6.0.3" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="10.4.0" />
 	<!--#if (includeMassTransitSupport)-->
-    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.0.1" />
 	<!--#endif-->
-    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -33,11 +23,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DcslGs.Template.Application.Infrastructure.Migrations\DcslGs.Template.Application.Infrastructure.Migrations.csproj" />
     <ProjectReference Include="..\DcslGs.Template.Application\DcslGs.Template.Application.csproj" />
     <ProjectReference Include="..\DcslGs.Template.Common.Api.Application\DcslGs.Template.Common.Api.Application.csproj" />
     <ProjectReference Include="..\DcslGs.Template.Common.Api\DcslGs.Template.Common.Api.csproj" />
     <ProjectReference Include="..\DcslGs.Template.Common.Serilog\DcslGs.Template.Common.Serilog.csproj" />
-    <ProjectReference Include="..\DcslGs.Template.Infrastructure.Migrations\DcslGs.Template.Infrastructure.Migrations.csproj" />
   </ItemGroup>
 
 </Project>
