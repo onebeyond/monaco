@@ -38,14 +38,14 @@ public static class ServiceCollectionExtensions
 																							  .GetInterfaces()
 																							  .Contains(typeof(INonInjectable)) &&
 																					   !filter.ValidatorType.IsAbstract)
-				.AddDbContext<AppDbContext>(opts => opts.UseSqlServer(optionsValue.AppDbContextConnectionString,
+				.AddDbContext<AppDbContext>(opts => opts.UseSqlServer(optionsValue.EntityFramework.ConnectionString,
 																	  sqlOptions =>
 																	  {
 																		  sqlOptions.MigrationsAssembly("DcslGs.Template.Application.Infrastructure.Migrations");
 																		  sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(3), null);
 																	  })
 														.UseLazyLoadingProxies()
-														.EnableSensitiveDataLogging(optionsValue.EnableEfSensitiveLogging));
+														.EnableSensitiveDataLogging(optionsValue.EntityFramework.EnableEfSensitiveLogging));
 #if includeMassTransitSupport
 		services.AddMassTransit(x => x.UsingAzureServiceBus((_, cfg) => cfg.Host(optionsValue.MessageBus.AzureServiceBusConnectionString)));
 #endif
