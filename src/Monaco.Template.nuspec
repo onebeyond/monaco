@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Monaco.Template.Solution.nuspec</id>
-		<version>0.0.1-alpha2</version>
+		<version>0.0.1-alpha1</version>
 		<description>
 			Monaco Solution Template for DCSL GuideSmiths .NET projects
 		</description>
@@ -14,7 +14,7 @@
 	</metadata>
 	<files>
 		<file src="Content\**\*.*"
-			  exclude="Content\**\bin\**\*.*;Content\**\obj\**\*.*;Content\**\.vs"
+			  exclude="Content\**\bin\**\*.*;Content\**\obj\**\*.*;Content\**\.vs;Content\**\.idea"
 			  target="Content" />
 	</files>
 </package>
