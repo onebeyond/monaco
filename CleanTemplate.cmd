@@ -1,6 +1,6 @@
-﻿rd /s /q src\**\.idea
-rd /s /q src\**\.vs
-rd /s /q src\Content\**\bin
-rd /s /q src\Content\**\obj
-rd /s /q src\Content\**\logs
-del src\Content\**\*.user
+FOR /d /r src\Content %%d IN (bin) DO @IF EXIST %%d rd /s /q %%d
+FOR /d /r src\Content %%d IN (obj) DO @IF EXIST %%d rd /s /q %%d
+FOR /d /r src\Content %%d IN (logs) DO @IF EXIST %%d rd /s /q %%d
+FOR /d /r src\Content %%d IN (.idea) DO @IF EXIST %%d rd /s /q %%d
+FOR /d /r src\Content %%d IN (.vs) DO @IF EXIST %%d rd /s /q %%d
+FOR /r src\Content %%d IN (*.user) DO del %%d
