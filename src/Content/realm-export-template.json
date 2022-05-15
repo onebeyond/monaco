@@ -1,7 +1,7 @@
 {
-  "id": "dcslgs-template",
-  "realm": "dcslgs-template",
-  "displayName": "DCSLGS Template",
+  "id": "monaco-template",
+  "realm": "monaco-template",
+  "displayName": "Monaco Template",
   "notBefore": 0,
   "defaultSignatureAlgorithm": "RS256",
   "revokeRefreshToken": false,
@@ -48,7 +48,7 @@
     "realm": [
       {
         "id": "da279406-4a04-4e22-a4a0-d374869e9235",
-        "name": "default-roles-dcslgs-template",
+        "name": "default-roles-monaco-template",
         "description": "${role_default-roles}",
         "composite": true,
         "composites": {
@@ -64,7 +64,7 @@
           }
         },
         "clientRole": false,
-        "containerId": "dcslgs-template",
+        "containerId": "monaco-template",
         "attributes": {}
       },
       {
@@ -73,7 +73,7 @@
         "description": "${role_offline-access}",
         "composite": false,
         "clientRole": false,
-        "containerId": "dcslgs-template",
+        "containerId": "monaco-template",
         "attributes": {}
       },
       {
@@ -81,7 +81,7 @@
         "name": "Technician",
         "composite": false,
         "clientRole": false,
-        "containerId": "dcslgs-template",
+        "containerId": "monaco-template",
         "attributes": {}
       },
       {
@@ -89,7 +89,7 @@
         "name": "Administrator",
         "composite": false,
         "clientRole": false,
-        "containerId": "dcslgs-template",
+        "containerId": "monaco-template",
         "attributes": {}
       },
       {
@@ -98,7 +98,7 @@
         "description": "Customer - Meter Reads",
         "composite": false,
         "clientRole": false,
-        "containerId": "dcslgs-template",
+        "containerId": "monaco-template",
         "attributes": {}
       },
       {
@@ -106,7 +106,7 @@
         "name": "Analyst",
         "composite": false,
         "clientRole": false,
-        "containerId": "dcslgs-template",
+        "containerId": "monaco-template",
         "attributes": {}
       },
       {
@@ -115,7 +115,7 @@
         "description": "Account Manager",
         "composite": false,
         "clientRole": false,
-        "containerId": "dcslgs-template",
+        "containerId": "monaco-template",
         "attributes": {}
       },
       {
@@ -124,7 +124,7 @@
         "description": "${role_uma_authorization}",
         "composite": false,
         "clientRole": false,
-        "containerId": "dcslgs-template",
+        "containerId": "monaco-template",
         "attributes": {}
       },
       {
@@ -133,7 +133,7 @@
         "description": "Customer with Full Access",
         "composite": false,
         "clientRole": false,
-        "containerId": "dcslgs-template",
+        "containerId": "monaco-template",
         "attributes": {}
       }
     ],
@@ -350,12 +350,12 @@
           "attributes": {}
         }
       ],
-      "dcslgs-template-front": [],
-      "dcslgs-template-api-swagger-ui": [],
+      "monaco-template-front": [],
+      "monaco-template-api-swagger-ui": [],
       "security-admin-console": [],
       "admin-cli": [],
       "account-console": [],
-      "dcslgs-template-api": [],
+      "monaco-template-api": [],
       "broker": [
         {
           "id": "69a8a103-715c-4e77-b5b2-50cb1dcfe249",
@@ -451,11 +451,11 @@
   "groups": [],
   "defaultRole": {
     "id": "da279406-4a04-4e22-a4a0-d374869e9235",
-    "name": "default-roles-dcslgs-template",
+    "name": "default-roles-monaco-template",
     "description": "${role_default-roles}",
     "composite": true,
     "clientRole": false,
-    "containerId": "dcslgs-template"
+    "containerId": "monaco-template"
   },
   "requiredCredentials": [
     "password"
@@ -530,13 +530,13 @@
       "clientId": "account",
       "name": "${client_account}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/dcslgs-template/account/",
+      "baseUrl": "/realms/monaco-template/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/realms/dcslgs-template/account/*"
+        "/realms/monaco-template/account/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -571,13 +571,13 @@
       "clientId": "account-console",
       "name": "${client_account-console}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/dcslgs-template/account/",
+      "baseUrl": "/realms/monaco-template/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/realms/dcslgs-template/account/*"
+        "/realms/monaco-template/account/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -735,13 +735,13 @@
       "clientId": "security-admin-console",
       "name": "${client_security-admin-console}",
       "rootUrl": "${authAdminUrl}",
-      "baseUrl": "/admin/dcslgs-template/console/",
+      "baseUrl": "/admin/monaco-template/console/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/admin/dcslgs-template/console/*"
+        "/admin/monaco-template/console/*"
       ],
       "webOrigins": [
         "+"
@@ -794,9 +794,9 @@
     },
     {
       "id": "da2f1df7-ae7d-45bd-934f-37eb6828390e",
-      "clientId": "dcslgs-template-api",
-      "name": "DCSLGS Template API",
-      "description": "DCSLGS Template API",
+      "clientId": "monaco-template-api",
+      "name": "Monaco Template API",
+      "description": "Monaco Template API",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
@@ -854,9 +854,9 @@
     },
     {
       "id": "cf3b7621-6e74-41cf-9b49-1f1186a73afb",
-      "clientId": "dcslgs-template-api-swagger-ui",
-      "name": "DCSLGS Template API Swagger",
-      "description": "DCSLGS Template API - Swagger client",
+      "clientId": "monaco-template-api-swagger-ui",
+      "name": "Monaco Template API Swagger",
+      "description": "Monaco Template API - Swagger client",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
@@ -907,7 +907,7 @@
       "defaultClientScopes": [
         "roles",
         "profile",
-        "dcslgs-template-api",
+        "monaco-template-api",
         "email"
       ],
       "optionalClientScopes": [
@@ -919,8 +919,8 @@
     },
     {
       "id": "01763350-60e0-4289-88a7-20002e58f01b",
-      "clientId": "dcslgs-template-front",
-      "name": "DCSLGS Template Web",
+      "clientId": "monaco-template-front",
+      "name": "Monaco Template Web",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
@@ -971,7 +971,7 @@
       "defaultClientScopes": [
         "roles",
         "profile",
-        "dcslgs-template-api",
+        "monaco-template-api",
         "email"
       ],
       "optionalClientScopes": [
@@ -1414,7 +1414,7 @@
     },
     {
       "id": "f17a7f75-a56c-476b-9026-5d7010dbf172",
-      "name": "dcslgs-template-api",
+      "name": "monaco-template-api",
       "protocol": "openid-connect",
       "attributes": {
         "include.in.token.scope": "true",
@@ -1428,7 +1428,7 @@
           "protocolMapper": "oidc-audience-mapper",
           "consentRequired": false,
           "config": {
-            "included.client.audience": "dcslgs-template-api",
+            "included.client.audience": "monaco-template-api",
             "id.token.claim": "false",
             "access.token.claim": "true"
           }

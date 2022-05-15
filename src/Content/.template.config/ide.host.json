@@ -5,14 +5,14 @@
     {
       "id": "excludecommon",
       "name": {
-        "text": "Exclude common files"
+        "text": "Exclude all the Common.* projects from the solution generated"
       },
       "isVisible": true
     },
 		{
 			"id": "includeFilesSupport",
 			"name": {
-				"text": "Include support for Azure BlobStorage and files handling structure"
+				"text": "Include support for Azure BlobStorage and file handling structure"
 			},
 			"isVisible": true
 		},
@@ -26,7 +26,7 @@
 		{
 			"id": "includeApiGateway",
 			"name": {
-				"text": "Includes API Gateway project with Ocelot implementation"
+				"text": "Include API Gateway project with Ocelot implementation"
 			},
 			"isVisible": true
 		}

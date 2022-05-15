@@ -2,20 +2,20 @@
   "$schema": "http://json.schemastore.org/template",
   "author": "DCSL GuideSmiths",
   "classifications": [ "Web", "Solution" ],
-  "name": "DCSL-GS REST API Solution Template",
-  "description": "Solution template for DCSL GuideSmiths .NET REST API projects",
-  "groupIdentity": "DcslGs.Template",
-  "identity": "DcslGs.Template.Solution",
-  "shortName": "dcslgs-solution",
+  "name": "Monaco Solution Template",
+  "description": "Solution template for .NET projects",
+  "groupIdentity": "Monaco.Template",
+  "identity": "Monaco.Template.Solution",
+  "shortName": "monaco-solution",
   "preferNameDirectory": true,
-  "sourceName": "DcslGs.Template",
+  "sourceName": "Monaco.Template",
   "tags": {
     "language": "C#",
     "type": "project"
   },
   "primaryOutputs": [
     {
-      "path": "DcslGs.Template.sln"
+      "path": "Monaco.Template.sln"
     }
   ],
   "symbols": {
@@ -38,14 +38,14 @@
 			"datatype": "bool",
 			"defaultValue": "false",
 			"displayName": "Include MassTransit support",
-			"description": "Includes support for MassTransit and integration events"
+			"description": "Include support for MassTransit and integration events"
 		},
     "includeApiGateway": {
 			"type": "parameter",
 			"datatype": "bool",
 			"defaultValue": "false",
 			"displayName": "Include API Gateway",
-			"description": "Includes API Gateway project with Ocelot implementation"
+			"description": "Include API Gateway project with Ocelot implementation"
 		}
   },
   "sources": [
@@ -56,41 +56,39 @@
           "exclude": [
             "nuget.config",
             "realm-export-template.json",
-            "DcslGs.Template.Common.*/**/*"
+            "Monaco.Template.Common.*/**/*"
           ]
         },
 				{
 					"condition": "(!includeFilesSupport)",
 					"exclude": [
-						"DcslGs.Template.Common.BlobStorage/**/*",
-						"DcslGs.Template.Application/Commands/File/**/*",
-						"DcslGs.Template.Application/DTOs/Extensions/FileExtensions.cs",
-						"DcslGs.Template.Application/DTOs/File*.cs",
-						"DcslGs.Template.Application/DTOs/ImageDto.cs",
-						"DcslGs.Template.Application/Queries/File/**/*",
-						"DcslGs.Template.Application/Queries/Image/**/*",
-						"DcslGs.Template.Application/Validators/File*.cs",
-						"DcslGs.Template.Api/Controllers/FilesController.cs",
-						"DcslGs.Template.Api/Controllers/ImagesController.cs",
-						"DcslGs.Template.Infrastructure/Services/**/*",
-						"DcslGs.Template.Infrastructure/EntityConfigurations/DocumentEntityConfiguration.cs",
-						"DcslGs.Template.Infrastructure/EntityConfigurations/FileEntityConfiguration.cs",
-						"DcslGs.Template.Infrastructure/EntityConfigurations/ImageEntityConfiguration.cs",
-						"DcslGs.Template.Domain/Model/Document.cs",
-						"DcslGs.Template.Domain/Model/File.cs",
-						"DcslGs.Template.Domain/Model/Image.cs"
+						"Monaco.Template.Common.BlobStorage/**/*",
+						"Monaco.Template.Api/Controllers/FilesController.cs",
+						"Monaco.Template.Api/Controllers/ImagesController.cs",
+						"Monaco.Template.Application/Features/File/**/*",
+						"Monaco.Template.Application/Features/Image/**/*",
+						"Monaco.Template.Application/DTOs/Extensions/FileExtensions.cs",
+						"Monaco.Template.Application/DTOs/File*.cs",
+						"Monaco.Template.Application/DTOs/ImageDto.cs",
+						"Monaco.Template.Application/Services/**/*FileService.*",
+						"Monaco.Template.Application.Infrastructure/EntityConfigurations/DocumentEntityConfiguration.cs",
+						"Monaco.Template.Application.Infrastructure/EntityConfigurations/FileEntityConfiguration.cs",
+						"Monaco.Template.Application.Infrastructure/EntityConfigurations/ImageEntityConfiguration.cs",
+						"Monaco.Template.Domain/Model/Document.cs",
+						"Monaco.Template.Domain/Model/File.cs",
+						"Monaco.Template.Domain/Model/Image.cs"
 					]
 				},
 				{
 					"condition": "(!includeMassTransitSupport)",
 					"exclude": [
-						"DcslGs.Template.Common.Messaging.Messages/**/*"
+						"Monaco.Template.Common.Messaging.Messages/**/*"
 					]
 				},
 	      {
 					"condition": "(!includeApiGateway)",
 					"exclude": [
-						"DcslGs.Template.Common.ApiGateway/**/*"
+						"Monaco.Template.Common.ApiGateway/**/*"
 					]
 	      }
       ]

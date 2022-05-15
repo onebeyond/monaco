@@ -1,7 +1,11 @@
-# Introduction 
-This project provides a solution template for scaffolding a .NET 6 solution with the most basic structure required to run a REST API with EF Core and the standard architecture used in current .NET projects. 
+#Monaco Solution Template
 
-Also, it provides some basic business components as example of real life implementation logic.
+---
+
+# Introduction 
+Monaco is a .NET solution template that provides the scaffolding for a .NET 6 solution based on the Vertical Slice Architecture. It ships the most basic structure required to run a REST API with EF Core with a rich model Domain. 
+
+It also provides some basic business components as example of real life implementation logic.
 
 # Getting Started
 TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:

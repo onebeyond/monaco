@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!--#if (includeFilesSupport)-->
+		<ProjectReference Include="..\Monaco.Template.Common.BlobStorage\Monaco.Template.Common.BlobStorage.csproj" />
+		<!--#endif-->
+		<ProjectReference Include="..\Monaco.Template.Common.Infrastructure\Monaco.Template.Common.Infrastructure.csproj" />
+		<ProjectReference Include="..\Monaco.Template.Domain\Monaco.Template.Domain.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!--#if (includeMassTransitSupport)-->
+		<PackageReference Include="MassTransit" Version="8.0.2" />
+		<!--#endif-->
+		<PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+	</ItemGroup>
+
+</Project>

@@ -1,1 +1,1 @@
-nuget pack src\DcslGs.Template.nuspec -OutputDirectory nupkg
+nuget pack src\Monaco.Template.nuspec -OutputDirectory nupkg

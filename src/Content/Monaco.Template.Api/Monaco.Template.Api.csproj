@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="6.0.3" />
+	<!--#if (includeMassTransitSupport)-->
+	<!--#endif-->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="6.0.5" />
+    <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="3.3.0" />
+    <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="3.1.0" />
+    <PackageReference Include="Serilog.Sinks.Debug" Version="2.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Monaco.Template.Application.Infrastructure.Migrations\Monaco.Template.Application.Infrastructure.Migrations.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Application\Monaco.Template.Application.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Common.Api.Application\Monaco.Template.Common.Api.Application.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Common.Api\Monaco.Template.Common.Api.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Common.Serilog\Monaco.Template.Common.Serilog.csproj" />
+  </ItemGroup>
+
+</Project>
