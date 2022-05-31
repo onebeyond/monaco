@@ -11,7 +11,7 @@ public class ScopeClaimsTransformation : IClaimsTransformation
     public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
         var claim = principal.FindFirst(AuthExtensions.ScopeClaimType);
-        if (principal.Identity is ClaimsIdentity identity && claim != null && claim.Value.Contains(' '))
+        if (principal.Identity is ClaimsIdentity identity && (claim?.Value.Contains(' ') ?? false))
         {
             var scopes = claim.Value.Split(' ');
             identity.AddClaims(scopes.Select(s => new Claim(AuthExtensions.ScopeClaimType, s, claim.ValueType, claim.Issuer)));

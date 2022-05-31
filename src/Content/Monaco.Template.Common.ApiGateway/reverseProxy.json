@@ -1,0 +1,95 @@
+{
+	"ReverseProxy": {
+		"Clusters": {
+			"api": {
+				"Destinations": {
+					"Template.Api": {
+						"Address": "http://localhost:5400"
+					}
+				}
+			}
+		},
+
+		"Routes": {
+			"CompaniesRead": {
+				"ClusterId": "api",
+				"AuthorizationPolicy": "companies:read",
+				"Match": {
+					"Path": "/api/v1/Companies/{**remainder}",
+					"Methods": [ "GET" ]
+				},
+				"Transforms": [
+					{
+						"PathPattern": "/api/v1/Companies/{**remainder}"
+					}
+				]
+			},
+			"CompaniesWrite": {
+				"ClusterId": "api",
+				"AuthorizationPolicy": "companies:write",
+				"Match": {
+					"Path": "/api/v1/Companies/{**remainder}",
+					"Methods": [ "POST", "PUT", "DELETE" ]
+				},
+				"Transforms": [
+					{
+						"PathPattern": "/api/v1/Companies/{**remainder}"
+					}
+				]
+			},
+			//#if (includeFilesSupport)
+			"FilesRead": {
+				"ClusterId": "api",
+				"AuthorizationPolicy": "files:read",
+				"Match": {
+					"Path": "/api/v1/Files/{**remainder}",
+					"Methods": [ "GET" ]
+				},
+				"Transforms": [
+					{
+						"PathPattern": "/api/v1/Files/{**remainder}"
+					}
+				]
+			},
+			"FilesWrite": {
+				"ClusterId": "api",
+				"AuthorizationPolicy": "files:write",
+				"Match": {
+					"Path": "/api/v1/Files/{**remainder}",
+					"Methods": [ "POST", "PUT", "DELETE" ]
+				},
+				"Transforms": [
+					{
+						"PathPattern": "/api/v1/Files/{**remainder}"
+					}
+				]
+			},
+			"ImagesRead": {
+				"ClusterId": "api",
+				"AuthorizationPolicy": "files:read",
+				"Match": {
+					"Path": "/api/v1/Images/{**remainder}",
+					"Methods": [ "GET" ]
+				},
+				"Transforms": [
+					{
+						"PathPattern": "/api/v1/Images/{**remainder}"
+					}
+				]
+			},
+			//#endif
+			"TemplateApiRoute": {
+				"ClusterId": "api",
+				"AuthorizationPolicy": "default",
+				"Match": {
+					"Path": "/api/{**remainder}"
+				},
+				"Transforms": [
+					{
+						"PathPattern": "/api/{**remainder}"
+					}
+				]
+			}
+		}
+	}
+}

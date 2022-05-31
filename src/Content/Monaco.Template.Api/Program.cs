@@ -1,13 +1,14 @@
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Mvc;
 using Monaco.Template.Api.Auth;
 using Monaco.Template.Application.DependencyInjection;
+using Monaco.Template.Application.Infrastructure.Context;
 using Monaco.Template.Common.Api.Auth;
+using Monaco.Template.Common.Api.Cors;
 using Monaco.Template.Common.Api.Middleware.Extensions;
 using Monaco.Template.Common.Api.Swagger;
 using Monaco.Template.Common.Serilog;
 using Monaco.Template.Common.Serilog.ApplicationInsights.TelemetryConverters;
-using Monaco.Template.Application.Infrastructure.Context;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
 [assembly: ApiConventionType(typeof(DefaultApiConventions))]
@@ -37,8 +38,8 @@ var configuration = builder.Configuration;
 builder.Services
 	   .AddAuthorizationWithPolicies(Scopes.List)
 	   .AddJwtBearerAuthentication(configuration["SSO:Authority"],
-								   configuration["SSO:Audience"],
-								   bool.Parse(configuration["SSO:RequireHttpsMetadata"] ?? "false"));
+						  configuration["SSO:Audience"],
+						  bool.Parse(configuration["SSO:RequireHttpsMetadata"] ?? "false"));
 
 builder.Services
 	   .ConfigureApplication(options =>
@@ -67,9 +68,7 @@ builder.Services
 	   .AddDbContextCheck<AppDbContext>(nameof(AppDbContext));
 
 builder.Services
-	   .AddCors(x => x.AddDefaultPolicy(p => p.AllowAnyHeader()
-											  .AllowAnyMethod()
-											  .AllowAnyOrigin()))
+	   .AddCorsPolicies(configuration)
 	   .AddControllers();
 
 var app = builder.Build();
@@ -82,9 +81,9 @@ app.UseSwaggerConfiguration(configuration["SSO:SwaggerUIClientId"],
 							configuration["Swagger:SwaggerUIAppName"]);
 
 app.UseCors()
-   .UseHttpsRedirection()
-   .UseAuthorization()
-   .UseSerilogContextEnricher();
+	.UseHttpsRedirection()
+	.UseAuthorization()
+	.UseSerilogContextEnricher();
 
 app.MapHealthChecks("/health", new HealthCheckOptions { Predicate = _ => true });
 

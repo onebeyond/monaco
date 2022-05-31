@@ -32,7 +32,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.Domain", "Monaco.Template.Common.Domain\Monaco.Template.Common.Domain.csproj", "{0FB378C2-9DE1-437F-8A62-774747105CE5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monaco.Template.Common.Api.Application", "Monaco.Template.Common.Api.Application\Monaco.Template.Common.Api.Application.csproj", "{F733BD0F-4C55-4E65-92E8-837191C37357}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.Api.Application", "Monaco.Template.Common.Api.Application\Monaco.Template.Common.Api.Application.csproj", "{F733BD0F-4C55-4E65-92E8-837191C37357}"
 EndProject
 #endif
 #if (includeMassTransitSupport)

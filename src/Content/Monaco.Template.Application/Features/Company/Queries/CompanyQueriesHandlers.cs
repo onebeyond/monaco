@@ -36,8 +36,12 @@ public sealed class CompanyQueriesHandlers : IRequestHandler<GetCompanyPageQuery
 		return page;
 	}
 
-	public Task<CompanyDto?> Handle(GetCompanyByIdQuery request, CancellationToken cancellationToken) =>
-		request.ExecuteQueryAsync<Domain.Model.Company, CompanyDto>(_dbContext,
-																	x => x.Map(true),
-																	cancellationToken);
+	public async Task<CompanyDto?> Handle(GetCompanyByIdQuery request, CancellationToken cancellationToken)
+	{
+		var item = await _dbContext.Set<Domain.Model.Company>()
+								   .AsNoTracking()
+								   .Include(x => x.Country)
+								   .SingleOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+		return item.Map(true);
+	}
 }
