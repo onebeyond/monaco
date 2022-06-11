@@ -1,6 +1,6 @@
-﻿using System.Linq.Expressions;
-using LinqKit;
+﻿using LinqKit;
 using Microsoft.Extensions.Primitives;
+using System.Linq.Expressions;
 
 namespace Monaco.Template.Common.Infrastructure.Context.Extensions;
 
@@ -94,8 +94,11 @@ public static class FilterExtensions
 		//Create the call to the method using the selected expression, the method and the value to search. If it's a string and it´s working on an IEnumerable, first apply ToLower
 		Expression expression;
 
-		if (string.IsNullOrEmpty(value as string))
-			expression = Expression.Equal(bodyExpression, Expression.Constant(null));
+		if (string.IsNullOrEmpty(value as string))  //Handles comparison against null values
+			expression = Expression.Equal(type == typeof(string)
+											  ? bodyExpression  //for strings
+											  : Expression.Convert(bodyExpression, typeof(Nullable<>).MakeGenericType(type)), //for all others
+										  Expression.Constant(null));
 		else if (type == typeof(string)) //Handles string values
 		{
 			expression = toLowerCase //If it's needed, applies lower case to entire string to ignore casing differences
@@ -106,11 +109,11 @@ public static class FilterExtensions
 			var not = strValue.StartsWith('!');
 			if (not) strValue = strValue[1..];
 
-			if (strValue.StartsWith('"') && strValue.EndsWith('"'))
+			if (strValue.StartsWith('"') && strValue.EndsWith('"'))		//quoted strings searches as exactly the same 
 				expression = not
 								 ? Expression.NotEqual(expression, Expression.Constant(Convert.ChangeType(strValue[1..^1], type)))
 								 : Expression.Equal(expression, Expression.Constant(Convert.ChangeType(strValue[1..^1], type)));
-			else
+			else	//otherwise searches with Contains
 			{
 				expression = Expression.Call(expression,
 											 type.GetMethod("Contains", new[] { type })!,
@@ -118,6 +121,8 @@ public static class FilterExtensions
 				if (not) expression = Expression.Not(expression);
 			}
 		}
+		else if (type.IsEnum)
+			expression = Expression.Equal(bodyExpression, Expression.Constant(Enum.Parse(type, (string.IsNullOrWhiteSpace(value?.ToString()) ? 0.ToString() : value!.ToString()) ?? 0.ToString())));
 		else if (type.IsAssignableFrom(typeof(Guid))) //Handles Guid values
 			expression = value.ToString()!.StartsWith('!')
 							 ? Expression.NotEqual(bodyExpression, Expression.Constant(Guid.Parse(value.ToString()![1..]), type))

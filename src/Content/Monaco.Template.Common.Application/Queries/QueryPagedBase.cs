@@ -9,14 +9,14 @@ public abstract class QueryPagedBase<T> : QueryBase<Page<T>?>
     {
     }
 
-    public virtual int Offset => QueryString.FirstOrDefault(x => x.Key == "offset")
+    public virtual int Offset => QueryString.FirstOrDefault(x => x.Key.Equals(nameof(Page<T>.Pager.Offset), StringComparison.InvariantCultureIgnoreCase))
                                             .Value
                                             .Select(x => int.TryParse(x, out var y) ? y : 0)
                                             .Where(x => x >= 0)
                                             .DefaultIfEmpty(0)
                                             .FirstOrDefault();
 
-    public virtual int Limit => QueryString.FirstOrDefault(x => x.Key == "limit")
+    public virtual int Limit => QueryString.FirstOrDefault(x => x.Key.Equals(nameof(Page<T>.Pager.Limit), StringComparison.InvariantCultureIgnoreCase))
                                            .Value
                                            .Select(x => int.TryParse(x, out var y) ? y : 0)
                                            .Where(x => x is > 0 and <= 100)

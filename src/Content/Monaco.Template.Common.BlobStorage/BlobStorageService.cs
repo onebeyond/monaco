@@ -1,8 +1,7 @@
-﻿using System.Web;
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
-using Microsoft.Extensions.Options;
 using Monaco.Template.Common.BlobStorage.Contracts;
+using System.Web;
 
 namespace Monaco.Template.Common.BlobStorage;
 
@@ -10,10 +9,9 @@ public class BlobStorageService : IBlobStorageService
 {
     private readonly BlobContainerClient _containerClient;
 
-    public BlobStorageService(IOptions<BlobStorageServiceOptions> options)
-    {
-		var serviceClient = new BlobServiceClient(options.Value.ConnectionString);
-        _containerClient = serviceClient.GetBlobContainerClient(options.Value.ContainerName);
+    public BlobStorageService(BlobServiceClient serviceClient, string containerName)
+	{
+        _containerClient = serviceClient.GetBlobContainerClient(containerName);
     }
 
     public async Task<Guid> UploadTempFileAsync(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)

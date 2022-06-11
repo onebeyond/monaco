@@ -1,20 +1,20 @@
-﻿using System.Reflection;
-using Monaco.Template.Application.Infrastructure.Context;
-using Monaco.Template.Common.Application.Commands.Behaviors;
-using Monaco.Template.Common.Application.Validators.Contracts;
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+#if includeMassTransitSupport
+using MassTransit;
+#endif
+using Monaco.Template.Application.Infrastructure.Context;
 #if includeFilesSupport
 using Monaco.Template.Application.Services;
 using Monaco.Template.Application.Services.Contracts;
 #endif
+using Monaco.Template.Common.Application.Commands.Behaviors;
+using Monaco.Template.Common.Application.Validators.Contracts;
+using System.Reflection;
 #if includeFilesSupport
 using Monaco.Template.Common.BlobStorage.Extensions;
-#endif
-#if includeMassTransitSupport
-using MassTransit;
 #endif
 
 namespace Monaco.Template.Application.DependencyInjection;

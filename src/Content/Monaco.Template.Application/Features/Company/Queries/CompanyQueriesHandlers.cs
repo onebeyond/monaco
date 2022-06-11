@@ -1,11 +1,10 @@
-﻿using Monaco.Template.Common.Application.Queries.Extensions;
-using Monaco.Template.Common.Domain.Model;
-using Monaco.Template.Common.Infrastructure.Context.Extensions;
-using Monaco.Template.Application.Infrastructure.Context;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Monaco.Template.Application.DTOs;
 using Monaco.Template.Application.DTOs.Extensions;
+using Monaco.Template.Application.Infrastructure.Context;
+using Monaco.Template.Common.Domain.Model;
+using Monaco.Template.Common.Infrastructure.Context.Extensions;
 
 namespace Monaco.Template.Application.Features.Company.Queries;
 
