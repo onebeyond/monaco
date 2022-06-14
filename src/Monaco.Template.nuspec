@@ -4,17 +4,17 @@
 		<id>Monaco.Template.Solution.nuspec</id>
 		<version>0.0.1-alpha1</version>
 		<description>
-			Monaco Solution Template for DCSL GuideSmiths .NET projects
+			Solution Template for .NET projects
 		</description>
 		<authors>DCSL GuideSmiths</authors>
-		<license type="expression">Apache-2.0</license>
+		<license type="expression">ISC</license>
 		<packageTypes>
 			<packageType name="Template" />
 		</packageTypes>
 	</metadata>
 	<files>
 		<file src="Content\**\*.*"
-			  exclude="Content\**\bin\**\*.*;Content\**\obj\**\*.*;Content\**\.vs;Content\**\.idea"
+			  exclude="Content\**\bin\**\*.*;Content\**\obj\**\*.*;Content\**\logs\**\*.*;Content\.vs\*.*;Content\.idea\*.*"
 			  target="Content" />
 	</files>
 </package>

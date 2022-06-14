@@ -6,9 +6,13 @@ using Monaco.Template.Common.Api.Application;
 using Monaco.Template.Common.Api.Application.Enums;
 using Monaco.Template.Common.Domain.Model;
 using MediatR;
+#if (!disableAuth)
 using Microsoft.AspNetCore.Authorization;
+#endif
 using Microsoft.AspNetCore.Mvc;
+#if (!disableAuth)
 using Monaco.Template.Api.Auth;
+#endif
 using Monaco.Template.Api.DTOs;
 
 namespace Monaco.Template.Api.Controllers;
@@ -25,17 +29,23 @@ public class CompaniesController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Scopes.CompaniesRead)]
-    public Task<ActionResult<Page<CompanyDto>>> Get() =>
+#if (!disableAuth)
+	[Authorize(Scopes.CompaniesRead)]
+#endif
+	public Task<ActionResult<Page<CompanyDto>>> Get() =>
 		_mediator.ExecuteQueryAsync(new GetCompanyPageQuery(Request.Query));
 
 	[HttpGet("{id:guid}")]
-    [Authorize(Scopes.CompaniesRead)]
+#if (!disableAuth)
+	[Authorize(Scopes.CompaniesRead)]
+#endif
     public Task<ActionResult<CompanyDto?>> Get(Guid id) => 
 		_mediator.ExecuteQueryAsync(new GetCompanyByIdQuery(id));
 
 	[HttpPost]
-    [Authorize(Scopes.CompaniesWrite)]
+#if (!disableAuth)
+	[Authorize(Scopes.CompaniesWrite)]
+#endif
     public Task<ActionResult<Guid>> Post([FromRoute] ApiVersion apiVersion, [FromBody] CompanyCreateEditDto dto) =>
 		_mediator.ExecuteCommandAsync(dto.MapCreateCommand(),
 									  ModelState,
@@ -43,15 +53,19 @@ public class CompaniesController : ControllerBase
 									  apiVersion);
 
 	[HttpPut("{id:guid}")]
-    [Authorize(Scopes.CompaniesWrite)]
-    public Task<IActionResult> Put(Guid id, [FromBody] CompanyCreateEditDto dto) =>
+#if (!disableAuth)
+	[Authorize(Scopes.CompaniesWrite)]
+#endif
+	public Task<IActionResult> Put(Guid id, [FromBody] CompanyCreateEditDto dto) =>
 		_mediator.ExecuteCommandAsync(dto.MapEditCommand(id),
 									  ModelState,
 									  ResponseType.NoContent);
 
 	[HttpDelete("{id:guid}")]
-    [Authorize(Scopes.CompaniesWrite)]
-    public Task<IActionResult> Delete(Guid id) =>
+#if (!disableAuth)
+	[Authorize(Scopes.CompaniesWrite)]
+#endif
+	public Task<IActionResult> Delete(Guid id) =>
 		_mediator.ExecuteCommandAsync(new CompanyDeleteCommand(id),
 									  ModelState);
 }

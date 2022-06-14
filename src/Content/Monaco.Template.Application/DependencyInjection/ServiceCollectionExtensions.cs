@@ -46,9 +46,6 @@ public static class ServiceCollectionExtensions
 																	  })
 														.UseLazyLoadingProxies()
 														.EnableSensitiveDataLogging(optionsValue.EntityFramework.EnableEfSensitiveLogging));
-#if includeMassTransitSupport
-		services.AddMassTransit(x => x.UsingAzureServiceBus((_, cfg) => cfg.Host(optionsValue.MessageBus.AzureServiceBusConnectionString)));
-#endif
 #if includeFilesSupport
 		services.RegisterBlobStorageService(opts =>
 											{

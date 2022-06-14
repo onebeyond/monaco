@@ -13,11 +13,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{8BFE9C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{35484293-234F-40DA-B430-A95170EDE449}"
 EndProject
+#if (!includeKeycloakConfig)
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KeyCloak", "KeyCloak", "{29DFBC35-3DA6-4C68-AA97-5CCE06D80917}"
 	ProjectSection(SolutionItems) = preProject
 		realm-export-template.json = realm-export-template.json
 	EndProjectSection
 EndProject
+#endif
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.Domain.Tests", "Monaco.Template.Common.Domain.Tests\Monaco.Template.Common.Domain.Tests.csproj", "{426A6AB4-95F6-46AC-AB6D-98C4612F74E5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.Api", "Monaco.Template.Common.Api\Monaco.Template.Common.Api.csproj", "{78120DEF-B581-4D6B-92D7-1735070ACB7F}"

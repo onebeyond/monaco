@@ -15,9 +15,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<!--#if (includeMassTransitSupport)-->
-		<PackageReference Include="MassTransit" Version="8.0.2" />
-		<!--#endif-->
 		<PackageReference Include="System.Drawing.Common" Version="6.0.0" />
 	</ItemGroup>
 

@@ -1,4 +1,5 @@
-﻿namespace Monaco.Template.Api.Auth;
+﻿#if (!disableAuth)
+namespace Monaco.Template.Api.Auth;
 
 public static class Scopes
 {
@@ -19,3 +20,4 @@ public static class Scopes
 #endif
                                        };
 }
+#endif

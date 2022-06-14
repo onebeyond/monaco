@@ -1,34 +1,55 @@
 {
   "$schema": "http://json.schemastore.org/vs-2017.3.host",
   "icon": "icon.png",
-  "symbolInfo": [
-    {
-      "id": "excludecommon",
-      "name": {
-        "text": "Exclude all the Common.* projects from the solution generated"
-      },
-      "isVisible": true
-    },
+	"symbolInfo": [
+		{
+			"id": "excludecommon",
+			"name": {
+				"text": "Exclude Common projects"
+			},
+			"isVisible": true
+		},
 		{
 			"id": "includeFilesSupport",
 			"name": {
-				"text": "Include support for Azure BlobStorage and file handling structure"
+				"text": "Include files support and structure"
 			},
 			"isVisible": true
 		},
 		{
 			"id": "includeMassTransitSupport",
 			"name": {
-				"text": "Include support for MassTransit and integration events"
+				"text": "Include MassTransit support"
 			},
 			"isVisible": true
 		},
 		{
 			"id": "includeApiGateway",
 			"name": {
-				"text": "Include API Gateway project with Ocelot implementation"
+				"text": "Include API Gateway"
+			},
+			"isVisible": true
+		},
+		{
+			"id": "disableAuth",
+			"name": {
+				"text": "Disable Authentication/Authorization"
+			},
+			"isVisible": true
+		},
+		{
+			"id": "includeKeycloakConfig",
+			"name": {
+				"text": "Include Keycloak realm configuration"
+			},
+			"isVisible": true
+		},
+		{
+			"id": "keycloakRealm",
+			"name": {
+				"text": "Keycloak Realm"
 			},
 			"isVisible": true
 		}
-  ]
+	]
 }
