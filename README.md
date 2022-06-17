@@ -1,6 +1,4 @@
-#Monaco Solution Template
-
----
+# Monaco - .NET Template
 
 # Introduction 
 Monaco is a .NET solution template that provides the scaffolding for a .NET 6 solution based on the Vertical Slice Architecture. It ships the most basic structure required to run a REST API with EF Core with a rich model Domain. 
