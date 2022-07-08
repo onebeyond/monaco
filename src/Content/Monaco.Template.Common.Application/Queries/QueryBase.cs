@@ -29,12 +29,22 @@ public abstract class QueryBase<T> : IRequest<T>
 														   .Value
 														   .Select(x => long.TryParse(x, out var y) ? y : (long?)null)
 														   .FirstOrDefault(x => x is not null);
-	
+
+	protected short? GetValueShort(string key) => QueryString.FirstOrDefault(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
+															 .Value
+															 .Select(x => short.TryParse(x, out var y) ? y : (short?)null)
+															 .FirstOrDefault(x => x is not null);
+
+	protected float? GetValueFloat(string key) => QueryString.FirstOrDefault(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
+															 .Value
+															 .Select(x => float.TryParse(x, out var y) ? y : (float?)null)
+															 .FirstOrDefault(x => x is not null);
+
 	protected decimal? GetValueDecimal(string key) => QueryString.FirstOrDefault(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
 																 .Value
 																 .Select(x => decimal.TryParse(x, out var y) ? y : (decimal?)null)
 																 .FirstOrDefault(x => x is not null);
-	
+
 	protected bool? GetValueBool(string key) => QueryString.FirstOrDefault(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
 														   .Value
 														   .Select(x => bool.TryParse(x, out var y) ? y : (bool?)null)

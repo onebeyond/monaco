@@ -29,7 +29,8 @@ public static class FilterExtensions
 		{
 			//genenerate the expression equivalent to that queystring with the mapping corresponding to the DB
 			var predicateKey = PredicateBuilder.New<T>(false); //Declare a PredicateBuilder for the current key values
-			predicateKey = values.Select(value => GetOperationExpression(key, filterMapLower[key], value)) //then generate the expresion for each value
+			predicateKey = values.Where(value => ValidateDataType(value, GetBodyExpression(filterMapLower[key]).Type))
+								 .Select(value => GetOperationExpression(key, filterMapLower[key], value)) //then generate the expresion for each value
 								 .Aggregate(predicateKey, (current, expr) => current.Or(expr)); //and chain them all with an OR operator
 			predicate = allConditions ? predicate.And(predicateKey) : predicate.Or(predicateKey); //then add the resulting expression to the more general predicate
 		}
@@ -59,7 +60,8 @@ public static class FilterExtensions
 		foreach (var (key, values) in filterList) //and while looping through the list of valid ones to use
 		{
 			var predicateKey = PredicateBuilder.New<T>(false); //Declare a PredicateBuilder for the current key values
-			predicateKey = values.Select(value => GetOperationExpression(key, filterMapLower[key], value, true)) //then generate the expresion for each value
+			predicateKey = values.Where(value => ValidateDataType(value, GetBodyExpression(filterMapLower[key]).Type))
+								 .Select(value => GetOperationExpression(key, filterMapLower[key], value, true)) //then generate the expresion for each value
 								 .Aggregate(predicateKey, (current, expr) => current.Or(expr)); //and chain them all with an OR operator
 			predicate = allConditions ? predicate.And(predicateKey) : predicate.Or(predicateKey); //then add the resulting expresion to the more general predicate
 		}
@@ -85,10 +87,13 @@ public static class FilterExtensions
 		return (filterMapLower, filterList, predicate);
 	}
 
+	private static Expression GetBodyExpression<T>(Expression<Func<T, object>> expression) =>
+		expression.Body.NodeType == ExpressionType.Convert ? ((UnaryExpression)expression.Body).Operand : expression.Body;
+
 	private static Expression<Func<T, bool>> GetOperationExpression<T>(string fieldKey, Expression<Func<T, object>> fieldMap, object? value, bool toLowerCase = false)
 	{
 		//Obtain expression Type and based on it y choose the method for the operation on the DB depending on if it's a String or any other type
-		var bodyExpression = fieldMap.Body.NodeType == ExpressionType.Convert ? ((UnaryExpression)fieldMap.Body).Operand : fieldMap.Body;
+		var bodyExpression = GetBodyExpression(fieldMap); // fieldMap.Body.NodeType == ExpressionType.Convert ? ((UnaryExpression)fieldMap.Body).Operand : fieldMap.Body;
 		var type = bodyExpression.Type;
 
 		//Create the call to the method using the selected expression, the method and the value to search. If it's a string and it´s working on an IEnumerable, first apply ToLower
@@ -138,5 +143,30 @@ public static class FilterExtensions
 
 		//Create and return the lambda expression that represents the operation to run
 		return Expression.Lambda<Func<T, bool>>(expression, fieldMap.Parameters);
+	}
+
+	private static bool ValidateDataType(string? data, Type type)
+	{
+		if (data is null)
+			return true;
+		if (type == typeof(int))
+			return int.TryParse(data, out _);
+		if (type == typeof(long))
+			return long.TryParse(data, out _);
+		if (type == typeof(short))
+			return short.TryParse(data, out _);
+		if (type == typeof(float))
+			return short.TryParse(data, out _);
+		if (type == typeof(decimal))
+			return decimal.TryParse(data, out _);
+		if (type == typeof(bool))
+			return bool.TryParse(data, out _);
+		if (type == typeof(Guid))
+			return Guid.TryParse(data, out _);
+		if (type == typeof(DateTime))
+			return DateTime.TryParse(data, out _);
+		if (type == typeof(Enum))
+			return Enum.TryParse(type, data, true, out _);
+		return type == typeof(string);
 	}
 }
