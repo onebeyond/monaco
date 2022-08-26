@@ -1,6 +1,6 @@
-﻿using LinqKit;
+﻿using System.Linq.Expressions;
+using LinqKit;
 using Microsoft.Extensions.Primitives;
-using System.Linq.Expressions;
 
 namespace Monaco.Template.Common.Infrastructure.Context.Extensions;
 
@@ -27,7 +27,7 @@ public static class FilterExtensions
 
 		foreach (var (key, values) in filterList) //and while looping through the list of valid ones to use
 		{
-			//genenerate the expression equivalent to that queystring with the mapping corresponding to the DB
+			//generate the expression equivalent to that querystring with the mapping corresponding to the DB
 			var predicateKey = PredicateBuilder.New<T>(false); //Declare a PredicateBuilder for the current key values
 			predicateKey = values.Where(value => ValidateDataType(value, GetBodyExpression(filterMapLower[key]).Type))
 								 .Select(value => GetOperationExpression(key, filterMapLower[key], value)) //then generate the expresion for each value
@@ -100,7 +100,7 @@ public static class FilterExtensions
 		Expression expression;
 
 		if (string.IsNullOrEmpty(value as string))  //Handles comparison against null values
-			expression = Expression.Equal(type == typeof(string)
+			expression = Expression.Equal(type == typeof(string) || type.GetGenericTypeDefinition() == typeof(Nullable<>)
 											  ? bodyExpression  //for strings
 											  : Expression.Convert(bodyExpression, typeof(Nullable<>).MakeGenericType(type)), //for all others
 										  Expression.Constant(null));
@@ -114,11 +114,11 @@ public static class FilterExtensions
 			var not = strValue.StartsWith('!');
 			if (not) strValue = strValue[1..];
 
-			if (strValue.StartsWith('"') && strValue.EndsWith('"'))		//quoted strings searches as exactly the same 
+			if (strValue.StartsWith('"') && strValue.EndsWith('"'))     //quoted strings searches as exactly the same 
 				expression = not
 								 ? Expression.NotEqual(expression, Expression.Constant(Convert.ChangeType(strValue[1..^1], type)))
 								 : Expression.Equal(expression, Expression.Constant(Convert.ChangeType(strValue[1..^1], type)));
-			else	//otherwise searches with Contains
+			else    //otherwise searches with Contains
 			{
 				expression = Expression.Call(expression,
 											 type.GetMethod("Contains", new[] { type })!,
@@ -147,7 +147,7 @@ public static class FilterExtensions
 
 	private static bool ValidateDataType(string? data, Type type)
 	{
-		if (data is null)
+		if (string.IsNullOrEmpty(data))
 			return true;
 		if (type == typeof(int))
 			return int.TryParse(data, out _);
