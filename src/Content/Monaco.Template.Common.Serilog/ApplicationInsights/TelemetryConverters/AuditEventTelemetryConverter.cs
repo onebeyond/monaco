@@ -1,7 +1,7 @@
 ﻿using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Serilog.Events;
-using Serilog.Sinks.ApplicationInsights.Sinks.ApplicationInsights.TelemetryConverters;
+using Serilog.Sinks.ApplicationInsights.TelemetryConverters;
 
 namespace Monaco.Template.Common.Serilog.ApplicationInsights.TelemetryConverters;
 
@@ -17,32 +17,38 @@ public class AuditEventTelemetryConverter : TelemetryConverterBase
         if (logEvent == null)
             throw new ArgumentNullException(nameof(logEvent));
 
-        var telemetry = new EventTelemetry("Audit Trail")
-                        {
-                            Timestamp = logEvent.Timestamp
-                        };
-			
-        ForwardPropertiesToTelemetryProperties(logEvent, telemetry, formatProvider, false, true, false);
+		//For complying with S4456:
+		return GetTelemetries(logEvent, formatProvider);
+	}
 
-        if (TryGetScalarProperty(logEvent, OperationId, out var operationId))
-        {
-            telemetry.Context.Operation.Id = operationId!.ToString();
-            telemetry.Name = $"Audit Trail for OperationId: {operationId.ToString()?.Trim('\"') ?? string.Empty}";
-        }
-			
-        if (TryGetScalarProperty(logEvent, ParentId, out var parentId))
-            telemetry.Context.Operation.ParentId = parentId!.ToString();
+	private IEnumerable<ITelemetry> GetTelemetries(LogEvent logEvent, IFormatProvider formatProvider)
+	{
+		var telemetry = new EventTelemetry("Audit Trail")
+						{
+							Timestamp = logEvent.Timestamp
+						};
 
-        if (TryGetScalarProperty(logEvent, UserId, out var userId))
-            telemetry.Context.User.Id = userId!.ToString();
+		ForwardPropertiesToTelemetryProperties(logEvent, telemetry, formatProvider, false, true, false);
 
-        if (TryGetScalarProperty(logEvent, UserName, out var username))
-            telemetry.Context.User.AccountId = username!.ToString();
+		if (TryGetScalarProperty(logEvent, OperationId, out var operationId))
+		{
+			telemetry.Context.Operation.Id = operationId!.ToString();
+			telemetry.Name = $"Audit Trail for OperationId: {operationId.ToString()?.Trim('\"') ?? string.Empty}";
+		}
 
-        yield return telemetry;
-    }
+		if (TryGetScalarProperty(logEvent, ParentId, out var parentId))
+			telemetry.Context.Operation.ParentId = parentId!.ToString();
 
-    private bool TryGetScalarProperty(LogEvent logEvent, string propertyName, out object? value)
+		if (TryGetScalarProperty(logEvent, UserId, out var userId))
+			telemetry.Context.User.Id = userId!.ToString();
+
+		if (TryGetScalarProperty(logEvent, UserName, out var username))
+			telemetry.Context.User.AccountId = username!.ToString();
+
+		yield return telemetry;
+	}
+
+    private static bool TryGetScalarProperty(LogEvent logEvent, string propertyName, out object? value)
     {
         var hasScalarValue = logEvent.Properties.TryGetValue(propertyName, out var someValue) &&
 							 someValue is ScalarValue;

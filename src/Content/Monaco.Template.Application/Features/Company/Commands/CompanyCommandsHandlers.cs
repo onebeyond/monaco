@@ -22,7 +22,7 @@ public sealed class CompanyCommandsHandlers : IRequestHandler<CompanyCreateComma
 	public async Task<ICommandResult<Guid>> Handle(CompanyCreateCommand request, CancellationToken cancellationToken)
 	{
 		var country = await GetCountry(request.CountryId, cancellationToken);
-		var item = request.Map(country!);
+		var item = request.Map(country);
 
 		_dbContext.Set<Domain.Model.Company>().Attach(item);
 		await _dbContext.SaveEntitiesAsync(cancellationToken);
@@ -35,14 +35,14 @@ public sealed class CompanyCommandsHandlers : IRequestHandler<CompanyCreateComma
 		var item = await _dbContext.GetAsync<Domain.Model.Company>(request.Id, cancellationToken);
 		var country = await GetCountry(request.CountryId, cancellationToken);
 
-		item!.Update(request.Name,
-					 request.Email,
-					 request.WebSiteUrl,
-					 request.Address,
-					 request.City,
-					 request.County,
-					 request.PostCode,
-					 country);
+		item.Update(request.Name,
+					request.Email,
+					request.WebSiteUrl,
+					request.Address,
+					request.City,
+					request.County,
+					request.PostCode,
+					country);
 
 		await _dbContext.SaveEntitiesAsync(cancellationToken);
 
@@ -59,8 +59,6 @@ public sealed class CompanyCommandsHandlers : IRequestHandler<CompanyCreateComma
 		return new CommandResult();
 	}
 
-	private async Task<Domain.Model.Country> GetCountry(Guid countryId, CancellationToken cancellationToken)
-	{
-		return await _dbContext.GetAsync<Domain.Model.Country>(countryId, cancellationToken);
-	}
+	private async Task<Domain.Model.Country> GetCountry(Guid countryId, CancellationToken cancellationToken) =>
+		await _dbContext.GetAsync<Domain.Model.Country>(countryId, cancellationToken);
 }

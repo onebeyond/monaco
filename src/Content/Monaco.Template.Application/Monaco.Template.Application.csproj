@@ -12,9 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.0.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.2.1" />
     <!--#if (includeMassTransitSupport)-->
-    <PackageReference Include="MassTransit" Version="8.0.2" />
+    <PackageReference Include="MassTransit" Version="8.0.6" />
     <!--#endif-->
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
   </ItemGroup>
