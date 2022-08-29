@@ -2,7 +2,7 @@
 
 namespace Monaco.Template.Application.Features.File.Commands;
 
-public class FileCreateCommand : CommandBase<Guid>
+public record FileCreateCommand : CommandBase<Guid>
 {
 	public FileCreateCommand(Stream stream, string fileName, string contentType)
 	{

@@ -4,7 +4,7 @@ using Monaco.Template.Application.DTOs;
 
 namespace Monaco.Template.Application.Features.Country.Queries;
 
-public class GetCountryListQuery : QueryBase<List<CountryDto>>
+public record GetCountryListQuery : QueryBase<List<CountryDto>>
 {
     public GetCountryListQuery(IEnumerable<KeyValuePair<string, StringValues>> queryString) : base(queryString)
     {

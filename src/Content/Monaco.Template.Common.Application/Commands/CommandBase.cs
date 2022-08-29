@@ -3,7 +3,7 @@ using Monaco.Template.Common.Application.Commands.Contracts;
 
 namespace Monaco.Template.Common.Application.Commands;
 
-public abstract class CommandBase : IRequest<ICommandResult>
+public abstract record CommandBase : IRequest<ICommandResult>
 {
     protected CommandBase()
     {
@@ -17,7 +17,7 @@ public abstract class CommandBase : IRequest<ICommandResult>
     public Guid Id { get; init; }
 }
 
-public abstract class CommandBase<TResult> : IRequest<ICommandResult<TResult>>
+public abstract record CommandBase<TResult> : IRequest<ICommandResult<TResult>>
 {
     protected CommandBase()
     {

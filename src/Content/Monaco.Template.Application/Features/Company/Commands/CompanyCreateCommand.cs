@@ -2,7 +2,7 @@
 
 namespace Monaco.Template.Application.Features.Company.Commands;
 
-public class CompanyCreateCommand : CommandBase<Guid>
+public record CompanyCreateCommand : CommandBase<Guid>
 {
     protected CompanyCreateCommand() { }
 

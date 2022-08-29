@@ -2,7 +2,7 @@
 
 namespace Monaco.Template.Application.Features.Company.Commands;
 
-public class CompanyEditCommand : CommandBase
+public record CompanyEditCommand : CommandBase
 {
     protected CompanyEditCommand() {}
 

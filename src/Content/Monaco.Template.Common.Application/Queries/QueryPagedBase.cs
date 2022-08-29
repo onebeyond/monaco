@@ -3,7 +3,7 @@ using Monaco.Template.Common.Domain.Model;
 
 namespace Monaco.Template.Common.Application.Queries;
 
-public abstract class QueryPagedBase<T> : QueryBase<Page<T>?>
+public abstract record QueryPagedBase<T> : QueryBase<Page<T>?>
 {
     protected QueryPagedBase(IEnumerable<KeyValuePair<string, StringValues>> queryString) : base(queryString)
     {

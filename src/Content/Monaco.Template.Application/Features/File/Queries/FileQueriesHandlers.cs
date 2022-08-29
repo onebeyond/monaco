@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Monaco.Template.Application.Features.File.Queries;
 
-public sealed class FileQueriesHandlers : IRequestHandler<GetFileByIdQuery, FileDto?>,
+public sealed record FileQueriesHandlers : IRequestHandler<GetFileByIdQuery, FileDto?>,
 										  IRequestHandler<DownloadFileByIdQuery, FileDownloadDto?>
 {
 	private readonly AppDbContext _dbContext;

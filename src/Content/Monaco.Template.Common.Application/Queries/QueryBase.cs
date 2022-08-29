@@ -3,7 +3,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace Monaco.Template.Common.Application.Queries;
 
-public abstract class QueryBase<T> : IRequest<T>
+public abstract record QueryBase<T> : IRequest<T>
 {
 	protected QueryBase(IEnumerable<KeyValuePair<string, StringValues>> queryString)
 	{

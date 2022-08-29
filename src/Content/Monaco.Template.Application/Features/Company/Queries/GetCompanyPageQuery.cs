@@ -4,7 +4,7 @@ using Monaco.Template.Application.DTOs;
 
 namespace Monaco.Template.Application.Features.Company.Queries;
 
-public class GetCompanyPageQuery : QueryPagedBase<CompanyDto>
+public record GetCompanyPageQuery : QueryPagedBase<CompanyDto>
 {
     public GetCompanyPageQuery(IEnumerable<KeyValuePair<string, StringValues>> queryString) : base(queryString)
     {

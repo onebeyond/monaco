@@ -2,7 +2,7 @@
 
 namespace Monaco.Template.Common.Application.Queries;
 
-public abstract class QueryByIdBase<T> : IRequest<T?>
+public abstract record QueryByIdBase<T> : IRequest<T?>
 {
     protected QueryByIdBase(Guid id)
     {
