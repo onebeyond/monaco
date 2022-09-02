@@ -39,3 +39,8 @@ From there, is enough to configure `appsettings.json` with the required settings
 Monaco provides support for generating the solution and projects from Visual Studio as well as providing the UI interface for configuring the project generation options.
 
 However, it's not recommended to use VS for generating new solutions. Monaco provides a default layout for the solution with the projects organized in different folders and some solution files already included in it, but this default layout from the template is ignored by VS, which also creates an additional level of folders in the generated folder. Because of these behaviors we strongly recommend using the console for running Monaco and generating any new solutions.
+
+
+# Contributing
+
+If you want to contribute, we are currently accepting PRs and/or proposals/discussions in the issue tracker.
