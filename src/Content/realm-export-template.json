@@ -1590,7 +1590,7 @@
   },
   "smtpServer": {
     "host": "localhost",
-    "from": "sso@dcsl.com",
+    "from": "sso@one-beyond.com",
     "starttls": "",
     "auth": "",
     "ssl": ""

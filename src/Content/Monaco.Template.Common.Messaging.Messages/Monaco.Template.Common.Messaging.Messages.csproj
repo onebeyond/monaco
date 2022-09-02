@@ -8,8 +8,8 @@
     <FileVersion>0.0.1.0-alpha1</FileVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Version>0.0.1-alpha1</Version>
-    <Authors>DCSL GuideSmiths</Authors>
-    <Company>DCSL GuideSmiths</Company>
+    <Authors>One Beyond</Authors>
+    <Company>One Beyond</Company>
     <PackageProjectUrl></PackageProjectUrl>
     <RepositoryUrl></RepositoryUrl>
   </PropertyGroup>
