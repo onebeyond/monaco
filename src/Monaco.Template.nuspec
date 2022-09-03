@@ -8,6 +8,7 @@
 		</description>
 		<authors>One Beyond</authors>
 		<license type="expression">ISC</license>
+		<icon>Content\.template.config\icon.png</icon>
 		<packageTypes>
 			<packageType name="Template" />
 		</packageTypes>
