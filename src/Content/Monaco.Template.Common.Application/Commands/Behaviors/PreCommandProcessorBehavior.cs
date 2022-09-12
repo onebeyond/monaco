@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using MediatR;
-using Monaco.Template.Common.Application.Validators;
 using Monaco.Template.Common.Application.Commands.Contracts;
 using Monaco.Template.Common.Application.Validators.Extensions;
 
