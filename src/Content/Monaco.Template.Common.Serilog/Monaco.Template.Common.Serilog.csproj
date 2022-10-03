@@ -4,6 +4,18 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+	<PackageVersion>0.0.1-alpha1</PackageVersion>
+    <Title>Monaco.Template.Common.Serilog</Title>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>One Beyond</Authors>
+    <Company>One Beyond</Company>
+    <Copyright>One Beyond</Copyright>
+    <PackageProjectUrl>https://github.com/guidesmiths/monaco</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/guidesmiths/monaco.git</RepositoryUrl>
+    <Description>Library with enrichers and converters for extending Serilog capabilities.</Description>
+    <RepositoryType>Git</RepositoryType>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
 
 

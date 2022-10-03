@@ -4,14 +4,18 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyVersion>0.0.1.0</AssemblyVersion>
-    <FileVersion>0.0.1.0-alpha1</FileVersion>
+
+	<PackageVersion>0.0.1-alpha1</PackageVersion>
+    <Title>Monaco.Template.Common.Messaging.Messages</Title>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>0.0.1-alpha1</Version>
     <Authors>One Beyond</Authors>
     <Company>One Beyond</Company>
-    <PackageProjectUrl></PackageProjectUrl>
-    <RepositoryUrl></RepositoryUrl>
+    <Copyright>One Beyond</Copyright>
+    <PackageProjectUrl>https://github.com/guidesmiths/monaco</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/guidesmiths/monaco.git</RepositoryUrl>
+    <Description>Library with messages for MassTransit messaging.</Description>
+    <RepositoryType>Git</RepositoryType>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
 
 </Project>
