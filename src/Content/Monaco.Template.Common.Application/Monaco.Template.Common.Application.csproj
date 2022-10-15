@@ -19,12 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="11.2.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Commands\Behaviors\" />
-    <Folder Include="Commands\Contracts\" />
+    <PackageReference Include="FluentValidation" Version="11.2.2" />
   </ItemGroup>
 
   <ItemGroup>
