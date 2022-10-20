@@ -26,13 +26,19 @@ It also provides some basic business components as example of real life implemen
 
 `dotnet new monaco-solution -n MyFirstSolution`
 
-This will create a folder named `MyFirstSolution`, which will contain a structure of directories prefixed with the name as part of the namespace declaration. The resulting solution will include the default layout and all the files required to run the application.
+This will create a folder named `MyFirstSolution`, which will contain a structure of directories prefixed with the name as part of the namespace declaration. The resulting solution will include the default layout and all the files required to run the application (more info about this [here](https://github.com/guidesmiths/monaco/wiki/Solution-projects-structure))
 
 From there, is enough to configure `appsettings.json` with the required settings and run the app.
 
 #### Getting help about template's options
 
 `dotnet new monaco-solution --help`
+
+(For more detailed information about Monaco options please refer [here](https://github.com/guidesmiths/monaco/wiki/Template-options))
+
+#### Documentation
+
+For more detailed documentation, please refer to our [Wiki](https://github.com/guidesmiths/monaco/wiki)
 
 #### Visual Studio support
 
