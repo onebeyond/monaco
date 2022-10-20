@@ -34,13 +34,13 @@ From there, is enough to configure `appsettings.json` with the required settings
 
 `dotnet new monaco-solution --help`
 
-(For more detailed information about Monaco options please refer [here](https://github.com/guidesmiths/monaco/wiki/Template-options))
+(For more information about Monaco options please refer [here](https://github.com/guidesmiths/monaco/wiki/Template-options))
 
-#### Documentation
+# Documentation
 
 For more detailed documentation, please refer to our [Wiki](https://github.com/guidesmiths/monaco/wiki)
 
-#### Visual Studio support
+# Visual Studio support
 
 Monaco provides support for generating the solution and projects from Visual Studio as well as providing the UI interface for configuring the project generation options.
 
