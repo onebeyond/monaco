@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Monaco.Template.Solution</id>
-		<version>0.0.1-alpha1</version>
+		<version>1.0.0-RC1</version>
 		<description>
 			Solution Template for .NET projects
 		</description>
@@ -15,7 +15,7 @@
 	</metadata>
 	<files>
 		<file src="Content\**\*.*"
-			  exclude="Content\**\bin\**\*.*;Content\**\obj\**\*.*;Content\**\logs\**\*.*;Content\.vs\*.*;Content\.idea\*.*"
+			  exclude="Content\**\bin\**\*.*;Content\**\obj\**\*.*;Content\**\logs\**\*.*;Content\.vs\**\*.*;Content\.idea\*.*;Content\*.user"
 			  target="Content" />
 	</files>
 </package>
