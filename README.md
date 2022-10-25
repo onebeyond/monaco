@@ -1,6 +1,9 @@
 ![Nombre1](monaco-transp.png)
 -
 
+[![Nuget version](https://img.shields.io/nuget/v/Monaco.Template.Solution?style=plastic)](https://www.nuget.org/packages/Monaco.Template.Solution)
+[![Nuget downloads](https://img.shields.io/nuget/dt/Monaco.Template.Solution?style=plastic)](https://www.nuget.org/packages/Monaco.Template.Solution)
+
 # Introduction 
 Monaco is a .NET solution template that provides the scaffolding for a .NET solution based on the [Vertical Slices Architecture](https://www.youtube.com/watch?v=SUiWfhAhgQw).
 
