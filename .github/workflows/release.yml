@@ -16,6 +16,6 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Create package
-      run: nuget pack src\Monaco.Template.nuspec -OutputDirectory .
+      run: nuget pack src/Monaco.Template.nuspec -OutputDirectory .
     - name: Push to NuGet
       run: dotnet nuget push "Monaco.Template.*.nupkg" --api-key ${{secrets.nuget_api_key}} --source https://api.nuget.org/v3/index.json
