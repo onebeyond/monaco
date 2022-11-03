@@ -1,1 +1,0 @@
-dotnet nuget push %1 --api-key %2 --source "nuget.org"

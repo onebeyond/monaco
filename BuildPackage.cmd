@@ -1,1 +1,0 @@
-nuget pack src\Monaco.Template.nuspec -OutputDirectory nupkg
