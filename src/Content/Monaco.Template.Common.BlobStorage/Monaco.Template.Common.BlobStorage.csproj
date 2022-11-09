@@ -4,10 +4,22 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+	<PackageVersion>0.0.1-alpha1</PackageVersion>
+	<Title>Monaco.Template.Common.BlobStorage</Title>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<Authors>One Beyond</Authors>
+	<Company>One Beyond</Company>
+	<Copyright>One Beyond</Copyright>
+	<PackageProjectUrl>https://github.com/guidesmiths/monaco</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/guidesmiths/monaco.git</RepositoryUrl>
+	<Description>Monaco's service implementation for handling files on Azure BlobStorage.</Description>
+	<RepositoryType>Git</RepositoryType>
+	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.13.1" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.14.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
   </ItemGroup>
 

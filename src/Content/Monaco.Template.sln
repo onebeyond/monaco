@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{8BFE9C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{35484293-234F-40DA-B430-A95170EDE449}"
 EndProject
-#if (!includeKeycloakConfig)
+#if (includeKeycloakConfig)
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KeyCloak", "KeyCloak", "{29DFBC35-3DA6-4C68-AA97-5CCE06D80917}"
 	ProjectSection(SolutionItems) = preProject
 		realm-export-template.json = realm-export-template.json

@@ -15,9 +15,9 @@ public static class BehaviorExtensions
                                        .ToList();
         //And adds the corresponding scoped behaviors for all the detected commands (for both existing and validation checks)
         commandBaseTypes.ForEach(t => services.AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(ICommandResult)),
-                                                         typeof(PreCommandProcessorExistsBehavior<>).MakeGenericType(t))
+                                                         typeof(CommandValidationExistsBehavior<>).MakeGenericType(t))
                                               .AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(ICommandResult)),
-                                                         typeof(PreCommandProcessorBehavior<>).MakeGenericType(t)));
+                                                         typeof(CommandValidationBehavior<>).MakeGenericType(t)));
         //Gets the CommandBases<T> derived classes
         var commandBaseResultTypes = assembly.GetTypes()
                                              .Where(x => (x.BaseType?.IsGenericType ?? false) && x.BaseType?.GetGenericTypeDefinition() == typeof(CommandBase<>))
@@ -27,9 +27,9 @@ public static class BehaviorExtensions
                                        {
                                            var tResult = t.BaseType!.GenericTypeArguments.First();
                                            services.AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(ICommandResult<>).MakeGenericType(tResult)),
-                                                              typeof(PreCommandProcessorExistsBehavior<,>).MakeGenericType(t, tResult))
+                                                              typeof(CommandValidationExistsBehavior<,>).MakeGenericType(t, tResult))
                                                    .AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(ICommandResult<>).MakeGenericType(tResult)),
-                                                              typeof(PreCommandProcessorBehavior<,>).MakeGenericType(t, tResult));
+                                                              typeof(CommandValidationBehavior<,>).MakeGenericType(t, tResult));
                                        });
         return services;
     }

@@ -4,15 +4,22 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+	<PackageVersion>0.0.1-alpha1</PackageVersion>
+	<Title>Monaco.Template.Common.Application</Title>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<Authors>One Beyond</Authors>
+	<Company>One Beyond</Company>
+	<Copyright>One Beyond</Copyright>
+	<PackageProjectUrl>https://github.com/guidesmiths/monaco</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/guidesmiths/monaco.git</RepositoryUrl>
+	<Description>Library with base classes and helpers for the Application library.</Description>
+	<RepositoryType>Git</RepositoryType>
+	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="11.2.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Commands\Behaviors\" />
-    <Folder Include="Commands\Contracts\" />
+    <PackageReference Include="FluentValidation" Version="11.2.2" />
   </ItemGroup>
 
   <ItemGroup>
