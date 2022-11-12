@@ -2,18 +2,18 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-#if includeMassTransitSupport
+#if massTransitIntegration
 using MassTransit;
 #endif
 using Monaco.Template.Application.Infrastructure.Context;
-#if includeFilesSupport
+#if filesSupport
 using Monaco.Template.Application.Services;
 using Monaco.Template.Application.Services.Contracts;
 #endif
 using Monaco.Template.Common.Application.Commands.Behaviors;
 using Monaco.Template.Common.Application.Validators.Contracts;
 using System.Reflection;
-#if includeFilesSupport
+#if filesSupport
 using Monaco.Template.Common.BlobStorage.Extensions;
 #endif
 
@@ -46,7 +46,7 @@ public static class ServiceCollectionExtensions
 																	  })
 														.UseLazyLoadingProxies()
 														.EnableSensitiveDataLogging(optionsValue.EntityFramework.EnableEfSensitiveLogging));
-#if includeFilesSupport
+#if filesSupport
 		services.RegisterBlobStorageService(opts =>
 											{
 												opts.ConnectionString = optionsValue.BlobStorage.ConnectionString;

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31808.319
 MinimumVisualStudioVersion = 10.0.40219.1
-#if (!excludecommon)
+#if (!excludeCommon)
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1095FB23-B2A1-4FD6-BC12-433529EEA56E}"
 	ProjectSection(SolutionItems) = preProject
 		nuget.config = nuget.config
@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{8BFE9C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{35484293-234F-40DA-B430-A95170EDE449}"
 EndProject
-#if (includeKeycloakConfig)
+#if (keycloakConfig)
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KeyCloak", "KeyCloak", "{29DFBC35-3DA6-4C68-AA97-5CCE06D80917}"
 	ProjectSection(SolutionItems) = preProject
 		realm-export-template.json = realm-export-template.json
@@ -37,11 +37,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.Api.Application", "Monaco.Template.Common.Api.Application\Monaco.Template.Common.Api.Application.csproj", "{F733BD0F-4C55-4E65-92E8-837191C37357}"
 EndProject
 #endif
-#if (includeMassTransitSupport)
+#if (massTransitIntegration)
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.Messaging.Messages", "Monaco.Template.Common.Messaging.Messages\Monaco.Template.Common.Messaging.Messages.csproj", "{45B82388-702E-4485-BEB5-995051DB9952}"
 EndProject
 #endif
-#if (includeApiGateway)
+#if (apiGateway)
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.ApiGateway", "Monaco.Template.Common.ApiGateway\Monaco.Template.Common.ApiGateway.csproj", "{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}"
 EndProject
 #endif
@@ -61,7 +61,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Application
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Application.Infrastructure.Migrations", "Monaco.Template.Application.Infrastructure.Migrations\Monaco.Template.Application.Infrastructure.Migrations.csproj", "{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}"
 EndProject
-#if (includeFilesSupport)
+#if (filesSupport)
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.BlobStorage", "Monaco.Template.Common.BlobStorage\Monaco.Template.Common.BlobStorage.csproj", "{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}"
 EndProject
 #endif
@@ -71,7 +71,7 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		#if (!excludecommon)
+		#if (!excludeCommon)
 		{426A6AB4-95F6-46AC-AB6D-98C4612F74E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{426A6AB4-95F6-46AC-AB6D-98C4612F74E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{426A6AB4-95F6-46AC-AB6D-98C4612F74E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -105,13 +105,13 @@ Global
 		{F733BD0F-4C55-4E65-92E8-837191C37357}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F733BD0F-4C55-4E65-92E8-837191C37357}.Release|Any CPU.Build.0 = Release|Any CPU
 		#endif
-		#if (includeMassTransitSupport)
+		#if (massTransitIntegration)
 		{45B82388-702E-4485-BEB5-995051DB9952}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{45B82388-702E-4485-BEB5-995051DB9952}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45B82388-702E-4485-BEB5-995051DB9952}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45B82388-702E-4485-BEB5-995051DB9952}.Release|Any CPU.Build.0 = Release|Any CPU
 		#endif
-		#if (includeApiGateway)
+		#if (apiGateway)
 		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -145,7 +145,7 @@ Global
 		{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}.Release|Any CPU.Build.0 = Release|Any CPU
-		#if (includeFilesSupport)
+		#if (filesSupport)
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -156,7 +156,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		#if (!excludecommon)
+		#if (!excludeCommon)
 		{35484293-234F-40DA-B430-A95170EDE449} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{426A6AB4-95F6-46AC-AB6D-98C4612F74E5} = {35484293-234F-40DA-B430-A95170EDE449}
 		{78120DEF-B581-4D6B-92D7-1735070ACB7F} = {8BFE9C37-2620-4156-88B8-286537954C5E}
@@ -167,16 +167,16 @@ Global
 		{0FB378C2-9DE1-437F-8A62-774747105CE5} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{F733BD0F-4C55-4E65-92E8-837191C37357} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		#endif
-		#if (includeMassTransitSupport)
+		#if (massTransitIntegration)
 		{45B82388-702E-4485-BEB5-995051DB9952} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		#endif
-		#if (includeApiGateway)
+		#if (apiGateway)
 		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		#endif
 		{426A6AB4-95F6-46AC-AB6D-98C4612F74E5} = {35484293-234F-40DA-B430-A95170EDE449}
 		{E5781B96-E0CA-4762-9412-C4202E0CA08F} = {920A23AF-59DA-4453-B825-0549B1C04F5B}
 		{B09E0906-8522-4B70-8C55-958415DAF21D} = {920A23AF-59DA-4453-B825-0549B1C04F5B}
-		#if (includeFilesSupport)
+		#if (filesSupport)
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		#endif
 	EndGlobalSection

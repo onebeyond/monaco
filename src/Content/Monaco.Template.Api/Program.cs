@@ -1,4 +1,4 @@
-#if includeMassTransitSupport
+#if massTransitIntegration
 using MassTransit;
 #endif
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -54,7 +54,7 @@ builder.Services
 							 {
 								 options.EntityFramework.ConnectionString = configuration.GetConnectionString("AppDbContext")!;
 								 options.EntityFramework.EnableEfSensitiveLogging = bool.Parse(configuration["EnableEFSensitiveLogging"] ?? "false");
-#if includeFilesSupport
+#if filesSupport
 								 options.BlobStorage.ConnectionString = configuration["BlobStorage:ConnectionString"]!;
 								 options.BlobStorage.ContainerName = configuration["BlobStorage:Container"]!;
 #endif
@@ -77,7 +77,7 @@ builder.Services
 								   configuration["SSO:Audience"],
 								   Scopes.List)
 #endif
-#if includeMassTransitSupport
+#if massTransitIntegration
 	   .AddMassTransit(cfg =>
 					   {
 						   if (builder.Environment.IsDevelopment())

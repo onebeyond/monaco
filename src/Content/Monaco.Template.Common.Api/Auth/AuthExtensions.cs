@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System.IdentityModel.Tokens.Jwt;
 
@@ -24,10 +23,9 @@ public static class AuthExtensions
 																   string authority,
 																   string audience,
 																   bool requireHttpsMetadata) =>
-		services.AddTransient<IClaimsTransformation, ScopeClaimsTransformation>()	//Add transformer to map scopes correctly in ClaimsPrincipal/Identity
-				.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)		//Set Bearer scheme
-				.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme,			//Configure validation settings for JWT bearer
-							  options =>
+		services.AddTransient<IClaimsTransformation, ScopeClaimsTransformation>() //Add transformer to map scopes correctly in ClaimsPrincipal/Identity
+				.AddAuthentication()
+				.AddJwtBearer(options => //Configure validation settings for JWT bearer
 							  {
 								  options.Authority = authority;
 								  options.Audience = audience;
@@ -36,9 +34,9 @@ public static class AuthExtensions
 								  options.TokenValidationParameters.RoleClaimType = "roles";
 
 								  options.SecurityTokenValidators.Clear();
-								  options.SecurityTokenValidators.Add(new JwtSecurityTokenHandler {MapInboundClaims = false});
+								  options.SecurityTokenValidators.Add(new JwtSecurityTokenHandler { MapInboundClaims = false });
 
-								  options.TokenValidationParameters.ValidTypes = new[] {"JWT"};
+								  options.TokenValidationParameters.ValidTypes = new[] { "JWT" };
 							  });
 
 	/// <summary>
