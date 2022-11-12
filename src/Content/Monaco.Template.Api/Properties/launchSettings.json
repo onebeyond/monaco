@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
     "http": {
       "commandName": "Project",
@@ -29,7 +30,6 @@
       }
     }
   },
-  "$schema": "https://json.schemastore.org/launchsettings.json",
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,

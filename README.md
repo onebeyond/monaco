@@ -17,15 +17,15 @@ It also provides some basic business components as example of real life implemen
 
 #### Supported .NET version:
 
-6.0
+7.0
 
 #### Installation
 
-`dotnet new --install Monaco.Template.Solution`
+`dotnet new install Monaco.Template.Solution`
 
 #### Uninstalling
 
-`dotnet new --uninstall Monaco.Template.Solution`
+`dotnet new uninstall Monaco.Template.Solution`
 
 #### How to create a Monaco based solution
 
