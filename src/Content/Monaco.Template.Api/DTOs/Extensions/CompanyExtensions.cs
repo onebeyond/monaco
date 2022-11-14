@@ -23,5 +23,6 @@ public static class CompanyExtensions
 			value.City,
 			value.County,
 			value.PostCode,
-			value.CountryId);
+			value.CountryId,
+			value.Version ?? Array.Empty<byte>());
 }

@@ -1,13 +1,13 @@
-﻿using System.Reflection;
-using MediatR;
+﻿using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Monaco.Template.Common.Application.Commands.Contracts;
+using System.Reflection;
 
 namespace Monaco.Template.Common.Application.Commands.Behaviors;
 
 public static class BehaviorExtensions
 {
-    public static IServiceCollection RegisterPreCommandProcessorBehaviors(this IServiceCollection services, Assembly assembly)
+    public static IServiceCollection RegisterCommandValidationBehaviors(this IServiceCollection services, Assembly assembly)
     {
         //Gets the CommandBase derived classes
         var commandBaseTypes = assembly.GetTypes()
@@ -33,4 +33,7 @@ public static class BehaviorExtensions
                                        });
         return services;
     }
+
+	public static IServiceCollection RegisterCommandConcurrencyExceptionBehavior(this IServiceCollection services) =>
+		services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ConcurrencyExceptionBehavior<,>));
 }

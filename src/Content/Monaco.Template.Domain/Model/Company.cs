@@ -38,6 +38,7 @@ public class Company : Entity
     public string City { get; private set; }
     public string County { get; private set; }
     public string PostCode { get; private set; }
+	public byte[] Version { get; }
 
     public Guid CountryId { get; private set; }
     public virtual Country Country { get; private set; }

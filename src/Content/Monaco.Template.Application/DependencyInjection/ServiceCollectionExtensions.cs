@@ -13,6 +13,7 @@ using Monaco.Template.Application.Services.Contracts;
 using Monaco.Template.Common.Application.Commands.Behaviors;
 using Monaco.Template.Common.Application.Validators.Contracts;
 using System.Reflection;
+using Monaco.Template.Common.Application.Policies;
 #if includeFilesSupport
 using Monaco.Template.Common.BlobStorage.Extensions;
 #endif
@@ -32,8 +33,10 @@ public static class ServiceCollectionExtensions
 	{
 		var optionsValue = new ApplicationOptions();
 		options.Invoke(optionsValue);
-		services.AddMediatR(GetApplicationAssembly())
-				.RegisterPreCommandProcessorBehaviors(GetApplicationAssembly())
+		services.AddPolicies<Policies.Policies>()
+				.AddMediatR(GetApplicationAssembly())
+				.RegisterCommandConcurrencyExceptionBehavior()
+				.RegisterCommandValidationBehaviors(GetApplicationAssembly())
 				.AddValidatorsFromAssembly(GetApplicationAssembly(), filter: filter => !filter.ValidatorType
 																							  .GetInterfaces()
 																							  .Contains(typeof(INonInjectable)) &&

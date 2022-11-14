@@ -14,7 +14,8 @@ public class CompanyEditCommand : CommandBase
                               string city,
                               string county,
                               string postCode,
-                              Guid countryId) : base(id)
+                              Guid countryId,
+							  byte[] version) : base(id)
     {
         Name = name;
         Email = email;
@@ -24,6 +25,7 @@ public class CompanyEditCommand : CommandBase
         County = county;
         PostCode = postCode;
         CountryId = countryId;
+		Version = version;
     }
 
     public string Name { get; }
@@ -34,4 +36,5 @@ public class CompanyEditCommand : CommandBase
     public string County { get; }
     public string PostCode { get; }
     public Guid CountryId { get; }
+	public byte[] Version { get; }
 }
