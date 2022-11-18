@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Monaco.Template.Common.Domain\Monaco.Template.Common.Domain.csproj" />
     <ProjectReference Include="..\Monaco.Template.Common.Infrastructure\Monaco.Template.Common.Infrastructure.csproj" />
   </ItemGroup>
 
