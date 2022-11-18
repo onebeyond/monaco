@@ -21,29 +21,29 @@ public static class ConfigureSwaggerExtensions
 																string? authority = null,
 																string? apiName = null,
 																List<string>? scopes = null)
-    {
+	{
         return services.AddApiVersioning(options =>
-                                         {
-                                             options.Conventions.Add(new VersionByNamespaceConvention());
-                                             options.ReportApiVersions = true;
-                                             options.DefaultApiVersion = new ApiVersion(1, 0);
-                                             options.AssumeDefaultVersionWhenUnspecified = true;
-                                         })
-                       .AddVersionedApiExplorer(options =>
-                                                {
-                                                    options.GroupNameFormat = "'v'VVV";
-                                                    options.SubstituteApiVersionInUrl = true;
-                                                })
-                       .ConfigureSwagger(apiDescription,
-                                         title,
-                                         description,
-                                         contactName,
-                                         contactEmail,
-                                         termsOfServiceUrl,
+										 {
+											 options.Conventions.Add(new VersionByNamespaceConvention());
+											 options.ReportApiVersions = true;
+											 options.DefaultApiVersion = new ApiVersion(1, 0);
+											 options.AssumeDefaultVersionWhenUnspecified = true;
+										 })
+					   .AddVersionedApiExplorer(options =>
+												{
+													options.GroupNameFormat = "'v'VVV";
+													options.SubstituteApiVersionInUrl = true;
+												})
+					   .ConfigureSwagger(apiDescription,
+										 title,
+										 description,
+										 contactName,
+										 contactEmail,
+										 termsOfServiceUrl,
 										 authority,
 										 apiName,
 										 scopes);
-    }
+	}
 	
 	public static IServiceCollection ConfigureSwagger(this IServiceCollection services,
 													  string apiDescription,

@@ -19,28 +19,28 @@
 		}
 	],
 	"symbols": {
-		"excludecommon": {
+		"excludeCommon": {
 			"type": "parameter",
 			"datatype": "bool",
 			"defaultValue": "false",
 			"displayName": "Exclude Common projects",
 			"description": "Exclude all the Common.* projects from the solution generated"
 		},
-		"includeFilesSupport": {
+		"filesSupport": {
 			"type": "parameter",
 			"datatype": "bool",
 			"defaultValue": "false",
 			"displayName": "Include files support and structure",
 			"description": "Include support for Azure BlobStorage and file handling structure"
 		},
-		"includeMassTransitSupport": {
+		"massTransitIntegration": {
 			"type": "parameter",
 			"datatype": "bool",
 			"defaultValue": "false",
-			"displayName": "Include MassTransit support",
-			"description": "Include support for MassTransit and integration events"
+			"displayName": "Include MassTransit integration",
+			"description": "Includes MassTransit for integration events"
 		},
-		"includeApiGateway": {
+		"apiGateway": {
 			"type": "parameter",
 			"datatype": "bool",
 			"defaultValue": "false",
@@ -54,7 +54,7 @@
 			"displayName": "Disable Authentication/Authorization",
 			"description": "Disable Authentication and Authorization implementation for the solution"
 		},
-		"includeKeycloakConfig": {
+		"keycloakConfig": {
 			"type": "parameter",
 			"datatype": "bool",
 			"defaultValue": "false",
@@ -137,9 +137,18 @@
 	},
 	"sources": [
 		{
+			"exclude": [
+				"**/[Bb]in/**",
+				"**/[Oo]bj/**",
+				".template.config/**/*",
+				"**/*.filelist",
+				"**/*.user",
+				"**/*.lock.json",
+				"**/.vs/**/*"
+			],
 			"modifiers": [
 				{
-					"condition": "(excludecommon)",
+					"condition": "(excludeCommon)",
 					"exclude": [
 						"nuget.config",
 						"realm-export-template.json",
@@ -147,7 +156,7 @@
 					]
 				},
 				{
-					"condition": "(!includeFilesSupport)",
+					"condition": "(!filesSupport)",
 					"exclude": [
 						"Monaco.Template.Common.BlobStorage/**/*",
 						"Monaco.Template.Api/Controllers/FilesController.cs",
@@ -167,13 +176,13 @@
 					]
 				},
 				{
-					"condition": "(!includeMassTransitSupport)",
+					"condition": "(!massTransitIntegration)",
 					"exclude": [
 						"Monaco.Template.Common.Messaging.Messages/**/*"
 					]
 				},
 				{
-					"condition": "(!includeApiGateway)",
+					"condition": "(!apiGateway)",
 					"exclude": [
 						"Monaco.Template.Common.ApiGateway/**/*"
 					]
@@ -185,7 +194,7 @@
 					]
 				},
 				{
-					"condition": "(!includeKeycloakConfig)",
+					"condition": "(!keycloakConfig)",
 					"exclude": [
 						"realm-export-template.json"
 					]

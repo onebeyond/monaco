@@ -1,4 +1,4 @@
-﻿#if includeFilesSupport
+﻿#if filesSupport
 #if (!disableAuth)
 using Monaco.Template.Api.Auth;
 #endif

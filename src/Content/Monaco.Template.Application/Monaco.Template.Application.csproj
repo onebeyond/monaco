@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -13,8 +13,8 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.2.2" />
-    <!--#if (includeMassTransitSupport)-->
-    <PackageReference Include="MassTransit" Version="8.0.7" />
+    <!--#if (massTransitIntegration)-->
+    <PackageReference Include="MassTransit" Version="8.0.8" />
     <!--#endif-->
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
   </ItemGroup>
