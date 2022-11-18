@@ -23,7 +23,7 @@ public class Policies
 	{
 		PolicyRegistry.Add(DbConcurrentExceptionPolicyKey,
 						   Policy.Handle<DbUpdateConcurrencyException>()
-								 .WaitAndRetry(3, i => TimeSpan.FromSeconds(i)));
+								 .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(i)));
 		
 		//To declare common policies
 	}

@@ -61,5 +61,5 @@ public class Company : Entity
         County = county;
         PostCode = postCode;
         Country = country;
-    }
+	}
 }

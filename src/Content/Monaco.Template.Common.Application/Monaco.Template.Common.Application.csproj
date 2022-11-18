@@ -27,8 +27,4 @@
     <ProjectReference Include="..\Monaco.Template.Common.Infrastructure\Monaco.Template.Common.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Policies\" />
-  </ItemGroup>
-
 </Project>

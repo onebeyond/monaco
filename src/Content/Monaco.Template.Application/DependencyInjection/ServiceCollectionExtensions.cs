@@ -14,6 +14,7 @@ using Monaco.Template.Common.Application.Commands.Behaviors;
 using Monaco.Template.Common.Application.Validators.Contracts;
 using System.Reflection;
 using Monaco.Template.Common.Application.Policies;
+using Monaco.Template.Common.Infrastructure.Context;
 #if includeFilesSupport
 using Monaco.Template.Common.BlobStorage.Extensions;
 #endif
@@ -35,7 +36,7 @@ public static class ServiceCollectionExtensions
 		options.Invoke(optionsValue);
 		services.AddPolicies<Policies.Policies>()
 				.AddMediatR(GetApplicationAssembly())
-				.RegisterCommandConcurrencyExceptionBehavior()
+				.RegisterCommandConcurrencyExceptionBehaviors(GetApplicationAssembly())
 				.RegisterCommandValidationBehaviors(GetApplicationAssembly())
 				.AddValidatorsFromAssembly(GetApplicationAssembly(), filter: filter => !filter.ValidatorType
 																							  .GetInterfaces()
@@ -48,7 +49,8 @@ public static class ServiceCollectionExtensions
 																		  sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(3), null);
 																	  })
 														.UseLazyLoadingProxies()
-														.EnableSensitiveDataLogging(optionsValue.EntityFramework.EnableEfSensitiveLogging));
+														.EnableSensitiveDataLogging(optionsValue.EntityFramework.EnableEfSensitiveLogging))
+				.AddScoped<BaseDbContext, AppDbContext>();
 #if includeFilesSupport
 		services.RegisterBlobStorageService(opts =>
 											{

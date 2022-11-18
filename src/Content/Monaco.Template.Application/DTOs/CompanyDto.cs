@@ -10,7 +10,6 @@ public class CompanyDto
     public string City { get; set; }
     public string County { get; set; }
     public string PostCode { get; set; }
-	public byte[] Version { get; set; }
 
     public Guid CountryId { get; set; }
     public CountryDto? Country { get; set; }
