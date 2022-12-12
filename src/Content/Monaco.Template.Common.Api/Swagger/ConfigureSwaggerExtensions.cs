@@ -92,27 +92,33 @@ public static class ConfigureSwaggerExtensions
 								   }
 							   });
 
+#if (disableAuth)
+	public static IApplicationBuilder UseSwaggerConfiguration(this IApplicationBuilder app) =>
+#else
 	public static IApplicationBuilder UseSwaggerConfiguration(this IApplicationBuilder app,
 															  string clientId,
 															  string appName) =>
+#endif
 		app.UseSwagger() // Enable middleware to serve generated Swagger as a JSON endpoint.
 		   .UseSwaggerUI(options =>
-						 {	// build a swagger endpoint for each discovered API version
+						 { // build a swagger endpoint for each discovered API version
 							 var provider = app.ApplicationServices.GetRequiredService<IApiVersionDescriptionProvider>();
 							 foreach (var groupName in provider.ApiVersionDescriptions.Select(x => x.GroupName))
 								 options.SwaggerEndpoint($"{groupName}/swagger.json", groupName.ToUpperInvariant());
+#if (!disableAuth)
 							 options.OAuthClientId(clientId);
 							 options.OAuthAppName(appName);
 							 options.OAuthScopeSeparator(" ");
 							 options.OAuthUsePkce();
+#endif
 						 });
 
 	/// <summary>
-    /// Configures the Swagger generation options.
-    /// </summary>
-    /// <remarks>This allows API versioning to define a Swagger document per API version after the
-    /// <see cref="IApiVersionDescriptionProvider"/> service has been resolved from the service container.</remarks>
-    public class SwaggerOptions : IConfigureOptions<SwaggerGenOptions>
+	/// Configures the Swagger generation options.
+	/// </summary>
+	/// <remarks>This allows API versioning to define a Swagger document per API version after the
+	/// <see cref="IApiVersionDescriptionProvider"/> service has been resolved from the service container.</remarks>
+	public class SwaggerOptions : IConfigureOptions<SwaggerGenOptions>
     {
         private readonly IApiVersionDescriptionProvider _provider;
         private readonly string _title;

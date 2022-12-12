@@ -112,11 +112,13 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 	app.UseDeveloperExceptionPage();
 
-#if (!disableAuth)
+#if (disableAuth)
+app.UseSwaggerConfiguration();
+#else
 app.UseSwaggerConfiguration(configuration["SSO:SwaggerUIClientId"]!,
 							configuration["Swagger:SwaggerUIAppName"]!);
-
 #endif
+
 app.UseCors()
 #if (!disableAuth)
    .UseHttpsRedirection()
