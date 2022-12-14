@@ -11,8 +11,8 @@
 	<Authors>One Beyond</Authors>
 	<Company>One Beyond</Company>
 	<Copyright>One Beyond</Copyright>
-	<PackageProjectUrl>https://github.com/guidesmiths/monaco</PackageProjectUrl>
-	<RepositoryUrl>https://github.com/guidesmiths/monaco.git</RepositoryUrl>
+	<PackageProjectUrl>https://github.com/onebeyond/monaco</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/onebeyond/monaco.git</RepositoryUrl>
 	<Description>Monaco's service implementation for handling files on Azure BlobStorage.</Description>
 	<RepositoryType>Git</RepositoryType>
 	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>

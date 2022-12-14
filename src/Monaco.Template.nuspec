@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Monaco.Template.Solution</id>
-		<version>1.1.0</version>
+		<version>1.2.0</version>
 		<title>Monaco Solution Template</title>
 		<description>
 			Solution Template for .NET projects
@@ -14,8 +14,8 @@
 			<packageType name="Template" />
 		</packageTypes>
 		<readme>README.md</readme>
-		<projectUrl>https://github.com/guidesmiths/monaco</projectUrl>
-		<repository type="git" url="https://github.com/guidesmiths/monaco" />
+		<projectUrl>https://github.com/onebeyond/monaco</projectUrl>
+		<repository type="git" url="https://github.com/onebeyond/monaco" />
 		<tags>solution project template template-engine csharp</tags>
 	</metadata>
 	<files>
