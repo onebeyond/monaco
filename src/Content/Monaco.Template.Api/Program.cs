@@ -37,7 +37,6 @@ builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(conte
 																		 .Filter.ByIncludingOnly(x => x.Properties.ContainsKey("AuditEntries")))
 												   .Enrich.WithOperationId()
 												   .Enrich.FromLogContext());
-											  .Enrich.FromLogContext());
 
 // Add services to the container.
 var configuration = builder.Configuration;
