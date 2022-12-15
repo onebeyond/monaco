@@ -14,8 +14,8 @@
 			<packageType name="Template" />
 		</packageTypes>
 		<readme>README.md</readme>
-		<projectUrl>https://github.com/guidesmiths/monaco</projectUrl>
-		<repository type="git" url="https://github.com/guidesmiths/monaco" />
+		<projectUrl>https://github.com/onebeyond/monaco</projectUrl>
+		<repository type="git" url="https://github.com/onebeyond/monaco" />
 		<tags>solution project template template-engine csharp</tags>
 	</metadata>
 	<files>
