@@ -14,8 +14,4 @@
 		<ProjectReference Include="..\Monaco.Template.Domain\Monaco.Template.Domain.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="System.Drawing.Common" Version="7.0.0" />
-	</ItemGroup>
-
 </Project>
