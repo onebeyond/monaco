@@ -96,7 +96,7 @@ builder.Services
 					   })
 #endif
 	   .AddHealthChecks()
-#if disableAuth
+#if !disableAuth
 	   .AddUrlGroup(new Uri($"{configuration["SSO:Authority"]}/.well-known/openid-configuration"), "SSO")
 #endif
 	   .AddDbContextCheck<AppDbContext>(nameof(AppDbContext));
