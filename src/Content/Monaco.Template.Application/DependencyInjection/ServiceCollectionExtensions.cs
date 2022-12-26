@@ -50,7 +50,7 @@ public static class ServiceCollectionExtensions
 																	  })
 														.UseLazyLoadingProxies()
 														.EnableSensitiveDataLogging(optionsValue.EntityFramework.EnableEfSensitiveLogging))
-				.AddScoped<BaseDbContext, AppDbContext>();
+				.AddScoped<BaseDbContext, AppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
 #if filesSupport
 		services.RegisterBlobStorageService(opts =>
 											{
