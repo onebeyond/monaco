@@ -1,6 +1,4 @@
-﻿using Polly.Bulkhead;
-
-namespace Monaco.Template.Application.Policies;
+﻿namespace Monaco.Template.Application.Policies;
 
 public class Policies : Common.Application.Policies.Policies
 {
