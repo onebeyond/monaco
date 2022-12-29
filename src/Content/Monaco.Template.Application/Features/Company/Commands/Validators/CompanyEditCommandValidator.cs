@@ -23,12 +23,13 @@ public sealed class CompanyEditCommandValidator : AbstractValidator<CompanyEditC
 
 		RuleFor(x => x.Email)
 			.NotEmpty()
-			.EmailAddress();
+			.EmailAddress()
+			.MaximumLength(255);
 
 		RuleFor(x => x.WebSiteUrl)
 			.MaximumLength(300);
 
-		RuleFor(x => x.Address)
+		RuleFor(x => x.Street)
 			.MaximumLength(100);
 
 		RuleFor(x => x.City)
@@ -41,7 +42,7 @@ public sealed class CompanyEditCommandValidator : AbstractValidator<CompanyEditC
 			.MaximumLength(10);
 
 		RuleFor(x => x.CountryId)
-			.NotEmpty()
-			.MustExistAsync<CompanyEditCommand, Domain.Model.Country>(dbContext);
+			.MustExistAsync<CompanyEditCommand, Domain.Model.Country>(dbContext)
+			.When(x => x.CountryId.HasValue);
 	}
 }

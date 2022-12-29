@@ -9,16 +9,16 @@ public class CompanyCreateCommand : CommandBase<Guid>
     public CompanyCreateCommand(string name,
                                 string email,
                                 string webSiteUrl,
-                                string address,
-                                string city,
-                                string county,
-                                string postCode,
-                                Guid countryId)
+                                string? street,
+                                string? city,
+                                string? county,
+                                string? postCode,
+                                Guid? countryId)
     {
         Name = name;
         Email = email;
         WebSiteUrl = webSiteUrl;
-        Address = address;
+        Street = street;
         City = city;
         County = county;
         PostCode = postCode;
@@ -28,9 +28,9 @@ public class CompanyCreateCommand : CommandBase<Guid>
     public string Name { get; }
     public string Email { get; }
     public string WebSiteUrl { get; }
-    public string Address { get; }
-    public string City { get; }
-    public string County { get; }
-    public string PostCode { get; }
-    public Guid CountryId { get; }
+    public string? Street { get; }
+    public string? City { get; }
+    public string? County { get; }
+    public string? PostCode { get; }
+    public Guid? CountryId { get; }
 }

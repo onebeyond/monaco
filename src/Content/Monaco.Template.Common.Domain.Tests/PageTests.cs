@@ -10,7 +10,7 @@ namespace Monaco.Template.Common.Domain.Tests;
 [ExcludeFromCodeCoverage]
 public class PageTests
 {
-    [Trait("Common domain Entities", "Page Entity")]
+    [Trait("Common Domain Entities", "Page Entity")]
     [Theory(DisplayName = "Create a new page succeeds")]
     [AnonymousData]
     public void Create_a_new_page(List<string> results, int offset, int limit, long count)
@@ -21,7 +21,7 @@ public class PageTests
         sut.Results.Should().OnlyContain(s => results.Contains(s));
     }
 		
-    [Trait("Common domain Entities", "Pager Entity")]
+    [Trait("Common Domain Entities", "Pager Entity")]
     [Theory(DisplayName = "Create a new pager succeeds")]
     [AnonymousData]
     public void Create_a_new_pager(int offset, int limit, long count)

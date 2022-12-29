@@ -15,33 +15,40 @@ public class CompanyEntityConfiguration : IEntityTypeConfiguration<Company>
                .IsRequired()
                .HasMaxLength(100);
 
+		builder.Property(x => x.Email)
+			   .IsRequired()
+			   .HasMaxLength(255);
+
         builder.Property(x => x.WebSiteUrl)
                .IsRequired(false)
                .HasMaxLength(300);
 
-        builder.Property(x => x.Address)
-               .IsRequired(false)
-               .HasMaxLength(100);
+        builder.Property(x => x.Version)
+               .IsRowVersion();
 
-        builder.Property(x => x.City)
-               .IsRequired(false)
-               .HasMaxLength(100);
+        builder.OwnsOne(x => x.Address,
+						b =>
+						{
+							b.Property(x => x.Street)
+							 .IsRequired(false)
+							 .HasMaxLength(100);
 
-        builder.Property(x => x.County)
-               .IsRequired(false)
-               .HasMaxLength(100);
+							b.Property(x => x.City)
+							 .IsRequired(false)
+							 .HasMaxLength(100);
 
-        builder.Property(x => x.PostCode)
-               .IsRequired(false)
-               .HasMaxLength(10);
+							b.Property(x => x.County)
+							 .IsRequired(false)
+							 .HasMaxLength(100);
 
-		builder.Property(x => x.Version)
-			   .IsRowVersion();
+							b.Property(x => x.PostCode)
+							 .IsRequired(false)
+							 .HasMaxLength(10);
 
-
-        builder.HasOne(x => x.Country)
-               .WithMany()
-               .HasForeignKey(x => x.CountryId)
-               .IsRequired();
-	}
+							b.HasOne(x => x.Country)
+							 .WithMany()
+							 .HasForeignKey(x => x.CountryId)
+							 .IsRequired();
+						});
+    }
 }

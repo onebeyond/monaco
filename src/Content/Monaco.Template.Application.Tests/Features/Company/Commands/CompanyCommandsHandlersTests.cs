@@ -9,6 +9,7 @@ using Monaco.Template.Application.Infrastructure.Context;
 using Monaco.Template.Common.Tests.Factories;
 using FluentAssertions;
 using MockQueryable.Moq;
+using Monaco.Template.Domain.Model;
 using Moq;
 using Xunit;
 
@@ -63,11 +64,7 @@ public class CompanyCommandsHandlersTests
         companyMock.Verify(x => x.Update(It.IsAny<string>(),
                                          It.IsAny<string>(),
                                          It.IsAny<string>(),
-                                         It.IsAny<string>(),
-                                         It.IsAny<string>(),
-                                         It.IsAny<string>(),
-                                         It.IsAny<string>(),
-                                         It.IsAny<Domain.Model.Country>()),
+                                         It.IsAny<Address>()),
                            Times.Once);
         dbContextMock.Verify(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()), Times.Once);
         result.ValidationResult.IsValid.Should().BeTrue();

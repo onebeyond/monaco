@@ -35,14 +35,7 @@ public sealed class CompanyCommandsHandlers : IRequestHandler<CompanyCreateComma
 		var item = await _dbContext.Set<Domain.Model.Company>().SingleAsync(x => x.Id == request.Id, cancellationToken);
 		var country = await GetCountry(request.CountryId, cancellationToken);
 
-		item.Update(request.Name,
-					request.Email,
-					request.WebSiteUrl,
-					request.Address,
-					request.City,
-					request.County,
-					request.PostCode,
-					country);
+		request.Map(item, country);
 
 		await _dbContext.SaveEntitiesAsync(cancellationToken);
 
@@ -59,6 +52,6 @@ public sealed class CompanyCommandsHandlers : IRequestHandler<CompanyCreateComma
 		return new CommandResult();
 	}
 
-	private async Task<Domain.Model.Country> GetCountry(Guid countryId, CancellationToken cancellationToken) =>
+	private async Task<Domain.Model.Country?> GetCountry(Guid? countryId, CancellationToken cancellationToken) =>
 		await _dbContext.GetAsync<Domain.Model.Country>(countryId, cancellationToken);
 }

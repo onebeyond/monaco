@@ -15,29 +15,17 @@ public class CompanyTests
 	public void NewCompanySucceeds(string name,
 								   string email,
 								   string webSiteUrl,
-								   string address,
-								   string city,
-								   string county,
-								   string postCode,
-								   Country country)
+								   Address address)
 	{
 		var sut = new Company(name,
 							  email,
 							  webSiteUrl,
-							  address,
-							  city,
-							  county,
-							  postCode,
-							  country);
+							  address);
 
 		sut.Name.Should().Be(name);
 		sut.Email.Should().Be(email);
 		sut.WebSiteUrl.Should().Be(webSiteUrl);
 		sut.Address.Should().Be(address);
-		sut.City.Should().Be(city);
-		sut.County.Should().Be(county);
-		sut.PostCode.Should().Be(postCode);
-		sut.Country.Should().Be(country);
 	}
 
 	[Trait("Core Domain Entities", "Company Entity")]
@@ -47,28 +35,16 @@ public class CompanyTests
 									  string name,
 									  string email,
 									  string webSiteUrl,
-									  string address,
-									  string city,
-									  string county,
-									  string postCode,
-									  Country country)
+									  Address address)
 	{
 		sut.Update(name,
 				   email,
 				   webSiteUrl,
-				   address,
-				   city,
-				   county,
-				   postCode,
-				   country);
+				   address);
 
 		sut.Name.Should().Be(name);
 		sut.Email.Should().Be(email);
 		sut.WebSiteUrl.Should().Be(webSiteUrl);
 		sut.Address.Should().Be(address);
-		sut.City.Should().Be(city);
-		sut.County.Should().Be(county);
-		sut.PostCode.Should().Be(postCode);
-		sut.Country.Should().Be(country);
 	}
 }
