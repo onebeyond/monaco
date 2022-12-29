@@ -1,11 +1,11 @@
-﻿using System.Drawing;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using ExifLibrary;
+using Monaco.Template.Application.Infrastructure.Context;
+using Monaco.Template.Application.Services.Contracts;
 using Monaco.Template.Common.BlobStorage;
 using Monaco.Template.Common.BlobStorage.Contracts;
 using Monaco.Template.Domain.Model;
-using Monaco.Template.Application.Infrastructure.Context;
-using Monaco.Template.Application.Services.Contracts;
+using SkiaSharp;
+using System.Drawing;
 using File = Monaco.Template.Domain.Model.File;
 using Image = Monaco.Template.Domain.Model.Image;
 
@@ -58,13 +58,15 @@ public class FileService : IFileService
 
 	public async Task<Image> UploadImage(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)
 	{
-		var image = System.Drawing.Image.FromStream(stream);
-		var dateTaken = GetDateTaken(image);
-		var thumb = GetThumbnail(image, ThumbnailWidth, ThumbnailHeight);
-		await using var thumbStream = new MemoryStream();
-		thumb.Save(thumbStream, image.RawFormat); //Set the same ImageFormat as the original image
-
-		stream.Position = 0; //Reset stream position to read from beginning
+		using var image = SKImage.FromEncodedData(stream);
+		using var thumb = GetThumbnail(image, ThumbnailWidth, ThumbnailHeight);
+		using var data = thumb.Encode();
+		await using var thumbStream = data.AsStream();
+		var metadata = GetMetadata(stream);
+		var dateTaken = metadata.Get<ExifDateTime>(ExifTag.DateTimeOriginal)?.Value;
+		var gpsLat = metadata.Get<GPSLatitudeLongitude>(ExifTag.GPSLatitude)?.ToFloat();
+		var gpsLong = metadata.Get<GPSLatitudeLongitude>(ExifTag.GPSLongitude)?.ToFloat();
+		stream.Position = 0; //Reset streams position to read from beginning
 		thumbStream.Position = 0;
 		var imageIds = await Task.WhenAll(_blobStorageService.UploadTempFileAsync(stream,
 																				  fileName,
@@ -83,9 +85,11 @@ public class FileService : IFileService
 								   contentType,
 								   stream.Length,
 								   thumbStream.Length,
-								   image.Size,
-								   thumb.Size,
+								   new Size(image.Width, image.Height),
+								   new Size(thumb.Width, thumb.Height),
 								   dateTaken,
+								   gpsLat,
+								   gpsLong,
 								   cancellationToken);
 		}
 		catch
@@ -187,6 +191,8 @@ public class FileService : IFileService
 									   new Size(image.Width, image.Height),
 									   image.ThumbnailId.HasValue ? new Size(image.Thumbnail!.Width, image.Thumbnail.Height) : null,
 									   image.DateTaken,
+									   image.GpsLatitude,
+									   image.GpsLongitude,
 									   cancellationToken);
 
 			default:
@@ -199,17 +205,13 @@ public class FileService : IFileService
 		}
 	}
 
-	public DateTime? GetDateTaken(System.Drawing.Image image)
+	public ExifPropertyCollection<ExifProperty> GetMetadata(Stream stream)
 	{
-		if (!image.PropertyIdList.Contains(36867)) //PropertyId=36867 is DateTaken property.
-			return null;
-
-		var dateTakenProp = image.GetPropertyItem(36867);
-		//Original DateTaken format separates the Date part with ":", so we need to replace them by "-" to properly parse it
-		return dateTakenProp is not null ? DateTime.Parse(new Regex(":").Replace(Encoding.UTF8.GetString(dateTakenProp.Value!), "-", 2)) : null;
+		stream.Position = 0;
+		return ImageFile.FromStream(stream).Properties;
 	}
-
-	public System.Drawing.Image GetThumbnail(System.Drawing.Image image, int thumbnailWidth, int thumbnailHeight)
+	
+	public SKImage GetThumbnail(SKImage image, int thumbnailWidth, int thumbnailHeight)
 	{
 		//Calculates the proper scale to shrink the image so the aspect ratio remains the same for the thumbnail as well
 		var scale = Math.Min(thumbnailWidth / (float)image.Height,
@@ -217,15 +219,16 @@ public class FileService : IFileService
 		if (scale > 1) //If scale is bigger than 1, it means that the thumbnail would end up being bigger than the original image
 			scale = 1; //So we reset it to 1 so both image and thumbnail are the same size at worst.
 		//Finally, we use the scale to calculate the final width and height to use for the thumbnail
-		return image.GetThumbnailImage((int)(image.Width * scale),
-									   (int)(image.Height * scale),
-									   () => true,
-									   IntPtr.Zero);
+		var sourceBitmap = SKBitmap.FromImage(image);
+		using var scaledBitmap = sourceBitmap.Resize(new SKImageInfo((int)(image.Width * scale),
+																	 (int)(image.Height * scale)),
+													 SKFilterQuality.Medium);
+		return SKImage.FromBitmap(scaledBitmap);
 	}
 
 	private async Task<File> GetFile(Guid id, CancellationToken cancellationToken)
 	{
-		return (await _dbContext.Set<File>().FindAsync(new object?[] { id }, cancellationToken))!;
+		return (await _dbContext.Set<File>().FindAsync(new object[] { id }, cancellationToken))!;
 	}
 
 	private async Task<Image> SaveImage(Guid imageId,
@@ -238,6 +241,8 @@ public class FileService : IFileService
 										Size imageDimentions,
 										Size? thumbDimentions,
 										DateTime? dateTaken,
+										float? gpsLatitude,
+										float? gpsLongitude,
 										CancellationToken cancellationToken)
 	{
 		var thumb = thumbnailId.HasValue
@@ -249,7 +254,9 @@ public class FileService : IFileService
 									true,
 									thumbDimentions!.Value.Height,
 									thumbDimentions!.Value.Width,
-									dateTaken)
+									dateTaken,
+									gpsLatitude,
+									gpsLongitude)
 						: null;
 		var item = new Image(imageId,
 							 name,
@@ -260,6 +267,8 @@ public class FileService : IFileService
 							 imageDimentions.Height,
 							 imageDimentions.Width,
 							 dateTaken,
+							 gpsLatitude,
+							 gpsLongitude,
 							 thumb);
 
 		return await Save(item, cancellationToken);

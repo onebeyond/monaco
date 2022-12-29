@@ -35,10 +35,13 @@ public class CompanyEntityConfiguration : IEntityTypeConfiguration<Company>
                .IsRequired(false)
                .HasMaxLength(10);
 
+		builder.Property(x => x.Version)
+			   .IsRowVersion();
+
 
         builder.HasOne(x => x.Country)
                .WithMany()
                .HasForeignKey(x => x.CountryId)
                .IsRequired();
-    }
+	}
 }

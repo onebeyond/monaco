@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -12,11 +12,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.2.1" />
-    <!--#if (includeMassTransitSupport)-->
-    <PackageReference Include="MassTransit" Version="8.0.6" />
+	<!--#if (filesSupport)-->
+    <PackageReference Include="ExifLibNet" Version="2.1.4" />
+	<!--#endif-->
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.2.2" />
+    <!--#if (massTransitIntegration)-->
+    <PackageReference Include="MassTransit" Version="8.0.8" />
     <!--#endif-->
-    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+	<!--#if (filesSupport)-->
+    <PackageReference Include="SkiaSharp" Version="2.88.3" />
+	<!--#endif-->
   </ItemGroup>
 
 </Project>

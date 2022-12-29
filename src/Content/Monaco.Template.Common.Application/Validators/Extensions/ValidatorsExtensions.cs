@@ -1,127 +1,107 @@
-﻿using System.Linq.Expressions;
+﻿using FluentValidation;
+using Monaco.Template.Common.Application.Commands;
 using Monaco.Template.Common.Domain.Model;
 using Monaco.Template.Common.Infrastructure.Context;
 using Monaco.Template.Common.Infrastructure.Context.Extensions;
-using FluentValidation;
-using Monaco.Template.Common.Application.Commands;
+using System.Linq.Expressions;
 
 namespace Monaco.Template.Common.Application.Validators.Extensions;
 
 public static class ValidatorsExtensions
 {
-    public static readonly string ExistsRulesetName = "Exists";
+	public static readonly string ExistsRulesetName = "Exists";
 
-    public static void CheckIfExists<T, TEntity>(this AbstractValidator<T> validator, BaseDbContext dbContext) where T : CommandBase
-                                                                                                               where TEntity : Entity
-    {
-        validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(x => x.Id).MustExistAsync<T, TEntity>(dbContext));
-    }
+	public static void CheckIfExists<TCommand, TEntity>(this AbstractValidator<TCommand> validator, BaseDbContext dbContext) where TCommand : CommandBase
+																															 where TEntity : Entity =>
+		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(x => x.Id).MustExistAsync<TCommand, TEntity>(dbContext));
 
-    public static void CheckIfExists<T, TEntity, TResult>(this AbstractValidator<T> validator, BaseDbContext dbContext) where T : CommandBase<TResult>
-                                                                                                                        where TEntity : Entity
-    {
-        validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(x => x.Id).MustExistAsync<T, TEntity, TResult>(dbContext));
-    }
+	public static void CheckIfExists<TCommand, TEntity, TCommandResult>(this AbstractValidator<TCommand> validator, BaseDbContext dbContext) where TCommand : CommandBase<TCommandResult>
+																																			 where TEntity : Entity =>
+		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(x => x.Id).MustExistAsync<TCommand, TEntity, TCommandResult>(dbContext));
 
-    public static void CheckIfExists<T>(this AbstractValidator<T> validator,
-                                        Func<Guid, CancellationToken, Task<bool>> predicate) where T : CommandBase
-    {
-        validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(x => x.Id).MustAsync(predicate));
-    }
+	public static void CheckIfExists<TCommand>(this AbstractValidator<TCommand> validator,
+											   Func<Guid, CancellationToken, Task<bool>> predicate) where TCommand : CommandBase =>
+		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(x => x.Id)
+															.MustAsync(predicate));
 
-    public static void CheckIfExists<T, TResult>(this AbstractValidator<T> validator,
-                                                 Func<Guid, CancellationToken, Task<bool>> predicate) where T : CommandBase<TResult>
-    {
-        validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(x => x.Id).MustAsync(predicate));
-    }
+	public static void CheckIfExists<TCommand, TCommandResult>(this AbstractValidator<TCommand> validator,
+															   Func<Guid, CancellationToken, Task<bool>> predicate) where TCommand : CommandBase<TCommandResult> =>
+		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(x => x.Id)
+															.MustAsync(predicate));
 
-    public static void CheckIfExists<T>(this AbstractValidator<T> validator,
-                                        Func<T, Guid, CancellationToken, Task<bool>> predicate) where T : CommandBase
-    {
-        validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(x => x.Id).MustAsync(predicate));
-    }
+	public static void CheckIfExists<TCommand>(this AbstractValidator<TCommand> validator,
+											   Func<TCommand, Guid, CancellationToken, Task<bool>> predicate) where TCommand : CommandBase =>
+		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(x => x.Id)
+															.MustAsync(predicate));
 
-    public static void CheckIfExists<T, TResult>(this AbstractValidator<T> validator,
-                                                 Func<T, Guid, CancellationToken, Task<bool>> predicate) where T : CommandBase<TResult>
-    {
-        validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(x => x.Id).MustAsync(predicate));
-    }
+	public static void CheckIfExists<TCommand, TCommandResult>(this AbstractValidator<TCommand> validator,
+															   Func<TCommand, Guid, CancellationToken, Task<bool>> predicate) where TCommand : CommandBase<TCommandResult> =>
+		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(x => x.Id)
+															.MustAsync(predicate));
 
-    public static void CheckIfExists<T, TProp>(this AbstractValidator<T> validator,
-                                               Expression<Func<T, TProp>> selector,
-                                               Func<TProp, CancellationToken, Task<bool>> predicate) where T : CommandBase
-    {
-        validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(selector).MustAsync(predicate));
-    }
+	public static void CheckIfExists<TCommand, TPropertyType>(this AbstractValidator<TCommand> validator,
+															  Expression<Func<TCommand, TPropertyType>> selector,
+															  Func<TPropertyType, CancellationToken, Task<bool>> predicate) where TCommand : CommandBase =>
+		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(selector)
+															.MustAsync(predicate));
 
-    public static void CheckIfExists<T, TProp>(this AbstractValidator<T> validator,
-                                               Expression<Func<T, TProp>> selector,
-                                               Func<T, TProp, CancellationToken, Task<bool>> predicate) where T : CommandBase
-    {
-        validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(selector).MustAsync(predicate));
-    }
+	public static void CheckIfExists<TComomand, TPropertyType>(this AbstractValidator<TComomand> validator,
+															   Expression<Func<TComomand, TPropertyType>> selector,
+															   Func<TComomand, TPropertyType, CancellationToken, Task<bool>> predicate) where TComomand : CommandBase =>
+		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(selector)
+															.MustAsync(predicate));
 
-    public static void CheckIfExists<T, TProp>(this AbstractValidator<T> validator,
-                                               Expression<Func<T, TProp>> selector,
-                                               Func<T, TProp, ValidationContext<T>, CancellationToken, Task<bool>> predicate) where T : CommandBase
-    {
-        validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(selector).MustAsync(predicate));
-    }
+	public static void CheckIfExists<TCommand, TPropertyType>(this AbstractValidator<TCommand> validator,
+															  Expression<Func<TCommand, TPropertyType>> selector,
+															  Func<TCommand, TPropertyType, ValidationContext<TCommand>, CancellationToken, Task<bool>> predicate) where TCommand : CommandBase =>
+		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(selector)
+															.MustAsync(predicate));
 
-    public static void CheckIfExists<T, TProp, TResult>(this AbstractValidator<T> validator,
-                                                        Expression<Func<T, TProp>> selector,
-                                                        Func<TProp, CancellationToken, Task<bool>> predicate) where T : CommandBase<TResult>
-    {
-        validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(selector).MustAsync(predicate));
-    }
+	public static void CheckIfExists<TCommand, TPropertyType, TCommandResult>(this AbstractValidator<TCommand> validator,
+																			  Expression<Func<TCommand, TPropertyType>> selector,
+																			  Func<TPropertyType, CancellationToken, Task<bool>> predicate) where TCommand : CommandBase<TCommandResult> =>
+		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(selector)
+															.MustAsync(predicate));
 
-    public static void CheckIfExists<T, TProp, TResult>(this AbstractValidator<T> validator,
-                                                        Expression<Func<T, TProp>> selector,
-                                                        Func<T, TProp, CancellationToken, Task<bool>> predicate) where T : CommandBase<TResult>
-    {
-        validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(selector).MustAsync(predicate));
-    }
+	public static void CheckIfExists<TCommand, TPropertyType, TResult>(this AbstractValidator<TCommand> validator,
+																	   Expression<Func<TCommand, TPropertyType>> selector,
+																	   Func<TCommand, TPropertyType, CancellationToken, Task<bool>> predicate) where TCommand : CommandBase<TResult> =>
+		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(selector)
+															.MustAsync(predicate));
 
-    public static void CheckIfExists<T, TProp, TResult>(this AbstractValidator<T> validator,
-                                                        Expression<Func<T, TProp>> selector,
-                                                        Func<T,
-                                                            TProp,
-                                                            ValidationContext<T>,
-                                                            CancellationToken,
-                                                            Task<bool>> predicate) where T : CommandBase<TResult>
-    {
-        validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(selector).MustAsync(predicate));
-    }
+	public static void CheckIfExists<TCommand, TPropertyType, TResult>(this AbstractValidator<TCommand> validator,
+																	   Expression<Func<TCommand, TPropertyType>> selector,
+																	   Func<TCommand,
+																		   TPropertyType,
+																		   ValidationContext<TCommand>,
+																		   CancellationToken,
+																		   Task<bool>> predicate) where TCommand : CommandBase<TResult> =>
+		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(selector)
+															.MustAsync(predicate));
 
-    public static IRuleBuilderOptions<T, Guid> MustExistAsync<T, TEntity>(this IRuleBuilder<T, Guid> ruleBuilder,
-                                                                          BaseDbContext dbContext) where T : CommandBase
-                                                                                                   where TEntity : Entity
-    {
-        return ruleBuilder.MustAsync(dbContext.ExistsAsync<TEntity>)
-                          .WithMessage("The value {PropertyValue} is not valid");
-    }
+	public static IRuleBuilderOptions<TCommand, Guid> MustExistAsync<TCommand, TEntity>(this IRuleBuilder<TCommand, Guid> ruleBuilder,
+																						BaseDbContext dbContext) where TCommand : CommandBase
+																												 where TEntity : Entity =>
+		ruleBuilder.MustAsync(dbContext.ExistsAsync<TEntity>)
+				   .WithMessage("The value {PropertyValue} is not valid");
 
-    public static IRuleBuilderOptions<T, Guid?> MustExistAsync<T, TEntity>(this IRuleBuilder<T, Guid?> ruleBuilder,
-                                                                           BaseDbContext dbContext) where T : CommandBase
-                                                                                                    where TEntity : Entity
-    {
-        return ruleBuilder.MustAsync(async (id, ct) => id.HasValue && await dbContext.ExistsAsync<TEntity>(x => x.Id == id.Value, ct))
-                          .WithMessage("The value {PropertyValue} is not valid");
-    }
+	public static IRuleBuilderOptions<TCommand, Guid?> MustExistAsync<TCommand, TEntity>(this IRuleBuilder<TCommand, Guid?> ruleBuilder,
+																						 BaseDbContext dbContext) where TCommand : CommandBase
+																												  where TEntity : Entity =>
+		ruleBuilder.MustAsync(async (id, ct) => id.HasValue &&
+												await dbContext.ExistsAsync<TEntity>(x => x.Id == id.Value, ct))
+				   .WithMessage("The value {PropertyValue} is not valid");
 
-    public static IRuleBuilderOptions<T, Guid?> MustExistAsync<T, TEntity, TResult>(this IRuleBuilder<T, Guid?> ruleBuilder,
-                                                                                    BaseDbContext dbContext) where T : CommandBase<TResult>
-                                                                                                             where TEntity : Entity
-    {
-        return ruleBuilder.MustAsync(async (id, ct) => id.HasValue && await dbContext.ExistsAsync<TEntity>(x => x.Id == id.Value, ct))
-                          .WithMessage("The value {PropertyValue} is not valid");
-    }
+	public static IRuleBuilderOptions<TCommand, Guid?> MustExistAsync<TCommand, TEntity, TResult>(this IRuleBuilder<TCommand, Guid?> ruleBuilder,
+																								  BaseDbContext dbContext) where TCommand : CommandBase<TResult>
+																														   where TEntity : Entity =>
+		ruleBuilder.MustAsync(async (id, ct) => id.HasValue &&
+												await dbContext.ExistsAsync<TEntity>(x => x.Id == id.Value, ct))
+				   .WithMessage("The value {PropertyValue} is not valid");
 
-    public static IRuleBuilderOptions<T, Guid> MustExistAsync<T, TEntity, TResult>(this IRuleBuilder<T, Guid> ruleBuilder,
-                                                                                   BaseDbContext dbContext) where T : CommandBase<TResult>
-                                                                                                            where TEntity : Entity
-    {
-        return ruleBuilder.MustAsync(dbContext.ExistsAsync<TEntity>)
-                          .WithMessage("The value {PropertyValue} is not valid");
-    }
+	public static IRuleBuilderOptions<TCommand, Guid> MustExistAsync<TCommand, TEntity, TResult>(this IRuleBuilder<TCommand, Guid> ruleBuilder,
+																								 BaseDbContext dbContext) where TCommand : CommandBase<TResult>
+																														  where TEntity : Entity =>
+		ruleBuilder.MustAsync(dbContext.ExistsAsync<TEntity>)
+				   .WithMessage("The value {PropertyValue} is not valid");
 }

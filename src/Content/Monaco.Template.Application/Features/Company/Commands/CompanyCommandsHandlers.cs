@@ -1,10 +1,10 @@
-﻿using Monaco.Template.Application.DTOs.Extensions;
+﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Monaco.Template.Application.DTOs.Extensions;
+using Monaco.Template.Application.Infrastructure.Context;
 using Monaco.Template.Common.Application.Commands;
 using Monaco.Template.Common.Application.Commands.Contracts;
 using Monaco.Template.Common.Infrastructure.Context.Extensions;
-using Monaco.Template.Application.Infrastructure.Context;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Monaco.Template.Application.Features.Company.Commands;
 
@@ -32,7 +32,7 @@ public sealed class CompanyCommandsHandlers : IRequestHandler<CompanyCreateComma
 
 	public async Task<ICommandResult> Handle(CompanyEditCommand request, CancellationToken cancellationToken)
 	{
-		var item = await _dbContext.GetAsync<Domain.Model.Company>(request.Id, cancellationToken);
+		var item = await _dbContext.Set<Domain.Model.Company>().SingleAsync(x => x.Id == request.Id, cancellationToken);
 		var country = await GetCountry(request.CountryId, cancellationToken);
 
 		item.Update(request.Name,

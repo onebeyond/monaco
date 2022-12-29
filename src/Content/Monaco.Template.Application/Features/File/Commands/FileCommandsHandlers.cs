@@ -1,4 +1,4 @@
-﻿#if includeFilesSupport
+﻿#if filesSupport
 using Monaco.Template.Application.Services.Contracts;
 using Monaco.Template.Common.Application.Commands;
 using Monaco.Template.Common.Application.Commands.Contracts;

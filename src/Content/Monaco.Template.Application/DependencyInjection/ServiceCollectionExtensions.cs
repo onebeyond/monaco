@@ -2,18 +2,20 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-#if includeMassTransitSupport
+#if massTransitIntegration
 using MassTransit;
 #endif
 using Monaco.Template.Application.Infrastructure.Context;
-#if includeFilesSupport
+#if filesSupport
 using Monaco.Template.Application.Services;
 using Monaco.Template.Application.Services.Contracts;
 #endif
 using Monaco.Template.Common.Application.Commands.Behaviors;
 using Monaco.Template.Common.Application.Validators.Contracts;
 using System.Reflection;
-#if includeFilesSupport
+using Monaco.Template.Common.Application.Policies;
+using Monaco.Template.Common.Infrastructure.Context;
+#if filesSupport
 using Monaco.Template.Common.BlobStorage.Extensions;
 #endif
 
@@ -32,8 +34,10 @@ public static class ServiceCollectionExtensions
 	{
 		var optionsValue = new ApplicationOptions();
 		options.Invoke(optionsValue);
-		services.AddMediatR(GetApplicationAssembly())
-				.RegisterPreCommandProcessorBehaviors(GetApplicationAssembly())
+		services.AddPolicies<Policies.Policies>()
+				.AddMediatR(GetApplicationAssembly())
+				.RegisterCommandConcurrencyExceptionBehaviors(GetApplicationAssembly())
+				.RegisterCommandValidationBehaviors(GetApplicationAssembly())
 				.AddValidatorsFromAssembly(GetApplicationAssembly(), filter: filter => !filter.ValidatorType
 																							  .GetInterfaces()
 																							  .Contains(typeof(INonInjectable)) &&
@@ -45,8 +49,9 @@ public static class ServiceCollectionExtensions
 																		  sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(3), null);
 																	  })
 														.UseLazyLoadingProxies()
-														.EnableSensitiveDataLogging(optionsValue.EntityFramework.EnableEfSensitiveLogging));
-#if includeFilesSupport
+														.EnableSensitiveDataLogging(optionsValue.EntityFramework.EnableEfSensitiveLogging))
+				.AddScoped<BaseDbContext, AppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
+#if filesSupport
 		services.RegisterBlobStorageService(opts =>
 											{
 												opts.ConnectionString = optionsValue.BlobStorage.ConnectionString;
@@ -55,7 +60,7 @@ public static class ServiceCollectionExtensions
 				.AddScoped<IFileService, FileService>();
 #endif
 
-		return services;
+        return services;
 	}
 
 	private static Assembly GetApplicationAssembly() => Assembly.GetAssembly(typeof(ServiceCollectionExtensions))!;

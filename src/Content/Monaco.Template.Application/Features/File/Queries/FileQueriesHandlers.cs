@@ -1,4 +1,4 @@
-﻿#if includeFilesSupport
+﻿#if filesSupport
 using Monaco.Template.Application.DTOs;
 using Monaco.Template.Application.DTOs.Extensions;
 using Monaco.Template.Application.Infrastructure.Context;

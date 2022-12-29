@@ -3,28 +3,28 @@
   "icon": "icon.png",
 	"symbolInfo": [
 		{
-			"id": "excludecommon",
+			"id": "excludeCommon",
 			"name": {
 				"text": "Exclude Common projects"
 			},
 			"isVisible": true
 		},
 		{
-			"id": "includeFilesSupport",
+			"id": "filesSupport",
 			"name": {
 				"text": "Include files support and structure"
 			},
 			"isVisible": true
 		},
 		{
-			"id": "includeMassTransitSupport",
+			"id": "massTransitIntegration",
 			"name": {
 				"text": "Include MassTransit support"
 			},
 			"isVisible": true
 		},
 		{
-			"id": "includeApiGateway",
+			"id": "apiGateway",
 			"name": {
 				"text": "Include API Gateway"
 			},
@@ -38,7 +38,7 @@
 			"isVisible": true
 		},
 		{
-			"id": "includeKeycloakConfig",
+			"id": "keycloakConfig",
 			"name": {
 				"text": "Include Keycloak realm configuration"
 			},
