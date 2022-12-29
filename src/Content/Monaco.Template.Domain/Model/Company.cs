@@ -26,6 +26,7 @@ public class Company : Entity
     public string Name { get; private set; }
     public string Email { get; private set; }
     public string WebSiteUrl { get; private set; }
+	public byte[] Version { get; }
 
 	public Address? Address { get; private set; }
 

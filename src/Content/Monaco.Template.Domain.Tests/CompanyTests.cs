@@ -26,6 +26,7 @@ public class CompanyTests
 		sut.Email.Should().Be(email);
 		sut.WebSiteUrl.Should().Be(webSiteUrl);
 		sut.Address.Should().Be(address);
+		sut.Version.Should().BeNull();
 	}
 
 	[Trait("Core Domain Entities", "Company Entity")]
@@ -46,5 +47,6 @@ public class CompanyTests
 		sut.Email.Should().Be(email);
 		sut.WebSiteUrl.Should().Be(webSiteUrl);
 		sut.Address.Should().Be(address);
+		sut.Version.Should().BeNull();
 	}
 }
