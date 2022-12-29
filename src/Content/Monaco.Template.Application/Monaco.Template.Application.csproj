@@ -12,11 +12,17 @@
   </ItemGroup>
 
   <ItemGroup>
+	<!--#if (filesSupport)-->
+    <PackageReference Include="ExifLibNet" Version="2.1.4" />
+	<!--#endif-->
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.2.2" />
     <!--#if (massTransitIntegration)-->
     <PackageReference Include="MassTransit" Version="8.0.8" />
     <!--#endif-->
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+	<!--#if (filesSupport)-->
+    <PackageReference Include="SkiaSharp" Version="2.88.3" />
+	<!--#endif-->
   </ItemGroup>
 
 </Project>

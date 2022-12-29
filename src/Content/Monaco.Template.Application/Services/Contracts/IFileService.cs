@@ -1,4 +1,6 @@
-﻿using Monaco.Template.Domain.Model;
+﻿using ExifLibrary;
+using Monaco.Template.Domain.Model;
+using SkiaSharp;
 using File = Monaco.Template.Domain.Model.File;
 
 namespace Monaco.Template.Application.Services.Contracts;
@@ -13,6 +15,6 @@ public interface IFileService
 	Task MakePermanentDocument(Document file, CancellationToken cancellationToken);
 	Task Delete(Guid id, CancellationToken cancellationToken);
 	Task<File> CopyFile(Guid id, CancellationToken cancellationToken);
-	DateTime? GetDateTaken(System.Drawing.Image image);
-	System.Drawing.Image GetThumbnail(System.Drawing.Image image, int thumbnailWidth, int thumbnailHeight);
+	ExifPropertyCollection<ExifProperty> GetMetadata(Stream stream);
+	SKImage GetThumbnail(SKImage image, int thumbnailWidth, int thumbnailHeight);
 }
