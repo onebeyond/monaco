@@ -2,12 +2,4 @@
 
 namespace Monaco.Template.Common.Application.Queries;
 
-public abstract record QueryByKeyBase<T, TKey> : IRequest<T>
-{
-	protected QueryByKeyBase(TKey key)
-    {
-        Key = key;
-    }
-
-    public TKey Key { get; }
-}
+public abstract record QueryByKeyBase<T, TKey>(TKey Key) : IRequest<T>;

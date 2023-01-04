@@ -29,7 +29,14 @@ public class CompanyCommandsHandlersTests
         var countryDbSetMock = new[] { country }.AsQueryable().BuildMockDbSet();
         dbContextMock.Setup(x => x.Set<Domain.Model.Country>())
                      .Returns(countryDbSetMock.Object);
-        var commandMock = new Mock<CompanyCreateCommand>();
+        var commandMock = new Mock<CompanyCreateCommand>(It.IsAny<string>(),
+														 It.IsAny<string>(),
+														 It.IsAny<string>(),
+														 It.IsAny<string>(),
+														 It.IsAny<string>(),
+														 It.IsAny<string>(),
+														 It.IsAny<string>(),
+														 It.IsAny<Guid>());
 			
         var sut = new CompanyCommandsHandlers(dbContextMock.Object);
         var result = await sut.Handle(commandMock.Object, new CancellationToken());
@@ -55,7 +62,15 @@ public class CompanyCommandsHandlersTests
         var countryDbSetMock = new[] { country }.AsQueryable().BuildMockDbSet();
         dbContextMock.Setup(x => x.Set<Domain.Model.Country>())
                      .Returns(countryDbSetMock.Object);
-        var commandMock = new Mock<CompanyEditCommand>();
+        var commandMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
+													   It.IsAny<string>(),
+													   It.IsAny<string>(),
+													   It.IsAny<string>(),
+													   It.IsAny<string>(),
+													   It.IsAny<string>(),
+													   It.IsAny<string>(),
+													   It.IsAny<string>(),
+													   It.IsAny<Guid>());
 
         var sut = new CompanyCommandsHandlers(dbContextMock.Object);
         var result = await sut.Handle(commandMock.Object, new CancellationToken());

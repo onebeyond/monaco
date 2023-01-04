@@ -3,14 +3,9 @@ using Microsoft.Extensions.Primitives;
 
 namespace Monaco.Template.Common.Application.Queries;
 
-public abstract record QueryBase<T> : IRequest<T>
+public abstract record QueryBase<T>(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : IRequest<T>
 {
-	protected QueryBase(IEnumerable<KeyValuePair<string, StringValues>> queryString)
-	{
-		QueryString = queryString;
-	}
-
-	public virtual IEnumerable<KeyValuePair<string, StringValues>> QueryString { get; }
+	public virtual IEnumerable<KeyValuePair<string, StringValues>> QueryString { get; } = QueryString;
 	public virtual string?[] Sort => QueryString.FirstOrDefault(x => x.Key == "sort").Value.ToArray();
 
 	protected bool Expand(string value) => QueryString.Any(x => x.Key.Equals("expand", StringComparison.InvariantCultureIgnoreCase) &&

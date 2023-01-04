@@ -4,17 +4,15 @@ namespace Monaco.Template.Application.Features.Company.Commands;
 
 public record CompanyEditCommand : CommandBase
 {
-    protected CompanyEditCommand() {}
-
-    public CompanyEditCommand(Guid id,
-                              string name,
-                              string email,
-                              string webSiteUrl,
-                              string address,
-                              string city,
-                              string county,
-                              string postCode,
-                              Guid countryId) : base(id)
+	public CompanyEditCommand(Guid id,
+							  string name,
+							  string email,
+							  string webSiteUrl,
+							  string address,
+							  string city,
+							  string county,
+							  string postCode,
+							  Guid countryId) : base(id)
     {
         Name = name;
         Email = email;
