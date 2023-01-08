@@ -1,18 +1,18 @@
 ﻿namespace Monaco.Template.Common.Domain.Model;
 
-public class Page<T>
+public record Page<T>
 {
-    /// <summary>
-    /// </summary>
-    /// <param name="results"></param>
-    /// <param name="offset"></param>
-    /// <param name="limit"></param>
-    /// <param name="count"></param>
-    public Page(IEnumerable<T> results, int offset, int limit, long count)
+	/// <summary>
+	/// </summary>
+	/// <param name="results">Results subset</param>
+	/// <param name="offset">Record from where to start paging</param>
+	/// <param name="limit">Amount of items to page</param>
+	/// <param name="count">Total amount of items</param>
+	public Page(IEnumerable<T> results, int offset, int limit, long count)
     {
         Results = results.ToList();
         Pager = new Pager(offset, limit, count);
-    }
+	}
 
     /// <summary>
     /// Page metadata
@@ -27,27 +27,4 @@ public class Page<T>
 /// <summary>
 /// Pagination metadata
 /// </summary>
-public class Pager
-{
-    public Pager(int offset, int limit, long count)
-    {
-        Offset = offset;
-        Limit = limit;
-        Count = count;
-    }
-
-    /// <summary>
-    /// Record from where to start paging
-    /// </summary>
-    public int Offset { get; }
-
-    /// <summary>
-    /// Amount of items to page
-    /// </summary>
-    public int Limit { get; }
-
-    /// <summary>
-    /// Total amount of items
-    /// </summary>
-    public long Count { get; }
-}
+public record Pager(int Offset, int Limit, long Count);
