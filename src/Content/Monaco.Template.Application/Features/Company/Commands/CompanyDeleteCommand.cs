@@ -2,9 +2,4 @@
 
 namespace Monaco.Template.Application.Features.Company.Commands;
 
-public class CompanyDeleteCommand : CommandBase
-{
-    public CompanyDeleteCommand(Guid id) : base(id)
-    {
-    }
-}
+public record CompanyDeleteCommand(Guid Id) : CommandBase(Id);
