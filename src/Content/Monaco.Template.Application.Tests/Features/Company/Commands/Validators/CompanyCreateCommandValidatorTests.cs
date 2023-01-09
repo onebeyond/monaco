@@ -414,7 +414,7 @@ public class CompanyCreateCommandValidatorTests
 		var companyDbSetMock = new List<Domain.Model.Company>().AsQueryable().BuildMockDbSet();
 		dbContextMock.Setup(x => x.Set<Domain.Model.Company>()).Returns(companyDbSetMock.Object);
 
-		var countryDbSetMock = new List<Domain.Model.Country>() { country }.AsQueryable().BuildMockDbSet();
+		var countryDbSetMock = new List<Domain.Model.Country> { country }.AsQueryable().BuildMockDbSet();
 		dbContextMock.Setup(x => x.Set<Domain.Model.Country>()).Returns(countryDbSetMock.Object);
 
 		var cmdMock = new Mock<CompanyCreateCommand>(It.IsAny<string>(),	// Name
@@ -427,28 +427,59 @@ public class CompanyCreateCommandValidatorTests
 													 country.Id);			// country.Id
 
 		var sut = new CompanyCreateCommandValidator(dbContextMock.Object);
-		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.CountryId));
+		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Street,
+																												  cmd => cmd.City,
+																												  cmd => cmd.County,
+																												  cmd => cmd.PostCode,
+																												  cmd => cmd.CountryId));
 
 		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.CountryId);
 	}
 
 	[Trait("Application Validators", "Company Validators")]
-	[Fact(DisplayName = "Country with null value does not generate validation error")]
-	public async Task CountryWithNullValueDoesNotGenerateError()
+	[Fact(DisplayName = "Country with null value does not generate validation error when Address fields null")]
+	public async Task CountryWithNullValueDoesNotGenerateErrorWhenAddressFieldsNull()
 	{
-		var cmdMock = new Mock<CompanyCreateCommand>(It.IsAny<string>(),    // Name
+		var cmdMock = new Mock<CompanyCreateCommand>(It.IsAny<string>(),	// Name
 													 It.IsAny<string>(),	// Email
 													 It.IsAny<string>(),	// WebSiteUrl
-													 It.IsAny<string>(),	// Street
-													 It.IsAny<string>(),	// City
-													 It.IsAny<string>(),    // County
-													 It.IsAny<string>(),	// PostCode
+													 null,					// Street
+													 null,					// City
+													 null,					// County
+													 null,					// PostCode
 													 null);					// country.Id
 
 		var sut = new CompanyCreateCommandValidator(new Mock<AppDbContext>().Object);
-		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.CountryId));
+		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Street,
+																												  cmd => cmd.City,
+																												  cmd => cmd.County,
+																												  cmd => cmd.PostCode,
+																												  cmd => cmd.CountryId));
 
 		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.CountryId);
+	}
+
+	[Trait("Application Validators", "Company Validators")]
+	[Fact(DisplayName = "Country with null value generates validation error when Address fields present")]
+	public async Task CountryWithNullValueGeneratesErrorWhenAddressFieldsPresent()
+	{
+		var cmdMock = new Mock<CompanyCreateCommand>(It.IsAny<string>(), // Name
+													 It.IsAny<string>(), // Email
+													 It.IsAny<string>(), // WebSiteUrl
+													 string.Empty,       // Street
+													 string.Empty,       // City
+													 string.Empty,       // County
+													 string.Empty,       // PostCode
+													 null);              // country.Id
+
+		var sut = new CompanyCreateCommandValidator(new Mock<AppDbContext>().Object);
+		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Street,
+																												  cmd => cmd.City,
+																												  cmd => cmd.County,
+																												  cmd => cmd.PostCode,
+																												  cmd => cmd.CountryId));
+
+		validationResult.ShouldHaveValidationErrorFor(cmd => cmd.CountryId);
 	}
 
 	[Trait("Application Validators", "Company Validators")]
@@ -461,7 +492,7 @@ public class CompanyCreateCommandValidatorTests
 		var companyDbSetMock = new List<Domain.Model.Company>().AsQueryable().BuildMockDbSet();
 		dbContextMock.Setup(x => x.Set<Domain.Model.Company>()).Returns(companyDbSetMock.Object);
 
-		var countryDbSetMock = new List<Domain.Model.Country>() { country }.AsQueryable().BuildMockDbSet();
+		var countryDbSetMock = new List<Domain.Model.Country> { country }.AsQueryable().BuildMockDbSet();
 		dbContextMock.Setup(x => x.Set<Domain.Model.Country>()).Returns(countryDbSetMock.Object);
 
 		var cmdMock = new Mock<CompanyCreateCommand>(It.IsAny<string>(),    // Name

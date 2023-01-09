@@ -1,10 +1,10 @@
 ﻿#if filesSupport
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Monaco.Template.Application.DTOs;
 using Monaco.Template.Application.DTOs.Extensions;
 using Monaco.Template.Application.Infrastructure.Context;
 using Monaco.Template.Common.BlobStorage.Contracts;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Monaco.Template.Application.Features.File.Queries;
 

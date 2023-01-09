@@ -1,6 +1,6 @@
-﻿using System.Linq.Expressions;
+﻿using Monaco.Template.Application.Features.Company.Commands;
 using Monaco.Template.Domain.Model;
-using Monaco.Template.Application.Features.Company.Commands;
+using System.Linq.Expressions;
 
 namespace Monaco.Template.Application.DTOs.Extensions;
 

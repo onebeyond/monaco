@@ -1,6 +1,6 @@
-﻿using Monaco.Template.Common.Application.Validators.Extensions;
+﻿using FluentValidation;
 using Monaco.Template.Application.Infrastructure.Context;
-using FluentValidation;
+using Monaco.Template.Common.Application.Validators.Extensions;
 
 namespace Monaco.Template.Application.Features.Company.Commands.Validators;
 
