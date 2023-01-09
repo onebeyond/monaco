@@ -1,40 +1,51 @@
-﻿using System.Linq.Expressions;
+﻿using Monaco.Template.Application.Features.Company.Commands;
 using Monaco.Template.Domain.Model;
-using Monaco.Template.Application.Features.Company.Commands;
+using System.Linq.Expressions;
 
 namespace Monaco.Template.Application.DTOs.Extensions;
 
 public static class CompanyExtensions
 {
-	public static CompanyDto? Map(this Company? value, bool expandCountry = false)
-	{
-		if (value == null)
-			return null;
+	public static CompanyDto? Map(this Company? value, bool expandCountry = false) =>
+		value is null
+			? null
+			: new()
+			  {
+				  Id = value.Id,
+				  Name = value.Name,
+				  Email = value.Email,
+				  WebSiteUrl = value.WebSiteUrl,
+				  Street = value.Address?.Street,
+				  City = value.Address?.City,
+				  County = value.Address?.County,
+				  PostCode = value.Address?.PostCode,
+				  CountryId = value.Address?.CountryId,
+				  Country = expandCountry ? value.Address?.Country.Map() : null
+			  };
 
-		return new()
-			   {
-				   Id = value.Id,
-				   Name = value.Name,
-				   Email = value.Email,
-				   WebSiteUrl = value.WebSiteUrl,
-				   Address = value.Address,
-				   City = value.City,
-				   County = value.County,
-				   PostCode = value.PostCode,
-				   CountryId = value.CountryId,
-				   Country = expandCountry ? value.Country.Map() : null
-			   };
-	}
-
-	public static Company Map(this CompanyCreateCommand value, Country country) =>
+	public static Company Map(this CompanyCreateCommand value, Country? country) =>
 		new(value.Name,
 			value.Email,
 			value.WebSiteUrl,
-			value.Address,
-			value.City,
-			value.County,
-			value.PostCode,
-			country);
+			country is not null
+				? new(value.Street,
+					  value.City,
+					  value.County,
+					  value.PostCode,
+					  country)
+				: null);
+
+	public static void Map(this CompanyEditCommand value, Company item, Country? country) =>
+		item.Update(value.Name,
+					value.Email,
+					value.WebSiteUrl,
+					country is not null
+						? new(value.Street,
+							  value.City,
+							  value.County,
+							  value.PostCode,
+							  country)
+						: null);
 
 	public static Dictionary<string, Expression<Func<Company, object>>> GetMappedFields() =>
 		new()
@@ -43,11 +54,11 @@ public static class CompanyExtensions
 			[nameof(CompanyDto.Name)] = x => x.Name,
 			[nameof(CompanyDto.Email)] = x => x.Email,
 			[nameof(CompanyDto.WebSiteUrl)] = x => x.WebSiteUrl,
-			[nameof(CompanyDto.Address)] = x => x.Address,
-			[nameof(CompanyDto.City)] = x => x.City,
-			[nameof(CompanyDto.County)] = x => x.County,
-			[nameof(CompanyDto.PostCode)] = x => x.PostCode,
-			[nameof(CompanyDto.CountryId)] = x => x.CountryId,
-			[$"{nameof(CompanyDto.Country)}.{nameof(CountryDto.Name)}"] = x => x.Country.Name
+			[nameof(CompanyDto.Street)] = x => x.Address!.Street!,
+			[nameof(CompanyDto.City)] = x => x.Address!.City!,
+			[nameof(CompanyDto.County)] = x => x.Address!.County!,
+			[nameof(CompanyDto.PostCode)] = x => x.Address!.PostCode!,
+			[nameof(CompanyDto.CountryId)] = x => x.Address!.CountryId,
+			[$"{nameof(CompanyDto.Country)}.{nameof(CountryDto.Name)}"] = x => x.Address!.Country.Name
 		};
 }

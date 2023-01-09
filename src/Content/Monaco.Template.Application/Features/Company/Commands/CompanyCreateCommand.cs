@@ -5,8 +5,8 @@ namespace Monaco.Template.Application.Features.Company.Commands;
 public record CompanyCreateCommand(string Name,
 								   string Email,
 								   string WebSiteUrl,
-								   string Address,
-								   string City,
-								   string County,
-								   string PostCode,
-								   Guid CountryId) : CommandBase<Guid>;
+								   string? Street,
+								   string? City,
+								   string? County,
+								   string? PostCode,
+                                   Guid? CountryId) : CommandBase<Guid>;

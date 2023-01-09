@@ -1,5 +1,5 @@
-﻿using Monaco.Template.Common.Application.Queries;
-using Monaco.Template.Application.DTOs;
+﻿using Monaco.Template.Application.DTOs;
+using Monaco.Template.Common.Application.Queries;
 
 namespace Monaco.Template.Application.Features.Country.Queries;
 

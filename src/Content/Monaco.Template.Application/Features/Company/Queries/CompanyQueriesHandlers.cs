@@ -24,7 +24,7 @@ public sealed class CompanyQueriesHandlers : IRequestHandler<GetCompanyPageQuery
 							  .AsNoTracking();
 
 		if (request.ExpandCountry)
-			query = query.Include(x => x.Country);
+			query = query.Include(x => x.Address!.Country);
 
 		var page = await query.ApplyFilter(request.QueryString, CompanyExtensions.GetMappedFields())
 							  .ApplySort(request.Sort, nameof(CompanyDto.Name), CompanyExtensions.GetMappedFields())
@@ -39,7 +39,7 @@ public sealed class CompanyQueriesHandlers : IRequestHandler<GetCompanyPageQuery
 	{
 		var item = await _dbContext.Set<Domain.Model.Company>()
 								   .AsNoTracking()
-								   .Include(x => x.Country)
+								   .Include(x => x.Address!.Country)
 								   .SingleOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 		return item.Map(true);
 	}

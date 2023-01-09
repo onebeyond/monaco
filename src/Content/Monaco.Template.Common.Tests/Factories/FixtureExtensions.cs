@@ -19,6 +19,7 @@ public static class FixtureExtensions
         fixture.Customize(new AutoMoqCustomization());
 
         fixture.RegisterCompany()
+			   .RegisterAddress()
                .RegisterCountry();
 
         return fixture;
@@ -37,6 +38,7 @@ public static class FixtureExtensions
 		fixture.Customize(new AutoMoqCustomization());
 
 		fixture.RegisterCompanyMock()
+			   .RegisterAddressMock()
 			   .RegisterCountryMock();
 
 		return fixture;

@@ -10,7 +10,7 @@ namespace Monaco.Template.Common.Domain.Tests;
 [ExcludeFromCodeCoverage]
 public class DomainEventTests
 {
-    [Trait("Common domain Entities", "Domain Event Entity")]
+    [Trait("Common Domain Entities", "Domain Event Entity")]
     [Theory(DisplayName = "New domain event succeeds")]
     [AnonymousData]
     public void NewEntityWithoutParametersSucceeds(DomainEvent sut)

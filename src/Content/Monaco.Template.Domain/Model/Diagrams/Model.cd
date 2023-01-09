@@ -6,15 +6,15 @@
       <Compartment Name="Methods" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AgQAAAAAACAAAAAIABAhQAQAAAIQAABCAAAAgEAAAAA=</HashCode>
+      <HashCode>AAQAAAAAACAAAAAAABAAAAQAAAAAAAACAAAAAAAAAAA=</HashCode>
       <FileName>Model\Company.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Property Name="Country" />
+      <Property Name="Address" />
     </ShowAsAssociation>
   </Class>
   <Class Name="Monaco.Template.Domain.Model.Country">
-    <Position X="6.75" Y="1" Width="2" />
+    <Position X="9.5" Y="1" Width="2" />
     <Compartments>
       <Compartment Name="Methods" Collapsed="true" />
     </Compartments>
@@ -23,6 +23,19 @@
       <FileName>Model\Country.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Monaco.Template.Domain.Model.Address">
+    <Position X="6.5" Y="1" Width="1.75" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIIAAAAAQAAAIQAAAAAAIAgAAAAAA=</HashCode>
+      <FileName>Model\Address.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Country" />
+    </ShowAsAssociation>
   </Class>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>

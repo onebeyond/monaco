@@ -6,17 +6,13 @@ namespace Monaco.Template.Common.Tests.Factories.Entities;
 
 public class CountryFactory
 {
-    public static Country Create()
-    {
-        return new Fixture().RegisterCountry()
-                            .Create<Country>();
-    }
+	public static Country Create() =>
+		new Fixture().RegisterCountry()
+					 .Create<Country>();
 
-    public static IEnumerable<Country> CreateMany()
-    {
-        return new Fixture().RegisterCountryMock()
-                            .CreateMany<Country>();
-    }
+	public static IEnumerable<Country> CreateMany() =>
+		new Fixture().RegisterCountryMock()
+					 .CreateMany<Country>();
 }
 
 public static class CountryFactoryExtensions

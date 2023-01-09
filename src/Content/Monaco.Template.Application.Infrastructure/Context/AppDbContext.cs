@@ -1,8 +1,8 @@
-﻿using System.Reflection;
-using Monaco.Template.Common.Infrastructure.Context;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using Monaco.Template.Common.Infrastructure.Context;
+using System.Reflection;
 
 namespace Monaco.Template.Application.Infrastructure.Context;
 
