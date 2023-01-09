@@ -4,11 +4,7 @@ using Monaco.Template.Application.DTOs;
 
 namespace Monaco.Template.Application.Features.Company.Queries;
 
-public class GetCompanyPageQuery : QueryPagedBase<CompanyDto>
+public record GetCompanyPageQuery(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryPagedBase<CompanyDto>(QueryString)
 {
-    public GetCompanyPageQuery(IEnumerable<KeyValuePair<string, StringValues>> queryString) : base(queryString)
-    {
-    }
-
-    public bool ExpandCountry => Expand(nameof(CompanyDto.Country));
+	public bool ExpandCountry => Expand(nameof(CompanyDto.Country));
 }

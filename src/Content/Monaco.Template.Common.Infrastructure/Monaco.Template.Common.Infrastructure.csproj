@@ -11,8 +11,8 @@
     <Authors>One Beyond</Authors>
     <Company>One Beyond</Company>
     <Copyright>One Beyond</Copyright>
-    <PackageProjectUrl>https://github.com/guidesmiths/monaco</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/guidesmiths/monaco.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/onebeyond/monaco</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/onebeyond/monaco.git</RepositoryUrl>
     <Description>Library with base classes and helpers for the Application's Infrastructure library.</Description>
     <RepositoryType>Git</RepositoryType>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
@@ -26,14 +26,14 @@
 
   <ItemGroup>
     <PackageReference Include="DelegateDecompiler.EntityFrameworkCore5" Version="0.32.0" />
-    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="6.1.2" />
-    <PackageReference Include="MediatR" Version="11.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.0">
+    <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="7.1.3" />
+    <PackageReference Include="MediatR" Version="11.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="7.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="7.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
     <PackageReference Include="Serilog" Version="2.12.0" />
   </ItemGroup>

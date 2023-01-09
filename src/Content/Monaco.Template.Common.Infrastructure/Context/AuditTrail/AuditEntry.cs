@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Monaco.Template.Common.Infrastructure.Context.AuditTrail;
 
-public class AuditEntry
+public record AuditEntry
 {
     private readonly EntityEntry _entityEntry;
 

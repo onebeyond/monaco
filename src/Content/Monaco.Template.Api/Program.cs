@@ -25,7 +25,6 @@ builder.Logging.ClearProviders();
 builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration)
 												   .WriteTo.Logger(l => l.WriteTo.Conditional(_ => context.HostingEnvironment.IsDevelopment(),	//Only for dev
 																							  cfg => cfg.Debug()
-																										.WriteTo.Console()
 																										.WriteTo.File("logs/log.txt",
 																													  rollingInterval: RollingInterval.Day,
 																													  outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"))
@@ -97,7 +96,7 @@ builder.Services
 					   })
 #endif
 	   .AddHealthChecks()
-#if disableAuth
+#if !disableAuth
 	   .AddUrlGroup(new Uri($"{configuration["SSO:Authority"]}/.well-known/openid-configuration"), "SSO")
 #endif
 	   .AddDbContextCheck<AppDbContext>(nameof(AppDbContext));
@@ -112,11 +111,13 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 	app.UseDeveloperExceptionPage();
 
-#if (!disableAuth)
+#if (disableAuth)
+app.UseSwaggerConfiguration();
+#else
 app.UseSwaggerConfiguration(configuration["SSO:SwaggerUIClientId"]!,
 							configuration["Swagger:SwaggerUIAppName"]!);
-
 #endif
+
 app.UseCors()
 #if (!disableAuth)
    .UseHttpsRedirection()

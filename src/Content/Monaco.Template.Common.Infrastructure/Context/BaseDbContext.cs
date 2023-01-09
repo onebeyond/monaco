@@ -13,8 +13,8 @@ namespace Monaco.Template.Common.Infrastructure.Context;
 
 public abstract class BaseDbContext : DbContext, IUnitOfWork
 {
-    protected readonly IMediator _mediator;
-    protected readonly IHostEnvironment _env;
+    protected readonly IMediator Mediator;
+    protected readonly IHostEnvironment Env;
 
     protected BaseDbContext()
     {
@@ -22,8 +22,8 @@ public abstract class BaseDbContext : DbContext, IUnitOfWork
 
     protected BaseDbContext(DbContextOptions options, IMediator mediator, IHostEnvironment env) : base(options)
     {
-        _mediator = mediator;
-        _env = env;
+        Mediator = mediator;
+        Env = env;
     }
 
     protected abstract Assembly GetConfigurationsAssembly();
@@ -42,10 +42,10 @@ public abstract class BaseDbContext : DbContext, IUnitOfWork
 																  .Where(t => (t.BaseType?.IsGenericType ?? false) &&
 																			  t.BaseType?.GetGenericTypeDefinition() == typeof(EntityTypeConfigurationBase<>))
 																  .ToList();
-        derivedConfigsToRegister.ForEach(t => modelBuilder.ApplyConfiguration((dynamic)Activator.CreateInstance(t, _env)!));
+        derivedConfigsToRegister.ForEach(t => modelBuilder.ApplyConfiguration((dynamic)Activator.CreateInstance(t, Env)!));
     }
 
-    public virtual async Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken)
     {
         // Dispatch Domain Events collection. 
         // Choices:
@@ -53,7 +53,7 @@ public abstract class BaseDbContext : DbContext, IUnitOfWork
         // side effects from the domain event handlers which are using the same DbContext with "InstancePerLifetimeScope" or "scoped" lifetime
         // B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
         // You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
-        await _mediator.DispatchDomainEventsAsync(this);
+        await Mediator.DispatchDomainEventsAsync(this);
 
         ResetReferentialEntitiesState();
 			
@@ -74,17 +74,15 @@ public abstract class BaseDbContext : DbContext, IUnitOfWork
             entry.State = EntityState.Unchanged;
     }
 
-    protected virtual List<AuditEntry> GetEntriesForAudit()
-    {
-        return ChangeTracker.Entries()
-                            .Where(x => new[]
-                                        {
-                                            EntityState.Added,
-                                            EntityState.Modified,
-                                            EntityState.Deleted
-                                        }.Contains(x.State) &&
-                                        x.Entity is not INonAuditable)
-                            .Select(x => new AuditEntry(x))
-                            .ToList();
-    }
+	protected virtual List<AuditEntry> GetEntriesForAudit() =>
+		ChangeTracker.Entries()
+					 .Where(x => new[]
+								 {
+									 EntityState.Added,
+									 EntityState.Modified,
+									 EntityState.Deleted
+								 }.Contains(x.State) &&
+								 x.Entity is not INonAuditable)
+					 .Select(x => new AuditEntry(x))
+					 .ToList();
 }

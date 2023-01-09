@@ -3,30 +3,16 @@ using Monaco.Template.Common.Application.Commands.Contracts;
 
 namespace Monaco.Template.Common.Application.Commands;
 
-public abstract class CommandBase : IRequest<ICommandResult>
+public abstract record CommandBase(Guid Id) : IRequest<ICommandResult>
 {
-    protected CommandBase()
+    protected CommandBase() : this(Guid.Empty)
     {
     }
-
-    protected CommandBase(Guid id)
-    {
-        Id = id;
-    }
-
-    public Guid Id { get; init; }
 }
 
-public abstract class CommandBase<TResult> : IRequest<ICommandResult<TResult>>
+public abstract record CommandBase<TResult>(Guid Id) : IRequest<ICommandResult<TResult>>
 {
-    protected CommandBase()
-    {
-    }
-
-    protected CommandBase(Guid id)
-    {
-        Id = id;
-    }
-
-    public Guid Id { get; init; }
+	protected CommandBase() : this(Guid.Empty)
+	{
+	}
 }

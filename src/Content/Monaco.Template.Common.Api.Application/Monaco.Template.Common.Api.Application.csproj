@@ -11,8 +11,8 @@
     <Authors>One Beyond</Authors>
     <Company>One Beyond</Company>
     <Copyright>One Beyond</Copyright>
-    <PackageProjectUrl>https://github.com/guidesmiths/monaco</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/guidesmiths/monaco.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/onebeyond/monaco</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/onebeyond/monaco.git</RepositoryUrl>
     <Description>Library with extensions for adapting MediatR responses for a REST API.</Description>
     <RepositoryType>Git</RepositoryType>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.2.2" />
-    <PackageReference Include="MediatR" Version="11.0.0" />
+    <PackageReference Include="MediatR" Version="11.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
     <PackageReference Include="System.Text.Encodings.Web" Version="7.0.0" />
   </ItemGroup>
