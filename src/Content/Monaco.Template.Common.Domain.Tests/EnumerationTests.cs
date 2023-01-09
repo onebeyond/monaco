@@ -91,7 +91,7 @@ public class EnumerationTests
 
     [Trait("Common domain Entities", "Enumeration Entity")]
     [Fact(DisplayName = "Enumeration compare succeeds")]
-    public void EnumerationCompareSucceds()
+    public void EnumerationCompareSucceeds()
     {
         DummyEnumeration.Item1.CompareTo(DummyEnumeration.Item1).Should().Be(0);
     }

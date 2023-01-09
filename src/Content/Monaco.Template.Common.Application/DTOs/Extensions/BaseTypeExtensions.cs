@@ -7,7 +7,7 @@ namespace Monaco.Template.Common.Application.DTOs.Extensions;
 public static class BaseTypeExtensions
 {
 	public static TResult? Map<TEntity, TResult>(this TEntity? value) 
-		where TEntity : Enumeration, IReferential
+		where TEntity : Enumeration
 		where TResult : BaseTypeDto, new()
 	{
 		if (value == null)
@@ -21,7 +21,7 @@ public static class BaseTypeExtensions
 	}
 
 
-	public static Dictionary<string, Expression<Func<TEntity, object>>> GetMappedFields<TEntity>() where TEntity : Enumeration, IReferential
+	public static Dictionary<string, Expression<Func<TEntity, object>>> GetMappedFields<TEntity>() where TEntity : Enumeration
 	{
 		return new()
 			   {

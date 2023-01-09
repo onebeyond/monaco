@@ -64,6 +64,8 @@ EndProject
 #if (filesSupport)
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.BlobStorage", "Monaco.Template.Common.BlobStorage\Monaco.Template.Common.BlobStorage.csproj", "{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monaco.Template.Common. Application.Tests", "Monaco.Template.Common. Application.Tests\Monaco.Template.Common. Application.Tests.csproj", "{93ECBA58-111C-401F-AA51-45626772E14A}"
+EndProject
 #endif
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -151,6 +153,10 @@ Global
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}.Release|Any CPU.Build.0 = Release|Any CPU
 		#endif
+		{93ECBA58-111C-401F-AA51-45626772E14A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93ECBA58-111C-401F-AA51-45626772E14A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93ECBA58-111C-401F-AA51-45626772E14A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93ECBA58-111C-401F-AA51-45626772E14A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -179,6 +185,7 @@ Global
 		#if (filesSupport)
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		#endif
+		{93ECBA58-111C-401F-AA51-45626772E14A} = {35484293-234F-40DA-B430-A95170EDE449}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {42C5F44E-1221-43DF-A6F5-4CB2CBEF8D72}
