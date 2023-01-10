@@ -2,10 +2,10 @@
 	"$schema": "http://json.schemastore.org/template",
 	"author": "One Beyond",
 	"classifications": [ "Web", "Solution" ],
-	"name": "Monaco Solution Template",
-	"description": "Solution template for .NET projects",
+	"name": "Monaco Backend Solution Template",
+	"description": "Solution template for backend .NET projects",
 	"groupIdentity": "Monaco.Template",
-	"identity": "Monaco.Template.Solution",
+	"identity": "Monaco.Template.Backend.Solution",
 	"shortName": "monaco-solution",
 	"preferNameDirectory": true,
 	"sourceName": "Monaco.Template",
@@ -15,7 +15,7 @@
 	},
 	"primaryOutputs": [
 		{
-			"path": "Monaco.Template.sln"
+			"path": "Monaco.Template.Backend.sln"
 		}
 	],
 	"symbols": {

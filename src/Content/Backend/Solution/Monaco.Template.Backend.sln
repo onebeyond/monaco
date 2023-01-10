@@ -20,49 +20,49 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KeyCloak", "KeyCloak", "{29
 	EndProjectSection
 EndProject
 #endif
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.Domain.Tests", "Monaco.Template.Common.Domain.Tests\Monaco.Template.Common.Domain.Tests.csproj", "{426A6AB4-95F6-46AC-AB6D-98C4612F74E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.Domain.Tests", "Monaco.Template.Backend.Common.Domain.Tests\Monaco.Template.Backend.Common.Domain.Tests.csproj", "{426A6AB4-95F6-46AC-AB6D-98C4612F74E5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.Api", "Monaco.Template.Common.Api\Monaco.Template.Common.Api.csproj", "{78120DEF-B581-4D6B-92D7-1735070ACB7F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.Api", "Monaco.Template.Backend.Common.Api\Monaco.Template.Backend.Common.Api.csproj", "{78120DEF-B581-4D6B-92D7-1735070ACB7F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.Application", "Monaco.Template.Common.Application\Monaco.Template.Common.Application.csproj", "{BFD5F082-8402-45DE-8ABA-EBB354BD2858}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.Application", "Monaco.Template.Backend.Common.Application\Monaco.Template.Backend.Common.Application.csproj", "{BFD5F082-8402-45DE-8ABA-EBB354BD2858}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.Infrastructure", "Monaco.Template.Common.Infrastructure\Monaco.Template.Common.Infrastructure.csproj", "{23E5BE73-89F8-4EFE-8F28-27987C4E2DCD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.Infrastructure", "Monaco.Template.Backend.Common.Infrastructure\Monaco.Template.Backend.Common.Infrastructure.csproj", "{23E5BE73-89F8-4EFE-8F28-27987C4E2DCD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.Serilog", "Monaco.Template.Common.Serilog\Monaco.Template.Common.Serilog.csproj", "{605588FC-AC96-43A2-BFD9-2A6F27790202}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.Serilog", "Monaco.Template.Backend.Common.Serilog\Monaco.Template.Backend.Common.Serilog.csproj", "{605588FC-AC96-43A2-BFD9-2A6F27790202}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.Tests", "Monaco.Template.Common.Tests\Monaco.Template.Common.Tests.csproj", "{B82D784A-81A2-46C5-A966-B472B8FCAD46}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.Tests", "Monaco.Template.Backend.Common.Tests\Monaco.Template.Backend.Common.Tests.csproj", "{B82D784A-81A2-46C5-A966-B472B8FCAD46}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.Domain", "Monaco.Template.Common.Domain\Monaco.Template.Common.Domain.csproj", "{0FB378C2-9DE1-437F-8A62-774747105CE5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.Domain", "Monaco.Template.Backend.Common.Domain\Monaco.Template.Backend.Common.Domain.csproj", "{0FB378C2-9DE1-437F-8A62-774747105CE5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.Api.Application", "Monaco.Template.Common.Api.Application\Monaco.Template.Common.Api.Application.csproj", "{F733BD0F-4C55-4E65-92E8-837191C37357}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.Api.Application", "Monaco.Template.Backend.Common.Api.Application\Monaco.Template.Backend.Common.Api.Application.csproj", "{F733BD0F-4C55-4E65-92E8-837191C37357}"
 EndProject
 #endif
 #if (massTransitIntegration)
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.Messaging.Messages", "Monaco.Template.Common.Messaging.Messages\Monaco.Template.Common.Messaging.Messages.csproj", "{45B82388-702E-4485-BEB5-995051DB9952}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.Messaging.Messages", "Monaco.Template.Backend.Common.Messaging.Messages\Monaco.Template.Backend.Common.Messaging.Messages.csproj", "{45B82388-702E-4485-BEB5-995051DB9952}"
 EndProject
 #endif
 #if (apiGateway)
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.ApiGateway", "Monaco.Template.Common.ApiGateway\Monaco.Template.Common.ApiGateway.csproj", "{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.ApiGateway", "Monaco.Template.Backend.Common.ApiGateway\Monaco.Template.Backend.Common.ApiGateway.csproj", "{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}"
 EndProject
 #endif
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{920A23AF-59DA-4453-B825-0549B1C04F5B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Application.Tests", "Monaco.Template.Application.Tests\Monaco.Template.Application.Tests.csproj", "{E5781B96-E0CA-4762-9412-C4202E0CA08F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Application.Tests", "Monaco.Template.Backend.Application.Tests\Monaco.Template.Backend.Application.Tests.csproj", "{E5781B96-E0CA-4762-9412-C4202E0CA08F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Domain.Tests", "Monaco.Template.Domain.Tests\Monaco.Template.Domain.Tests.csproj", "{B09E0906-8522-4B70-8C55-958415DAF21D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Domain.Tests", "Monaco.Template.Backend.Domain.Tests\Monaco.Template.Backend.Domain.Tests.csproj", "{B09E0906-8522-4B70-8C55-958415DAF21D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Application", "Monaco.Template.Application\Monaco.Template.Application.csproj", "{D43A4BF3-8D08-4EC2-8A99-5C3B92EC71A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Application", "Monaco.Template.Backend.Application\Monaco.Template.Backend.Application.csproj", "{D43A4BF3-8D08-4EC2-8A99-5C3B92EC71A2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Api", "Monaco.Template.Api\Monaco.Template.Api.csproj", "{895C8DDB-DD81-4CED-BE86-EFED36DD3732}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Api", "Monaco.Template.Backend.Api\Monaco.Template.Backend.Api.csproj", "{895C8DDB-DD81-4CED-BE86-EFED36DD3732}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Domain", "Monaco.Template.Domain\Monaco.Template.Domain.csproj", "{6B21DD04-2484-490C-B108-CC01148B9FC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Domain", "Monaco.Template.Backend.Domain\Monaco.Template.Backend.Domain.csproj", "{6B21DD04-2484-490C-B108-CC01148B9FC4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Application.Infrastructure", "Monaco.Template.Application.Infrastructure\Monaco.Template.Application.Infrastructure.csproj", "{71313461-6A79-47B3-AEB9-5668A88935F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Application.Infrastructure", "Monaco.Template.Backend.Application.Infrastructure\Monaco.Template.Backend.Application.Infrastructure.csproj", "{71313461-6A79-47B3-AEB9-5668A88935F2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Application.Infrastructure.Migrations", "Monaco.Template.Application.Infrastructure.Migrations\Monaco.Template.Application.Infrastructure.Migrations.csproj", "{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Application.Infrastructure.Migrations", "Monaco.Template.Backend.Application.Infrastructure.Migrations\Monaco.Template.Backend.Application.Infrastructure.Migrations.csproj", "{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}"
 EndProject
 #if (filesSupport)
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Common.BlobStorage", "Monaco.Template.Common.BlobStorage\Monaco.Template.Common.BlobStorage.csproj", "{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.BlobStorage", "Monaco.Template.Backend.Common.BlobStorage\Monaco.Template.Backend.Common.BlobStorage.csproj", "{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}"
 EndProject
 #endif
 Global

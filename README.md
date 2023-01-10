@@ -21,11 +21,11 @@ It also provides some basic business components as example of real life implemen
 
 #### Installation
 
-`dotnet new install Monaco.Template.Solution`
+`dotnet new install Monaco.Template`
 
 #### Uninstalling
 
-`dotnet new uninstall Monaco.Template.Solution`
+`dotnet new uninstall Monaco.Template`
 
 #### How to create a Monaco based solution
 
