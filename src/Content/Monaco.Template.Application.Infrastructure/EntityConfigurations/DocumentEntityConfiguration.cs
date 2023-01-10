@@ -1,6 +1,6 @@
-﻿using Monaco.Template.Domain.Model;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Monaco.Template.Domain.Model;
 
 namespace Monaco.Template.Application.Infrastructure.EntityConfigurations;
 

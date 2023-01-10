@@ -1,7 +1,7 @@
-﻿using Monaco.Template.Common.Application.Validators.Extensions;
-using Monaco.Template.Common.Infrastructure.Context.Extensions;
+﻿using FluentValidation;
 using Monaco.Template.Application.Infrastructure.Context;
-using FluentValidation;
+using Monaco.Template.Common.Application.Validators.Extensions;
+using Monaco.Template.Common.Infrastructure.Context.Extensions;
 
 namespace Monaco.Template.Application.Features.Company.Commands.Validators;
 
@@ -19,12 +19,13 @@ public sealed class CompanyCreateCommandValidator : AbstractValidator<CompanyCre
 
 		RuleFor(x => x.Email)
 			.NotEmpty()
-			.EmailAddress();
+			.EmailAddress()
+			.MaximumLength(255);
 
 		RuleFor(x => x.WebSiteUrl)
 			.MaximumLength(300);
 
-		RuleFor(x => x.Address)
+		RuleFor(x => x.Street)
 			.MaximumLength(100);
 
 		RuleFor(x => x.City)
@@ -37,8 +38,10 @@ public sealed class CompanyCreateCommandValidator : AbstractValidator<CompanyCre
 			.MaximumLength(10);
 
 		RuleFor(x => x.CountryId)
-			.NotEmpty()
-			.MustExistAsync<CompanyCreateCommand, Domain.Model.Country, Guid>(dbContext);
+			.NotNull()
+			.When(x => x.Street is { } || x.City is { } || x.County is { } || x.PostCode is { }, ApplyConditionTo.CurrentValidator)
+			.MustExistAsync<CompanyCreateCommand, Domain.Model.Country, Guid>(dbContext)
+			.When(x => x.CountryId.HasValue, ApplyConditionTo.CurrentValidator);
 
 	}
 }

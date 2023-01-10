@@ -2,9 +2,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-#if massTransitIntegration
-using MassTransit;
-#endif
 using Monaco.Template.Application.Infrastructure.Context;
 #if filesSupport
 using Monaco.Template.Application.Services;

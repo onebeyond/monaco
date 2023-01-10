@@ -6,17 +6,15 @@ namespace Monaco.Template.Common.Tests.Factories.Entities;
 
 public static class CompanyFactory
 {
-    public static Company Create()
-    {
-        return new Fixture().RegisterCompany()
-                            .Create<Company>();
-    }
+	public static Company Create() =>
+		new Fixture().RegisterCompany()
+					 .RegisterAddress()
+					 .Create<Company>();
 
-    public static IEnumerable<Company> CreateMany()
-    {
-        return new Fixture().RegisterCompanyMock()
-                            .CreateMany<Company>();
-    }
+	public static IEnumerable<Company> CreateMany() =>
+		new Fixture().RegisterCompanyMock()
+					 .RegisterAddress()
+					 .CreateMany<Company>();
 }
 
 public static class CompanyFactoryExtension
@@ -26,11 +24,7 @@ public static class CompanyFactoryExtension
         fixture.Register(() => new Company(fixture.Create<string>(),
                                            fixture.Create<string>(),
                                            fixture.Create<string>(),
-                                           fixture.Create<string>(),
-                                           fixture.Create<string>(),
-                                           fixture.Create<string>(),
-                                           fixture.Create<string>(),
-                                           fixture.Create<Country>()));
+                                           fixture.Create<Address>()));
         return fixture;
     }
 
@@ -41,11 +35,7 @@ public static class CompanyFactoryExtension
                              var mock = new Mock<Company>(fixture.Create<string>(),
                                                           fixture.Create<string>(),
                                                           fixture.Create<string>(),
-                                                          fixture.Create<string>(),
-                                                          fixture.Create<string>(),
-                                                          fixture.Create<string>(),
-                                                          fixture.Create<string>(),
-                                                          fixture.Create<Country>());
+                                                          fixture.Create<Address>());
                              mock.SetupGet(x => x.Id).Returns(Guid.NewGuid());
                              return mock.Object;
                          });

@@ -41,7 +41,7 @@ public class CompanyEditCommandValidatorTests
 												   It.IsAny<string>(),  // Name
 												   It.IsAny<string>(),	// Email
 												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Address
+												   It.IsAny<string>(),	// Street
 												   It.IsAny<string>(),	// City
 												   It.IsAny<string>(),	// County
 												   It.IsAny<string>(),  // PostCode
@@ -66,7 +66,7 @@ public class CompanyEditCommandValidatorTests
 												   It.IsAny<string>(),  // Name
 												   It.IsAny<string>(),	// Email
 												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Address
+												   It.IsAny<string>(),	// Street
 												   It.IsAny<string>(),	// City
 												   It.IsAny<string>(),	// County
 												   It.IsAny<string>(),  // PostCode
@@ -92,7 +92,7 @@ public class CompanyEditCommandValidatorTests
 												   new string(It.IsAny<char>(), 100),	// same Name as the already-existing Company
 												   It.IsAny<string>(),				// Email
 												   It.IsAny<string>(),				// WebSiteUrl
-												   It.IsAny<string>(),				// Address
+												   It.IsAny<string>(),				// Street
 												   It.IsAny<string>(),				// City
 												   It.IsAny<string>(),				// County
 												   It.IsAny<string>(),				// PostCode
@@ -112,7 +112,7 @@ public class CompanyEditCommandValidatorTests
 												   string.Empty,			// Name
 												   It.IsAny<string>(),	// Email
 												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Address
+												   It.IsAny<string>(),	// Street
 												   It.IsAny<string>(),	// City
 												   It.IsAny<string>(),	// County
 												   It.IsAny<string>(),	// PostCode
@@ -135,7 +135,7 @@ public class CompanyEditCommandValidatorTests
 												   new string(It.IsAny<char>(), 101),	// Name
 												   It.IsAny<string>(),				// Email
 												   It.IsAny<string>(),				// WebSiteUrl
-												   It.IsAny<string>(),				// Address
+												   It.IsAny<string>(),				// Street
 												   It.IsAny<string>(),				// City
 												   It.IsAny<string>(),				// County
 												   It.IsAny<string>(),				// PostCode
@@ -165,7 +165,7 @@ public class CompanyEditCommandValidatorTests
 												   company.Name,          // same Name as the already-existing Company
 												   It.IsAny<string>(),	// Email
 												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Address
+												   It.IsAny<string>(),	// Street
 												   It.IsAny<string>(),	// City
 												   It.IsAny<string>(),    // County
 												   It.IsAny<string>(),	// PostCode
@@ -193,7 +193,7 @@ public class CompanyEditCommandValidatorTests
 												   It.IsAny<string>(),	// same Name as the already-existing Company
 												   "valid@email.com",		// Email
 												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Address
+												   It.IsAny<string>(),	// Street
 												   It.IsAny<string>(),	// City
 												   It.IsAny<string>(),	// County
 												   It.IsAny<string>(),	// PostCode
@@ -213,7 +213,7 @@ public class CompanyEditCommandValidatorTests
 												   It.IsAny<string>(),	// Name
 												   string.Empty,			// Email
 												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Address
+												   It.IsAny<string>(),	// Street
 												   It.IsAny<string>(),	// City
 												   It.IsAny<string>(),	// County
 												   It.IsAny<string>(),	// PostCode
@@ -237,7 +237,7 @@ public class CompanyEditCommandValidatorTests
 												   It.IsAny<string>(),	// Name
 												   email,					// Email
 												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Address
+												   It.IsAny<string>(),	// Street
 												   It.IsAny<string>(),	// City
 												   It.IsAny<string>(),	// County
 												   It.IsAny<string>(),	// PostCode
@@ -260,7 +260,7 @@ public class CompanyEditCommandValidatorTests
 												   It.IsAny<string>(),				// Name
 												   It.IsAny<string>(),				// Email
 												   new string(It.IsAny<char>(), 301),	// WebSiteUrl
-												   It.IsAny<string>(),				// Address
+												   It.IsAny<string>(),				// Street
 												   It.IsAny<string>(),				// City
 												   It.IsAny<string>(),				// County
 												   It.IsAny<string>(),				// PostCode
@@ -284,7 +284,7 @@ public class CompanyEditCommandValidatorTests
 												   It.IsAny<string>(),    // Name
 												   It.IsAny<string>(),	// Email
 												   string.Empty,			// WebSiteUrl
-												   It.IsAny<string>(),	// Address
+												   It.IsAny<string>(),	// Street
 												   It.IsAny<string>(),	// City
 												   It.IsAny<string>(),	// County
 												   It.IsAny<string>(),	// PostCode
@@ -297,23 +297,23 @@ public class CompanyEditCommandValidatorTests
 	}
 
 	[Trait("Application Validators", "Company Validators")]
-	[Fact(DisplayName = "Address with long value generates validation error")]
+	[Fact(DisplayName = "Street with long value generates validation error")]
 	public async Task AddressWithLongValueGeneratesError()
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
 												   It.IsAny<string>(),                // Name
 												   It.IsAny<string>(),				// Email
 												   It.IsAny<string>(),				// WebSiteUrl
-												   new string(It.IsAny<char>(), 101),	// Address
+												   new string(It.IsAny<char>(), 101),	// Street
 												   It.IsAny<string>(),				// City
 												   It.IsAny<string>(),				// County
 												   It.IsAny<string>(),				// PostCode
 												   It.IsAny<Guid>());					// country.Id
 
 		var validator = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
-		var validationResult = await validator.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Address));
+		var validationResult = await validator.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Street));
 
-		validationResult.ShouldHaveValidationErrorFor(cmd => cmd.Address)
+		validationResult.ShouldHaveValidationErrorFor(cmd => cmd.Street)
 						.WithErrorCode("MaximumLengthValidator")
 						.WithMessageArgument("MaxLength", 100)
 						.Should()
@@ -321,23 +321,23 @@ public class CompanyEditCommandValidatorTests
 	}
 
 	[Trait("Application Validators", "Company Validators")]
-	[Fact(DisplayName = "Address with empty value does not generate validation error")]
+	[Fact(DisplayName = "Street with empty value does not generate validation error")]
 	public async Task AddressWithEmptyValueDoesNotGenerateError()
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
 												   It.IsAny<string>(),    // Name
 												   It.IsAny<string>(),	// Email
 												   It.IsAny<string>(),	// WebSiteUrl
-												   string.Empty,			// Address
+												   string.Empty,			// Street
 												   It.IsAny<string>(),	// City
 												   It.IsAny<string>(),	// County
 												   It.IsAny<string>(),	// PostCode
 												   It.IsAny<Guid>());		// country.Id
 
 		var sut = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
-		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Address));
+		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Street));
 
-		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.Address);
+		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.Street);
 	}
 
 	[Trait("Application Validators", "Company Validators")]
@@ -348,7 +348,7 @@ public class CompanyEditCommandValidatorTests
 												   It.IsAny<string>(),                // Name
 												   It.IsAny<string>(),				// Email
 												   It.IsAny<string>(),				// WebSiteUrl
-												   It.IsAny<string>(),				// Address
+												   It.IsAny<string>(),				// Street
 												   new string(It.IsAny<char>(), 101),	// City
 												   It.IsAny<string>(),				// County
 												   It.IsAny<string>(),				// PostCode
@@ -372,7 +372,7 @@ public class CompanyEditCommandValidatorTests
 												   It.IsAny<string>(),    // Name
 												   It.IsAny<string>(),	// Email
 												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Address
+												   It.IsAny<string>(),	// Street
 												   string.Empty,			// City
 												   It.IsAny<string>(),	// County
 												   It.IsAny<string>(),	// PostCode
@@ -392,7 +392,7 @@ public class CompanyEditCommandValidatorTests
 												   It.IsAny<string>(),                // Name
 												   It.IsAny<string>(),				// Email
 												   It.IsAny<string>(),				// WebSiteUrl
-												   It.IsAny<string>(),				// Address
+												   It.IsAny<string>(),				// Street
 												   It.IsAny<string>(),				// City
 												   new string(It.IsAny<char>(), 101),	// County
 												   It.IsAny<string>(),				// PostCode
@@ -416,7 +416,7 @@ public class CompanyEditCommandValidatorTests
 												   It.IsAny<string>(),        // Name
 												   It.IsAny<string>(),	// Email
 												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Address
+												   It.IsAny<string>(),	// Street
 												   It.IsAny<string>(),	// City
 												   string.Empty,			// County
 												   It.IsAny<string>(),	// PostCode
@@ -436,7 +436,7 @@ public class CompanyEditCommandValidatorTests
 												   It.IsAny<string>(),                // Name
 												   It.IsAny<string>(),				// Email
 												   It.IsAny<string>(),				// WebSiteUrl
-												   It.IsAny<string>(),				// Address
+												   It.IsAny<string>(),				// Street
 												   It.IsAny<string>(),				// City
 												   It.IsAny<string>(),				// County
 												   new string(It.IsAny<char>(), 11),	// PostCode
@@ -460,7 +460,7 @@ public class CompanyEditCommandValidatorTests
 												   It.IsAny<string>(),        // Name
 												   It.IsAny<string>(),	// Email
 												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Address
+												   It.IsAny<string>(),	// Street
 												   It.IsAny<string>(),	// City
 												   It.IsAny<string>(),	// County
 												   string.Empty,			// PostCode
@@ -489,7 +489,7 @@ public class CompanyEditCommandValidatorTests
 												   It.IsAny<string>(),	// Name
 												   It.IsAny<string>(),	// Email
 												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Address
+												   It.IsAny<string>(),	// Street
 												   It.IsAny<string>(),	// City
 												   It.IsAny<string>(),	// County
 												   It.IsAny<string>(),	// PostCode
@@ -502,26 +502,23 @@ public class CompanyEditCommandValidatorTests
 	}
 
 	[Trait("Application Validators", "Company Validators")]
-	[Fact(DisplayName = "Country with empty value generates validation error")]
-	public async Task CountryWithEmptyValueGeneratesError()
+	[Fact(DisplayName = "Country with null value does not generate validation error")]
+	public async Task CountryWithNullValueDoesNotGenerateError()
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
-												   It.IsAny<string>(),        // Name
+												   It.IsAny<string>(),	// Name
 												   It.IsAny<string>(),	// Email
 												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Address
+												   It.IsAny<string>(),	// Street
 												   It.IsAny<string>(),	// City
-												   It.IsAny<string>(),    // County
+												   It.IsAny<string>(),	// County
 												   It.IsAny<string>(),	// PostCode
-												   Guid.Empty);			// country.Id
+												   null);			// country.Id
 
 		var sut = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.CountryId));
 
-		validationResult.ShouldHaveValidationErrorFor(cmd => cmd.CountryId)
-						.WithErrorCode("NotEmptyValidator")
-						.Should()
-						.HaveCount(1);
+		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.CountryId);
 	}
 
 	[Trait("Application Validators", "Company Validators")]
@@ -541,7 +538,7 @@ public class CompanyEditCommandValidatorTests
 												   It.IsAny<string>(),    // Name
 												   It.IsAny<string>(),	// Email
 												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Address
+												   It.IsAny<string>(),	// Street
 												   It.IsAny<string>(),	// City
 												   It.IsAny<string>(),	// County
 												   It.IsAny<string>(),    // PostCode

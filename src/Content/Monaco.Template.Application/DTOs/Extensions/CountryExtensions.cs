@@ -1,5 +1,5 @@
-﻿using System.Linq.Expressions;
-using Monaco.Template.Domain.Model;
+﻿using Monaco.Template.Domain.Model;
+using System.Linq.Expressions;
 
 namespace Monaco.Template.Application.DTOs.Extensions;
 

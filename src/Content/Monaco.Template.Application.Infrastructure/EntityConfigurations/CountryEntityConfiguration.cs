@@ -1,9 +1,9 @@
-﻿using Monaco.Template.Common.Infrastructure.EntityConfigurations;
-using Monaco.Template.Common.Infrastructure.EntityConfigurations.Extensions;
-using Monaco.Template.Domain.Model;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.Hosting;
 using Monaco.Template.Application.Infrastructure.EntityConfigurations.Seeds;
+using Monaco.Template.Common.Infrastructure.EntityConfigurations;
+using Monaco.Template.Common.Infrastructure.EntityConfigurations.Extensions;
+using Monaco.Template.Domain.Model;
 
 namespace Monaco.Template.Application.Infrastructure.EntityConfigurations;
 

@@ -12,12 +12,12 @@ namespace Monaco.Template.Common.Domain.Tests;
 [ExcludeFromCodeCoverage]
 public class EnumerationTests
 {
-    [Trait("Common domain Entities", "Enumeration Entity")]
+    [Trait("Common Domain Entities", "Enumeration Entity")]
     [Theory(DisplayName = "New enumeration instance succeeds")]
     [AnonymousData]
     public void NewEnumerationInstanceSucceeds(Guid id, string name)
     {
-        var fixture = new Fixture();
+		var fixture = new Fixture();
         fixture.Customize<Enumeration>(c => c.FromFactory(() => new Mock<Enumeration>(id, name) { CallBase = true }.Object));
 
         var sut = fixture.Create<Enumeration>();
@@ -26,7 +26,7 @@ public class EnumerationTests
         sut.Name.Should().Be(name);
     }
 
-    [Trait("Common domain Entities", "Enumeration Entity")]
+    [Trait("Common Domain Entities", "Enumeration Entity")]
     [Theory(DisplayName = "Enumeration to string is name")]
     [AnonymousData]
     public void EnumerationToStringIsName(Guid id, string name)
@@ -39,7 +39,7 @@ public class EnumerationTests
         sut.ToString().Should().Be(name);
     }
 
-    [Trait("Common domain Entities", "Enumeration Entity")]
+    [Trait("Common Domain Entities", "Enumeration Entity")]
     [Fact(DisplayName = "Get all items from Enumeration succeeds")]
     public void GetAllItemsFromEnumerationSucceeds()
     {
@@ -47,7 +47,7 @@ public class EnumerationTests
                    .Should().HaveCount(2).And.Contain(new[] { DummyEnumerationDerived.Item3, DummyEnumerationDerived.Item4 });
     }
 
-    [Trait("Common domain Entities", "Enumeration Entity")]
+    [Trait("Common Domain Entities", "Enumeration Entity")]
     [Fact(DisplayName = "Get an enumeration item from its value succeeds")]
     public void GetAnEnumerationItemFromItsValueSucceeds()
     {
@@ -58,7 +58,7 @@ public class EnumerationTests
         result.Should().Be(DummyEnumeration.Item1);
     }
 
-    [Trait("Common domain Entities", "Enumeration Entity")]
+    [Trait("Common Domain Entities", "Enumeration Entity")]
     [Theory(DisplayName = "Get an enumeration item from invalid value fails")]
     [AnonymousData]
     public void GetAnEnumerationItemFromInvalidValueFails(Guid id)
@@ -68,18 +68,18 @@ public class EnumerationTests
         action.Should().Throw<InvalidOperationException>().WithMessage($"'{id}' is not a valid value in {typeof(DummyEnumeration)}");
     }
 
-    [Trait("Common domain Entities", "Enumeration Entity")]
+    [Trait("Common Domain Entities", "Enumeration Entity")]
     [Fact(DisplayName = "Get an enumeration item from its name succeeds")]
     public void GetAnEnumerationItemFromItsNameSucceeds()
     {
-        Func<DummyEnumeration> action = () => Enumeration.From<DummyEnumeration>(DummyEnumeration.Item1.Name);
+        var action = () => Enumeration.From<DummyEnumeration>(DummyEnumeration.Item1.Name);
         var result = action.Invoke();
 
         action.Should().NotThrow();
         result.Should().Be(DummyEnumeration.Item1);
     }
 
-    [Trait("Common domain Entities", "Enumeration Entity")]
+    [Trait("Common Domain Entities", "Enumeration Entity")]
     [Theory(DisplayName = "Get an enumeration item from invalid value fails")]
     [AnonymousData]
     public void GetAnEnumerationItemFromInvalidNameFails(string name)
@@ -89,7 +89,7 @@ public class EnumerationTests
         action.Should().Throw<InvalidOperationException>().WithMessage($"'{name}' is not a valid display name in {typeof(DummyEnumeration)}");
     }
 
-    [Trait("Common domain Entities", "Enumeration Entity")]
+    [Trait("Common Domain Entities", "Enumeration Entity")]
     [Fact(DisplayName = "Enumeration compare succeeds")]
     public void EnumerationCompareSucceeds()
     {
