@@ -1,9 +1,9 @@
 ﻿using FluentValidation;
-using Monaco.Template.Application.Infrastructure.Context;
-using Monaco.Template.Common.Application.Validators.Extensions;
-using Monaco.Template.Common.Infrastructure.Context.Extensions;
+using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Common.Application.Validators.Extensions;
+using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
-namespace Monaco.Template.Application.Features.Company.Commands.Validators;
+namespace Monaco.Template.Backend.Application.Features.Company.Commands.Validators;
 
 public sealed class CompanyCreateCommandValidator : AbstractValidator<CompanyCreateCommand>
 {

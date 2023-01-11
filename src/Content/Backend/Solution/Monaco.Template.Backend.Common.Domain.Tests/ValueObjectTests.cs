@@ -1,11 +1,11 @@
 ﻿using FluentAssertions;
-using Monaco.Template.Common.Domain.Model;
-using Monaco.Template.Common.Tests.Factories;
+using Monaco.Template.Backend.Common.Domain.Model;
+using Monaco.Template.Backend.Common.Tests.Factories;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
-namespace Monaco.Template.Common.Domain.Tests;
+namespace Monaco.Template.Backend.Common.Domain.Tests;
 
 [ExcludeFromCodeCoverage]
 public class ValueObjectTests

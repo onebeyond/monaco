@@ -1,16 +1,16 @@
-﻿using Monaco.Template.Common.Domain.Model;
-using Monaco.Template.Common.Domain.Model.Contracts;
+﻿using Monaco.Template.Backend.Common.Domain.Model;
+using Monaco.Template.Backend.Common.Domain.Model.Contracts;
 
-namespace Monaco.Template.Domain.Model;
+namespace Monaco.Template.Backend.Domain.Model;
 
 public class Country : Entity, IReferential
 {
-    protected Country() { }
+	protected Country() { }
 
-    public Country(string name)
-    {
-        Name = name;
-    }
+	public Country(string name)
+	{
+		Name = name;
+	}
 
-    public string Name { get; private set; }
+	public string Name { get; private set; }
 }

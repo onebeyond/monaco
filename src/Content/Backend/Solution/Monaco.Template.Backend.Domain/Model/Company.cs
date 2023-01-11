@@ -1,31 +1,31 @@
 ﻿using Dawn;
-using Monaco.Template.Common.Domain.Model;
+using Monaco.Template.Backend.Common.Domain.Model;
 
-namespace Monaco.Template.Domain.Model;
+namespace Monaco.Template.Backend.Domain.Model;
 
 public class Company : Entity
 {
-    protected Company()
-    {
-    }
+	protected Company()
+	{
+	}
 
-    public Company(string name,
-                   string email,
-                   string webSiteUrl,
+	public Company(string name,
+				   string email,
+				   string webSiteUrl,
 				   Address? address)
-    {
-        Name = Guard.Argument(name, nameof(name))
+	{
+		Name = Guard.Argument(name, nameof(name))
 					.NotEmpty()
 					.MaxLength(100);
 		Email = Guard.Argument(email, nameof(email))
 					 .NotEmpty();
-        WebSiteUrl = webSiteUrl;
+		WebSiteUrl = webSiteUrl;
 		Address = address;
-    }
+	}
 
-    public string Name { get; private set; }
-    public string Email { get; private set; }
-    public string WebSiteUrl { get; private set; }
+	public string Name { get; private set; }
+	public string Email { get; private set; }
+	public string WebSiteUrl { get; private set; }
 	public byte[] Version { get; }
 
 	public Address? Address { get; private set; }
@@ -34,10 +34,10 @@ public class Company : Entity
 							   string email,
 							   string webSiteUrl,
 							   Address? address)
-    {
-        Name = name;
-        Email = email;
-        WebSiteUrl = webSiteUrl;
-        Address = address;
-    }
+	{
+		Name = name;
+		Email = email;
+		WebSiteUrl = webSiteUrl;
+		Address = address;
+	}
 }

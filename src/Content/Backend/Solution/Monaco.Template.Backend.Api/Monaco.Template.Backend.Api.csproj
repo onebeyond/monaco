@@ -26,11 +26,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Monaco.Template.Application.Infrastructure.Migrations\Monaco.Template.Application.Infrastructure.Migrations.csproj" />
-    <ProjectReference Include="..\Monaco.Template.Application\Monaco.Template.Application.csproj" />
-    <ProjectReference Include="..\Monaco.Template.Common.Api.Application\Monaco.Template.Common.Api.Application.csproj" />
-    <ProjectReference Include="..\Monaco.Template.Common.Api\Monaco.Template.Common.Api.csproj" />
-    <ProjectReference Include="..\Monaco.Template.Common.Serilog\Monaco.Template.Common.Serilog.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Backend.Application.Infrastructure.Migrations\Monaco.Template.Backend.Application.Infrastructure.Migrations.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Backend.Application\Monaco.Template.Backend.Application.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Backend.Common.Api.Application\Monaco.Template.Backend.Common.Api.Application.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Backend.Common.Api\Monaco.Template.Backend.Common.Api.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Backend.Common.Serilog\Monaco.Template.Backend.Common.Serilog.csproj" />
   </ItemGroup>
 
 </Project>

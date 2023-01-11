@@ -1,19 +1,20 @@
 ﻿#if filesSupport
 using MediatR;
-using Monaco.Template.Application.Services.Contracts;
-using Monaco.Template.Common.Application.Commands;
-using Monaco.Template.Common.Application.Commands.Contracts;
+using Monaco.Template.Backend.Application.Features.File.Commands;
+using Monaco.Template.Backend.Application.Services.Contracts;
+using Monaco.Template.Backend.Common.Application.Commands;
+using Monaco.Template.Backend.Common.Application.Commands.Contracts;
 
-namespace Monaco.Template.Application.Features.File.Commands;
+namespace Monaco.Template.Backend.Application.Features.File.Commands;
 
 public sealed class FileCommandsHandlers : IRequestHandler<FileCreateCommand, ICommandResult<Guid>>,
 										   IRequestHandler<FileDeleteCommand, ICommandResult>
 {
 	private readonly IFileService _fileService;
 
-	public FileCommandsHandlers(/*IFileService fileService*/)
+	public FileCommandsHandlers(IFileService fileService)
 	{
-		// _fileService = fileService;
+		_fileService = fileService;
 	}
 
 	public async Task<ICommandResult<Guid>> Handle(FileCreateCommand request, CancellationToken cancellationToken)

@@ -1,8 +1,8 @@
-﻿namespace Monaco.Template.Application.Infrastructure.EntityConfigurations.Seeds;
+﻿namespace Monaco.Template.Backend.Application.Infrastructure.EntityConfigurations.Seeds;
 
 public class CountrySeed
 {
-    public static List<object> GetCountries() =>
+	public static List<object> GetCountries() =>
 		new()
 		{
 			new { Id = new Guid("5c064eff-a037-a6a3-06ec-92f662903af3"), Name = "Afghanistan" },

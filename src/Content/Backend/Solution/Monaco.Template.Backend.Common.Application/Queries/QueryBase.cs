@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Primitives;
 
-namespace Monaco.Template.Common.Application.Queries;
+namespace Monaco.Template.Backend.Common.Application.Queries;
 
 public abstract record QueryBase<T>(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : IRequest<T>
 {
@@ -14,12 +14,12 @@ public abstract record QueryBase<T>(IEnumerable<KeyValuePair<string, StringValue
 	protected string? GetValueString(string key) => QueryString.FirstOrDefault(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
 															   .Value
 															   .FirstOrDefault(x => x is not null);
-	
+
 	protected int? GetValueInt(string key) => QueryString.FirstOrDefault(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
 														 .Value
 														 .Select(x => int.TryParse(x, out var y) ? y : (int?)null)
 														 .FirstOrDefault(x => x is not null);
-	
+
 	protected long? GetValueLong(string key) => QueryString.FirstOrDefault(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
 														   .Value
 														   .Select(x => long.TryParse(x, out var y) ? y : (long?)null)
@@ -44,17 +44,17 @@ public abstract record QueryBase<T>(IEnumerable<KeyValuePair<string, StringValue
 														   .Value
 														   .Select(x => bool.TryParse(x, out var y) ? y : (bool?)null)
 														   .FirstOrDefault(x => x is not null);
-	
+
 	protected Guid? GetValueGuid(string key) => QueryString.FirstOrDefault(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
 														   .Value
 														   .Select(x => Guid.TryParse(x, out var y) ? y : (Guid?)null)
 														   .FirstOrDefault(x => x is not null);
-	
+
 	protected DateTime? GetValueDateTime(string key) => QueryString.FirstOrDefault(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
 																   .Value
 																   .Select(x => DateTime.TryParse(x, out var y) ? y : (DateTime?)null)
 																   .FirstOrDefault(x => x is not null);
-	
+
 	protected TEnum? GetValueEnum<TEnum>(string key) where TEnum : struct => QueryString.FirstOrDefault(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
 																						.Value
 																						.Select(x => Enum.TryParse<TEnum>(x, true, out var y) ? y : (TEnum?)null)

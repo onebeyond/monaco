@@ -2,7 +2,7 @@
 using Polly;
 using Polly.Registry;
 
-namespace Monaco.Template.Common.Application.Policies;
+namespace Monaco.Template.Backend.Common.Application.Policies;
 
 public class Policies
 {
@@ -24,7 +24,7 @@ public class Policies
 		PolicyRegistry.Add(DbConcurrentExceptionPolicyKey,
 						   Policy.Handle<DbUpdateConcurrencyException>()
 								 .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(i)));
-		
+
 		//To declare common policies
 	}
 

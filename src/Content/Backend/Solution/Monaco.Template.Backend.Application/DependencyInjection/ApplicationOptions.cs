@@ -1,4 +1,4 @@
-﻿namespace Monaco.Template.Application.DependencyInjection;
+﻿namespace Monaco.Template.Backend.Application.DependencyInjection;
 
 public class ApplicationOptions
 {
@@ -10,7 +10,7 @@ public class ApplicationOptions
 	public class EntityFrameworkOptions
 	{
 		public string ConnectionString { get; set; } = string.Empty;
-		public bool EnableEfSensitiveLogging { get; set; }	
+		public bool EnableEfSensitiveLogging { get; set; }
 	}
 #if filesSupport
 

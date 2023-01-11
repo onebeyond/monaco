@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
 
 	<PackageVersion>0.0.1-alpha1</PackageVersion>
-    <Title>Monaco.Template.Common.Infrastructure</Title>
+    <Title>Monaco.Template.Backend.Common.Infrastructure</Title>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>One Beyond</Authors>
     <Company>One Beyond</Company>
@@ -39,7 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Monaco.Template.Common.Domain\Monaco.Template.Common.Domain.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Backend.Common.Domain\Monaco.Template.Backend.Common.Domain.csproj" />
   </ItemGroup>
 
 </Project>

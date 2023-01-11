@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Monaco.Template.Common.Domain\Monaco.Template.Common.Domain.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Backend.Common.Domain\Monaco.Template.Backend.Common.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

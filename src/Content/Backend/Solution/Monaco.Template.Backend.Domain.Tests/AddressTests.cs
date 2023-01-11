@@ -1,10 +1,10 @@
 ﻿using FluentAssertions;
-using Monaco.Template.Common.Tests.Factories;
-using Monaco.Template.Domain.Model;
+using Monaco.Template.Backend.Common.Tests.Factories;
+using Monaco.Template.Backend.Domain.Model;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
-namespace Monaco.Template.Domain.Tests;
+namespace Monaco.Template.Backend.Domain.Tests;
 
 [ExcludeFromCodeCoverage]
 public class AddressTests

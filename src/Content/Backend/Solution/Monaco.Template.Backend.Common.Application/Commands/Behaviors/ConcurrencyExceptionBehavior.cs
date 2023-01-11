@@ -1,11 +1,11 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Monaco.Template.Common.Application.Commands.Contracts;
-using Monaco.Template.Common.Infrastructure.Context;
+using Monaco.Template.Backend.Common.Application.Commands.Contracts;
+using Monaco.Template.Backend.Common.Infrastructure.Context;
 using Polly;
 using Polly.Registry;
 
-namespace Monaco.Template.Common.Application.Commands.Behaviors;
+namespace Monaco.Template.Backend.Common.Application.Commands.Behaviors;
 
 public class ConcurrencyExceptionBehavior<TCommand> : IPipelineBehavior<TCommand, ICommandResult> where TCommand : CommandBase
 {

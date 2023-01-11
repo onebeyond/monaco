@@ -1,32 +1,32 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Monaco.Template.Common.Infrastructure.EntityConfigurations.Extensions;
-using Monaco.Template.Domain.Model;
+using Monaco.Template.Backend.Common.Infrastructure.EntityConfigurations.Extensions;
+using Monaco.Template.Backend.Domain.Model;
 
-namespace Monaco.Template.Application.Infrastructure.EntityConfigurations;
+namespace Monaco.Template.Backend.Application.Infrastructure.EntityConfigurations;
 
 public class CompanyEntityConfiguration : IEntityTypeConfiguration<Company>
 {
-    public void Configure(EntityTypeBuilder<Company> builder)
-    {
-        builder.ConfigureIdWithDbGeneratedValue();
+	public void Configure(EntityTypeBuilder<Company> builder)
+	{
+		builder.ConfigureIdWithDbGeneratedValue();
 
-        builder.Property(x => x.Name)
-               .IsRequired()
-               .HasMaxLength(100);
+		builder.Property(x => x.Name)
+			   .IsRequired()
+			   .HasMaxLength(100);
 
 		builder.Property(x => x.Email)
 			   .IsRequired()
 			   .HasMaxLength(255);
 
-        builder.Property(x => x.WebSiteUrl)
-               .IsRequired(false)
-               .HasMaxLength(300);
+		builder.Property(x => x.WebSiteUrl)
+			   .IsRequired(false)
+			   .HasMaxLength(300);
 
-        builder.Property(x => x.Version)
-               .IsRowVersion();
+		builder.Property(x => x.Version)
+			   .IsRowVersion();
 
-        builder.OwnsOne(x => x.Address,
+		builder.OwnsOne(x => x.Address,
 						b =>
 						{
 							b.Property(x => x.Street)
@@ -50,5 +50,5 @@ public class CompanyEntityConfiguration : IEntityTypeConfiguration<Company>
 							 .HasForeignKey(x => x.CountryId)
 							 .IsRequired();
 						});
-    }
+	}
 }

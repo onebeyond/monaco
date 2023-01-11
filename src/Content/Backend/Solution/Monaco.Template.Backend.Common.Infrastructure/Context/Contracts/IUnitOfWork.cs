@@ -1,7 +1,7 @@
-﻿namespace Monaco.Template.Common.Infrastructure.Context.Contracts;
+﻿namespace Monaco.Template.Backend.Common.Infrastructure.Context.Contracts;
 
 public interface IUnitOfWork
 {
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
-    Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken);
+	Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+	Task<bool> SaveEntitiesAsync(CancellationToken cancellationToken);
 }

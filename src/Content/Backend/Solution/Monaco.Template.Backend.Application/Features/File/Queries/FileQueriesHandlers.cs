@@ -1,12 +1,13 @@
 ﻿#if filesSupport
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Monaco.Template.Application.DTOs;
-using Monaco.Template.Application.DTOs.Extensions;
-using Monaco.Template.Application.Infrastructure.Context;
-using Monaco.Template.Common.BlobStorage.Contracts;
+using Monaco.Template.Backend.Application.DTOs;
+using Monaco.Template.Backend.Application.DTOs.Extensions;
+using Monaco.Template.Backend.Application.Features.File.Queries;
+using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Common.BlobStorage.Contracts;
 
-namespace Monaco.Template.Application.Features.File.Queries;
+namespace Monaco.Template.Backend.Application.Features.File.Queries;
 
 public sealed class FileQueriesHandlers : IRequestHandler<GetFileByIdQuery, FileDto?>,
 										  IRequestHandler<DownloadFileByIdQuery, FileDownloadDto?>
@@ -44,12 +45,9 @@ public sealed class FileQueriesHandlers : IRequestHandler<GetFileByIdQuery, File
 		return dto;
 	}
 
-	private async Task<Domain.Model.File?> GetFile(Guid id, CancellationToken cancellationToken)
-	{
-		var item = await _dbContext.Set<Domain.Model.File>()
-								   .AsNoTracking()
-								   .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
-		return item;
-	}
+	private Task<Backend.Domain.Model.File?> GetFile(Guid id, CancellationToken cancellationToken) =>
+		_dbContext.Set<Backend.Domain.Model.File>()
+				  .AsNoTracking()
+				  .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
 }
 #endif

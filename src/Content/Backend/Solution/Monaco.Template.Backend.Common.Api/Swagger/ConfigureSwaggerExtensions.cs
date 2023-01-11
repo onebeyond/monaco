@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Monaco.Template.Common.Api.Swagger;
+namespace Monaco.Template.Backend.Common.Api.Swagger;
 
 public static class ConfigureSwaggerExtensions
 {
@@ -22,7 +22,7 @@ public static class ConfigureSwaggerExtensions
 																string? apiName = null,
 																List<string>? scopes = null)
 	{
-        return services.AddApiVersioning(options =>
+		return services.AddApiVersioning(options =>
 										 {
 											 options.Conventions.Add(new VersionByNamespaceConvention());
 											 options.ReportApiVersions = true;
@@ -44,7 +44,7 @@ public static class ConfigureSwaggerExtensions
 										 apiName,
 										 scopes);
 	}
-	
+
 	public static IServiceCollection ConfigureSwagger(this IServiceCollection services,
 													  string apiDescription,
 													  string title,
@@ -79,14 +79,14 @@ public static class ConfigureSwaggerExtensions
 																	 {
 																		 Type = SecuritySchemeType.OAuth2,
 																		 Flows = new OpenApiOAuthFlows
-																				 {
-																					 AuthorizationCode = new OpenApiOAuthFlow
-																										 {
-																											 AuthorizationUrl = new Uri($"{authority}/protocol/openid-connect/auth"),
-																											 TokenUrl = new Uri($"{authority}/protocol/openid-connect/token"),
-																											 Scopes = new Dictionary<string, string>(scopesList.ToDictionary(x => x, _ => "")) { { apiName, apiDescription } }
-																										 }
-																				 }
+																		 {
+																			 AuthorizationCode = new OpenApiOAuthFlow
+																			 {
+																				 AuthorizationUrl = new Uri($"{authority}/protocol/openid-connect/auth"),
+																				 TokenUrl = new Uri($"{authority}/protocol/openid-connect/token"),
+																				 Scopes = new Dictionary<string, string>(scopesList.ToDictionary(x => x, _ => "")) { { apiName, apiDescription } }
+																			 }
+																		 }
 																	 });
 									   options.OperationFilter<AuthorizeCheckOperationFilter>(apiName);
 								   }
@@ -119,62 +119,62 @@ public static class ConfigureSwaggerExtensions
 	/// <remarks>This allows API versioning to define a Swagger document per API version after the
 	/// <see cref="IApiVersionDescriptionProvider"/> service has been resolved from the service container.</remarks>
 	public class SwaggerOptions : IConfigureOptions<SwaggerGenOptions>
-    {
-        private readonly IApiVersionDescriptionProvider _provider;
-        private readonly string _title;
-        private readonly string _description;
-        private readonly string _contactName;
-        private readonly string _contactEmail;
-        private readonly string _termsOfServiceUrl;
+	{
+		private readonly IApiVersionDescriptionProvider _provider;
+		private readonly string _title;
+		private readonly string _description;
+		private readonly string _contactName;
+		private readonly string _contactEmail;
+		private readonly string _termsOfServiceUrl;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SwaggerOptions"/> class.
-        /// </summary>
-        /// <param name="provider">The <see cref="IApiVersionDescriptionProvider">provider</see> used to generate Swagger documents.</param>
-        /// <param name="title"></param>
-        /// <param name="description"></param>
-        /// <param name="contactName"></param>
-        /// <param name="contactEmail"></param>
-        /// <param name="termsOfServiceUrl"></param>
-        public SwaggerOptions(IApiVersionDescriptionProvider provider,
-                              string title,
-                              string description,
-                              string contactName,
-                              string contactEmail,
-                              string termsOfServiceUrl)
-        {
-            _provider = provider;
-            _title = title;
-            _description = description;
-            _contactName = contactName;
-            _contactEmail = contactEmail;
-            _termsOfServiceUrl = termsOfServiceUrl;
-        }
+		/// <summary>
+		/// Initializes a new instance of the <see cref="SwaggerOptions"/> class.
+		/// </summary>
+		/// <param name="provider">The <see cref="IApiVersionDescriptionProvider">provider</see> used to generate Swagger documents.</param>
+		/// <param name="title"></param>
+		/// <param name="description"></param>
+		/// <param name="contactName"></param>
+		/// <param name="contactEmail"></param>
+		/// <param name="termsOfServiceUrl"></param>
+		public SwaggerOptions(IApiVersionDescriptionProvider provider,
+							  string title,
+							  string description,
+							  string contactName,
+							  string contactEmail,
+							  string termsOfServiceUrl)
+		{
+			_provider = provider;
+			_title = title;
+			_description = description;
+			_contactName = contactName;
+			_contactEmail = contactEmail;
+			_termsOfServiceUrl = termsOfServiceUrl;
+		}
 
-        /// <inheritdoc />
-        public void Configure(SwaggerGenOptions options)
-        {
-            // add a swagger document for each discovered API version
-            // note: you might choose to skip or document deprecated API versions differently
-            foreach (var description in _provider.ApiVersionDescriptions)
-                options.SwaggerDoc(description.GroupName, CreateInfoForApiVersion(description));
-        }
+		/// <inheritdoc />
+		public void Configure(SwaggerGenOptions options)
+		{
+			// add a swagger document for each discovered API version
+			// note: you might choose to skip or document deprecated API versions differently
+			foreach (var description in _provider.ApiVersionDescriptions)
+				options.SwaggerDoc(description.GroupName, CreateInfoForApiVersion(description));
+		}
 
-        private OpenApiInfo CreateInfoForApiVersion(ApiVersionDescription description)
-        {
-            var info = new OpenApiInfo
-                       {
-                           Title = _title,
-                           Version = description.ApiVersion.ToString(),
-                           Description = _description,
-                           Contact = new OpenApiContact { Name = _contactName, Email = _contactEmail },
-                           TermsOfService = new Uri(_termsOfServiceUrl)
-                       };
+		private OpenApiInfo CreateInfoForApiVersion(ApiVersionDescription description)
+		{
+			var info = new OpenApiInfo
+			{
+				Title = _title,
+				Version = description.ApiVersion.ToString(),
+				Description = _description,
+				Contact = new OpenApiContact { Name = _contactName, Email = _contactEmail },
+				TermsOfService = new Uri(_termsOfServiceUrl)
+			};
 
-            if (description.IsDeprecated)
-                info.Description += " This API version has been deprecated.";
+			if (description.IsDeprecated)
+				info.Description += " This API version has been deprecated.";
 
-            return info;
-        }
-    }
+			return info;
+		}
+	}
 }

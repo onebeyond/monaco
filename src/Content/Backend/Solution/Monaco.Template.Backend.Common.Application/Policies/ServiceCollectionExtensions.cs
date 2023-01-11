@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Polly.Registry;
 
-namespace Monaco.Template.Common.Application.Policies;
+namespace Monaco.Template.Backend.Common.Application.Policies;
 
 public static class ServiceCollectionExtensions
 {

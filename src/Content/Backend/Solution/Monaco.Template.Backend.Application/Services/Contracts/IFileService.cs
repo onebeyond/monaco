@@ -1,9 +1,9 @@
 ﻿using ExifLibrary;
-using Monaco.Template.Domain.Model;
+using Monaco.Template.Backend.Domain.Model;
 using SkiaSharp;
-using File = Monaco.Template.Domain.Model.File;
+using File = Monaco.Template.Backend.Domain.Model.File;
 
-namespace Monaco.Template.Application.Services.Contracts;
+namespace Monaco.Template.Backend.Application.Services.Contracts;
 
 public interface IFileService
 {

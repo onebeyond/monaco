@@ -1,8 +1,8 @@
 ﻿using AutoFixture;
-using Monaco.Template.Domain.Model;
+using Monaco.Template.Backend.Domain.Model;
 using Moq;
 
-namespace Monaco.Template.Common.Tests.Factories.Entities;
+namespace Monaco.Template.Backend.Common.Tests.Factories.Entities;
 
 public static class AddressFactory
 {

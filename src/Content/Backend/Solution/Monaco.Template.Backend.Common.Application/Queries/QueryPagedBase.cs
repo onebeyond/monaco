@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Primitives;
-using Monaco.Template.Common.Domain.Model;
+using Monaco.Template.Backend.Common.Domain.Model;
 
-namespace Monaco.Template.Common.Application.Queries;
+namespace Monaco.Template.Backend.Common.Application.Queries;
 
 public abstract record QueryPagedBase<T>(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryBase<Page<T>?>(QueryString)
 {
@@ -12,10 +12,10 @@ public abstract record QueryPagedBase<T>(IEnumerable<KeyValuePair<string, String
 											.DefaultIfEmpty(0)
 											.FirstOrDefault();
 
-    public virtual int Limit => QueryString.FirstOrDefault(x => x.Key.Equals(nameof(Page<T>.Pager.Limit), StringComparison.InvariantCultureIgnoreCase))
-                                           .Value
-                                           .Select(x => int.TryParse(x, out var y) ? y : 0)
-                                           .Where(x => x is > 0 and <= 100)
-                                           .DefaultIfEmpty(10)
-                                           .FirstOrDefault();
+	public virtual int Limit => QueryString.FirstOrDefault(x => x.Key.Equals(nameof(Page<T>.Pager.Limit), StringComparison.InvariantCultureIgnoreCase))
+										   .Value
+										   .Select(x => int.TryParse(x, out var y) ? y : 0)
+										   .Where(x => x is > 0 and <= 100)
+										   .DefaultIfEmpty(10)
+										   .FirstOrDefault();
 }

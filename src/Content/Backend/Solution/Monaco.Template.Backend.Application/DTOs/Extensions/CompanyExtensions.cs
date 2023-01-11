@@ -1,8 +1,9 @@
-﻿using Monaco.Template.Application.Features.Company.Commands;
-using Monaco.Template.Domain.Model;
+﻿using Monaco.Template.Backend.Application.DTOs.Extensions;
+using Monaco.Template.Backend.Application.Features.Company.Commands;
+using Monaco.Template.Backend.Domain.Model;
 using System.Linq.Expressions;
 
-namespace Monaco.Template.Application.DTOs.Extensions;
+namespace Monaco.Template.Backend.Application.DTOs.Extensions;
 
 public static class CompanyExtensions
 {
@@ -10,18 +11,18 @@ public static class CompanyExtensions
 		value is null
 			? null
 			: new()
-			  {
-				  Id = value.Id,
-				  Name = value.Name,
-				  Email = value.Email,
-				  WebSiteUrl = value.WebSiteUrl,
-				  Street = value.Address?.Street,
-				  City = value.Address?.City,
-				  County = value.Address?.County,
-				  PostCode = value.Address?.PostCode,
-				  CountryId = value.Address?.CountryId,
-				  Country = expandCountry ? value.Address?.Country.Map() : null
-			  };
+			{
+				Id = value.Id,
+				Name = value.Name,
+				Email = value.Email,
+				WebSiteUrl = value.WebSiteUrl,
+				Street = value.Address?.Street,
+				City = value.Address?.City,
+				County = value.Address?.County,
+				PostCode = value.Address?.PostCode,
+				CountryId = value.Address?.CountryId,
+				Country = expandCountry ? value.Address?.Country.Map() : null
+			};
 
 	public static Company Map(this CompanyCreateCommand value, Country? country) =>
 		new(value.Name,

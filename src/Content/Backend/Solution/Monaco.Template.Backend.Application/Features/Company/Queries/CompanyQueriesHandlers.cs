@@ -1,12 +1,12 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Monaco.Template.Application.DTOs;
-using Monaco.Template.Application.DTOs.Extensions;
-using Monaco.Template.Application.Infrastructure.Context;
-using Monaco.Template.Common.Domain.Model;
-using Monaco.Template.Common.Infrastructure.Context.Extensions;
+using Monaco.Template.Backend.Application.DTOs;
+using Monaco.Template.Backend.Application.DTOs.Extensions;
+using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Common.Domain.Model;
+using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
-namespace Monaco.Template.Application.Features.Company.Queries;
+namespace Monaco.Template.Backend.Application.Features.Company.Queries;
 
 public sealed class CompanyQueriesHandlers : IRequestHandler<GetCompanyPageQuery, Page<CompanyDto>?>,
 											 IRequestHandler<GetCompanyByIdQuery, CompanyDto?>

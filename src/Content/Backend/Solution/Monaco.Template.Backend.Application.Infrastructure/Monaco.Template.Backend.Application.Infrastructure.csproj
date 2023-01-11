@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!--#if (filesSupport)-->
+		<ProjectReference Include="..\Monaco.Template.Backend.Common.BlobStorage\Monaco.Template.Backend.Common.BlobStorage.csproj" />
+		<!--#endif-->
+		<ProjectReference Include="..\Monaco.Template.Backend.Common.Infrastructure\Monaco.Template.Backend.Common.Infrastructure.csproj" />
+		<ProjectReference Include="..\Monaco.Template.Backend.Domain\Monaco.Template.Backend.Domain.csproj" />
+	</ItemGroup>
+
+</Project>

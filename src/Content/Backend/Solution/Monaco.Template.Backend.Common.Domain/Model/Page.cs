@@ -1,4 +1,4 @@
-﻿namespace Monaco.Template.Common.Domain.Model;
+﻿namespace Monaco.Template.Backend.Common.Domain.Model;
 
 public record Page<T>
 {
@@ -9,19 +9,19 @@ public record Page<T>
 	/// <param name="limit">Amount of items to page</param>
 	/// <param name="count">Total amount of items</param>
 	public Page(IEnumerable<T> results, int offset, int limit, long count)
-    {
-        Results = results.ToList();
-        Pager = new Pager(offset, limit, count);
+	{
+		Results = results.ToList();
+		Pager = new Pager(offset, limit, count);
 	}
 
-    /// <summary>
-    /// Page metadata
-    /// </summary>
-    public Pager Pager { get; }
-    /// <summary>
-    /// Paged results
-    /// </summary>
-    public IReadOnlyList<T> Results { get; }
+	/// <summary>
+	/// Page metadata
+	/// </summary>
+	public Pager Pager { get; }
+	/// <summary>
+	/// Paged results
+	/// </summary>
+	public IReadOnlyList<T> Results { get; }
 }
 
 /// <summary>

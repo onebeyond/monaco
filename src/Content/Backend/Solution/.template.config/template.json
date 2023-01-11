@@ -6,9 +6,9 @@
 	"description": "Solution template for backend .NET projects",
 	"groupIdentity": "Monaco.Template",
 	"identity": "Monaco.Template.Backend.Solution",
-	"shortName": "monaco-solution",
+	"shortName": "monaco-backend-solution",
 	"preferNameDirectory": true,
-	"sourceName": "Monaco.Template",
+	"sourceName": "Monaco.Template.Backend",
 	"tags": {
 		"language": "C#",
 		"type": "project"
@@ -152,45 +152,45 @@
 					"exclude": [
 						"nuget.config",
 						"realm-export-template.json",
-						"Monaco.Template.Common.*/**/*"
+						"Monaco.Template.Backend.Common.*/**/*"
 					]
 				},
 				{
 					"condition": "(!filesSupport)",
 					"exclude": [
-						"Monaco.Template.Common.BlobStorage/**/*",
-						"Monaco.Template.Api/Controllers/FilesController.cs",
-						"Monaco.Template.Api/Controllers/ImagesController.cs",
-						"Monaco.Template.Application/Features/File/**/*",
-						"Monaco.Template.Application/Features/Image/**/*",
-						"Monaco.Template.Application/DTOs/Extensions/FileExtensions.cs",
-						"Monaco.Template.Application/DTOs/File*.cs",
-						"Monaco.Template.Application/DTOs/ImageDto.cs",
-						"Monaco.Template.Application/Services/**/*FileService.*",
-						"Monaco.Template.Application.Infrastructure/EntityConfigurations/DocumentEntityConfiguration.cs",
-						"Monaco.Template.Application.Infrastructure/EntityConfigurations/FileEntityConfiguration.cs",
-						"Monaco.Template.Application.Infrastructure/EntityConfigurations/ImageEntityConfiguration.cs",
-						"Monaco.Template.Domain/Model/Document.cs",
-						"Monaco.Template.Domain/Model/File.cs",
-						"Monaco.Template.Domain/Model/Image.cs"
+						"Monaco.Template.Backend.Common.BlobStorage/**/*",
+						"Monaco.Template.Backend.Api/Controllers/FilesController.cs",
+						"Monaco.Template.Backend.Api/Controllers/ImagesController.cs",
+						"Monaco.Template.Backend.Application/Features/File/**/*",
+						"Monaco.Template.Backend.Application/Features/Image/**/*",
+						"Monaco.Template.Backend.Application/DTOs/Extensions/FileExtensions.cs",
+						"Monaco.Template.Backend.Application/DTOs/File*.cs",
+						"Monaco.Template.Backend.Application/DTOs/ImageDto.cs",
+						"Monaco.Template.Backend.Application/Services/**/*FileService.*",
+						"Monaco.Template.Backend.Application.Infrastructure/EntityConfigurations/DocumentEntityConfiguration.cs",
+						"Monaco.Template.Backend.Application.Infrastructure/EntityConfigurations/FileEntityConfiguration.cs",
+						"Monaco.Template.Backend.Application.Infrastructure/EntityConfigurations/ImageEntityConfiguration.cs",
+						"Monaco.Template.Backend.Domain/Model/Document.cs",
+						"Monaco.Template.Backend.Domain/Model/File.cs",
+						"Monaco.Template.Backend.Domain/Model/Image.cs"
 					]
 				},
 				{
 					"condition": "(!massTransitIntegration)",
 					"exclude": [
-						"Monaco.Template.Common.Messaging.Messages/**/*"
+						"Monaco.Template.Backend.Common.Messaging.Messages/**/*"
 					]
 				},
 				{
 					"condition": "(!apiGateway)",
 					"exclude": [
-						"Monaco.Template.Common.ApiGateway/**/*"
+						"Monaco.Template.Backend.Common.ApiGateway/**/*"
 					]
 				},
 				{
 					"condition": "(disableAuth)",
 					"exclude": [
-						"Monaco.Template.Api/Auth/**/*"
+						"Monaco.Template.Backend.Api/Auth/**/*"
 					]
 				},
 				{

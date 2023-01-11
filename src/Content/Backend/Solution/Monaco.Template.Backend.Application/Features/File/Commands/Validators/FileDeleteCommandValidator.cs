@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
-using Monaco.Template.Application.Infrastructure.Context;
-using Monaco.Template.Common.Application.Validators.Extensions;
+using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 
-namespace Monaco.Template.Application.Features.File.Commands.Validators;
+namespace Monaco.Template.Backend.Application.Features.File.Commands.Validators;
 
 public sealed class FileDeleteCommandValidator : AbstractValidator<FileDeleteCommand>
 {

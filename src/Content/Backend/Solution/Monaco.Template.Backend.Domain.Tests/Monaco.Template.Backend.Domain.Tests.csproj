@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Monaco.Template.Common.Tests\Monaco.Template.Common.Tests.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Backend.Common.Tests\Monaco.Template.Backend.Common.Tests.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,21 +1,21 @@
-﻿using System;
+﻿using FluentAssertions;
+using FluentValidation;
+using FluentValidation.TestHelper;
+using MockQueryable.Moq;
+using Monaco.Template.Backend.Application.Features.Company.Commands;
+using Monaco.Template.Backend.Application.Features.Company.Commands.Validators;
+using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Common.Application.Validators.Extensions;
+using Monaco.Template.Backend.Common.Tests.Factories;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
-using Monaco.Template.Application.Features.Company.Commands;
-using Monaco.Template.Application.Features.Company.Commands.Validators;
-using Monaco.Template.Application.Infrastructure.Context;
-using Monaco.Template.Common.Application.Validators.Extensions;
-using Monaco.Template.Common.Tests.Factories;
-using FluentAssertions;
-using FluentValidation;
-using FluentValidation.TestHelper;
-using MockQueryable.Moq;
-using Moq;
 using Xunit;
 
-namespace Monaco.Template.Application.Tests.Features.Company.Commands.Validators;
+namespace Monaco.Template.Backend.Application.Tests.Features.Company.Commands.Validators;
 
 [ExcludeFromCodeCoverage]
 public class CompanyEditCommandValidatorTests
@@ -28,24 +28,24 @@ public class CompanyEditCommandValidatorTests
 
 		sut.RuleLevelCascadeMode.Should().Be(CascadeMode.Stop);
 	}
-	
+
 	[Trait("Application Validators", "Company Validators")]
 	[Theory(DisplayName = "Existing company passes validation correctly")]
 	[AnonymousData]
 	public async Task ExistingCompanyPassesValidationCorrectly(Domain.Model.Company company)
 	{
 		var dbContextMock = new Mock<AppDbContext>();
-		var companyDbSetMock = new List<Domain.Model.Company>(new []{company}).AsQueryable().BuildMockDbSet();
+		var companyDbSetMock = new List<Domain.Model.Company>(new[] { company }).AsQueryable().BuildMockDbSet();
 		dbContextMock.Setup(x => x.Set<Domain.Model.Company>()).Returns(companyDbSetMock.Object);
-		var cmdMock = new Mock<CompanyEditCommand>(company.Id,			// Id
+		var cmdMock = new Mock<CompanyEditCommand>(company.Id,          // Id
 												   It.IsAny<string>(),  // Name
-												   It.IsAny<string>(),	// Email
-												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Street
-												   It.IsAny<string>(),	// City
-												   It.IsAny<string>(),	// County
+												   It.IsAny<string>(),  // Email
+												   It.IsAny<string>(),  // WebSiteUrl
+												   It.IsAny<string>(),  // Street
+												   It.IsAny<string>(),  // City
+												   It.IsAny<string>(),  // County
 												   It.IsAny<string>(),  // PostCode
-												   Guid.NewGuid());		// Country.Id
+												   Guid.NewGuid());     // Country.Id
 
 		var sut = new CompanyEditCommandValidator(dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, s => s.IncludeRuleSets(ValidatorsExtensions.ExistsRulesetName));
@@ -53,24 +53,24 @@ public class CompanyEditCommandValidatorTests
 		validationResult.RuleSetsExecuted.Should().Contain(ValidatorsExtensions.ExistsRulesetName);
 		validationResult.ShouldNotHaveAnyValidationErrors();
 	}
-	
+
 	[Trait("Application Validators", "Company Validators")]
 	[Theory(DisplayName = "Non existing company passes validation correctly")]
 	[AnonymousData]
 	public async Task NonExistingCompanyPassesValidationCorrectly(Domain.Model.Company company, Guid id)
 	{
 		var dbContextMock = new Mock<AppDbContext>();
-		var companyDbSetMock = new List<Domain.Model.Company>(new []{company}).AsQueryable().BuildMockDbSet();
+		var companyDbSetMock = new List<Domain.Model.Company>(new[] { company }).AsQueryable().BuildMockDbSet();
 		dbContextMock.Setup(x => x.Set<Domain.Model.Company>()).Returns(companyDbSetMock.Object);
-		var cmdMock = new Mock<CompanyEditCommand>(id,					// Id
+		var cmdMock = new Mock<CompanyEditCommand>(id,                  // Id
 												   It.IsAny<string>(),  // Name
-												   It.IsAny<string>(),	// Email
-												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Street
-												   It.IsAny<string>(),	// City
-												   It.IsAny<string>(),	// County
+												   It.IsAny<string>(),  // Email
+												   It.IsAny<string>(),  // WebSiteUrl
+												   It.IsAny<string>(),  // Street
+												   It.IsAny<string>(),  // City
+												   It.IsAny<string>(),  // County
 												   It.IsAny<string>(),  // PostCode
-												   Guid.NewGuid());		// Country.Id
+												   Guid.NewGuid());     // Country.Id
 
 		var sut = new CompanyEditCommandValidator(dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, s => s.IncludeRuleSets(ValidatorsExtensions.ExistsRulesetName));
@@ -78,7 +78,7 @@ public class CompanyEditCommandValidatorTests
 		validationResult.RuleSetsExecuted.Should().Contain(ValidatorsExtensions.ExistsRulesetName);
 		validationResult.ShouldHaveValidationErrorFor(x => x.Id);
 	}
-	
+
 	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "Name being valid does not generate validation error")]
 	public async Task NameDoesNotGenerateErrorWhenValid()
@@ -89,14 +89,14 @@ public class CompanyEditCommandValidatorTests
 		dbContextMock.Setup(x => x.Set<Domain.Model.Company>()).Returns(companyDbSetMock.Object);
 
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
-												   new string(It.IsAny<char>(), 100),	// same Name as the already-existing Company
-												   It.IsAny<string>(),				// Email
-												   It.IsAny<string>(),				// WebSiteUrl
-												   It.IsAny<string>(),				// Street
-												   It.IsAny<string>(),				// City
-												   It.IsAny<string>(),				// County
-												   It.IsAny<string>(),				// PostCode
-												   It.IsAny<Guid>());					// country.Id
+												   new string(It.IsAny<char>(), 100),   // same Name as the already-existing Company
+												   It.IsAny<string>(),              // Email
+												   It.IsAny<string>(),              // WebSiteUrl
+												   It.IsAny<string>(),              // Street
+												   It.IsAny<string>(),              // City
+												   It.IsAny<string>(),              // County
+												   It.IsAny<string>(),              // PostCode
+												   It.IsAny<Guid>());                   // country.Id
 
 		var sut = new CompanyEditCommandValidator(dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Name));
@@ -109,14 +109,14 @@ public class CompanyEditCommandValidatorTests
 	public async Task NameIsEmptyGeneratesError()
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
-												   string.Empty,			// Name
-												   It.IsAny<string>(),	// Email
-												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Street
-												   It.IsAny<string>(),	// City
-												   It.IsAny<string>(),	// County
-												   It.IsAny<string>(),	// PostCode
-												   It.IsAny<Guid>());		// country.Id
+												   string.Empty,            // Name
+												   It.IsAny<string>(),  // Email
+												   It.IsAny<string>(),  // WebSiteUrl
+												   It.IsAny<string>(),  // Street
+												   It.IsAny<string>(),  // City
+												   It.IsAny<string>(),  // County
+												   It.IsAny<string>(),  // PostCode
+												   It.IsAny<Guid>());       // country.Id
 
 		var sut = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Name));
@@ -132,14 +132,14 @@ public class CompanyEditCommandValidatorTests
 	public async Task NameWithLongValueGeneratesError()
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
-												   new string(It.IsAny<char>(), 101),	// Name
-												   It.IsAny<string>(),				// Email
-												   It.IsAny<string>(),				// WebSiteUrl
-												   It.IsAny<string>(),				// Street
-												   It.IsAny<string>(),				// City
-												   It.IsAny<string>(),				// County
-												   It.IsAny<string>(),				// PostCode
-												   It.IsAny<Guid>());					// country.Id
+												   new string(It.IsAny<char>(), 101),   // Name
+												   It.IsAny<string>(),              // Email
+												   It.IsAny<string>(),              // WebSiteUrl
+												   It.IsAny<string>(),              // Street
+												   It.IsAny<string>(),              // City
+												   It.IsAny<string>(),              // County
+												   It.IsAny<string>(),              // PostCode
+												   It.IsAny<Guid>());                   // country.Id
 
 		var sut = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Name));
@@ -163,13 +163,13 @@ public class CompanyEditCommandValidatorTests
 
 		var cmdMock = new Mock<CompanyEditCommand>(id,
 												   company.Name,          // same Name as the already-existing Company
-												   It.IsAny<string>(),	// Email
-												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Street
-												   It.IsAny<string>(),	// City
+												   It.IsAny<string>(),  // Email
+												   It.IsAny<string>(),  // WebSiteUrl
+												   It.IsAny<string>(),  // Street
+												   It.IsAny<string>(),  // City
 												   It.IsAny<string>(),    // County
-												   It.IsAny<string>(),	// PostCode
-												   It.IsAny<Guid>());		// country.Id
+												   It.IsAny<string>(),  // PostCode
+												   It.IsAny<Guid>());       // country.Id
 
 		var sut = new CompanyEditCommandValidator(dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Name));
@@ -190,14 +190,14 @@ public class CompanyEditCommandValidatorTests
 		dbContextMock.Setup(x => x.Set<Domain.Model.Company>()).Returns(companyDbSetMock.Object);
 
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
-												   It.IsAny<string>(),	// same Name as the already-existing Company
-												   "valid@email.com",		// Email
-												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Street
-												   It.IsAny<string>(),	// City
-												   It.IsAny<string>(),	// County
-												   It.IsAny<string>(),	// PostCode
-												   It.IsAny<Guid>());		// country.Id
+												   It.IsAny<string>(),  // same Name as the already-existing Company
+												   "valid@email.com",       // Email
+												   It.IsAny<string>(),  // WebSiteUrl
+												   It.IsAny<string>(),  // Street
+												   It.IsAny<string>(),  // City
+												   It.IsAny<string>(),  // County
+												   It.IsAny<string>(),  // PostCode
+												   It.IsAny<Guid>());       // country.Id
 
 		var sut = new CompanyEditCommandValidator(dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Email));
@@ -210,14 +210,14 @@ public class CompanyEditCommandValidatorTests
 	public async Task EmailIsEmptyGeneratesError()
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
-												   It.IsAny<string>(),	// Name
-												   string.Empty,			// Email
-												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Street
-												   It.IsAny<string>(),	// City
-												   It.IsAny<string>(),	// County
-												   It.IsAny<string>(),	// PostCode
-												   It.IsAny<Guid>());		// country.Id
+												   It.IsAny<string>(),  // Name
+												   string.Empty,            // Email
+												   It.IsAny<string>(),  // WebSiteUrl
+												   It.IsAny<string>(),  // Street
+												   It.IsAny<string>(),  // City
+												   It.IsAny<string>(),  // County
+												   It.IsAny<string>(),  // PostCode
+												   It.IsAny<Guid>());       // country.Id
 
 		var sut = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Email));
@@ -234,14 +234,14 @@ public class CompanyEditCommandValidatorTests
 	public async Task EmailAddressIsInvalidGeneratesError(string email)
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
-												   It.IsAny<string>(),	// Name
-												   email,					// Email
-												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Street
-												   It.IsAny<string>(),	// City
-												   It.IsAny<string>(),	// County
-												   It.IsAny<string>(),	// PostCode
-												   It.IsAny<Guid>());		// country.Id
+												   It.IsAny<string>(),  // Name
+												   email,                   // Email
+												   It.IsAny<string>(),  // WebSiteUrl
+												   It.IsAny<string>(),  // Street
+												   It.IsAny<string>(),  // City
+												   It.IsAny<string>(),  // County
+												   It.IsAny<string>(),  // PostCode
+												   It.IsAny<Guid>());       // country.Id
 
 		var sut = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Email));
@@ -257,14 +257,14 @@ public class CompanyEditCommandValidatorTests
 	public async Task WebsiteUrlWithLongValueGeneratesError()
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
-												   It.IsAny<string>(),				// Name
-												   It.IsAny<string>(),				// Email
-												   new string(It.IsAny<char>(), 301),	// WebSiteUrl
-												   It.IsAny<string>(),				// Street
-												   It.IsAny<string>(),				// City
-												   It.IsAny<string>(),				// County
-												   It.IsAny<string>(),				// PostCode
-												   It.IsAny<Guid>());					// country.Id
+												   It.IsAny<string>(),              // Name
+												   It.IsAny<string>(),              // Email
+												   new string(It.IsAny<char>(), 301),   // WebSiteUrl
+												   It.IsAny<string>(),              // Street
+												   It.IsAny<string>(),              // City
+												   It.IsAny<string>(),              // County
+												   It.IsAny<string>(),              // PostCode
+												   It.IsAny<Guid>());                   // country.Id
 
 		var sut = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.WebSiteUrl));
@@ -282,13 +282,13 @@ public class CompanyEditCommandValidatorTests
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
 												   It.IsAny<string>(),    // Name
-												   It.IsAny<string>(),	// Email
-												   string.Empty,			// WebSiteUrl
-												   It.IsAny<string>(),	// Street
-												   It.IsAny<string>(),	// City
-												   It.IsAny<string>(),	// County
-												   It.IsAny<string>(),	// PostCode
-												   It.IsAny<Guid>());		// country.Id
+												   It.IsAny<string>(),  // Email
+												   string.Empty,            // WebSiteUrl
+												   It.IsAny<string>(),  // Street
+												   It.IsAny<string>(),  // City
+												   It.IsAny<string>(),  // County
+												   It.IsAny<string>(),  // PostCode
+												   It.IsAny<Guid>());       // country.Id
 
 		var sut = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.WebSiteUrl));
@@ -302,13 +302,13 @@ public class CompanyEditCommandValidatorTests
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
 												   It.IsAny<string>(),                // Name
-												   It.IsAny<string>(),				// Email
-												   It.IsAny<string>(),				// WebSiteUrl
-												   new string(It.IsAny<char>(), 101),	// Street
-												   It.IsAny<string>(),				// City
-												   It.IsAny<string>(),				// County
-												   It.IsAny<string>(),				// PostCode
-												   It.IsAny<Guid>());					// country.Id
+												   It.IsAny<string>(),              // Email
+												   It.IsAny<string>(),              // WebSiteUrl
+												   new string(It.IsAny<char>(), 101),   // Street
+												   It.IsAny<string>(),              // City
+												   It.IsAny<string>(),              // County
+												   It.IsAny<string>(),              // PostCode
+												   It.IsAny<Guid>());                   // country.Id
 
 		var validator = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
 		var validationResult = await validator.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Street));
@@ -326,13 +326,13 @@ public class CompanyEditCommandValidatorTests
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
 												   It.IsAny<string>(),    // Name
-												   It.IsAny<string>(),	// Email
-												   It.IsAny<string>(),	// WebSiteUrl
-												   string.Empty,			// Street
-												   It.IsAny<string>(),	// City
-												   It.IsAny<string>(),	// County
-												   It.IsAny<string>(),	// PostCode
-												   It.IsAny<Guid>());		// country.Id
+												   It.IsAny<string>(),  // Email
+												   It.IsAny<string>(),  // WebSiteUrl
+												   string.Empty,            // Street
+												   It.IsAny<string>(),  // City
+												   It.IsAny<string>(),  // County
+												   It.IsAny<string>(),  // PostCode
+												   It.IsAny<Guid>());       // country.Id
 
 		var sut = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Street));
@@ -346,13 +346,13 @@ public class CompanyEditCommandValidatorTests
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
 												   It.IsAny<string>(),                // Name
-												   It.IsAny<string>(),				// Email
-												   It.IsAny<string>(),				// WebSiteUrl
-												   It.IsAny<string>(),				// Street
-												   new string(It.IsAny<char>(), 101),	// City
-												   It.IsAny<string>(),				// County
-												   It.IsAny<string>(),				// PostCode
-												   It.IsAny<Guid>());					// country.Id
+												   It.IsAny<string>(),              // Email
+												   It.IsAny<string>(),              // WebSiteUrl
+												   It.IsAny<string>(),              // Street
+												   new string(It.IsAny<char>(), 101),   // City
+												   It.IsAny<string>(),              // County
+												   It.IsAny<string>(),              // PostCode
+												   It.IsAny<Guid>());                   // country.Id
 
 		var sut = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.City));
@@ -370,13 +370,13 @@ public class CompanyEditCommandValidatorTests
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
 												   It.IsAny<string>(),    // Name
-												   It.IsAny<string>(),	// Email
-												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Street
-												   string.Empty,			// City
-												   It.IsAny<string>(),	// County
-												   It.IsAny<string>(),	// PostCode
-												   It.IsAny<Guid>());		// country.Id
+												   It.IsAny<string>(),  // Email
+												   It.IsAny<string>(),  // WebSiteUrl
+												   It.IsAny<string>(),  // Street
+												   string.Empty,            // City
+												   It.IsAny<string>(),  // County
+												   It.IsAny<string>(),  // PostCode
+												   It.IsAny<Guid>());       // country.Id
 
 		var sut = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.City));
@@ -390,13 +390,13 @@ public class CompanyEditCommandValidatorTests
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
 												   It.IsAny<string>(),                // Name
-												   It.IsAny<string>(),				// Email
-												   It.IsAny<string>(),				// WebSiteUrl
-												   It.IsAny<string>(),				// Street
-												   It.IsAny<string>(),				// City
-												   new string(It.IsAny<char>(), 101),	// County
-												   It.IsAny<string>(),				// PostCode
-												   It.IsAny<Guid>());					// country.Id
+												   It.IsAny<string>(),              // Email
+												   It.IsAny<string>(),              // WebSiteUrl
+												   It.IsAny<string>(),              // Street
+												   It.IsAny<string>(),              // City
+												   new string(It.IsAny<char>(), 101),   // County
+												   It.IsAny<string>(),              // PostCode
+												   It.IsAny<Guid>());                   // country.Id
 
 		var sut = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.County));
@@ -414,13 +414,13 @@ public class CompanyEditCommandValidatorTests
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
 												   It.IsAny<string>(),        // Name
-												   It.IsAny<string>(),	// Email
-												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Street
-												   It.IsAny<string>(),	// City
-												   string.Empty,			// County
-												   It.IsAny<string>(),	// PostCode
-												   It.IsAny<Guid>());		// country.Id
+												   It.IsAny<string>(),  // Email
+												   It.IsAny<string>(),  // WebSiteUrl
+												   It.IsAny<string>(),  // Street
+												   It.IsAny<string>(),  // City
+												   string.Empty,            // County
+												   It.IsAny<string>(),  // PostCode
+												   It.IsAny<Guid>());       // country.Id
 
 		var sut = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.County));
@@ -434,13 +434,13 @@ public class CompanyEditCommandValidatorTests
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
 												   It.IsAny<string>(),                // Name
-												   It.IsAny<string>(),				// Email
-												   It.IsAny<string>(),				// WebSiteUrl
-												   It.IsAny<string>(),				// Street
-												   It.IsAny<string>(),				// City
-												   It.IsAny<string>(),				// County
-												   new string(It.IsAny<char>(), 11),	// PostCode
-												   It.IsAny<Guid>());					// country.Id
+												   It.IsAny<string>(),              // Email
+												   It.IsAny<string>(),              // WebSiteUrl
+												   It.IsAny<string>(),              // Street
+												   It.IsAny<string>(),              // City
+												   It.IsAny<string>(),              // County
+												   new string(It.IsAny<char>(), 11),    // PostCode
+												   It.IsAny<Guid>());                   // country.Id
 
 		var sut = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.PostCode));
@@ -458,13 +458,13 @@ public class CompanyEditCommandValidatorTests
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
 												   It.IsAny<string>(),        // Name
-												   It.IsAny<string>(),	// Email
-												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Street
-												   It.IsAny<string>(),	// City
-												   It.IsAny<string>(),	// County
-												   string.Empty,			// PostCode
-												   It.IsAny<Guid>());		// country.Id
+												   It.IsAny<string>(),  // Email
+												   It.IsAny<string>(),  // WebSiteUrl
+												   It.IsAny<string>(),  // Street
+												   It.IsAny<string>(),  // City
+												   It.IsAny<string>(),  // County
+												   string.Empty,            // PostCode
+												   It.IsAny<Guid>());       // country.Id
 
 		var sut = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.PostCode));
@@ -486,14 +486,14 @@ public class CompanyEditCommandValidatorTests
 		dbContextMock.Setup(x => x.Set<Domain.Model.Country>()).Returns(countryDbSetMock.Object);
 
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
-												   It.IsAny<string>(),	// Name
-												   It.IsAny<string>(),	// Email
-												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Street
-												   It.IsAny<string>(),	// City
-												   It.IsAny<string>(),	// County
-												   It.IsAny<string>(),	// PostCode
-												   country.Id);			// country.Id
+												   It.IsAny<string>(),  // Name
+												   It.IsAny<string>(),  // Email
+												   It.IsAny<string>(),  // WebSiteUrl
+												   It.IsAny<string>(),  // Street
+												   It.IsAny<string>(),  // City
+												   It.IsAny<string>(),  // County
+												   It.IsAny<string>(),  // PostCode
+												   country.Id);         // country.Id
 
 		var sut = new CompanyEditCommandValidator(dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.CountryId));
@@ -506,14 +506,14 @@ public class CompanyEditCommandValidatorTests
 	public async Task CountryWithNullValueDoesNotGenerateError()
 	{
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
-												   It.IsAny<string>(),	// Name
-												   It.IsAny<string>(),	// Email
-												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Street
-												   It.IsAny<string>(),	// City
-												   It.IsAny<string>(),	// County
-												   It.IsAny<string>(),	// PostCode
-												   null);			// country.Id
+												   It.IsAny<string>(),  // Name
+												   It.IsAny<string>(),  // Email
+												   It.IsAny<string>(),  // WebSiteUrl
+												   It.IsAny<string>(),  // Street
+												   It.IsAny<string>(),  // City
+												   It.IsAny<string>(),  // County
+												   It.IsAny<string>(),  // PostCode
+												   null);           // country.Id
 
 		var sut = new CompanyEditCommandValidator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.CountryId));
@@ -536,13 +536,13 @@ public class CompanyEditCommandValidatorTests
 
 		var cmdMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
 												   It.IsAny<string>(),    // Name
-												   It.IsAny<string>(),	// Email
-												   It.IsAny<string>(),	// WebSiteUrl
-												   It.IsAny<string>(),	// Street
-												   It.IsAny<string>(),	// City
-												   It.IsAny<string>(),	// County
+												   It.IsAny<string>(),  // Email
+												   It.IsAny<string>(),  // WebSiteUrl
+												   It.IsAny<string>(),  // Street
+												   It.IsAny<string>(),  // City
+												   It.IsAny<string>(),  // County
 												   It.IsAny<string>(),    // PostCode
-												   Guid.NewGuid());		// country.Id
+												   Guid.NewGuid());     // country.Id
 
 		var sut = new CompanyEditCommandValidator(dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.CountryId));

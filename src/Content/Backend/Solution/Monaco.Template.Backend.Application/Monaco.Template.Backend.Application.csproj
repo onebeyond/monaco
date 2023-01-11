@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Monaco.Template.Common.Application\Monaco.Template.Common.Application.csproj" />
-    <ProjectReference Include="..\Monaco.Template.Application.Infrastructure\Monaco.Template.Application.Infrastructure.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Backend.Common.Application\Monaco.Template.Backend.Common.Application.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Backend.Application.Infrastructure\Monaco.Template.Backend.Application.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,4 @@
-﻿namespace Monaco.Template.Common.Application.Validators.Contracts;
+﻿namespace Monaco.Template.Backend.Common.Application.Validators.Contracts;
 
 public interface INonInjectable
 {

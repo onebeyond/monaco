@@ -1,9 +1,9 @@
-﻿using System.Linq.Expressions;
-using LinqKit;
+﻿using LinqKit;
 using Microsoft.EntityFrameworkCore;
-using Monaco.Template.Common.Domain.Model;
+using Monaco.Template.Backend.Common.Domain.Model;
+using System.Linq.Expressions;
 
-namespace Monaco.Template.Common.Infrastructure.Context.Extensions;
+namespace Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
 public static class OperationsExtensions
 {

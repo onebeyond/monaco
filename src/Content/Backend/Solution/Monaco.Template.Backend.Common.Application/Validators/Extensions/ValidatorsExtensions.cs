@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
-using Monaco.Template.Common.Application.Commands;
-using Monaco.Template.Common.Domain.Model;
-using Monaco.Template.Common.Infrastructure.Context;
-using Monaco.Template.Common.Infrastructure.Context.Extensions;
+using Monaco.Template.Backend.Common.Application.Commands;
+using Monaco.Template.Backend.Common.Domain.Model;
+using Monaco.Template.Backend.Common.Infrastructure.Context;
+using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 using System.Linq.Expressions;
 
-namespace Monaco.Template.Common.Application.Validators.Extensions;
+namespace Monaco.Template.Backend.Common.Application.Validators.Extensions;
 
 public static class ValidatorsExtensions
 {

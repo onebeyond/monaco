@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Monaco.Template.Common.Api.Cors;
+namespace Monaco.Template.Backend.Common.Api.Cors;
 
 public static class CorsExtensions
 {
@@ -28,11 +28,11 @@ public static class CorsExtensions
 							 var corsConfigurations = configuration.GetSection(sectionName)
 																   .GetChildren()
 																   .ToList();
-							 
+
 							 var defaultConfig = corsConfigurations.Find(c => c[NameSection] == CorsDefaultPolicyName);
 							 if (defaultConfig is not null)
 								 x.AddDefaultPolicy(ConfigurePolicy(defaultConfig));
-							 
+
 							 corsConfigurations.ForEach(c => x.AddPolicy(c[NameSection], ConfigurePolicy(c)));
 						 });
 
@@ -42,7 +42,7 @@ public static class CorsExtensions
 	/// <param name="services"></param>
 	/// <param name="configuration"></param>
 	/// <returns></returns>
-	public static IServiceCollection AddCorsPolicies(this IServiceCollection services, IConfiguration configuration) => 
+	public static IServiceCollection AddCorsPolicies(this IServiceCollection services, IConfiguration configuration) =>
 		services.AddCorsPolicies(configuration, DefaultCorsPoliciesSectionName);
 
 	private static Action<CorsPolicyBuilder> ConfigurePolicy(IConfiguration config) =>

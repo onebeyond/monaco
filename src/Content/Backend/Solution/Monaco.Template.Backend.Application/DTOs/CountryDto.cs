@@ -1,7 +1,7 @@
-﻿namespace Monaco.Template.Application.DTOs;
+﻿namespace Monaco.Template.Backend.Application.DTOs;
 
 public class CountryDto
 {
-    public Guid Id { get; set; }
-    public string Name { get; set; }
+	public Guid Id { get; set; }
+	public string Name { get; set; }
 }

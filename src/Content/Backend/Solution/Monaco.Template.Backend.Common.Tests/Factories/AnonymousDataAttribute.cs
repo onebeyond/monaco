@@ -1,7 +1,7 @@
 ﻿using AutoFixture;
 using AutoFixture.Xunit2;
 
-namespace Monaco.Template.Common.Tests.Factories;
+namespace Monaco.Template.Backend.Common.Tests.Factories;
 
 public class AnonymousDataAttribute : AutoDataAttribute
 {

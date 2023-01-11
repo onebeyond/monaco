@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Monaco.Template.Domain\Monaco.Template.Domain.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Backend.Domain\Monaco.Template.Backend.Domain.csproj" />
   </ItemGroup>
 
 </Project>

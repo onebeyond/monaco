@@ -2,9 +2,9 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
-using Monaco.Template.Common.Api.Attributes;
+using Monaco.Template.Backend.Common.Api.Attributes;
 
-namespace Monaco.Template.Common.Api.Middleware;
+namespace Monaco.Template.Backend.Common.Api.Middleware;
 
 public class JwtClaimsMapperMiddleware
 {

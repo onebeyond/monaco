@@ -1,11 +1,11 @@
 ﻿#if filesSupport
 #if (!disableAuth)
-using Monaco.Template.Api.Auth;
+using Monaco.Template.Backend.Api.Auth;
 #endif
-using Monaco.Template.Application.Features.File.Commands;
-using Monaco.Template.Application.DTOs;
-using Monaco.Template.Application.Features.File.Queries;
-using Monaco.Template.Common.Api.Application;
+using Monaco.Template.Backend.Application.Features.File.Commands;
+using Monaco.Template.Backend.Application.DTOs;
+using Monaco.Template.Backend.Application.Features.File.Queries;
+using Monaco.Template.Backend.Common.Api.Application;
 using MediatR;
 #if (!disableAuth)
 using Microsoft.AspNetCore.Authorization;
@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace Monaco.Template.Api.Controllers
+namespace Monaco.Template.Backend.Api.Controllers
 {
 	[Route("api/v{apiVersion:apiVersion}/[controller]")]
     [ApiController]

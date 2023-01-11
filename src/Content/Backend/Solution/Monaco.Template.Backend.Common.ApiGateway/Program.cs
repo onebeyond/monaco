@@ -1,6 +1,6 @@
-using Monaco.Template.Common.Api.Auth;
-using Monaco.Template.Common.Api.Cors;
-using Monaco.Template.Common.ApiGateway.Auth;
+using Monaco.Template.Backend.Common.ApiGateway.Auth;
+using Monaco.Template.Backend.Common.Api.Auth;
+using Monaco.Template.Backend.Common.Api.Cors;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);

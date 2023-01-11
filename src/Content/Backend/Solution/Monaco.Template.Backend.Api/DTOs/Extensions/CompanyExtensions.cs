@@ -1,6 +1,6 @@
-﻿using Monaco.Template.Application.Features.Company.Commands;
+﻿using Monaco.Template.Backend.Application.Features.Company.Commands;
 
-namespace Monaco.Template.Api.DTOs.Extensions;
+namespace Monaco.Template.Backend.Api.DTOs.Extensions;
 
 public static class CompanyExtensions
 {

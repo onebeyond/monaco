@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -6,20 +6,16 @@
     <Nullable>enable</Nullable>
 
 	<PackageVersion>0.0.1-alpha1</PackageVersion>
-    <Title>Monaco.Template.Common.Domain</Title>
+    <Title>Monaco.Template.Backend.Common.Messaging.Messages</Title>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>One Beyond</Authors>
     <Company>One Beyond</Company>
     <Copyright>One Beyond</Copyright>
     <PackageProjectUrl>https://github.com/onebeyond/monaco</PackageProjectUrl>
     <RepositoryUrl>https://github.com/onebeyond/monaco.git</RepositoryUrl>
-    <Description>Library with classes and contracts for the Domain library.</Description>
+    <Description>Library with messages for MassTransit messaging.</Description>
     <RepositoryType>Git</RepositoryType>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="MediatR.Contracts" Version="1.0.1" />
-  </ItemGroup>
 
 </Project>

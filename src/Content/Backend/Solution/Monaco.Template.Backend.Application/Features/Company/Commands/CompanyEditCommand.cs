@@ -1,6 +1,6 @@
-﻿using Monaco.Template.Common.Application.Commands;
+﻿using Monaco.Template.Backend.Common.Application.Commands;
 
-namespace Monaco.Template.Application.Features.Company.Commands;
+namespace Monaco.Template.Backend.Application.Features.Company.Commands;
 
 public record CompanyEditCommand(Guid Id,
 								 string Name,
@@ -10,4 +10,4 @@ public record CompanyEditCommand(Guid Id,
 								 string? City,
 								 string? County,
 								 string? PostCode,
-                                 Guid? CountryId) : CommandBase(Id);
+								 Guid? CountryId) : CommandBase(Id);

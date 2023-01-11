@@ -2,7 +2,7 @@
 using LinqKit;
 using Microsoft.Extensions.Primitives;
 
-namespace Monaco.Template.Common.Infrastructure.Context.Extensions;
+namespace Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
 public static class FilterExtensions
 {

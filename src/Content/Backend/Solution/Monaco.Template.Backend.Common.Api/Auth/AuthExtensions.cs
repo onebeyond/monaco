@@ -4,15 +4,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using System.IdentityModel.Tokens.Jwt;
 
-namespace Monaco.Template.Common.Api.Auth;
+namespace Monaco.Template.Backend.Common.Api.Auth;
 
 public static class AuthExtensions
 {
-    public const string ScopeClaimType = "scope";
+	public const string ScopeClaimType = "scope";
 
-    public static IServiceCollection AddAuthorizationWithPolicies(this IServiceCollection services, List<string> scopes) =>
+	public static IServiceCollection AddAuthorizationWithPolicies(this IServiceCollection services, List<string> scopes) =>
 		services.AddAuthorization(cfg =>
-								  {	 //DefaultPolicy will require at least authenticated user by default
+								  {  //DefaultPolicy will require at least authenticated user by default
 									  cfg.DefaultPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
 														  .RequireAuthenticatedUser().Build();
 									  //Register all listed scopes as policies requiring the existance of such scope in User claims
@@ -40,11 +40,11 @@ public static class AuthExtensions
 							  });
 
 	/// <summary>
-    /// Requires claims of type "scope" with matching values
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <param name="allowedValues"></param>
-    /// <returns></returns>
-    public static AuthorizationPolicyBuilder RequireScope(this AuthorizationPolicyBuilder builder, params string[] allowedValues) =>
+	/// Requires claims of type "scope" with matching values
+	/// </summary>
+	/// <param name="builder"></param>
+	/// <param name="allowedValues"></param>
+	/// <returns></returns>
+	public static AuthorizationPolicyBuilder RequireScope(this AuthorizationPolicyBuilder builder, params string[] allowedValues) =>
 		builder.RequireClaim(ScopeClaimType, (IEnumerable<string>)allowedValues);
 }

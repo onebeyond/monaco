@@ -1,8 +1,8 @@
 ﻿using MockQueryable.Moq;
-using Monaco.Template.Application.Infrastructure.Context;
-using Monaco.Template.Application.Services;
-using Monaco.Template.Common.BlobStorage.Contracts;
-using Monaco.Template.Domain.Model;
+using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Application.Services;
+using Monaco.Template.Backend.Common.BlobStorage.Contracts;
+using Monaco.Template.Backend.Domain.Model;
 using Moq;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using Xunit;
 using File = System.IO.File;
 
-namespace Monaco.Template.Application.Tests.Services;
+namespace Monaco.Template.Backend.Application.Tests.Services;
 
 [ExcludeFromCodeCoverage]
 public class FileServiceTests
@@ -27,7 +27,7 @@ public class FileServiceTests
 		dbContextMock.Setup(x => x.Set<Image>())
 					 .Returns(imageDbSetMock.Object);
 		var blobStorageServiceMock = new Mock<IBlobStorageService>();
-		
+
 		var sut = new FileService(dbContextMock.Object, blobStorageServiceMock.Object);
 
 		await using var stream = File.OpenRead("..\\..\\..\\..\\..\\..\\monaco-solid.png");

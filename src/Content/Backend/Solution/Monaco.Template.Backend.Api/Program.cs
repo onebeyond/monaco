@@ -4,18 +4,18 @@ using MassTransit;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 #if (!disableAuth)
-using Monaco.Template.Api.Auth;
 #endif
-using Monaco.Template.Application.DependencyInjection;
-using Monaco.Template.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Application.DependencyInjection;
+using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Api.Auth;
 #if (!disableAuth)
-using Monaco.Template.Common.Api.Auth;
+using Monaco.Template.Backend.Common.Api.Auth;
 #endif
-using Monaco.Template.Common.Api.Cors;
-using Monaco.Template.Common.Api.Middleware.Extensions;
-using Monaco.Template.Common.Api.Swagger;
-using Monaco.Template.Common.Serilog;
-using Monaco.Template.Common.Serilog.ApplicationInsights.TelemetryConverters;
+using Monaco.Template.Backend.Common.Api.Cors;
+using Monaco.Template.Backend.Common.Api.Middleware.Extensions;
+using Monaco.Template.Backend.Common.Api.Swagger;
+using Monaco.Template.Backend.Common.Serilog;
+using Monaco.Template.Backend.Common.Serilog.ApplicationInsights.TelemetryConverters;
 using Serilog;
 
 [assembly: ApiConventionType(typeof(DefaultApiConventions))]

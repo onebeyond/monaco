@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 
-namespace Monaco.Template.Common.Api.Middleware.Extensions;
+namespace Monaco.Template.Backend.Common.Api.Middleware.Extensions;
 
 public static class MiddlewareExtensions
 {

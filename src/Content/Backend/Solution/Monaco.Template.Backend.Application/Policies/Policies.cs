@@ -1,4 +1,4 @@
-﻿namespace Monaco.Template.Application.Policies;
+﻿namespace Monaco.Template.Backend.Application.Policies;
 
 public class Policies : Common.Application.Policies.Policies
 {

@@ -1,8 +1,8 @@
 ﻿using AutoFixture;
-using Monaco.Template.Domain.Model;
+using Monaco.Template.Backend.Domain.Model;
 using Moq;
 
-namespace Monaco.Template.Common.Tests.Factories.Entities;
+namespace Monaco.Template.Backend.Common.Tests.Factories.Entities;
 
 public class CountryFactory
 {
@@ -17,21 +17,21 @@ public class CountryFactory
 
 public static class CountryFactoryExtensions
 {
-    public static IFixture RegisterCountry(this IFixture fixture)
-    {
-        fixture.Register(() => new Country(fixture.Create<string>()));
-			
-        return fixture;
-    }
+	public static IFixture RegisterCountry(this IFixture fixture)
+	{
+		fixture.Register(() => new Country(fixture.Create<string>()));
 
-    public static IFixture RegisterCountryMock(this IFixture fixture)
-    {
-        fixture.Register(() =>
-                         {
-                             var mock = new Mock<Country>(fixture.Create<string>());
-                             mock.SetupGet(x => x.Id).Returns(Guid.NewGuid());
-                             return mock.Object;
-                         });
-        return fixture;
-    }
+		return fixture;
+	}
+
+	public static IFixture RegisterCountryMock(this IFixture fixture)
+	{
+		fixture.Register(() =>
+						 {
+							 var mock = new Mock<Country>(fixture.Create<string>());
+							 mock.SetupGet(x => x.Id).Returns(Guid.NewGuid());
+							 return mock.Object;
+						 });
+		return fixture;
+	}
 }

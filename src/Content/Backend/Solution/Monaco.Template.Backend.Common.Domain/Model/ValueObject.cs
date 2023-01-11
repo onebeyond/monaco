@@ -1,4 +1,4 @@
-﻿namespace Monaco.Template.Common.Domain.Model;
+﻿namespace Monaco.Template.Backend.Common.Domain.Model;
 
 public abstract class ValueObject
 {

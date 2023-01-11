@@ -1,7 +1,7 @@
 ﻿using Dawn;
-using Monaco.Template.Common.Domain.Model;
+using Monaco.Template.Backend.Common.Domain.Model;
 
-namespace Monaco.Template.Domain.Model;
+namespace Monaco.Template.Backend.Domain.Model;
 
 public class Address : ValueObject
 {

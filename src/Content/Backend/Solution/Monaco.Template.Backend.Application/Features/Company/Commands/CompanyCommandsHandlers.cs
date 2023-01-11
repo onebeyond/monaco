@@ -1,12 +1,12 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Monaco.Template.Application.DTOs.Extensions;
-using Monaco.Template.Application.Infrastructure.Context;
-using Monaco.Template.Common.Application.Commands;
-using Monaco.Template.Common.Application.Commands.Contracts;
-using Monaco.Template.Common.Infrastructure.Context.Extensions;
+using Monaco.Template.Backend.Application.DTOs.Extensions;
+using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Common.Application.Commands;
+using Monaco.Template.Backend.Common.Application.Commands.Contracts;
+using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
-namespace Monaco.Template.Application.Features.Company.Commands;
+namespace Monaco.Template.Backend.Application.Features.Company.Commands;
 
 public sealed class CompanyCommandsHandlers : IRequestHandler<CompanyCreateCommand, ICommandResult<Guid>>,
 											  IRequestHandler<CompanyEditCommand, ICommandResult>,

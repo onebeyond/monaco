@@ -1,13 +1,13 @@
-﻿using Monaco.Template.Common.Application.Commands;
-using Monaco.Template.Common.Application.Queries;
-using Monaco.Template.Common.Domain.Model;
-using FluentValidation.AspNetCore;
+﻿using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Monaco.Template.Common.Api.Application.Enums;
+using Monaco.Template.Backend.Common.Api.Application.Enums;
+using Monaco.Template.Backend.Common.Application.Commands;
+using Monaco.Template.Backend.Common.Application.Queries;
+using Monaco.Template.Backend.Common.Domain.Model;
 
-namespace Monaco.Template.Common.Api.Application;
+namespace Monaco.Template.Backend.Common.Api.Application;
 
 public static class MediatorExtensions
 {
@@ -117,11 +117,11 @@ public static class MediatorExtensions
 
 		if (result.ValidationResult.IsValid)
 			return responseType switch
-				   {
-					   ResponseType.Ok => new OkResult(),
-					   ResponseType.NoContent => new NoContentResult(),
-					   _ => throw new ArgumentOutOfRangeException(nameof(responseType), responseType, null)
-				   };
+			{
+				ResponseType.Ok => new OkResult(),
+				ResponseType.NoContent => new NoContentResult(),
+				_ => throw new ArgumentOutOfRangeException(nameof(responseType), responseType, null)
+			};
 
 		result.ValidationResult.AddToModelState(modelState, null);
 		return new BadRequestObjectResult(modelState);

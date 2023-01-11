@@ -1,4 +1,4 @@
-﻿namespace Monaco.Template.Common.BlobStorage;
+﻿namespace Monaco.Template.Backend.Common.BlobStorage;
 
 public class BlobStorageServiceOptions
 {

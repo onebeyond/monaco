@@ -3,19 +3,19 @@ using Microsoft.ApplicationInsights.DataContracts;
 using Serilog.Events;
 using Serilog.Sinks.ApplicationInsights.TelemetryConverters;
 
-namespace Monaco.Template.Common.Serilog.ApplicationInsights.TelemetryConverters;
+namespace Monaco.Template.Backend.Common.Serilog.ApplicationInsights.TelemetryConverters;
 
 public class AuditEventTelemetryConverter : TelemetryConverterBase
 {
-    private const string OperationId = "operationId";
-    private const string ParentId = "parentId";
-    private const string UserId = "userId";
-    private const string UserName = "userName";
+	private const string OperationId = "operationId";
+	private const string ParentId = "parentId";
+	private const string UserId = "userId";
+	private const string UserName = "userName";
 
-    public override IEnumerable<ITelemetry> Convert(LogEvent logEvent, IFormatProvider formatProvider)
-    {
-        if (logEvent == null)
-            throw new ArgumentNullException(nameof(logEvent));
+	public override IEnumerable<ITelemetry> Convert(LogEvent logEvent, IFormatProvider formatProvider)
+	{
+		if (logEvent == null)
+			throw new ArgumentNullException(nameof(logEvent));
 
 		//For complying with S4456:
 		return GetTelemetries(logEvent, formatProvider);
@@ -24,9 +24,9 @@ public class AuditEventTelemetryConverter : TelemetryConverterBase
 	private IEnumerable<ITelemetry> GetTelemetries(LogEvent logEvent, IFormatProvider formatProvider)
 	{
 		var telemetry = new EventTelemetry("Audit Trail")
-						{
-							Timestamp = logEvent.Timestamp
-						};
+		{
+			Timestamp = logEvent.Timestamp
+		};
 
 		ForwardPropertiesToTelemetryProperties(logEvent, telemetry, formatProvider, false, true, false);
 
@@ -48,13 +48,13 @@ public class AuditEventTelemetryConverter : TelemetryConverterBase
 		yield return telemetry;
 	}
 
-    private static bool TryGetScalarProperty(LogEvent logEvent, string propertyName, out object? value)
-    {
-        var hasScalarValue = logEvent.Properties.TryGetValue(propertyName, out var someValue) &&
+	private static bool TryGetScalarProperty(LogEvent logEvent, string propertyName, out object? value)
+	{
+		var hasScalarValue = logEvent.Properties.TryGetValue(propertyName, out var someValue) &&
 							 someValue is ScalarValue;
 
-        value = hasScalarValue ? ((ScalarValue)someValue!).Value : default;
+		value = hasScalarValue ? ((ScalarValue)someValue!).Value : default;
 
-        return hasScalarValue;
-    }
+		return hasScalarValue;
+	}
 }

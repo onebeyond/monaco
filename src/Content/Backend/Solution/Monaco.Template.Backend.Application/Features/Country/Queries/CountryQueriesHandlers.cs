@@ -1,10 +1,10 @@
 ﻿using MediatR;
-using Monaco.Template.Application.DTOs;
-using Monaco.Template.Application.DTOs.Extensions;
-using Monaco.Template.Application.Infrastructure.Context;
-using Monaco.Template.Common.Application.Queries.Extensions;
+using Monaco.Template.Backend.Application.DTOs;
+using Monaco.Template.Backend.Application.DTOs.Extensions;
+using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Common.Application.Queries.Extensions;
 
-namespace Monaco.Template.Application.Features.Country.Queries;
+namespace Monaco.Template.Backend.Application.Features.Country.Queries;
 
 public sealed class CountryQueriesHandlers : IRequestHandler<GetCountryListQuery, List<CountryDto>>,
 											 IRequestHandler<GetCountryByIdQuery, CountryDto?>

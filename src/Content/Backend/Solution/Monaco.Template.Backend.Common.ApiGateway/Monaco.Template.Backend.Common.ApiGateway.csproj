@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Monaco.Template.Common.Api\Monaco.Template.Common.Api.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Backend.Common.Api\Monaco.Template.Backend.Common.Api.csproj" />
   </ItemGroup>
 
 </Project>

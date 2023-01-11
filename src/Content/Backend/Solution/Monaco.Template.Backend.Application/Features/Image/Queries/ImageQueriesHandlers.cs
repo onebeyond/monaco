@@ -1,12 +1,13 @@
 ﻿#if filesSupport
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Monaco.Template.Application.DTOs;
-using Monaco.Template.Application.DTOs.Extensions;
-using Monaco.Template.Application.Infrastructure.Context;
-using Monaco.Template.Common.BlobStorage.Contracts;
+using Monaco.Template.Backend.Application.DTOs;
+using Monaco.Template.Backend.Application.DTOs.Extensions;
+using Monaco.Template.Backend.Application.Features.Image.Queries;
+using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Common.BlobStorage.Contracts;
 
-namespace Monaco.Template.Application.Features.Image.Queries;
+namespace Monaco.Template.Backend.Application.Features.Image.Queries;
 
 public sealed class ImageQueriesHandlers : IRequestHandler<GetImageByIdQuery, ImageDto?>,
 										   IRequestHandler<GetThumbnailByImageIdQuery, ImageDto?>,
@@ -51,23 +52,17 @@ public sealed class ImageQueriesHandlers : IRequestHandler<GetImageByIdQuery, Im
 		return dto;
 	}
 
-	private async Task<Domain.Model.Image?> GetImage(Guid id, CancellationToken cancellationToken)
-	{
-		var item = await _dbContext.Set<Domain.Model.Image>()
-								   .AsNoTracking()
-								   .Include(x => x.Thumbnail)
-								   .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
-		return item;
-	}
+	private Task<Backend.Domain.Model.Image?> GetImage(Guid id, CancellationToken cancellationToken) =>
+		_dbContext.Set<Backend.Domain.Model.Image>()
+				  .AsNoTracking()
+				  .Include(x => x.Thumbnail)
+				  .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-	private async Task<Domain.Model.Image?> GetThumbnail(Guid id, CancellationToken cancellationToken)
-	{
-		var item = await _dbContext.Set<Domain.Model.Image>()
-								   .AsNoTracking()
-								   .Where(x => x.Id == id)
-								   .Select(x => x.Thumbnail)
-								   .SingleOrDefaultAsync(cancellationToken);
-		return item;
-	}
+	private Task<Backend.Domain.Model.Image?> GetThumbnail(Guid id, CancellationToken cancellationToken) =>
+		_dbContext.Set<Backend.Domain.Model.Image>()
+				  .AsNoTracking()
+				  .Where(x => x.Id == id)
+				  .Select(x => x.Thumbnail)
+				  .SingleOrDefaultAsync(cancellationToken);
 }
 #endif

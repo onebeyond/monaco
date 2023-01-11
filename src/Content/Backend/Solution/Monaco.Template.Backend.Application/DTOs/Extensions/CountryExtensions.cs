@@ -1,7 +1,7 @@
-﻿using Monaco.Template.Domain.Model;
+﻿using Monaco.Template.Backend.Domain.Model;
 using System.Linq.Expressions;
 
-namespace Monaco.Template.Application.DTOs.Extensions;
+namespace Monaco.Template.Backend.Application.DTOs.Extensions;
 
 public static class CountryExtensions
 {
@@ -11,10 +11,10 @@ public static class CountryExtensions
 			return null;
 
 		var dto = new CountryDto
-				  {
-					  Id = value.Id,
-					  Name = value.Name
-				  };
+		{
+			Id = value.Id,
+			Name = value.Name
+		};
 		return dto;
 	}
 

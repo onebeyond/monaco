@@ -1,15 +1,15 @@
 ﻿using ExifLibrary;
-using Monaco.Template.Application.Infrastructure.Context;
-using Monaco.Template.Application.Services.Contracts;
-using Monaco.Template.Common.BlobStorage;
-using Monaco.Template.Common.BlobStorage.Contracts;
-using Monaco.Template.Domain.Model;
+using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Application.Services.Contracts;
+using Monaco.Template.Backend.Common.BlobStorage;
+using Monaco.Template.Backend.Common.BlobStorage.Contracts;
+using Monaco.Template.Backend.Domain.Model;
 using SkiaSharp;
 using System.Drawing;
-using File = Monaco.Template.Domain.Model.File;
-using Image = Monaco.Template.Domain.Model.Image;
+using File = Monaco.Template.Backend.Domain.Model.File;
+using Image = Monaco.Template.Backend.Domain.Model.Image;
 
-namespace Monaco.Template.Application.Services;
+namespace Monaco.Template.Backend.Application.Services;
 
 public class FileService : IFileService
 {
@@ -30,10 +30,10 @@ public class FileService : IFileService
 		var fileType = _blobStorageService.GetFileType(Path.GetExtension(fileName));
 
 		return fileType switch
-			   {
-				   FileTypeEnum.Image => await UploadImage(stream, fileName, contentType, cancellationToken),
-				   _ => await UploadDocument(stream, fileName, contentType, cancellationToken),
-			   };
+		{
+			FileTypeEnum.Image => await UploadImage(stream, fileName, contentType, cancellationToken),
+			_ => await UploadDocument(stream, fileName, contentType, cancellationToken),
+		};
 	}
 
 	public async Task<Document> UploadDocument(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)
@@ -210,7 +210,7 @@ public class FileService : IFileService
 		stream.Position = 0;
 		return ImageFile.FromStream(stream).Properties;
 	}
-	
+
 	public SKImage GetThumbnail(SKImage image, int thumbnailWidth, int thumbnailHeight)
 	{
 		//Calculates the proper scale to shrink the image so the aspect ratio remains the same for the thumbnail as well
@@ -218,7 +218,7 @@ public class FileService : IFileService
 							 thumbnailHeight / (float)image.Width);
 		if (scale > 1) //If scale is bigger than 1, it means that the thumbnail would end up being bigger than the original image
 			scale = 1; //So we reset it to 1 so both image and thumbnail are the same size at worst.
-		//Finally, we use the scale to calculate the final width and height to use for the thumbnail
+					   //Finally, we use the scale to calculate the final width and height to use for the thumbnail
 		var sourceBitmap = SKBitmap.FromImage(image);
 		using var scaledBitmap = sourceBitmap.Resize(new SKImageInfo((int)(image.Width * scale),
 																	 (int)(image.Height * scale)),

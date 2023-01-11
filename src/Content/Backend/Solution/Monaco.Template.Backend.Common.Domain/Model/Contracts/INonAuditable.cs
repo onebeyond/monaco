@@ -1,4 +1,4 @@
-﻿namespace Monaco.Template.Common.Domain.Model.Contracts;
+﻿namespace Monaco.Template.Backend.Common.Domain.Model.Contracts;
 
 public interface INonAuditable
 {

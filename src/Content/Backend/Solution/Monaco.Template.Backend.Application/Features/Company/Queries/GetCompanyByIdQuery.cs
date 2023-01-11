@@ -1,6 +1,6 @@
-﻿using Monaco.Template.Application.DTOs;
-using Monaco.Template.Common.Application.Queries;
+﻿using Monaco.Template.Backend.Application.DTOs;
+using Monaco.Template.Backend.Common.Application.Queries;
 
-namespace Monaco.Template.Application.Features.Company.Queries;
+namespace Monaco.Template.Backend.Application.Features.Company.Queries;
 
 public record GetCompanyByIdQuery(Guid Id) : QueryByIdBase<CompanyDto?>(Id);
