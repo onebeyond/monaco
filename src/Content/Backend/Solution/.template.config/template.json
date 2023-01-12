@@ -1,10 +1,10 @@
 {
 	"$schema": "http://json.schemastore.org/template",
 	"author": "One Beyond",
-	"classifications": [ "Web", "Solution" ],
+	"classifications": [ "Web", "Solution", "Cloud", "WebAPI" ],
 	"name": "Monaco Backend Solution Template",
 	"description": "Solution template for backend .NET projects",
-	"groupIdentity": "Monaco.Template",
+	"groupIdentity": "Monaco.Template.Backend",
 	"identity": "Monaco.Template.Backend.Solution",
 	"shortName": "monaco-backend-solution",
 	"preferNameDirectory": true,
