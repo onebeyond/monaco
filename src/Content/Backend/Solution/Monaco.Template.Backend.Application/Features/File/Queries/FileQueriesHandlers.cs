@@ -3,7 +3,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Application.DTOs.Extensions;
-using Monaco.Template.Backend.Application.Features.File.Queries;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.BlobStorage.Contracts;
 
@@ -45,8 +44,8 @@ public sealed class FileQueriesHandlers : IRequestHandler<GetFileByIdQuery, File
 		return dto;
 	}
 
-	private Task<Backend.Domain.Model.File?> GetFile(Guid id, CancellationToken cancellationToken) =>
-		_dbContext.Set<Backend.Domain.Model.File>()
+	private Task<Domain.Model.File?> GetFile(Guid id, CancellationToken cancellationToken) =>
+		_dbContext.Set<Domain.Model.File>()
 				  .AsNoTracking()
 				  .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
 }

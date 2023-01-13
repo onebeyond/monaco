@@ -3,7 +3,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Application.DTOs.Extensions;
-using Monaco.Template.Backend.Application.Features.Image.Queries;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.BlobStorage.Contracts;
 
@@ -52,14 +51,14 @@ public sealed class ImageQueriesHandlers : IRequestHandler<GetImageByIdQuery, Im
 		return dto;
 	}
 
-	private Task<Backend.Domain.Model.Image?> GetImage(Guid id, CancellationToken cancellationToken) =>
-		_dbContext.Set<Backend.Domain.Model.Image>()
+	private Task<Domain.Model.Image?> GetImage(Guid id, CancellationToken cancellationToken) =>
+		_dbContext.Set<Domain.Model.Image>()
 				  .AsNoTracking()
 				  .Include(x => x.Thumbnail)
 				  .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-	private Task<Backend.Domain.Model.Image?> GetThumbnail(Guid id, CancellationToken cancellationToken) =>
-		_dbContext.Set<Backend.Domain.Model.Image>()
+	private Task<Domain.Model.Image?> GetThumbnail(Guid id, CancellationToken cancellationToken) =>
+		_dbContext.Set<Domain.Model.Image>()
 				  .AsNoTracking()
 				  .Where(x => x.Id == id)
 				  .Select(x => x.Thumbnail)
