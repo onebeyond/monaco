@@ -8,7 +8,7 @@
 			Solution Template for .NET projects
 		</description>
 		<authors>One Beyond</authors>
-		<license type="expression">ISC</license>
+		<license type="expression">MIT</license>
 		<icon>Content\.template.config\icon.png</icon>
 		<packageTypes>
 			<packageType name="Template" />
