@@ -9,11 +9,8 @@ public static class SortingExtensions
 											 string defaultSortField,
 											 Dictionary<string, Expression<Func<T, object>>> sortMap)
 	{
-		if (source == null)
-			throw new ArgumentNullException(nameof(source), "Data source is empty");
-
-		if (string.IsNullOrWhiteSpace(defaultSortField))
-			throw new ArgumentNullException(nameof(defaultSortField), "Default sort field is missing");
+		ArgumentNullException.ThrowIfNull(nameof(source));
+		ArgumentException.ThrowIfNullOrEmpty(nameof(defaultSortField));
 
 		var (sortMapLower, lstSort) = GetData(sortFields, defaultSortField, sortMap);
 
@@ -28,11 +25,8 @@ public static class SortingExtensions
 											  string defaultSortField,
 											  Dictionary<string, Expression<Func<T, object>>> sortMap)
 	{
-		if (source == null)
-			throw new ArgumentNullException(nameof(source), "Data source is empty");
-
-		if (string.IsNullOrWhiteSpace(defaultSortField))
-			throw new ArgumentNullException(nameof(defaultSortField), "Default sort field is missing");
+		ArgumentNullException.ThrowIfNull(nameof(source));
+		ArgumentException.ThrowIfNullOrEmpty(nameof(defaultSortField));
 
 		var (sortMapLower, lstSort) = GetData(sortFields, defaultSortField, sortMap);
 
@@ -98,8 +92,8 @@ public static class SortingExtensions
 	private static Dictionary<string, bool> ProcessSortParam<T>(IEnumerable<string?> sortFields,
 																IReadOnlyDictionary<string, Expression<Func<T, object>>> sortMap) =>
 		sortFields.Where(x => x is not null)
-				  .ToDictionary(x => (x![0] is '-' ? x[1..] : x).ToLower(),
-								x => x![0] is not '-')
+				  .ToDictionary(x => (x is ['-', .. var param] ? param : x!).ToLower(),
+								x => x is not ['-', ..])
 				  .Where(x => sortMap.ContainsKey(x.Key))
 				  .ToDictionary(x => x.Key, x => x.Value);
 }

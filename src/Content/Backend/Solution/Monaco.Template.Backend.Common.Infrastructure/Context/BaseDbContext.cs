@@ -1,13 +1,13 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
-using System.Reflection;
 using Monaco.Template.Backend.Common.Domain.Model;
 using Monaco.Template.Backend.Common.Domain.Model.Contracts;
-using Monaco.Template.Backend.Common.Infrastructure.Context.Contracts;
 using Monaco.Template.Backend.Common.Infrastructure.Context.AuditTrail;
+using Monaco.Template.Backend.Common.Infrastructure.Context.Contracts;
 using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 using Monaco.Template.Backend.Common.Infrastructure.EntityConfigurations;
+using System.Reflection;
 
 namespace Monaco.Template.Backend.Common.Infrastructure.Context;
 

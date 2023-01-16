@@ -1,7 +1,7 @@
-﻿using System.Diagnostics;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.Hosting;
+using System.Diagnostics;
 
 namespace Monaco.Template.Backend.Common.Infrastructure.EntityConfigurations;
 

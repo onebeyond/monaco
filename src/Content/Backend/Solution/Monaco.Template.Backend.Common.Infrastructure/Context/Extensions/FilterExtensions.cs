@@ -1,6 +1,6 @@
-﻿using System.Linq.Expressions;
-using LinqKit;
+﻿using LinqKit;
 using Microsoft.Extensions.Primitives;
+using System.Linq.Expressions;
 
 namespace Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
@@ -16,12 +16,13 @@ public static class FilterExtensions
 	/// <param name="defaultCondition">Indicates if the default condition of the expression will be TRUE or FALSE</param>
 	/// <param name="allConditions">Indicates if the filtering must match all the conditions (AND) or just some of them (OR)</param>
 	/// <returns>Returns an IQueryable to which has been applied the predicate matching the filtering criteria</returns>
-	public static IQueryable<T> ApplyFilter<T>(this IQueryable<T> source, IEnumerable<KeyValuePair<string, StringValues>> queryString,
+	public static IQueryable<T> ApplyFilter<T>(this IQueryable<T> source,
+											   IEnumerable<KeyValuePair<string, StringValues>> queryString,
 											   Dictionary<string, Expression<Func<T, object>>> filterMap,
-											   bool defaultCondition = true, bool allConditions = true)
+											   bool defaultCondition = true,
+											   bool allConditions = true)
 	{
-		if (source == null)
-			throw new ArgumentNullException(nameof(source), "Data source is empty");
+		ArgumentNullException.ThrowIfNull(nameof(source));
 
 		var (filterMapLower, filterList, predicate) = GetData(queryString, filterMap, defaultCondition);
 
@@ -35,7 +36,7 @@ public static class FilterExtensions
 			predicate = allConditions ? predicate.And(predicateKey) : predicate.Or(predicateKey); //then add the resulting expression to the more general predicate
 		}
 
-		return source.Where(predicate).AsExpandable();
+		return source.Where(predicate);
 	}
 
 	/// <summary>
@@ -48,12 +49,13 @@ public static class FilterExtensions
 	/// <param name="defaultCondition">Indicates if the default condition of the expression will be TRUE or FALSE</param>
 	/// <param name="allConditions">Indicates if the filtering must match all the conditions (AND) or just some of them (OR)</param>
 	/// <returns>Returns an IEnumerable to which has been applied the predicate matching the filtering criteria</returns>
-	public static IEnumerable<T> ApplyFilter<T>(this IEnumerable<T> source, IEnumerable<KeyValuePair<string, StringValues>> queryString,
+	public static IEnumerable<T> ApplyFilter<T>(this IEnumerable<T> source,
+												IEnumerable<KeyValuePair<string, StringValues>> queryString,
 												Dictionary<string, Expression<Func<T, object>>> filterMap,
-												bool defaultCondition = true, bool allConditions = true)
+												bool defaultCondition = true,
+												bool allConditions = true)
 	{
-		if (source == null)
-			throw new ArgumentNullException(nameof(source), "Data source is empty");
+		ArgumentNullException.ThrowIfNull(nameof(source));
 
 		var (filterMapLower, filterList, predicate) = GetData(queryString, filterMap, defaultCondition);
 
@@ -93,35 +95,38 @@ public static class FilterExtensions
 	private static Expression<Func<T, bool>> GetOperationExpression<T>(string fieldKey, Expression<Func<T, object>> fieldMap, object? value, bool toLowerCase = false)
 	{
 		//Obtain expression Type and based on it y choose the method for the operation on the DB depending on if it's a String or any other type
-		var bodyExpression = GetBodyExpression(fieldMap); // fieldMap.Body.NodeType == ExpressionType.Convert ? ((UnaryExpression)fieldMap.Body).Operand : fieldMap.Body;
+		var bodyExpression = GetBodyExpression(fieldMap);
 		var type = bodyExpression.Type;
 
 		//Create the call to the method using the selected expression, the method and the value to search. If it's a string and it´s working on an IEnumerable, first apply ToLower
 		Expression expression;
 
-		if (string.IsNullOrEmpty(value as string))  //Handles comparison against null values
+		if ((value as string) is not { Length: > 0 }) //Handles comparison against null values
 			expression = Expression.Equal(type == typeof(string) || type.GetGenericTypeDefinition() == typeof(Nullable<>)
-											  ? bodyExpression  //for strings
+											  ? bodyExpression                                                                //for strings
 											  : Expression.Convert(bodyExpression, typeof(Nullable<>).MakeGenericType(type)), //for all others
 										  Expression.Constant(null));
 		else if (type == typeof(string)) //Handles string values
 		{
 			expression = toLowerCase //If it's needed, applies lower case to entire string to ignore casing differences
-							 ? Expression.Call(bodyExpression, type.GetMethod("ToLower", Type.EmptyTypes)!)
+							 ? Expression.Call(bodyExpression, type.GetMethod(nameof(string.ToLower), Type.EmptyTypes)!)
 							 : bodyExpression;
 
 			var strValue = (string)value;
-			var not = strValue.StartsWith('!');
+			var not = strValue is ['!', ..];
 			if (not) strValue = strValue[1..];
 
-			if (strValue.StartsWith('"') && strValue.EndsWith('"'))     //quoted strings searches as exactly the same 
+			if (strValue is ['"', .., '"'])     //quoted strings searches as exactly the same
+			{
+				var constExpr = Expression.Constant(Convert.ChangeType(strValue[1..^1], type));
 				expression = not
-								 ? Expression.NotEqual(expression, Expression.Constant(Convert.ChangeType(strValue[1..^1], type)))
-								 : Expression.Equal(expression, Expression.Constant(Convert.ChangeType(strValue[1..^1], type)));
+								 ? Expression.NotEqual(expression, constExpr)
+								 : Expression.Equal(expression, constExpr);
+			}
 			else    //otherwise searches with Contains
 			{
 				expression = Expression.Call(expression,
-											 type.GetMethod("Contains", new[] { type })!,
+											 type.GetMethod(nameof(string.Contains), new[] { type })!,
 											 Expression.Constant(Convert.ChangeType(strValue, type)));
 				if (not) expression = Expression.Not(expression);
 			}
@@ -129,7 +134,7 @@ public static class FilterExtensions
 		else if (type.IsEnum)
 			expression = Expression.Equal(bodyExpression, Expression.Constant(Enum.Parse(type, (string.IsNullOrWhiteSpace(value?.ToString()) ? 0.ToString() : value!.ToString()) ?? 0.ToString())));
 		else if (type.IsAssignableFrom(typeof(Guid))) //Handles Guid values
-			expression = value.ToString()!.StartsWith('!')
+			expression = value.ToString() is ['!', ..]
 							 ? Expression.NotEqual(bodyExpression, Expression.Constant(Guid.Parse(value.ToString()![1..]), type))
 							 : Expression.Equal(bodyExpression, Expression.Constant(Guid.Parse(value.ToString()!), type));
 		else if (type.IsAssignableFrom(typeof(DateTime)) && fieldKey.EndsWith("from")) //Handles DateTime values whose param name ends with From (range start)
@@ -137,7 +142,7 @@ public static class FilterExtensions
 		else if (type.IsAssignableFrom(typeof(DateTime)) && fieldKey.EndsWith("to")) //Handles DateTime values whose param name ends with To (range end)
 			expression = Expression.LessThanOrEqual(bodyExpression, Expression.Constant(DateTime.Parse(value.ToString()!), type));
 		else //Handles all other generic cases (numbers, booleans, etc)
-			expression = value.ToString()!.StartsWith('!')
+			expression = value.ToString() is ['!', ..]
 							 ? Expression.NotEqual(bodyExpression, Expression.Constant(Convert.ChangeType(value.ToString()![1..], type)))
 							 : Expression.Equal(bodyExpression, Expression.Constant(Convert.ChangeType(value, type)));
 
@@ -145,28 +150,19 @@ public static class FilterExtensions
 		return Expression.Lambda<Func<T, bool>>(expression, fieldMap.Parameters);
 	}
 
-	private static bool ValidateDataType(string? data, Type type)
-	{
-		if (string.IsNullOrEmpty(data))
-			return true;
-		if (type == typeof(int))
-			return int.TryParse(data, out _);
-		if (type == typeof(long))
-			return long.TryParse(data, out _);
-		if (type == typeof(short))
-			return short.TryParse(data, out _);
-		if (type == typeof(float))
-			return short.TryParse(data, out _);
-		if (type == typeof(decimal))
-			return decimal.TryParse(data, out _);
-		if (type == typeof(bool))
-			return bool.TryParse(data, out _);
-		if (type == typeof(Guid))
-			return Guid.TryParse(data, out _);
-		if (type == typeof(DateTime))
-			return DateTime.TryParse(data, out _);
-		if (type == typeof(Enum))
-			return Enum.TryParse(type, data, true, out _);
-		return type == typeof(string);
-	}
+	private static bool ValidateDataType(string? data, Type type) =>
+		data switch
+		{
+			null or { Length: 0 } => true,
+			not null when type == typeof(int) => int.TryParse(data, out _),
+			not null when type == typeof(long) => long.TryParse(data, out _),
+			not null when type == typeof(short) => short.TryParse(data, out _),
+			not null when type == typeof(float) => float.TryParse(data, out _),
+			not null when type == typeof(decimal) => decimal.TryParse(data, out _),
+			not null when type == typeof(bool) => bool.TryParse(data, out _),
+			not null when type == typeof(Guid) => Guid.TryParse(data, out _),
+			not null when type == typeof(DateTime) => DateTime.TryParse(data, out _),
+			not null when type == typeof(Enum) => Enum.TryParse(type, data, true, out _),
+			_ => type == typeof(string)
+		};
 }

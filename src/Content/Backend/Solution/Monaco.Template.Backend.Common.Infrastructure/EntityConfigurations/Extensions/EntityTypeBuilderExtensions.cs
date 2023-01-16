@@ -41,8 +41,7 @@ public static class EntityTypeBuilderExtensions
 			   .UseIdentityColumn();
 	}
 
-	public static DataBuilder<TEntity> HasData<TEntity>(this EntityTypeBuilder<TEntity> source, Func<TEntity>[] dataFuncs) where TEntity : class
-	{
-		return source.HasData(dataFuncs.Select(func => func()));
-	}
+	public static DataBuilder<TEntity> HasData<TEntity>(this EntityTypeBuilder<TEntity> source,
+														Func<TEntity>[] dataFuncs) where TEntity : class =>
+		source.HasData(dataFuncs.Select(func => func()));
 }

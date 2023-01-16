@@ -1,5 +1,4 @@
-﻿using LinqKit;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Monaco.Template.Backend.Common.Domain.Model;
 using System.Linq.Expressions;
 
@@ -7,15 +6,15 @@ namespace Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
 public static class OperationsExtensions
 {
-	public static async Task<bool> ExistsAsync<T>(this DbContext dbContext, Guid id, CancellationToken cancellationToken = default) where T : Entity
-	{
-		return await dbContext.Set<T>().AsExpandable().AnyAsync(x => x.Id == id, cancellationToken);
-	}
+	public static Task<bool> ExistsAsync<T>(this DbContext dbContext,
+											Guid id,
+											CancellationToken cancellationToken) where T : Entity =>
+		dbContext.Set<T>().AnyAsync(x => x.Id == id, cancellationToken);
 
-	public static async Task<bool> ExistsAsync<T>(this DbContext dbContext, Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default) where T : class
-	{
-		return await dbContext.Set<T>().AsExpandable().AnyAsync(predicate, cancellationToken);
-	}
+	public static Task<bool> ExistsAsync<T>(this DbContext dbContext,
+											Expression<Func<T, bool>> predicate,
+											CancellationToken cancellationToken) where T : class => 
+		dbContext.Set<T>().AnyAsync(predicate, cancellationToken);
 
 	public static async Task<T?> GetAsync<T>(this DbContext dbContext,
 											 Guid? id,
