@@ -33,7 +33,7 @@ public static class CorsExtensions
 							 if (defaultConfig is not null)
 								 x.AddDefaultPolicy(ConfigurePolicy(defaultConfig));
 
-							 corsConfigurations.ForEach(c => x.AddPolicy(c[NameSection], ConfigurePolicy(c)));
+							 corsConfigurations.ForEach(c => x.AddPolicy(c[NameSection]!, ConfigurePolicy(c)));
 						 });
 
 	/// <summary>
@@ -48,14 +48,14 @@ public static class CorsExtensions
 	private static Action<CorsPolicyBuilder> ConfigurePolicy(IConfiguration config) =>
 		p => p.WithOrigins(config.GetSection(OriginsSection)
 								 .GetChildren()
-								 .Select(o => o.Value)
+								 .Select(o => o.Value!)
 								 .ToArray())
 			  .WithMethods(config.GetSection(MethodsSection)
 								 .GetChildren()
-								 .Select(o => o.Value)
+								 .Select(o => o.Value!)
 								 .ToArray())
 			  .WithHeaders(config.GetSection(HeadersSection)
 								 .GetChildren()
-								 .Select(o => o.Value)
+								 .Select(o => o.Value!)
 								 .ToArray());
 }
