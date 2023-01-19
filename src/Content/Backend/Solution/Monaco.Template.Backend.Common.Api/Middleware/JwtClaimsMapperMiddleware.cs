@@ -24,7 +24,7 @@ public class JwtClaimsMapperMiddleware
 		if (context.GetEndpoint()?.Metadata.Any(x => x is JwtMapClaimsAttribute) ?? false)
 		{
 			var authHeader = context.Request.Headers.Authorization.FirstOrDefault(x => x!.Contains(SchemeStr));
-			if (!string.IsNullOrWhiteSpace(authHeader))
+			if (authHeader is { Length: > 0 })
 			{
 				var jwtString = authHeader.Replace(SchemeStr, string.Empty);
 				var handler = new JwtSecurityTokenHandler();
