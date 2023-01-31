@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+	<PackageVersion>0.0.1-alpha1</PackageVersion>
+	<Title>Monaco.Template.Backend.Common.Application</Title>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<Authors>One Beyond</Authors>
+	<Company>One Beyond</Company>
+	<Copyright>One Beyond</Copyright>
+	<PackageProjectUrl>https://github.com/onebeyond/monaco</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/onebeyond/monaco.git</RepositoryUrl>
+	<Description>Library with base classes and helpers for the Application library.</Description>
+	<RepositoryType>Git</RepositoryType>
+	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="11.4.0" />
+    <PackageReference Include="Polly" Version="7.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Monaco.Template.Backend.Common.Infrastructure\Monaco.Template.Backend.Common.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

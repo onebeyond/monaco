@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
-		<id>Monaco.Template.Solution</id>
-		<version>1.2.1</version>
-		<title>Monaco Solution Template</title>
+		<id>Monaco.Template</id>
+		<version>2.0.0-beta1</version>
+		<title>Monaco Template</title>
 		<description>
-			Solution Template for .NET projects
+			Templates for .NET projects
 		</description>
 		<authors>One Beyond</authors>
 		<license type="expression">MIT</license>
-		<icon>Content\.template.config\icon.png</icon>
+		<icon>Content\Backend\Solution\.template.config\icon.png</icon>
 		<packageTypes>
 			<packageType name="Template" />
 		</packageTypes>
@@ -20,7 +20,7 @@
 	</metadata>
 	<files>
 		<file src="Content\**\*.*"
-			  exclude="Content\**\bin\**\*.*;Content\**\obj\**\*.*;Content\**\logs\**\*.*;Content\.vs\**\*.*;Content\.idea\*.*;Content\*.user"
+			  exclude="Content\**\bin\**\*.*;Content\**\obj\**\*.*;Content\**\logs\**\*.*;Content\.vs\**\*.*;Content\**\.idea\*.*;Content\**\*.user"
 			  target="Content" />
 		<file src="..\README.md"
 			  target="" />
