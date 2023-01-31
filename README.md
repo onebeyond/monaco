@@ -15,19 +15,19 @@ Each of the different solution templates also provide some basic business compon
 
 # Getting Started
 
-#### Supported .NET version:
+### Supported .NET version:
 
 7.0
 
-#### Installation
+### Installation
 
 `dotnet new install Monaco.Template`
 
-#### Uninstalling
+### Uninstalling
 
 `dotnet new uninstall Monaco.Template`
 
-#### How to create a Monaco based solution
+### How to create a Monaco based solution
 
 For generating a new backend solution, you can run the following command:
 
@@ -37,7 +37,7 @@ This will create a folder named `MyFirstSolution`, which will contain a structur
 
 From there, is enough to configure `appsettings.json` with the required settings and run the app.
 
-#### Getting help about template's options
+### Getting help about template's options
 
 `dotnet new monaco-backend-solution --help`
 
