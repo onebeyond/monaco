@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
@@ -21,7 +20,7 @@ namespace Monaco.Template.Backend.Application.DependencyInjection;
 public static class ServiceCollectionExtensions
 {
 	/// <summary>
-	/// Registers and configures all the services and dependencies of the Application 
+	/// Registers and configures all the services and dependencies of the Application
 	/// </summary>
 	/// <param name="services"></param>
 	/// <param name="options"></param>
@@ -32,7 +31,7 @@ public static class ServiceCollectionExtensions
 		var optionsValue = new ApplicationOptions();
 		options.Invoke(optionsValue);
 		services.AddPolicies<Policies.Policies>()
-				.AddMediatR(GetApplicationAssembly())
+				.AddMediatR(config => config.RegisterServicesFromAssemblies(GetApplicationAssembly()))
 				.RegisterCommandConcurrencyExceptionBehaviors(GetApplicationAssembly())
 				.RegisterCommandValidationBehaviors(GetApplicationAssembly())
 				.AddValidatorsFromAssembly(GetApplicationAssembly(), filter: filter => !filter.ValidatorType
