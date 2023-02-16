@@ -3,8 +3,6 @@ using MassTransit;
 #endif
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
-#if (!disableAuth)
-#endif
 using Monaco.Template.Backend.Application.DependencyInjection;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Api.Auth;
@@ -23,7 +21,7 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration)
-												   .WriteTo.Logger(l => l.WriteTo.Conditional(_ => context.HostingEnvironment.IsDevelopment(),	//Only for dev
+												   .WriteTo.Logger(l => l.WriteTo.Conditional(_ => context.HostingEnvironment.IsDevelopment(),	// Only for dev
 																							  cfg => cfg.Debug()
 																										.WriteTo.File("logs/log.txt",
 																													  rollingInterval: RollingInterval.Day,
