@@ -102,7 +102,7 @@ public static class FilterExtensions
 		Expression expression;
 
 		if ((value as string) is not { Length: > 0 }) //Handles comparison against null values
-			expression = Expression.Equal(type == typeof(string) || type.GetGenericTypeDefinition() == typeof(Nullable<>)
+			expression = Expression.Equal(type == typeof(string) || type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)
 											  ? bodyExpression                                                                //for strings
 											  : Expression.Convert(bodyExpression, typeof(Nullable<>).MakeGenericType(type)), //for all others
 										  Expression.Constant(null));
@@ -142,9 +142,12 @@ public static class FilterExtensions
 		else if (type.IsAssignableFrom(typeof(DateTime)) && fieldKey.EndsWith("to")) //Handles DateTime values whose param name ends with To (range end)
 			expression = Expression.LessThanOrEqual(bodyExpression, Expression.Constant(DateTime.Parse(value.ToString()!), type));
 		else //Handles all other generic cases (numbers, booleans, etc)
+		{
+			var underlyingType = Nullable.GetUnderlyingType(type);
 			expression = value.ToString() is ['!', ..]
-							 ? Expression.NotEqual(bodyExpression, Expression.Constant(Convert.ChangeType(value.ToString()![1..], type)))
-							 : Expression.Equal(bodyExpression, Expression.Constant(Convert.ChangeType(value, type)));
+							 ? Expression.NotEqual(Expression.Convert(bodyExpression, underlyingType ?? type), Expression.Constant(Convert.ChangeType(value.ToString()![1..], underlyingType ?? type)))
+							 : Expression.Equal(Expression.Convert(bodyExpression, underlyingType ?? type), Expression.Constant(Convert.ChangeType(value, underlyingType ?? type)));
+		}
 
 		//Create and return the lambda expression that represents the operation to run
 		return Expression.Lambda<Func<T, bool>>(expression, fieldMap.Parameters);
@@ -154,14 +157,14 @@ public static class FilterExtensions
 		data switch
 		{
 			null or { Length: 0 } => true,
-			not null when type == typeof(int) => int.TryParse(data, out _),
-			not null when type == typeof(long) => long.TryParse(data, out _),
-			not null when type == typeof(short) => short.TryParse(data, out _),
-			not null when type == typeof(float) => float.TryParse(data, out _),
-			not null when type == typeof(decimal) => decimal.TryParse(data, out _),
-			not null when type == typeof(bool) => bool.TryParse(data, out _),
-			not null when type == typeof(Guid) => Guid.TryParse(data, out _),
-			not null when type == typeof(DateTime) => DateTime.TryParse(data, out _),
+			not null when type == typeof(int) || type == typeof(int?) => int.TryParse(data, out _),
+			not null when type == typeof(long) || type == typeof(long?) => long.TryParse(data, out _),
+			not null when type == typeof(short) || type == typeof(short?) => short.TryParse(data, out _),
+			not null when type == typeof(float) || type == typeof(float?) => float.TryParse(data, out _),
+			not null when type == typeof(decimal) || type == typeof(decimal?) => decimal.TryParse(data, out _),
+			not null when type == typeof(bool) || type == typeof(bool?) => bool.TryParse(data, out _),
+			not null when type == typeof(Guid) || type == typeof(Guid?) => Guid.TryParse(data, out _),
+			not null when type == typeof(DateTime) || type == typeof(DateTime?) => DateTime.TryParse(data, out _),
 			not null when type == typeof(Enum) => Enum.TryParse(type, data, true, out _),
 			_ => type == typeof(string)
 		};
