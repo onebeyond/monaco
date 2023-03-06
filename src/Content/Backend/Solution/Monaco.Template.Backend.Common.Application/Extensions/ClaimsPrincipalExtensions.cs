@@ -1,13 +1,13 @@
-﻿using System.Security.Claims;
+﻿using Microsoft.IdentityModel.JsonWebTokens;
+using System.Security.Claims;
 using System.Text.Json;
-using Microsoft.IdentityModel.JsonWebTokens;
+using System.Text.Json.Nodes;
 
 namespace Monaco.Template.Backend.Common.Application.Extensions;
 
 public static class ClaimsPrincipalExtensions
 {
 	private const string ResourceAccessClaimName = "resource_access";
-	private record Client(string[] Roles);
 
 	/// <summary>
 	/// Retrieves the User Id from the "sub" claim
@@ -32,11 +32,11 @@ public static class ClaimsPrincipalExtensions
 		if (resourceAccessClaim is null)
 			return false;
 
-		var clients = JsonSerializer.Deserialize<Dictionary<string, Client>>(resourceAccessClaim.Value,
-																			 new JsonSerializerOptions(JsonSerializerDefaults.Web));
+		var clients = JsonSerializer.Deserialize<Dictionary<string, JsonObject>>(resourceAccessClaim.Value,
+																				 new JsonSerializerOptions(JsonSerializerDefaults.Web));
 		return clients is not null &&
 			   clients.ContainsKey(clientName) &&
-			   clients[clientName].Roles.Contains(roleName);
+			   (clients[clientName][principal.Identities.First().RoleClaimType]?.Deserialize<string[]>()?.Contains(roleName) ?? false);
 	}
 
 	/// <summary>
