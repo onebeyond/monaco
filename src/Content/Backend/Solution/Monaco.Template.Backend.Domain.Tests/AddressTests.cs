@@ -7,9 +7,9 @@ using Xunit;
 namespace Monaco.Template.Backend.Domain.Tests;
 
 [ExcludeFromCodeCoverage]
+[Trait("Core Domain Entities", "Address Entity")]
 public class AddressTests
 {
-	[Trait("Core Domain Entities", "Address Entity")]
 	[Theory(DisplayName = "New address succeeds")]
 	[AnonymousData]
 	public void NewAddressSucceeds(string? street,

@@ -18,9 +18,9 @@ using Xunit;
 namespace Monaco.Template.Backend.Application.Tests.Features.Company.Commands.Validators;
 
 [ExcludeFromCodeCoverage]
+[Trait("Application Validators", "Company Validators")]
 public class CompanyDeleteCommandValidatorTests
 {
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "Validator's rule level cascade mode is 'Stop'")]
 	public void ValidatorRuleLevelCascadeModeIsStop()
 	{
@@ -29,7 +29,6 @@ public class CompanyDeleteCommandValidatorTests
 		sut.RuleLevelCascadeMode.Should().Be(CascadeMode.Stop);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Theory(DisplayName = "Existing company passes validation correctly")]
 	[AnonymousData]
 	public async Task ExistingCompanyPassesValidationCorrectly(Domain.Model.Company company)
@@ -46,7 +45,6 @@ public class CompanyDeleteCommandValidatorTests
 		validationResult.ShouldNotHaveAnyValidationErrors();
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Theory(DisplayName = "Non existing company passes validation correctly")]
 	[AnonymousData]
 	public async Task NonExistingCompanyPassesValidationCorrectly(Domain.Model.Company company, Guid id)

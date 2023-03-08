@@ -61,15 +61,13 @@ public class BlobStorageService : IBlobStorageService
 		return destId;
 	}
 
-	public FileTypeEnum GetFileType(string fileExtension)
-	{
-		return fileExtension.Trim('.') switch
+	public FileTypeEnum GetFileType(string fileExtension) =>
+		fileExtension.Trim('.').ToLower() switch
 		{
 			"doc" or "docx" or "pdf" or "rtf" or "txt" or "xls" or "xlsx" or "xlsm" => FileTypeEnum.Document,
-			"jpg" or "jpeg" or "png" or "bmp" or "gif" or "tiff" => FileTypeEnum.Image,
+			"jpg" or "jpeg" or "png" or "bmp" or "gif" or "tif" or "tiff" => FileTypeEnum.Image,
 			_ => FileTypeEnum.Others,
 		};
-	}
 
 	private static string GetTempPath(string blobFileName) => $"temp/{blobFileName}";
 
@@ -78,10 +76,10 @@ public class BlobStorageService : IBlobStorageService
 	private Dictionary<string, string> GetMetadata(string fileName, string contentType) =>
 		new()
 		{
-			{ BlobMetadata.Name, HttpUtility.UrlEncode(Path.GetFileNameWithoutExtension(fileName)) },
-			{ BlobMetadata.Extension, HttpUtility.UrlEncode(Path.GetExtension(fileName)) },
-			{ BlobMetadata.ContentType, contentType },
-			{ BlobMetadata.UploadedOn, DateTime.UtcNow.ToString("O") },
-			{ BlobMetadata.FileType, GetFileType(Path.GetExtension(fileName)).ToString()}
+			[BlobMetadata.Name] = HttpUtility.UrlEncode(Path.GetFileNameWithoutExtension(fileName)),
+			[BlobMetadata.Extension] = HttpUtility.UrlEncode(Path.GetExtension(fileName)),
+			[BlobMetadata.ContentType] = contentType,
+			[BlobMetadata.UploadedOn] = DateTime.UtcNow.ToString("O"),
+			[BlobMetadata.FileType] = GetFileType(Path.GetExtension(fileName)).ToString()
 		};
 }

@@ -8,9 +8,9 @@ using Xunit;
 namespace Monaco.Template.Backend.Common.Domain.Tests;
 
 [ExcludeFromCodeCoverage]
+[Trait("Common Domain entities", "ValueObject")]
 public class ValueObjectTests
 {
-	[Trait("Common Domain entities", "ValueObject")]
 	[Theory(DisplayName = "New ValueObject instance succeeds")]
 	[AnonymousData]
 	public void NewValueObjectInstanceSucceeds(string field1, string? field2)
@@ -21,7 +21,6 @@ public class ValueObjectTests
 		sut.Field2.Should().Be(field2);
 	}
 
-	[Trait("Common Domain entities", "ValueObject")]
 	[Theory(DisplayName = "Different ValueObject instances with same values are equal")]
 	[AnonymousData]
 	public void DifferentValueObjectInstancesWithSameValuesAreEqual(string field1, string? field2)
@@ -33,7 +32,6 @@ public class ValueObjectTests
 		val1.Equals(val2).Should().BeTrue();
 	}
 
-	[Trait("Common Domain entities", "ValueObject")]
 	[Theory(DisplayName = "Different ValueObject instances with same values are not equal")]
 	[AnonymousData]
 	public void DifferentValueObjectInstancesWithDifferentValuesAreNotEqual(string field1, string? field2, string? field3)
@@ -45,7 +43,6 @@ public class ValueObjectTests
 		val1.Equals(val2).Should().BeFalse();
 	}
 
-	[Trait("Common Domain entities", "ValueObject")]
 	[Theory(DisplayName = "Different ValueObject instances with same values are not equal")]
 	[AnonymousData]
 	public void ValueObjectComparedAgainstNullIsNotEqual(string field1, string? field2)

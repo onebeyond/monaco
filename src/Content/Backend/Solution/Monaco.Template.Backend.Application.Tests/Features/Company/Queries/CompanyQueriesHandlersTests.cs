@@ -18,9 +18,9 @@ using Xunit;
 namespace Monaco.Template.Backend.Application.Tests.Features.Company.Queries;
 
 [ExcludeFromCodeCoverage]
+[Trait("Application Queries", "Company Queries")]
 public class CompanyQueriesHandlersTests
 {
-	[Trait("Application Queries", "Company Queries")]
 	[Theory(DisplayName = "Get company page without params succeeds")]
 	[AnonymousData]
 	public async Task GetCompanyPageWithoutParamsSucceeds(List<Domain.Model.Company> companies)
@@ -40,7 +40,6 @@ public class CompanyQueriesHandlersTests
 			  .BeInAscendingOrder(x => x.Name);
 	}
 
-	[Trait("Application Queries", "Company Queries")]
 	[Theory(DisplayName = "Get company page with params succeeds")]
 	[AnonymousData]
 	public async Task GetCompanyPageWithParamsSucceeds(List<Domain.Model.Company> companies)
@@ -82,9 +81,8 @@ public class CompanyQueriesHandlersTests
 		result!.Name.Should().Be(company.Name);
 	}
 
-	[Trait("Application Queries", "Company Queries")]
 	[Fact(DisplayName = "Get non-existing company by Id fails")]
-	public async Task GetNonExistingCountryByIdFails()
+	public async Task GetNonExistingCompanyByIdFails()
 	{
 		var companies = CompanyFactory.CreateMany().ToList();
 		var dbContextMock = SetupMock(companies);
@@ -102,7 +100,6 @@ public class CompanyQueriesHandlersTests
 		var dbContextMock = new Mock<AppDbContext>();
 		dbContextMock.Setup(x => x.Set<Domain.Model.Company>())
 					 .Returns(dbSetMock.Object);
-
 
 		return dbContextMock;
 	}

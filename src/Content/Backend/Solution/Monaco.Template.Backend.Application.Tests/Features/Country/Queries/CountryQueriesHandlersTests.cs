@@ -18,9 +18,9 @@ using Xunit;
 namespace Monaco.Template.Backend.Application.Tests.Features.Country.Queries;
 
 [ExcludeFromCodeCoverage]
+[Trait("Application Queries", "Country Queries")]
 public class CountryQueriesHandlersTests
 {
-	[Trait("Application Queries", "Country Queries")]
 	[Theory(DisplayName = "Get country list without params succeeds")]
 	[AnonymousData]
 	public async Task GetCountryListWithoutParamsSucceeds(List<Domain.Model.Country> countries)
@@ -37,7 +37,6 @@ public class CountryQueriesHandlersTests
 			  .BeInAscendingOrder(x => x.Name);
 	}
 
-	[Trait("Application Queries", "Country Queries")]
 	[Theory(DisplayName = "Get country list with params succeeds")]
 	[AnonymousData]
 	public async Task GetCountryListWithParamsSucceeds(List<Domain.Model.Country> countries)
@@ -61,7 +60,6 @@ public class CountryQueriesHandlersTests
 			  .BeInDescendingOrder(x => x.Name);
 	}
 
-	[Trait("Application Queries", "Country Queries")]
 	[Fact(DisplayName = "Get existing country by Id succeeds")]
 	public async Task GetExistingCountryByIdSucceeds()
 	{
@@ -77,7 +75,6 @@ public class CountryQueriesHandlersTests
 		result!.Name.Should().Be(country.Name);
 	}
 
-	[Trait("Application Queries", "Country Queries")]
 	[Fact(DisplayName = "Get non-existing country by Id fails")]
 	public async Task GetNonExistingCountryByIdFails()
 	{

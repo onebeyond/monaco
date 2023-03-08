@@ -8,12 +8,12 @@ using Xunit;
 namespace Monaco.Template.Backend.Common.Domain.Tests;
 
 [ExcludeFromCodeCoverage]
+[Trait("Common Domain Entities", "Domain Event Entity")]
 public class DomainEventTests
 {
-	[Trait("Common Domain Entities", "Domain Event Entity")]
 	[Theory(DisplayName = "New domain event succeeds")]
 	[AnonymousData]
-	public void NewEntityWithoutParametersSucceeds(DomainEvent sut)
+	public void NewDomainEventWithoutParametersSucceeds(DomainEvent sut)
 	{
 		sut.DateOccurred.Should().BeCloseTo(DateTime.UtcNow, new TimeSpan(0, 0, 5));
 	}

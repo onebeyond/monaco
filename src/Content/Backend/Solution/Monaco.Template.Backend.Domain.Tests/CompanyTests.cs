@@ -7,9 +7,9 @@ using Xunit;
 namespace Monaco.Template.Backend.Domain.Tests;
 
 [ExcludeFromCodeCoverage]
+[Trait("Core Domain Entities", "Company Entity")]
 public class CompanyTests
 {
-	[Trait("Core Domain Entities", "Company Entity")]
 	[Theory(DisplayName = "New company succeeds")]
 	[AnonymousData]
 	public void NewCompanySucceeds(string name,
@@ -29,7 +29,6 @@ public class CompanyTests
 		sut.Version.Should().BeNull();
 	}
 
-	[Trait("Core Domain Entities", "Company Entity")]
 	[Theory(DisplayName = "New company succeeds")]
 	[AnonymousData]
 	public void UpdateCompanySucceeds(Company sut,

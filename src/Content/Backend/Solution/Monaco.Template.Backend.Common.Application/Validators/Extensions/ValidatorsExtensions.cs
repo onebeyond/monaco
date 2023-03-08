@@ -13,11 +13,13 @@ public static class ValidatorsExtensions
 
 	public static void CheckIfExists<TCommand, TEntity>(this AbstractValidator<TCommand> validator, BaseDbContext dbContext) where TCommand : CommandBase
 																															 where TEntity : Entity =>
-		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(x => x.Id).MustExistAsync<TCommand, TEntity>(dbContext));
+		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(x => x.Id)
+															.MustExistAsync<TCommand, TEntity>(dbContext));
 
 	public static void CheckIfExists<TCommand, TEntity, TCommandResult>(this AbstractValidator<TCommand> validator, BaseDbContext dbContext) where TCommand : CommandBase<TCommandResult>
 																																			 where TEntity : Entity =>
-		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(x => x.Id).MustExistAsync<TCommand, TEntity, TCommandResult>(dbContext));
+		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(x => x.Id)
+															.MustExistAsync<TCommand, TEntity, TCommandResult>(dbContext));
 
 	public static void CheckIfExists<TCommand>(this AbstractValidator<TCommand> validator,
 											   Func<Guid, CancellationToken, Task<bool>> predicate) where TCommand : CommandBase =>
@@ -45,9 +47,9 @@ public static class ValidatorsExtensions
 		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(selector)
 															.MustAsync(predicate));
 
-	public static void CheckIfExists<TComomand, TPropertyType>(this AbstractValidator<TComomand> validator,
-															   Expression<Func<TComomand, TPropertyType>> selector,
-															   Func<TComomand, TPropertyType, CancellationToken, Task<bool>> predicate) where TComomand : CommandBase =>
+	public static void CheckIfExists<TCommand, TPropertyType>(this AbstractValidator<TCommand> validator,
+															   Expression<Func<TCommand, TPropertyType>> selector,
+															   Func<TCommand, TPropertyType, CancellationToken, Task<bool>> predicate) where TCommand : CommandBase =>
 		validator.RuleSet(ExistsRulesetName, () => validator.RuleFor(selector)
 															.MustAsync(predicate));
 

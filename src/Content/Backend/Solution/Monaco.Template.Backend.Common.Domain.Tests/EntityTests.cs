@@ -12,9 +12,9 @@ using Xunit;
 namespace Monaco.Template.Backend.Common.Domain.Tests;
 
 [ExcludeFromCodeCoverage]
+[Trait("Common Domain Entities", "Base Entity")]
 public class EntityTests
 {
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "New entity without parameters succeeds")]
 	[AnonymousData]
 	public void NewEntityWithoutParametersSucceeds(Entity sut)
@@ -23,7 +23,6 @@ public class EntityTests
 		sut.DomainEvents.Should().BeEmpty();
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "New entity with parameters succeeds")]
 	[AnonymousData]
 	public void NewEntityWithParametersSucceeds(Guid id)
@@ -37,7 +36,6 @@ public class EntityTests
 		sut.DomainEvents.Should().BeEmpty();
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "Add Domain Event succeeds")]
 	[AnonymousData]
 	public void AddDomainEventSucceeds(Entity sut, DomainEvent domainEvent)
@@ -47,7 +45,6 @@ public class EntityTests
 		sut.DomainEvents.Should().HaveCount(1).And.Contain(domainEvent);
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "Add duplicated domain event allowing duplicates succeeds")]
 	[AnonymousData]
 	public void AddDuplicatedDomainEventAllowingDuplicatesSucceeds(Entity sut, DomainEvent domainEvent)
@@ -58,7 +55,6 @@ public class EntityTests
 		sut.DomainEvents.Should().HaveCount(2).And.Contain(new[] { domainEvent, domainEvent });
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "Add duplicated domain event not allowing duplicates adds only one")]
 	[AnonymousData]
 	public void AddDuplicatedDomainEventNotAllowingDuplicatesAddsOnlyOne(Entity sut, DomainEvent domainEvent)
@@ -69,7 +65,6 @@ public class EntityTests
 		sut.DomainEvents.Should().HaveCount(1).And.Contain(domainEvent);
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "Add duplicated type of domain event not allowing duplicates adds only one")]
 	[AnonymousData]
 	public void AddDuplicatedTypeOfDomainEventNotAllowingDuplicatesAddsOnlyOne(Entity sut, DomainEvent domainEvent1, DomainEvent domainEvent2)
@@ -80,7 +75,6 @@ public class EntityTests
 		sut.DomainEvents.Should().HaveCount(1).And.Contain(domainEvent1);
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "Remove Domain Event succeeds")]
 	[AnonymousData]
 	public void RemoveDomainEventSucceeds(Entity sut, List<DomainEvent> domainEvents)
@@ -92,7 +86,6 @@ public class EntityTests
 		sut.DomainEvents.Should().HaveCount(2).And.Contain(new[] { domainEvents[1], domainEvents[2] });
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "Remove Domain Event succeeds")]
 	[AnonymousData]
 	public void RemoveNonExistingDomainEventSucceeds(Entity sut, List<DomainEvent> domainEvents)
@@ -107,7 +100,6 @@ public class EntityTests
 		sut.DomainEvents.Should().HaveCount(2).And.Contain(new[] { domainEvents[0], domainEvents[1] });
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "Clear Domain Events succeeds")]
 	[AnonymousData]
 	public void ClearDomainEventsSucceeds(Entity sut, List<DomainEvent> domainEvents)
@@ -121,7 +113,6 @@ public class EntityTests
 		sut.DomainEvents.Should().BeEmpty();
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "Entity instance equals (method) itself succeeds")]
 	[AnonymousData]
 	public void EntityInstanceEqualsMethodItselfSucceeds(Entity sut)
@@ -129,7 +120,6 @@ public class EntityTests
 		sut.Equals(sut).Should().BeTrue();
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "Entity instance equals (method) another instance same Id as same succeeds")]
 	[AnonymousData]
 	public void EntityInstanceEqualsMethodAnotherInstanceSameIdAsSameSucceeds(Guid id)
@@ -143,7 +133,6 @@ public class EntityTests
 		sut.Equals(instance).Should().BeTrue();
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "Entity instance equals (method) another instance as different succeeds")]
 	[AnonymousData]
 	public void EntityInstanceEqualsMethodAnotherInstanceAsDifferentSucceeds(Entity sut, Entity instance)
@@ -151,7 +140,6 @@ public class EntityTests
 		sut.Equals(instance).Should().BeFalse();
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "Entity instance equals (method) another different object as different succeeds ")]
 	[AnonymousData]
 	public void EntityInstanceEqualsMethodAnotherDifferentObjectAsDifferentSucceeds(Entity sut, object instance)
@@ -159,7 +147,6 @@ public class EntityTests
 		sut.Equals(instance).Should().BeFalse();
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "Entity instance equals (method) another different not proxy object as different succeeds ")]
 	[AnonymousData]
 	public void EntityInstanceEqualsMethodAnotherDifferentNotProxyObjectAsDifferentSucceeds(Entity sut)
@@ -167,7 +154,6 @@ public class EntityTests
 		sut.Equals(new object()).Should().BeFalse();
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "Entity instance equals (operator) itself succeeds")]
 	[AnonymousData]
 	public void EntityInstanceEqualsOperatorItselfSucceeds(Entity sut)
@@ -178,7 +164,6 @@ public class EntityTests
 #pragma warning restore CS1718 // Comparison made to same variable
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "Entity instance equals (operator) as different succeeds")]
 	[AnonymousData]
 	public void EntityInstanceEqualsOperatorNullAsDifferentSucceeds(Entity sut)
@@ -186,14 +171,12 @@ public class EntityTests
 		(sut == null).Should().BeFalse();
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Fact(DisplayName = "Entity instance null equals (operator) null as same succeeds")]
 	public void EntityInstanceNullEqualsOperatorNullAsSameSucceeds()
 	{
 		(null as Entity == null).Should().BeTrue();
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "Entity instance equals (operator) null as different succeeds")]
 	[AnonymousData]
 	public void EntityInstanceNotEqualsOperatorNullAsDifferentSucceeds(Entity? sut)
@@ -201,7 +184,6 @@ public class EntityTests
 		(sut != null).Should().BeTrue();
 	}
 
-	[Trait("Common Domain Entities", "Base Entity")]
 	[Theory(DisplayName = "Get Entity hash code succeeds")]
 	[AnonymousData]
 	public void EntityGetHashCodeSucceeds(Entity sut)
