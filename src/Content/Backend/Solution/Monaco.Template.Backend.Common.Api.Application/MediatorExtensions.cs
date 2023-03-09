@@ -18,15 +18,13 @@ public static class MediatorExtensions
 	/// <param name="mediator"></param>
 	/// <param name="query"></param>
 	/// <returns></returns>
-	public static async Task<ActionResult<TResult>> ExecuteQueryAsync<TResult>(this IMediator mediator,
-																			   QueryBase<TResult> query)
+	public static async Task<ActionResult<TResult>> ExecuteQueryAsync<TResult>(this IMediator mediator, QueryBase<TResult> query)
 	{
 		var result = await mediator.Send(query);
 
-		if (result == null)
-			return new NotFoundResult();
-
-		return new OkObjectResult(result);
+		return result is null
+			? new NotFoundResult()
+			: new OkObjectResult(result);
 	}
 
 	/// <summary>
@@ -36,15 +34,13 @@ public static class MediatorExtensions
 	/// <param name="mediator"></param>
 	/// <param name="query"></param>
 	/// <returns></returns>
-	public static async Task<ActionResult<Page<TResult>>> ExecuteQueryAsync<TResult>(this IMediator mediator,
-																					 QueryPagedBase<TResult> query)
+	public static async Task<ActionResult<Page<TResult>>> ExecuteQueryAsync<TResult>(this IMediator mediator, QueryPagedBase<TResult> query)
 	{
 		var result = await mediator.Send(query);
 
-		if (result == null)
-			return new NotFoundResult();
-
-		return new OkObjectResult(result);
+		return result is null
+			? new NotFoundResult()
+			: new OkObjectResult(result);
 	}
 
 	/// <summary>
@@ -54,15 +50,13 @@ public static class MediatorExtensions
 	/// <param name="mediator"></param>
 	/// <param name="query"></param>
 	/// <returns></returns>
-	public static async Task<ActionResult<TResult>> ExecuteQueryAsync<TResult>(this IMediator mediator,
-																			   QueryByIdBase<TResult> query)
+	public static async Task<ActionResult<TResult>> ExecuteQueryAsync<TResult>(this IMediator mediator, QueryByIdBase<TResult> query)
 	{
-		var item = await mediator.Send(query);
+		var result = await mediator.Send(query);
 
-		if (item == null)
-			return new NotFoundResult();
-
-		return new OkObjectResult(item);
+		return result is null
+			? new NotFoundResult()
+			: new OkObjectResult(result);
 	}
 
 	/// <summary>

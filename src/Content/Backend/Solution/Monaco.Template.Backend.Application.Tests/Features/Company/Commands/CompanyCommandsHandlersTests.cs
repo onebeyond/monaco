@@ -16,9 +16,9 @@ using Xunit;
 namespace Monaco.Template.Backend.Application.Tests.Features.Company.Commands;
 
 [ExcludeFromCodeCoverage]
+[Trait("Application Commands", "Company Commands")]
 public class CompanyCommandsHandlersTests
 {
-	[Trait("Application Commands", "Company Commands")]
 	[Theory(DisplayName = "Create new company succeeds")]
 	[AnonymousData]
 	public async Task CreateNewCompanySucceeds(Domain.Model.Country country)
@@ -48,7 +48,6 @@ public class CompanyCommandsHandlersTests
 		result.ItemNotFound.Should().BeFalse();
 	}
 
-	[Trait("Application Commands", "Company Commands")]
 	[Theory(DisplayName = "Edit company succeeds")]
 	[AnonymousData]
 	public async Task EditCompanySucceeds(Domain.Model.Country country)

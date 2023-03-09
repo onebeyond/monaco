@@ -13,7 +13,7 @@ public static class OperationsExtensions
 
 	public static Task<bool> ExistsAsync<T>(this DbContext dbContext,
 											Expression<Func<T, bool>> predicate,
-											CancellationToken cancellationToken) where T : class => 
+											CancellationToken cancellationToken) where T : class =>
 		dbContext.Set<T>().AnyAsync(predicate, cancellationToken);
 
 	public static async Task<T?> GetAsync<T>(this DbContext dbContext,
@@ -33,4 +33,13 @@ public static class OperationsExtensions
 									.GetMethod("Set", Type.EmptyTypes)?
 									.MakeGenericMethod(t)
 									.Invoke(context, Array.Empty<object?>())!;
+
+	public static async Task<List<T>> GetListByIdsAsync<T>(this DbContext dbContext,
+														   IEnumerable<Guid> items,
+														   CancellationToken cancellationToken) where T : Entity =>
+		items?.Any() == true
+			? await dbContext.Set<T>()
+							 .Where(x => items.Contains(x.Id))
+							 .ToListAsync(cancellationToken)
+			: new();
 }

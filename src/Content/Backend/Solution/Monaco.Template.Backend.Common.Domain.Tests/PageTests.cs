@@ -13,7 +13,7 @@ public class PageTests
 	[Trait("Common Domain Entities", "Page Entity")]
 	[Theory(DisplayName = "Create a new page succeeds")]
 	[AnonymousData]
-	public void Create_a_new_page(List<string> results, int offset, int limit, long count)
+	public void CreateNewPageSucceeds(List<string> results, int offset, int limit, long count)
 	{
 		var sut = new Page<string>(results, offset, limit, count);
 
@@ -24,7 +24,7 @@ public class PageTests
 	[Trait("Common Domain Entities", "Pager Entity")]
 	[Theory(DisplayName = "Create a new pager succeeds")]
 	[AnonymousData]
-	public void Create_a_new_pager(int offset, int limit, long count)
+	public void CreateNewPagerSucceeds(int offset, int limit, long count)
 	{
 		var sut = new Pager(offset, limit, count);
 

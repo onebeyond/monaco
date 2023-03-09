@@ -55,7 +55,7 @@ public class CommandValidationBehavior<TCommand, TResult> : IPipelineBehavior<TC
 }
 
 /// <summary>
-/// Behavior to validate the existance of the entity represented by the Command Id.
+/// Behavior to validate the existence of the entity represented by the Command Id.
 /// </summary>
 /// <typeparam name="TCommand">The type of the Command to process</typeparam>
 public class CommandValidationExistsBehavior<TCommand> : IPipelineBehavior<TCommand, ICommandResult> where TCommand : CommandBase
@@ -78,7 +78,7 @@ public class CommandValidationExistsBehavior<TCommand> : IPipelineBehavior<TComm
 }
 
 /// <summary>
-/// Behavior to validate the existance of the entity represented by the Command Id.
+/// Behavior to validate the existence of the entity represented by the Command Id.
 /// </summary>
 /// <typeparam name="TCommand">The type of the Command to process</typeparam>
 /// <typeparam name="TResult">The type of data to return along with the CommandResult</typeparam>

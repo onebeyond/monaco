@@ -7,9 +7,9 @@ using Xunit;
 namespace Monaco.Template.Backend.Domain.Tests;
 
 [ExcludeFromCodeCoverage]
+[Trait("Core Domain Entities", "Country Entity")]
 public class CountryTests
 {
-	[Trait("Core Domain Entities", "Country Entity")]
 	[Theory(DisplayName = "New country succeeds")]
 	[AnonymousData]
 	public void NewCountrySucceeds(string name)

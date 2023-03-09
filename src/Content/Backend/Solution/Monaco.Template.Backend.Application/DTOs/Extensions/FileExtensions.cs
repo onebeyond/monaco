@@ -7,44 +7,38 @@ namespace Monaco.Template.Backend.Application.DTOs.Extensions;
 
 public static class FileExtensions
 {
-	public static FileDto? Map(this File? value)
-	{
-		if (value == null)
-			return null;
+	public static FileDto? Map(this File? value) =>
+		value is null
+			? null
+			: new()
+			{
+				Id = value.Id,
+				Name = value.Name,
+				Extension = value.Extension,
+				ContentType = value.ContentType,
+				Size = value.Size,
+				UploadedOn = value.UploadedOn,
+				IsTemp = value.IsTemp
+			};
 
-		return new FileDto
-		{
-			Id = value.Id,
-			Name = value.Name,
-			Extension = value.Extension,
-			ContentType = value.ContentType,
-			Size = value.Size,
-			UploadedOn = value.UploadedOn,
-			IsTemp = value.IsTemp
-		};
-	}
-
-	public static ImageDto? Map(this Image? value)
-	{
-		if (value == null)
-			return null;
-
-		return new ImageDto
-		{
-			DateTaken = value.DateTaken,
-			Width = value.Width,
-			Height = value.Height,
-			ThumbnailId = value.ThumbnailId,
-			Thumbnail = value.ThumbnailId.HasValue ? value.Thumbnail.Map() : null,
-			Id = value.Id,
-			Name = value.Name,
-			Extension = value.Extension,
-			ContentType = value.ContentType,
-			Size = value.Size,
-			UploadedOn = value.UploadedOn,
-			IsTemp = value.IsTemp
-		};
-	}
+	public static ImageDto? Map(this Image? value) =>
+		value is null
+			? null
+			: new()
+			{
+				DateTaken = value.DateTaken,
+				Width = value.Width,
+				Height = value.Height,
+				ThumbnailId = value.ThumbnailId,
+				Thumbnail = value.ThumbnailId.HasValue ? value.Thumbnail.Map() : null,
+				Id = value.Id,
+				Name = value.Name,
+				Extension = value.Extension,
+				ContentType = value.ContentType,
+				Size = value.Size,
+				UploadedOn = value.UploadedOn,
+				IsTemp = value.IsTemp
+			};
 
 	public static File Map(this FileCreateCommand value, Guid id, FileTypeEnum fileType) =>
 		fileType switch

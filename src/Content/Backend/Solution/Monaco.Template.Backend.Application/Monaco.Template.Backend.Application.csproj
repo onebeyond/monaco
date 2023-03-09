@@ -15,9 +15,9 @@
 	<!--#if (filesSupport)-->
     <PackageReference Include="ExifLibNet" Version="2.1.4" />
 	<!--#endif-->
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.5.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.5.1" />
     <!--#if (massTransitIntegration)-->
-    <PackageReference Include="MassTransit" Version="8.0.12" />
+    <PackageReference Include="MassTransit" Version="8.0.13" />
     <!--#endif-->
 	<!--#if (filesSupport)-->
     <PackageReference Include="SkiaSharp" Version="2.88.3" />

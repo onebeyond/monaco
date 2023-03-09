@@ -5,18 +5,14 @@ namespace Monaco.Template.Backend.Application.DTOs.Extensions;
 
 public static class CountryExtensions
 {
-	public static CountryDto? Map(this Country? value)
-	{
-		if (value == null)
-			return null;
-
-		var dto = new CountryDto
-		{
-			Id = value.Id,
-			Name = value.Name
-		};
-		return dto;
-	}
+	public static CountryDto? Map(this Country? value) =>
+		value is null
+			? null
+			: new()
+			{
+				Id = value.Id,
+				Name = value.Name
+			};
 
 	public static Dictionary<string, Expression<Func<Country, object>>> GetMappedFields() =>
 		new()

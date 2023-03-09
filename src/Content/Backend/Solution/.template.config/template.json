@@ -159,6 +159,7 @@
 					"condition": "(!filesSupport)",
 					"exclude": [
 						"Monaco.Template.Backend.Common.BlobStorage/**/*",
+						"Monaco.Template.Backend.Common.BlobStorage.Tests/**/*",
 						"Monaco.Template.Backend.Api/Controllers/FilesController.cs",
 						"Monaco.Template.Backend.Api/Controllers/ImagesController.cs",
 						"Monaco.Template.Backend.Application/Features/File/**/*",
@@ -547,6 +548,7 @@
 		"5a3893d1-1e36-310c-7633-8f36ffa26315",
 		"a2689ae3-3643-6250-a748-8f055cc72da8",
 		"be447a08-0a85-5779-8c65-cf15c2c9a5a8",
-		"c776f397-182b-6d0d-09f2-4e440dc093d3"
+		"c776f397-182b-6d0d-09f2-4e440dc093d3",
+		"d8623b90-59c1-4753-a0e6-f2dbd4305c9b"
 	]
 }

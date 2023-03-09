@@ -17,9 +17,9 @@ using Xunit;
 namespace Monaco.Template.Backend.Application.Tests.Features.Company.Commands.Validators;
 
 [ExcludeFromCodeCoverage]
+[Trait("Application Validators", "Company Validators")]
 public class CompanyCreateCommandValidatorTests
 {
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "Validator's rule level cascade mode is 'Stop'")]
 	public void ValidatorRuleLevelCascadeModeIsStop()
 	{
@@ -28,7 +28,6 @@ public class CompanyCreateCommandValidatorTests
 		sut.RuleLevelCascadeMode.Should().Be(CascadeMode.Stop);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "Name being valid does not generate validation error")]
 	public async Task NameDoesNotGenerateErrorWhenValid()
 	{
@@ -52,7 +51,6 @@ public class CompanyCreateCommandValidatorTests
 		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.Name);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "Name with empty value generates validation error")]
 	public async Task NameIsEmptyGeneratesError()
 	{
@@ -74,7 +72,6 @@ public class CompanyCreateCommandValidatorTests
 						.HaveCount(1);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "Name with long value generates validation error")]
 	public async Task NameWithLongValueGeneratesError()
 	{
@@ -97,7 +94,6 @@ public class CompanyCreateCommandValidatorTests
 						.HaveCount(1);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Theory(DisplayName = "Name which already exists generates validation error")]
 	[AnonymousData]
 	public async Task NameAlreadyExistsGeneratesError(Domain.Model.Company company)
@@ -125,7 +121,6 @@ public class CompanyCreateCommandValidatorTests
 						.HaveCount(1);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "Email being valid does not generate validation error")]
 	public async Task EmailIsValidDoesNotGenerateError()
 	{
@@ -149,7 +144,6 @@ public class CompanyCreateCommandValidatorTests
 		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.Email);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "Email with empty value generates validation error")]
 	public async Task EmailIsEmptyGeneratesError()
 	{
@@ -171,7 +165,6 @@ public class CompanyCreateCommandValidatorTests
 						.HaveCount(1);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Theory(DisplayName = "Email being invalid generates validation error")]
 	[AnonymousData]
 	public async Task EmailAddressIsInvalidGeneratesError(string email)
@@ -194,7 +187,6 @@ public class CompanyCreateCommandValidatorTests
 						.HaveCount(1);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "Website URL with long value generates validation error")]
 	public async Task WebsiteUrlWithLongValueGeneratesError()
 	{
@@ -217,7 +209,6 @@ public class CompanyCreateCommandValidatorTests
 						.HaveCount(1);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "Website URL with empty value does not generate validation error")]
 	public async Task WebsiteUrlWithEmptyValueDoesNotGenerateError()
 	{
@@ -236,9 +227,8 @@ public class CompanyCreateCommandValidatorTests
 		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.WebSiteUrl);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "Street with long value generates validation error")]
-	public async Task AddressWithLongValueGeneratesError()
+	public async Task StreetWithLongValueGeneratesError()
 	{
 		var cmdMock = new Mock<CompanyCreateCommand>(It.IsAny<string>(),                // Name
 													 It.IsAny<string>(),                // Email
@@ -259,9 +249,8 @@ public class CompanyCreateCommandValidatorTests
 						.HaveCount(1);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "Street with empty value does not generate validation error")]
-	public async Task AddressWithEmptyValueDoesNotGenerateError()
+	public async Task StreetWithEmptyValueDoesNotGenerateError()
 	{
 		var cmdMock = new Mock<CompanyCreateCommand>(It.IsAny<string>(),    // Name
 													 It.IsAny<string>(),    // Email
@@ -278,7 +267,6 @@ public class CompanyCreateCommandValidatorTests
 		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.Street);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "City with long value generates validation error")]
 	public async Task CityWithLongValueGeneratesError()
 	{
@@ -301,7 +289,6 @@ public class CompanyCreateCommandValidatorTests
 						.HaveCount(1);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "City with empty value does not generate validation error")]
 	public async Task CityWithEmptyValueDoesNotGenerateError()
 	{
@@ -320,7 +307,6 @@ public class CompanyCreateCommandValidatorTests
 		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.City);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "County with long value generates validation error")]
 	public async Task CountyWithLongValueGeneratesError()
 	{
@@ -343,7 +329,6 @@ public class CompanyCreateCommandValidatorTests
 						.HaveCount(1);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "County with empty value does not generate validation error")]
 	public async Task CountyWithEmptyValueDoesNotGenerateError()
 	{
@@ -362,7 +347,6 @@ public class CompanyCreateCommandValidatorTests
 		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.County);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "Postcode with long value generates validation error")]
 	public async Task PostcodeWithLongValueGeneratesError()
 	{
@@ -385,7 +369,6 @@ public class CompanyCreateCommandValidatorTests
 						.HaveCount(1);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "Postcode with empty value does not generate validation error")]
 	public async Task PostcodeWithEmptyValueDoesNotGenerateError()
 	{
@@ -404,7 +387,6 @@ public class CompanyCreateCommandValidatorTests
 		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.PostCode);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Theory(DisplayName = "Country being valid does not generate validation error")]
 	[AnonymousData(true)]
 	public async Task CountryIsValidDoesNotGenerateError(Domain.Model.Country country)
@@ -436,7 +418,6 @@ public class CompanyCreateCommandValidatorTests
 		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.CountryId);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "Country with null value does not generate validation error when Address fields null")]
 	public async Task CountryWithNullValueDoesNotGenerateErrorWhenAddressFieldsNull()
 	{
@@ -459,7 +440,6 @@ public class CompanyCreateCommandValidatorTests
 		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.CountryId);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Fact(DisplayName = "Country with null value generates validation error when Address fields present")]
 	public async Task CountryWithNullValueGeneratesErrorWhenAddressFieldsPresent()
 	{
@@ -482,7 +462,6 @@ public class CompanyCreateCommandValidatorTests
 		validationResult.ShouldHaveValidationErrorFor(cmd => cmd.CountryId);
 	}
 
-	[Trait("Application Validators", "Company Validators")]
 	[Theory(DisplayName = "Country that doesn't exist generates validation error")]
 	[AnonymousData]
 	public async Task CountryMustExistValidation(Domain.Model.Country country)

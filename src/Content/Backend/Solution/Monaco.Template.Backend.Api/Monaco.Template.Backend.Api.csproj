@@ -10,8 +10,8 @@
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="6.0.3" />
     <!--#if (massTransitIntegration)-->
-    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.0.12" />
-    <PackageReference Include="MassTransit.RabbitMQ" Version="8.0.12" />
+    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.0.13" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.0.13" />
     <!--#endif-->
 	<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.3">
       <PrivateAssets>all</PrivateAssets>
