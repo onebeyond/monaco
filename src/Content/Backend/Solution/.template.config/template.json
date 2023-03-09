@@ -159,6 +159,7 @@
 					"condition": "(!filesSupport)",
 					"exclude": [
 						"Monaco.Template.Backend.Common.BlobStorage/**/*",
+						"Monaco.Template.Backend.Common.BlobStorage.Tests/**/*",
 						"Monaco.Template.Backend.Api/Controllers/FilesController.cs",
 						"Monaco.Template.Backend.Api/Controllers/ImagesController.cs",
 						"Monaco.Template.Backend.Application/Features/File/**/*",

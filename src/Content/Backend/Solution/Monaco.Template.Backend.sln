@@ -3,6 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31808.319
 MinimumVisualStudioVersion = 10.0.40219.1
+#if (!excludeCommon)
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1095FB23-B2A1-4FD6-BC12-433529EEA56E}"
 	ProjectSection(SolutionItems) = preProject
 		nuget.config = nuget.config
@@ -12,11 +13,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{8BFE9C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{35484293-234F-40DA-B430-A95170EDE449}"
 EndProject
+#if (keycloakConfig)
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KeyCloak", "KeyCloak", "{29DFBC35-3DA6-4C68-AA97-5CCE06D80917}"
 	ProjectSection(SolutionItems) = preProject
 		realm-export-template.json = realm-export-template.json
 	EndProjectSection
 EndProject
+#endif
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.Domain.Tests", "Monaco.Template.Backend.Common.Domain.Tests\Monaco.Template.Backend.Common.Domain.Tests.csproj", "{426A6AB4-95F6-46AC-AB6D-98C4612F74E5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.Api", "Monaco.Template.Backend.Common.Api\Monaco.Template.Backend.Common.Api.csproj", "{78120DEF-B581-4D6B-92D7-1735070ACB7F}"
@@ -33,10 +36,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Com
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.Api.Application", "Monaco.Template.Backend.Common.Api.Application\Monaco.Template.Backend.Common.Api.Application.csproj", "{F733BD0F-4C55-4E65-92E8-837191C37357}"
 EndProject
+#endif
+#if (massTransitIntegration)
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.Messaging.Messages", "Monaco.Template.Backend.Common.Messaging.Messages\Monaco.Template.Backend.Common.Messaging.Messages.csproj", "{45B82388-702E-4485-BEB5-995051DB9952}"
 EndProject
+#endif
+#if (apiGateway)
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.ApiGateway", "Monaco.Template.Backend.Common.ApiGateway\Monaco.Template.Backend.Common.ApiGateway.csproj", "{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}"
 EndProject
+#endif
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{920A23AF-59DA-4453-B825-0549B1C04F5B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Application.Tests", "Monaco.Template.Backend.Application.Tests\Monaco.Template.Backend.Application.Tests.csproj", "{E5781B96-E0CA-4762-9412-C4202E0CA08F}"
@@ -53,16 +61,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.App
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Application.Infrastructure.Migrations", "Monaco.Template.Backend.Application.Infrastructure.Migrations\Monaco.Template.Backend.Application.Infrastructure.Migrations.csproj", "{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}"
 EndProject
+#if (filesSupport)
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.BlobStorage", "Monaco.Template.Backend.Common.BlobStorage\Monaco.Template.Backend.Common.BlobStorage.csproj", "{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monaco.Template.Backend.Common.BlobStorage.Tests", "Monaco.Template.Backend.Common.BlobStorage.Tests\Monaco.Template.Backend.Common.BlobStorage.Tests.csproj", "{1F3073EF-20EF-4BDB-B0DB-065034E76E76}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.BlobStorage.Tests", "Monaco.Template.Backend.Common.BlobStorage.Tests\Monaco.Template.Backend.Common.BlobStorage.Tests.csproj", "{D8623B90-59C1-4753-A0E6-F2DBD4305C9B}"
 EndProject
+#endif
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		#if (!excludeCommon)
 		{426A6AB4-95F6-46AC-AB6D-98C4612F74E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{426A6AB4-95F6-46AC-AB6D-98C4612F74E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{426A6AB4-95F6-46AC-AB6D-98C4612F74E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -95,14 +106,19 @@ Global
 		{F733BD0F-4C55-4E65-92E8-837191C37357}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F733BD0F-4C55-4E65-92E8-837191C37357}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F733BD0F-4C55-4E65-92E8-837191C37357}.Release|Any CPU.Build.0 = Release|Any CPU
+		#endif
+		#if (massTransitIntegration)
 		{45B82388-702E-4485-BEB5-995051DB9952}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{45B82388-702E-4485-BEB5-995051DB9952}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45B82388-702E-4485-BEB5-995051DB9952}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45B82388-702E-4485-BEB5-995051DB9952}.Release|Any CPU.Build.0 = Release|Any CPU
+		#endif
+		#if (apiGateway)
 		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}.Release|Any CPU.Build.0 = Release|Any CPU
+		#endif
 		{E5781B96-E0CA-4762-9412-C4202E0CA08F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E5781B96-E0CA-4762-9412-C4202E0CA08F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5781B96-E0CA-4762-9412-C4202E0CA08F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -131,19 +147,22 @@ Global
 		{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}.Release|Any CPU.Build.0 = Release|Any CPU
+		#if (filesSupport)
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1F3073EF-20EF-4BDB-B0DB-065034E76E76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1F3073EF-20EF-4BDB-B0DB-065034E76E76}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1F3073EF-20EF-4BDB-B0DB-065034E76E76}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1F3073EF-20EF-4BDB-B0DB-065034E76E76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8623B90-59C1-4753-A0E6-F2DBD4305C9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8623B90-59C1-4753-A0E6-F2DBD4305C9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8623B90-59C1-4753-A0E6-F2DBD4305C9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8623B90-59C1-4753-A0E6-F2DBD4305C9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		#endif
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		#if (!excludeCommon)
 		{35484293-234F-40DA-B430-A95170EDE449} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{426A6AB4-95F6-46AC-AB6D-98C4612F74E5} = {35484293-234F-40DA-B430-A95170EDE449}
 		{78120DEF-B581-4D6B-92D7-1735070ACB7F} = {8BFE9C37-2620-4156-88B8-286537954C5E}
@@ -153,12 +172,19 @@ Global
 		{B82D784A-81A2-46C5-A966-B472B8FCAD46} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{0FB378C2-9DE1-437F-8A62-774747105CE5} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{F733BD0F-4C55-4E65-92E8-837191C37357} = {8BFE9C37-2620-4156-88B8-286537954C5E}
+		#endif
+		#if (massTransitIntegration)
 		{45B82388-702E-4485-BEB5-995051DB9952} = {8BFE9C37-2620-4156-88B8-286537954C5E}
+		#endif
+		#if (apiGateway)
 		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34} = {8BFE9C37-2620-4156-88B8-286537954C5E}
+		#endif
 		{E5781B96-E0CA-4762-9412-C4202E0CA08F} = {920A23AF-59DA-4453-B825-0549B1C04F5B}
 		{B09E0906-8522-4B70-8C55-958415DAF21D} = {920A23AF-59DA-4453-B825-0549B1C04F5B}
+		#if (filesSupport)
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0} = {8BFE9C37-2620-4156-88B8-286537954C5E}
-		{1F3073EF-20EF-4BDB-B0DB-065034E76E76} = {35484293-234F-40DA-B430-A95170EDE449}
+		{D8623B90-59C1-4753-A0E6-F2DBD4305C9B} = {35484293-234F-40DA-B430-A95170EDE449}
+		#endif
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {42C5F44E-1221-43DF-A6F5-4CB2CBEF8D72}
