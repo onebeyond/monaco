@@ -31,7 +31,7 @@ public static class FilterExtensions
 			//generate the expression equivalent to that querystring with the mapping corresponding to the DB
 			var predicateKey = PredicateBuilder.New<T>(false); //Declare a PredicateBuilder for the current key values
 			predicateKey = values.Where(value => ValidateDataType(value, GetBodyExpression(filterMapLower[key]).Type))
-								 .Select(value => GetOperationExpression(key, filterMapLower[key], value)) //then generate the expresion for each value
+								 .Select(value => GetOperationExpression(key, filterMapLower[key], value)) //then generate the expression for each value
 								 .Aggregate(predicateKey, (current, expr) => current.Or(expr)); //and chain them all with an OR operator
 			predicate = allConditions ? predicate.And(predicateKey) : predicate.Or(predicateKey); //then add the resulting expression to the more general predicate
 		}
@@ -153,19 +153,22 @@ public static class FilterExtensions
 		return Expression.Lambda<Func<T, bool>>(expression, fieldMap.Parameters);
 	}
 
-	private static bool ValidateDataType(string? data, Type type) =>
-		data switch
-		{
-			null or { Length: 0 } => true,
-			not null when type == typeof(int) || type == typeof(int?) => int.TryParse(data, out _),
-			not null when type == typeof(long) || type == typeof(long?) => long.TryParse(data, out _),
-			not null when type == typeof(short) || type == typeof(short?) => short.TryParse(data, out _),
-			not null when type == typeof(float) || type == typeof(float?) => float.TryParse(data, out _),
-			not null when type == typeof(decimal) || type == typeof(decimal?) => decimal.TryParse(data, out _),
-			not null when type == typeof(bool) || type == typeof(bool?) => bool.TryParse(data, out _),
-			not null when type == typeof(Guid) || type == typeof(Guid?) => Guid.TryParse(data, out _),
-			not null when type == typeof(DateTime) || type == typeof(DateTime?) => DateTime.TryParse(data, out _),
-			not null when type == typeof(Enum) => Enum.TryParse(type, data, true, out _),
-			_ => type == typeof(string)
-		};
+	private static bool ValidateDataType(string? data, Type type)
+	{
+		data = data is ['!', ..] ? data[1..] : data;
+		return data switch
+			   {
+				   null or { Length: 0 } => true,
+				   not null when type == typeof(int) || type == typeof(int?) => int.TryParse(data, out _),
+				   not null when type == typeof(long) || type == typeof(long?) => long.TryParse(data, out _),
+				   not null when type == typeof(short) || type == typeof(short?) => short.TryParse(data, out _),
+				   not null when type == typeof(float) || type == typeof(float?) => float.TryParse(data, out _),
+				   not null when type == typeof(decimal) || type == typeof(decimal?) => decimal.TryParse(data, out _),
+				   not null when type == typeof(bool) || type == typeof(bool?) => bool.TryParse(data, out _),
+				   not null when type == typeof(Guid) || type == typeof(Guid?) => Guid.TryParse(data, out _),
+				   not null when type == typeof(DateTime) || type == typeof(DateTime?) => DateTime.TryParse(data, out _),
+				   not null when type == typeof(Enum) => Enum.TryParse(type, data, true, out _),
+				   _ => type == typeof(string)
+			   };
+	}
 }
