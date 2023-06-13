@@ -53,40 +53,37 @@ public static class SortingExtensions
 	{
 		var bodyExpression = (MemberExpression)(expression.Body.NodeType == ExpressionType.Convert ? ((UnaryExpression)expression.Body).Operand : expression.Body);
 		var sortLambda = Expression.Lambda(bodyExpression, expression.Parameters);
-		Expression<Func<IOrderedQueryable<T>>> sortMethod;
-		if (firstSort)
-			if (ascending) sortMethod = () => source.OrderBy<T, object>(k => null!);
-			else sortMethod = () => source.OrderByDescending<T, object>(k => null!);
-		else
-			if (ascending) sortMethod = () => ((IOrderedQueryable<T>)source).ThenBy<T, object>(k => null!);
-		else sortMethod = () => ((IOrderedQueryable<T>)source).ThenByDescending<T, object>(k => null!);
+		Expression<Func<IOrderedQueryable<T>>> sortMethod = firstSort
+																? ascending
+																	  ? () => source.OrderBy<T, object>(k => null!)
+																	  : () => source.OrderByDescending<T, object>(k => null!)
+																: ascending
+																	? () => ((IOrderedQueryable<T>)source).ThenBy<T, object>(k => null!)
+																	: () => ((IOrderedQueryable<T>)source).ThenByDescending<T, object>(k => null!);
 
 		var methodCallExpression = (MethodCallExpression)sortMethod.Body;
 		var method = methodCallExpression.Method.GetGenericMethodDefinition();
 		var genericSortMethod = method.MakeGenericMethod(typeof(T), bodyExpression.Type);
-		var orderedQuery = (IOrderedQueryable<T>)genericSortMethod.Invoke(source, new object[] { source, sortLambda })!;
-		return orderedQuery;
+		return (IOrderedQueryable<T>)genericSortMethod.Invoke(source, new object[] { source, sortLambda })!;
 	}
 
 	private static IOrderedEnumerable<T> GetOrderedQuery<T>(this IEnumerable<T> source, Expression<Func<T, object>> expression, bool ascending, bool firstSort)
 	{
 		var bodyExpression = (MemberExpression)(expression.Body.NodeType == ExpressionType.Convert ? ((UnaryExpression)expression.Body).Operand : expression.Body);
 		var sortLambda = Expression.Lambda(bodyExpression, expression.Parameters);
-		Expression<Func<IOrderedEnumerable<T>>> sortMethod;
-		if (firstSort)
-			if (ascending) sortMethod = () => source.OrderBy<T, object>(k => null!);
-			else sortMethod = () => source.OrderByDescending<T, object>(k => null!);
-		else
-			if (ascending) sortMethod = () => ((IOrderedEnumerable<T>)source).ThenBy<T, object>(k => null!);
-		else sortMethod = () => ((IOrderedEnumerable<T>)source).ThenByDescending<T, object>(k => null!);
-
+		Expression<Func<IOrderedEnumerable<T>>> sortMethod = firstSort
+																 ? ascending
+																	   ? () => source.OrderBy<T, object>(k => null!)
+																	   : () => source.OrderByDescending<T, object>(k => null!)
+																 : ascending
+																	 ? () => ((IOrderedEnumerable<T>)source).ThenBy<T, object>(k => null!)
+																	 : () => ((IOrderedEnumerable<T>)source).ThenByDescending<T, object>(k => null!);
 		if (sortMethod.Body is not MethodCallExpression methodCallExpression)
 			throw new Exception("oops");
 
 		var meth = methodCallExpression.Method.GetGenericMethodDefinition();
 		var genericSortMethod = meth.MakeGenericMethod(typeof(T), bodyExpression.Type);
-		var orderedQuery = (IOrderedEnumerable<T>)genericSortMethod.Invoke(source, new object[] { source, sortLambda.Compile() })!;
-		return orderedQuery;
+		return (IOrderedEnumerable<T>)genericSortMethod.Invoke(source, new object[] { source, sortLambda.Compile() })!;
 	}
 
 	private static Dictionary<string, bool> ProcessSortParam<T>(IEnumerable<string?> sortFields,
