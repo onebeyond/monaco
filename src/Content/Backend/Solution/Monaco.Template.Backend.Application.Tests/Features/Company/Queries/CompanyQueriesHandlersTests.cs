@@ -33,7 +33,7 @@ public class CompanyQueriesHandlersTests
 
 		result.Should().NotBeNull();
 		result!.Pager.Count.Should().Be(companies.Count);
-		result.Results
+		result.Items
 			  .Should()
 			  .HaveCount(companies.Count).And
 			  .Contain(x => companies.Any(c => c.Name == x.Name)).And
@@ -58,7 +58,7 @@ public class CompanyQueriesHandlersTests
 
 		result.Should().NotBeNull();
 		result!.Pager.Count.Should().Be(companiesSet.Count);
-		result.Results
+		result.Items
 			  .Should()
 			  .HaveCount(companiesSet.Count).And
 			  .Contain(x => companiesSet.Any(c => c.Name == x.Name)).And

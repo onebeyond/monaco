@@ -4,13 +4,13 @@ public record Page<T>
 {
 	/// <summary>
 	/// </summary>
-	/// <param name="results">Results subset</param>
+	/// <param name="items">Items subset</param>
 	/// <param name="offset">Record from where to start paging</param>
 	/// <param name="limit">Amount of items to page</param>
 	/// <param name="count">Total amount of items</param>
-	public Page(IEnumerable<T> results, int offset, int limit, long count)
+	public Page(IEnumerable<T> items, int offset, int limit, long count)
 	{
-		Results = results.ToList();
+		Items = items.ToList();
 		Pager = new Pager(offset, limit, count);
 	}
 
@@ -19,9 +19,9 @@ public record Page<T>
 	/// </summary>
 	public Pager Pager { get; }
 	/// <summary>
-	/// Paged results
+	/// Paged items
 	/// </summary>
-	public IReadOnlyList<T> Results { get; }
+	public IReadOnlyList<T> Items { get; }
 }
 
 /// <summary>

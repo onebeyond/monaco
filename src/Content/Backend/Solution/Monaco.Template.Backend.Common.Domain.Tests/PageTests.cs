@@ -18,7 +18,7 @@ public class PageTests
 		var sut = new Page<string>(results, offset, limit, count);
 
 		sut.Pager.Should().NotBeNull().And.BeEquivalentTo(new Pager(offset, limit, count));
-		sut.Results.Should().OnlyContain(s => results.Contains(s));
+		sut.Items.Should().OnlyContain(s => results.Contains(s));
 	}
 
 	[Trait("Common Domain Entities", "Pager Entity")]
