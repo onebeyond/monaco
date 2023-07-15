@@ -5,6 +5,8 @@
 [![Nuget downloads](https://img.shields.io/nuget/dt/Monaco.Template?style=plastic)](https://www.nuget.org/packages/Monaco.Template)
 [![License](https://img.shields.io/github/license/OneBeyond/monaco?style=plastic)](LICENSE.TXT)
 [![Release to NuGet](https://github.com/onebeyond/monaco/actions/workflows/release.yml/badge.svg)](https://github.com/onebeyond/monaco/actions/workflows/release.yml)
+[![Maintainability](https://api.codeclimate.com/v1/badges/b536ba0439c5440795b4/maintainability)](https://codeclimate.com/github/onebeyond/monaco/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/b536ba0439c5440795b4/test_coverage)](https://codeclimate.com/github/onebeyond/monaco/test_coverage)
 
 # Introduction
 Monaco is meant to be a set of .NET templates for different platforms, such as a backend with a REST API, a Blazor WASM webapp or a .NET MAUI desktop/mobile app (the last 2 are planned [here](https://github.com/onebeyond/monaco/milestone/1) and [here](https://github.com/onebeyond/monaco/milestone/2)), as well as other individual files templates, all in order to help accelerate the development of new projects with a flexible and easy to understand architecture.
