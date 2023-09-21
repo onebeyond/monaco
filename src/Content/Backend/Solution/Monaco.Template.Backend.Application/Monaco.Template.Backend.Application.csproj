@@ -20,7 +20,7 @@
     <PackageReference Include="MassTransit" Version="8.0.13" />
     <!--#endif-->
 	<!--#if (filesSupport)-->
-    <PackageReference Include="SkiaSharp" Version="2.88.3" />
+    <PackageReference Include="SkiaSharp" Version="2.88.6" />
 	<!--#endif-->
   </ItemGroup>
 
