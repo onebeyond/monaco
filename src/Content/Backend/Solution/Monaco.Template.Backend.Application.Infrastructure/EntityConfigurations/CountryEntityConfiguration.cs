@@ -7,12 +7,8 @@ using Monaco.Template.Backend.Domain.Model;
 
 namespace Monaco.Template.Backend.Application.Infrastructure.EntityConfigurations;
 
-public class CountryEntityConfiguration : EntityTypeConfigurationBase<Country>
+public class CountryEntityConfiguration(IHostEnvironment env) : EntityTypeConfigurationBase<Country>(env)
 {
-	public CountryEntityConfiguration(IHostEnvironment env) : base(env)
-	{
-	}
-
 	public override void Configure(EntityTypeBuilder<Country> builder)
 	{
 		builder.ConfigureIdWithDbGeneratedValue();

@@ -1,5 +1,4 @@
 ﻿#if (!disableAuth)
-
 namespace Monaco.Template.Backend.Api.Auth;
 
 public static class Scopes

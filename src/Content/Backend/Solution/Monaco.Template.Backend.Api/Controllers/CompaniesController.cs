@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Asp.Versioning;
+using MediatR;
 #if (!disableAuth)
 using Microsoft.AspNetCore.Authorization;
 #endif
@@ -19,35 +20,28 @@ namespace Monaco.Template.Backend.Api.Controllers;
 
 [Route("api/v{apiVersion:apiVersion}/[controller]")]
 [ApiController]
-public class CompaniesController : ControllerBase
+public class CompaniesController(IMediator mediator) : ControllerBase
 {
-	private readonly IMediator _mediator;
-
-	public CompaniesController(IMediator mediator)
-	{
-		_mediator = mediator;
-	}
-
 	[HttpGet]
 #if (!disableAuth)
 	[Authorize(Scopes.CompaniesRead)]
 #endif
 	public Task<ActionResult<Page<CompanyDto>>> Get() =>
-		_mediator.ExecuteQueryAsync(new GetCompanyPageQuery(Request.Query));
+		mediator.ExecuteQueryAsync(new GetCompanyPageQuery(Request.Query));
 
 	[HttpGet("{id:guid}")]
 #if (!disableAuth)
 	[Authorize(Scopes.CompaniesRead)]
 #endif
 	public Task<ActionResult<CompanyDto?>> Get(Guid id) =>
-		_mediator.ExecuteQueryAsync(new GetCompanyByIdQuery(id));
+		mediator.ExecuteQueryAsync(new GetCompanyByIdQuery(id));
 
 	[HttpPost]
 #if (!disableAuth)
 	[Authorize(Scopes.CompaniesWrite)]
 #endif
 	public Task<ActionResult<Guid>> Post([FromRoute] ApiVersion apiVersion, [FromBody] CompanyCreateEditDto dto) =>
-		_mediator.ExecuteCommandAsync(dto.MapCreateCommand(),
+		mediator.ExecuteCommandAsync(dto.MapCreateCommand(),
 									  ModelState,
 									  "api/v{0}/Companies/{1}",
 									  apiVersion);
@@ -57,7 +51,7 @@ public class CompaniesController : ControllerBase
 	[Authorize(Scopes.CompaniesWrite)]
 #endif
 	public Task<IActionResult> Put(Guid id, [FromBody] CompanyCreateEditDto dto) =>
-		_mediator.ExecuteCommandAsync(dto.MapEditCommand(id),
+		mediator.ExecuteCommandAsync(dto.MapEditCommand(id),
 									  ModelState,
 									  ResponseType.NoContent);
 
@@ -66,6 +60,6 @@ public class CompaniesController : ControllerBase
 	[Authorize(Scopes.CompaniesWrite)]
 #endif
 	public Task<IActionResult> Delete(Guid id) =>
-		_mediator.ExecuteCommandAsync(new CompanyDeleteCommand(id),
+		mediator.ExecuteCommandAsync(new CompanyDeleteCommand(id),
 									  ModelState);
 }

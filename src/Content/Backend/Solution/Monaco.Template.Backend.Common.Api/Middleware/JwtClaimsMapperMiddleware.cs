@@ -6,18 +6,12 @@ using Monaco.Template.Backend.Common.Api.Attributes;
 
 namespace Monaco.Template.Backend.Common.Api.Middleware;
 
-public class JwtClaimsMapperMiddleware
+public class JwtClaimsMapperMiddleware(RequestDelegate next)
 {
-	private readonly RequestDelegate _next;
 	private const string SchemeStr = $"{JwtBearerDefaults.AuthenticationScheme} ";
 	private const string ScopeClaimType = "scope";
 	private const string NameClaimType = "name";
 	private const string RoleClaimType = "role";
-
-	public JwtClaimsMapperMiddleware(RequestDelegate next)
-	{
-		_next = next;
-	}
 
 	public Task InvokeAsync(HttpContext context)
 	{
@@ -41,6 +35,6 @@ public class JwtClaimsMapperMiddleware
 			}
 		}
 
-		return _next(context);
+		return next(context);
 	}
 }

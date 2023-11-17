@@ -1,10 +1,20 @@
 ﻿namespace Monaco.Template.Backend.Application.DTOs;
 
-public class ImageDto : FileDto
-{
-	public DateTime? DateTaken { get; set; }
-	public int Width { get; set; }
-	public int Height { get; set; }
-	public Guid? ThumbnailId { get; set; }
-	public ImageDto? Thumbnail { get; set; }
-}
+public record ImageDto(Guid Id,
+					   string Name,
+					   string Extension,
+					   string ContentType,
+					   long Size,
+					   DateTime UploadedOn,
+					   bool IsTemp,
+					   DateTime? DateTaken,
+					   int Width,
+					   int Height,
+					   Guid? ThumbnailId,
+					   ImageDto? Thumbnail) : FileDto(Id,
+													  Name,
+													  Extension,
+													  ContentType,
+													  Size,
+													  UploadedOn,
+													  IsTemp);

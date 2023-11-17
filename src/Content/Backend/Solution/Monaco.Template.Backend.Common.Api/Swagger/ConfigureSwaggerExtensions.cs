@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.AspNetCore.Mvc.Versioning.Conventions;
+﻿using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
+using Asp.Versioning.Conventions;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
@@ -24,16 +24,17 @@ public static class ConfigureSwaggerExtensions
 	{
 		return services.AddApiVersioning(options =>
 										 {
-											 options.Conventions.Add(new VersionByNamespaceConvention());
 											 options.ReportApiVersions = true;
 											 options.DefaultApiVersion = new ApiVersion(1, 0);
 											 options.AssumeDefaultVersionWhenUnspecified = true;
 										 })
-					   .AddVersionedApiExplorer(options =>
-												{
-													options.GroupNameFormat = "'v'VVV";
-													options.SubstituteApiVersionInUrl = true;
-												})
+					   .AddMvc(options => options.Conventions.Add(new VersionByNamespaceConvention()))
+					   .AddApiExplorer(options =>
+									   {
+										   options.GroupNameFormat = "'v'VVV";
+										   options.SubstituteApiVersionInUrl = true;
+									   })
+					   .Services
 					   .ConfigureSwagger(apiDescription,
 										 title,
 										 description,

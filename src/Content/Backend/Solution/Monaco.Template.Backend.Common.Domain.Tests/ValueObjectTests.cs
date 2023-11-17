@@ -56,16 +56,10 @@ public class ValueObjectTests
 
 	#region Dummy ValueObjects
 
-	public class DummyValueObject : ValueObject
+	public class DummyValueObject(string field1, string? field2 = null) : ValueObject
 	{
-		public DummyValueObject(string field1, string? field2 = null)
-		{
-			Field1 = field1;
-			Field2 = field2;
-		}
-
-		public string Field1 { get; }
-		public string? Field2 { get; }
+		public string Field1 { get; } = field1;
+		public string? Field2 { get; } = field2;
 
 		protected override IEnumerable<object?> GetEqualityComponents()
 		{

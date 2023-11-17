@@ -43,7 +43,7 @@ public sealed class CompanyEditCommandValidator : AbstractValidator<CompanyEditC
 
 		RuleFor(x => x.CountryId)
 			.NotNull()
-			.When(x => x.Street is { } || x.City is { } || x.County is { } || x.PostCode is { }, ApplyConditionTo.CurrentValidator)
+			.When(x => x.Street is not null || x.City is not null || x.County is not null || x.PostCode is not null, ApplyConditionTo.CurrentValidator)
 			.MustExistAsync<CompanyEditCommand, Domain.Model.Country>(dbContext)
 			.When(x => x.CountryId.HasValue, ApplyConditionTo.CurrentValidator);
 	}

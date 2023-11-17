@@ -8,22 +8,15 @@ namespace Monaco.Template.Backend.Api.Controllers;
 
 [Route("api/v{apiVersion:apiVersion}/[controller]")]
 [ApiController]
-public class CountriesController : ControllerBase
+public class CountriesController(IMediator mediator) : ControllerBase
 {
-	private readonly IMediator _mediator;
-
-	public CountriesController(IMediator mediator)
-	{
-		_mediator = mediator;
-	}
-
 	/// <summary>
 	/// Gets a list of countries
 	/// </summary>
 	/// <returns></returns>
 	[HttpGet]
 	public Task<ActionResult<List<CountryDto>>> Get() =>
-		_mediator.ExecuteQueryAsync(new GetCountryListQuery(Request.Query));
+		mediator.ExecuteQueryAsync(new GetCountryListQuery(Request.Query));
 
 	/// <summary>
 	/// Gets a country by Id
@@ -32,5 +25,5 @@ public class CountriesController : ControllerBase
 	/// <returns></returns>
 	[HttpGet("{id:guid}")]
 	public Task<ActionResult<CountryDto?>> Get(Guid id) =>
-		_mediator.ExecuteQueryAsync(new GetCountryByIdQuery(id));
+		mediator.ExecuteQueryAsync(new GetCountryByIdQuery(id));
 }

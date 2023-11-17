@@ -28,32 +28,20 @@ public class CommandResult<T> : CommandResult, ICommandResult<T>
 	public T Result { get; set; }
 }
 
-public class CommandResult : ICommandResult
+public class CommandResult(ValidationResult validationResult, bool itemNotFound) : ICommandResult
 {
-	public CommandResult(ValidationResult validationResult, bool itemNotFound)
+	public CommandResult(bool itemNotFound) : this(new ValidationResult(), itemNotFound)
 	{
-		ValidationResult = validationResult;
-		ItemNotFound = itemNotFound;
 	}
 
-	public CommandResult(bool itemNotFound)
+	public CommandResult(ValidationResult validationResult) : this(validationResult, false)
 	{
-		ValidationResult = new ValidationResult();
-		ItemNotFound = itemNotFound;
 	}
 
-	public CommandResult(ValidationResult validationResult)
+	public CommandResult() : this(new ValidationResult(), false)
 	{
-		ValidationResult = validationResult;
-		ItemNotFound = false;
 	}
 
-	public CommandResult()
-	{
-		ValidationResult = new ValidationResult();
-		ItemNotFound = false;
-	}
-
-	public ValidationResult ValidationResult { get; set; }
-	public bool ItemNotFound { get; set; }
+	public ValidationResult ValidationResult { get; set; } = validationResult;
+	public bool ItemNotFound { get; set; } = itemNotFound;
 }

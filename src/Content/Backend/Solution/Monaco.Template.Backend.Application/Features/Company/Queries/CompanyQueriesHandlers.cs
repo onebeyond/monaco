@@ -8,19 +8,12 @@ using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
 namespace Monaco.Template.Backend.Application.Features.Company.Queries;
 
-public sealed class CompanyQueriesHandlers : IRequestHandler<GetCompanyPageQuery, Page<CompanyDto>?>,
-											 IRequestHandler<GetCompanyByIdQuery, CompanyDto?>
+public sealed class CompanyQueriesHandlers(AppDbContext dbContext) : IRequestHandler<GetCompanyPageQuery, Page<CompanyDto>?>,
+																	 IRequestHandler<GetCompanyByIdQuery, CompanyDto?>
 {
-	private readonly AppDbContext _dbContext;
-
-	public CompanyQueriesHandlers(AppDbContext dbContext)
-	{
-		_dbContext = dbContext;
-	}
-
 	public async Task<Page<CompanyDto>?> Handle(GetCompanyPageQuery request, CancellationToken cancellationToken)
 	{
-		var query = _dbContext.Set<Domain.Model.Company>()
+		var query = dbContext.Set<Domain.Model.Company>()
 							  .AsNoTracking();
 
 		if (request.ExpandCountry)
@@ -37,7 +30,7 @@ public sealed class CompanyQueriesHandlers : IRequestHandler<GetCompanyPageQuery
 
 	public async Task<CompanyDto?> Handle(GetCompanyByIdQuery request, CancellationToken cancellationToken)
 	{
-		var item = await _dbContext.Set<Domain.Model.Company>()
+		var item = await dbContext.Set<Domain.Model.Company>()
 								   .AsNoTracking()
 								   .Include(x => x.Address!.Country)
 								   .SingleOrDefaultAsync(x => x.Id == request.Id, cancellationToken);

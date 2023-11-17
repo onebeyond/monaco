@@ -9,19 +9,16 @@ public static class CompanyExtensions
 	public static CompanyDto? Map(this Company? value, bool expandCountry = false) =>
 		value is null
 			? null
-			: new()
-			{
-				Id = value.Id,
-				Name = value.Name,
-				Email = value.Email,
-				WebSiteUrl = value.WebSiteUrl,
-				Street = value.Address?.Street,
-				City = value.Address?.City,
-				County = value.Address?.County,
-				PostCode = value.Address?.PostCode,
-				CountryId = value.Address?.CountryId,
-				Country = expandCountry ? value.Address?.Country.Map() : null
-			};
+			: new(value.Id,
+				  value.Name,
+				  value.Email,
+				  value.WebSiteUrl,
+				  value.Address?.Street,
+				  value.Address?.City,
+				  value.Address?.County,
+				  value.Address?.PostCode,
+				  value.Address?.CountryId,
+				  expandCountry ? value.Address?.Country.Map() : null);
 
 	public static Company Map(this CompanyCreateCommand value, Country? country) =>
 		new(value.Name,

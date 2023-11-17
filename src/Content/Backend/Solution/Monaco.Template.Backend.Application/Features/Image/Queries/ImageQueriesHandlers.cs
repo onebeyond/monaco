@@ -8,19 +8,10 @@ using Monaco.Template.Backend.Common.BlobStorage.Contracts;
 
 namespace Monaco.Template.Backend.Application.Features.Image.Queries;
 
-public sealed class ImageQueriesHandlers : IRequestHandler<GetImageByIdQuery, ImageDto?>,
-										   IRequestHandler<GetThumbnailByImageIdQuery, ImageDto?>,
-										   IRequestHandler<DownloadThumbnailByImageIdQuery, FileDownloadDto?>
+public sealed class ImageQueriesHandlers(AppDbContext dbContext, IBlobStorageService blobStorageService) : IRequestHandler<GetImageByIdQuery, ImageDto?>,
+																										   IRequestHandler<GetThumbnailByImageIdQuery, ImageDto?>,
+																										   IRequestHandler<DownloadThumbnailByImageIdQuery, FileDownloadDto?>
 {
-	private readonly AppDbContext _dbContext;
-	private readonly IBlobStorageService _blobStorageService;
-
-	public ImageQueriesHandlers(AppDbContext dbContext, IBlobStorageService blobStorageService)
-	{
-		_dbContext = dbContext;
-		_blobStorageService = blobStorageService;
-	}
-
 	public async Task<ImageDto?> Handle(GetImageByIdQuery request, CancellationToken cancellationToken)
 	{
 		var item = await GetImage(request.Id, cancellationToken);
@@ -40,25 +31,21 @@ public sealed class ImageQueriesHandlers : IRequestHandler<GetImageByIdQuery, Im
 		if (item == null)
 			return null;
 
-		var file = await _blobStorageService.DownloadAsync(item.Id, item.IsTemp, cancellationToken);
+		var file = await blobStorageService.DownloadAsync(item.Id, item.IsTemp, cancellationToken);
 
-		var dto = new FileDownloadDto
-				  {
-					  FileContent = file,
-					  FileName = $"{item.Name}{item.Extension}",
-					  ContentType = item.ContentType
-				  };
-		return dto;
+		return new FileDownloadDto(file,
+								   $"{item.Name}{item.Extension}",
+								   item.ContentType);
 	}
 
 	private Task<Domain.Model.Image?> GetImage(Guid id, CancellationToken cancellationToken) =>
-		_dbContext.Set<Domain.Model.Image>()
+		dbContext.Set<Domain.Model.Image>()
 				  .AsNoTracking()
 				  .Include(x => x.Thumbnail)
 				  .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
 
 	private Task<Domain.Model.Image?> GetThumbnail(Guid id, CancellationToken cancellationToken) =>
-		_dbContext.Set<Domain.Model.Image>()
+		dbContext.Set<Domain.Model.Image>()
 				  .AsNoTracking()
 				  .Where(x => x.Id == id)
 				  .Select(x => x.Thumbnail)

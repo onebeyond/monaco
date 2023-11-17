@@ -5,14 +5,9 @@ using System.Web;
 
 namespace Monaco.Template.Backend.Common.BlobStorage;
 
-public class BlobStorageService : IBlobStorageService
+public class BlobStorageService(BlobServiceClient serviceClient, string containerName) : IBlobStorageService
 {
-	private readonly BlobContainerClient _containerClient;
-
-	public BlobStorageService(BlobServiceClient serviceClient, string containerName)
-	{
-		_containerClient = serviceClient.GetBlobContainerClient(containerName);
-	}
+	private readonly BlobContainerClient _containerClient = serviceClient.GetBlobContainerClient(containerName);
 
 	public async Task<Guid> UploadTempFileAsync(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)
 	{

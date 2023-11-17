@@ -10,11 +10,16 @@ public class OperationIdEnricher : ILogEventEnricher
 	{
 		var activity = Activity.Current;
 
-		if (activity is null) return;
-
-		if (activity.Id != null)
-			logEvent.AddPropertyIfAbsent(new LogEventProperty("operationId", new ScalarValue(activity.Id)));
-		if (activity.ParentId != null)
-			logEvent.AddPropertyIfAbsent(new LogEventProperty("parentId", new ScalarValue(activity.ParentId)));
+		switch (activity)
+		{
+			case null:
+				return;
+			case { Id: not null }:
+				logEvent.AddPropertyIfAbsent(new LogEventProperty("operationId", new ScalarValue(activity.Id)));
+				break;
+			case { ParentId: not null }:
+				logEvent.AddPropertyIfAbsent(new LogEventProperty("parentId", new ScalarValue(activity.ParentId)));
+				break;
+		}
 	}
 }

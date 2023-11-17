@@ -39,7 +39,7 @@ public sealed class CompanyCreateCommandValidator : AbstractValidator<CompanyCre
 
 		RuleFor(x => x.CountryId)
 			.NotNull()
-			.When(x => x.Street is { } || x.City is { } || x.County is { } || x.PostCode is { }, ApplyConditionTo.CurrentValidator)
+			.When(x => x.Street is not null || x.City is not null || x.County is not null || x.PostCode is not null, ApplyConditionTo.CurrentValidator)
 			.MustExistAsync<CompanyCreateCommand, Domain.Model.Country, Guid>(dbContext)
 			.When(x => x.CountryId.HasValue, ApplyConditionTo.CurrentValidator);
 
