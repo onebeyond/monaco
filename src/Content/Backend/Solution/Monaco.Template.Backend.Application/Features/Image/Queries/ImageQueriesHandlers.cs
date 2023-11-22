@@ -42,9 +42,9 @@ public sealed class ImageQueriesHandlers : IRequestHandler<GetImageByIdQuery, Im
 
 		var file = await _blobStorageService.DownloadAsync(item.Id, item.IsTemp, cancellationToken);
 
-		return new FileDownloadDto(file,
-								   $"{item.Name}{item.Extension}",
-								   item.ContentType);
+		return new(file,
+				   $"{item.Name}{item.Extension}",
+				   item.ContentType);
 	}
 
 	private Task<Domain.Model.Image?> GetImage(Guid id, CancellationToken cancellationToken) =>
