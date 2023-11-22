@@ -15,14 +15,14 @@ public class FileService : IFileService
 	private readonly AppDbContext _dbContext;
 	private readonly IBlobStorageService _blobStorageService;
 
+	private const int ThumbnailWidth = 120;
+	private const int ThumbnailHeight = 120;
+
 	public FileService(AppDbContext dbContext, IBlobStorageService blobStorageService)
 	{
 		_dbContext = dbContext;
 		_blobStorageService = blobStorageService;
 	}
-
-	private const int ThumbnailWidth = 120;
-	private const int ThumbnailHeight = 120;
 
 	public async Task<File> Upload(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)
 	{
