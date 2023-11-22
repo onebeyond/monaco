@@ -8,13 +8,13 @@ public class SerilogContextEnricherMiddleware
 {
 	private readonly RequestDelegate _next;
 
+	private const string UserIdType = "sub";
+	private const string UserNameType = "preferred_username";
+
 	public SerilogContextEnricherMiddleware(RequestDelegate next)
 	{
 		_next = next;
 	}
-
-	private const string UserIdType = "sub";
-	private const string UserNameType = "preferred_username";
 
 	public Task Invoke(HttpContext context)
 	{
