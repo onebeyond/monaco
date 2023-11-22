@@ -10,15 +10,15 @@ public class JwtClaimsMapperMiddleware
 {
 	private readonly RequestDelegate _next;
 
-	public JwtClaimsMapperMiddleware(RequestDelegate next)
-	{
-		_next = next;
-	}
-
 	private const string SchemeStr = $"{JwtBearerDefaults.AuthenticationScheme} ";
 	private const string ScopeClaimType = "scope";
 	private const string NameClaimType = "name";
 	private const string RoleClaimType = "role";
+
+	public JwtClaimsMapperMiddleware(RequestDelegate next)
+	{
+		_next = next;
+	}
 
 	public Task InvokeAsync(HttpContext context)
 	{
