@@ -30,6 +30,12 @@ public class CommandResult<T> : CommandResult, ICommandResult<T>
 
 public class CommandResult : ICommandResult
 {
+	public CommandResult(ValidationResult validationResult, bool itemNotFound)
+	{
+		ValidationResult = validationResult;
+		ItemNotFound = itemNotFound;
+	}
+
 	public CommandResult(bool itemNotFound) : this(new ValidationResult(), itemNotFound)
 	{
 	}
@@ -40,12 +46,6 @@ public class CommandResult : ICommandResult
 
 	public CommandResult() : this(new ValidationResult(), false)
 	{
-	}
-
-	public CommandResult(ValidationResult validationResult, bool itemNotFound)
-	{
-		ValidationResult = validationResult;
-		ItemNotFound = itemNotFound;
 	}
 
 	public ValidationResult ValidationResult { get; set; }
