@@ -10,14 +10,23 @@ using Image = Monaco.Template.Backend.Domain.Model.Image;
 
 namespace Monaco.Template.Backend.Application.Services;
 
-public class FileService(AppDbContext dbContext, IBlobStorageService blobStorageService) : IFileService
+public class FileService : IFileService
 {
+	private readonly AppDbContext _dbContext;
+	private readonly IBlobStorageService _blobStorageService;
+
+	public FileService(AppDbContext dbContext, IBlobStorageService blobStorageService)
+	{
+		_dbContext = dbContext;
+		_blobStorageService = blobStorageService;
+	}
+
 	private const int ThumbnailWidth = 120;
 	private const int ThumbnailHeight = 120;
 
 	public async Task<File> Upload(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)
 	{
-		var fileType = blobStorageService.GetFileType(Path.GetExtension(fileName));
+		var fileType = _blobStorageService.GetFileType(Path.GetExtension(fileName));
 
 		return fileType switch
 			   {
@@ -28,7 +37,7 @@ public class FileService(AppDbContext dbContext, IBlobStorageService blobStorage
 
 	public async Task<Document> UploadDocument(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)
 	{
-		var docId = await blobStorageService.UploadTempFileAsync(stream, fileName, contentType, cancellationToken);
+		var docId = await _blobStorageService.UploadTempFileAsync(stream, fileName, contentType, cancellationToken);
 
 		try
 		{
@@ -41,7 +50,7 @@ public class FileService(AppDbContext dbContext, IBlobStorageService blobStorage
 		}
 		catch
 		{
-			await blobStorageService.DeleteAsync(docId, true, cancellationToken);
+			await _blobStorageService.DeleteAsync(docId, true, cancellationToken);
 			throw;
 		}
 	}
@@ -58,11 +67,11 @@ public class FileService(AppDbContext dbContext, IBlobStorageService blobStorage
 		var gpsLong = metadata.Get<GPSLatitudeLongitude>(ExifTag.GPSLongitude)?.ToFloat();
 		stream.Position = 0; // Reset streams position to read from beginning
 		thumbStream.Position = 0;
-		var imageIds = await Task.WhenAll(blobStorageService.UploadTempFileAsync(stream,
+		var imageIds = await Task.WhenAll(_blobStorageService.UploadTempFileAsync(stream,
 																				  fileName,
 																				  contentType,
 																				  cancellationToken),
-										  blobStorageService.UploadTempFileAsync(thumbStream,
+										  _blobStorageService.UploadTempFileAsync(thumbStream,
 																				  fileName,
 																				  contentType,
 																				  cancellationToken));
@@ -84,8 +93,8 @@ public class FileService(AppDbContext dbContext, IBlobStorageService blobStorage
 		}
 		catch
 		{
-			await Task.WhenAll(blobStorageService.DeleteAsync(imageIds[0], true, cancellationToken),
-							   blobStorageService.DeleteAsync(imageIds[1], true, cancellationToken));
+			await Task.WhenAll(_blobStorageService.DeleteAsync(imageIds[0], true, cancellationToken),
+							   _blobStorageService.DeleteAsync(imageIds[1], true, cancellationToken));
 			throw;
 		}
 	}
@@ -108,19 +117,19 @@ public class FileService(AppDbContext dbContext, IBlobStorageService blobStorage
 	{
 		file.MakePermanent();
 		file.Thumbnail?.MakePermanent();
-		await dbContext.SaveEntitiesAsync(cancellationToken);
+		await _dbContext.SaveEntitiesAsync(cancellationToken);
 
-		await blobStorageService.MakePermanentAsync(file.Id, cancellationToken);
+		await _blobStorageService.MakePermanentAsync(file.Id, cancellationToken);
 		if (file.ThumbnailId.HasValue)
-			await blobStorageService.MakePermanentAsync(file.ThumbnailId.Value, cancellationToken);
+			await _blobStorageService.MakePermanentAsync(file.ThumbnailId.Value, cancellationToken);
 	}
 
 	public async Task MakePermanentDocument(Document file, CancellationToken cancellationToken)
 	{
 		file.MakePermanent();
-		await dbContext.SaveEntitiesAsync(cancellationToken);
+		await _dbContext.SaveEntitiesAsync(cancellationToken);
 
-		await blobStorageService.MakePermanentAsync(file.Id, cancellationToken);
+		await _blobStorageService.MakePermanentAsync(file.Id, cancellationToken);
 	}
 
 	public async Task Delete(Guid id, CancellationToken cancellationToken)
@@ -139,10 +148,10 @@ public class FileService(AppDbContext dbContext, IBlobStorageService blobStorage
 
 	public async Task DeleteDocument(Document file, CancellationToken cancellationToken)
 	{
-		dbContext.Set<Document>().Remove(file);
-		await dbContext.SaveEntitiesAsync(cancellationToken);
+		_dbContext.Set<Document>().Remove(file);
+		await _dbContext.SaveEntitiesAsync(cancellationToken);
 
-		await blobStorageService.DeleteAsync(file.Id, file.IsTemp, cancellationToken);
+		await _blobStorageService.DeleteAsync(file.Id, file.IsTemp, cancellationToken);
 	}
 
 	public async Task DeleteImage(Image file, CancellationToken cancellationToken)
@@ -150,26 +159,26 @@ public class FileService(AppDbContext dbContext, IBlobStorageService blobStorage
 		var thumbId = file.ThumbnailId;
 
 		if (file.Thumbnail != null)
-			dbContext.Set<Image>().Remove(file.Thumbnail);
-		dbContext.Set<Image>().Remove(file);
-		await dbContext.SaveEntitiesAsync(cancellationToken);
+			_dbContext.Set<Image>().Remove(file.Thumbnail);
+		_dbContext.Set<Image>().Remove(file);
+		await _dbContext.SaveEntitiesAsync(cancellationToken);
 
-		await Task.WhenAll(blobStorageService.DeleteAsync(file.Id, file.IsTemp, cancellationToken),
+		await Task.WhenAll(_blobStorageService.DeleteAsync(file.Id, file.IsTemp, cancellationToken),
 						   thumbId.HasValue
-							   ? blobStorageService.DeleteAsync(thumbId.Value, file.IsTemp, cancellationToken)
+							   ? _blobStorageService.DeleteAsync(thumbId.Value, file.IsTemp, cancellationToken)
 							   : Task.CompletedTask);
 	}
 
 	public async Task<File> CopyFile(Guid id, CancellationToken cancellationToken)
 	{
 		var file = await GetFile(id, cancellationToken);
-		var copyId = await blobStorageService.CopyAsync(id, file.IsTemp, cancellationToken);
+		var copyId = await _blobStorageService.CopyAsync(id, file.IsTemp, cancellationToken);
 
 		switch (file)
 		{
 			case Image image:
 				Guid? thumbCopyId = image.ThumbnailId.HasValue
-						? await blobStorageService.CopyAsync(image.ThumbnailId.Value, image.IsTemp, cancellationToken)
+						? await _blobStorageService.CopyAsync(image.ThumbnailId.Value, image.IsTemp, cancellationToken)
 						: null;
 
 				return await SaveImage(copyId,
@@ -219,7 +228,7 @@ public class FileService(AppDbContext dbContext, IBlobStorageService blobStorage
 
 	private async Task<File> GetFile(Guid id, CancellationToken cancellationToken)
 	{
-		return (await dbContext.Set<File>().FindAsync(new object[] { id }, cancellationToken))!;
+		return (await _dbContext.Set<File>().FindAsync(new object[] { id }, cancellationToken))!;
 	}
 
 	private async Task<Image> SaveImage(Guid imageId,
@@ -285,8 +294,8 @@ public class FileService(AppDbContext dbContext, IBlobStorageService blobStorage
 
 	private async Task<T> Save<T>(T item, CancellationToken cancellationToken) where T : File
 	{
-		await dbContext.Set<T>().AddAsync(item, cancellationToken);
-		await dbContext.SaveEntitiesAsync(cancellationToken);
+		await _dbContext.Set<T>().AddAsync(item, cancellationToken);
+		await _dbContext.SaveEntitiesAsync(cancellationToken);
 
 		return item;
 	}

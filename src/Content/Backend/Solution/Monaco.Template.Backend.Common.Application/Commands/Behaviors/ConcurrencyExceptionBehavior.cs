@@ -7,11 +7,18 @@ using Polly.Registry;
 
 namespace Monaco.Template.Backend.Common.Application.Commands.Behaviors;
 
-public class ConcurrencyExceptionBehavior<TCommand>(IReadOnlyPolicyRegistry<string> policyRegistry,
-													BaseDbContext dbContext) : IPipelineBehavior<TCommand, ICommandResult>
+public class ConcurrencyExceptionBehavior<TCommand> : IPipelineBehavior<TCommand, ICommandResult>
 	where TCommand : CommandBase
 {
-	private readonly IAsyncPolicy _dbConcurrentRetryPolicy = policyRegistry.Get<IAsyncPolicy>(Policies.Policies.DbConcurrentExceptionPolicyKey);
+	private readonly IAsyncPolicy _dbConcurrentRetryPolicy;
+	private readonly BaseDbContext _dbContext;
+
+	public ConcurrencyExceptionBehavior(IReadOnlyPolicyRegistry<string> policyRegistry,
+										BaseDbContext dbContext)
+	{
+		_dbConcurrentRetryPolicy = policyRegistry.Get<IAsyncPolicy>(Policies.Policies.DbConcurrentExceptionPolicyKey);
+		_dbContext = dbContext;
+	}
 
 	public Task<ICommandResult> Handle(TCommand request,
 									   RequestHandlerDelegate<ICommandResult> next,
@@ -24,17 +31,24 @@ public class ConcurrencyExceptionBehavior<TCommand>(IReadOnlyPolicyRegistry<stri
 												  }
 												  catch (DbUpdateConcurrencyException)
 												  {
-													  dbContext.ChangeTracker.Clear();
+													  _dbContext.ChangeTracker.Clear();
 													  throw;
 												  }
 											  });
 }
 
-public class ConcurrencyExceptionBehavior<TCommand, TResult>(IReadOnlyPolicyRegistry<string> policyRegistry,
-															 BaseDbContext dbContext) : IPipelineBehavior<TCommand, ICommandResult<TResult?>>
+public class ConcurrencyExceptionBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, ICommandResult<TResult?>>
 	where TCommand : CommandBase<TResult?>
 {
-	private readonly IAsyncPolicy _dbConcurrentRetryPolicy = policyRegistry.Get<IAsyncPolicy>(Policies.Policies.DbConcurrentExceptionPolicyKey);
+	private readonly IAsyncPolicy _dbConcurrentRetryPolicy;
+	private readonly BaseDbContext _dbContext;
+
+	public ConcurrencyExceptionBehavior(IReadOnlyPolicyRegistry<string> policyRegistry,
+										BaseDbContext dbContext)
+	{
+		_dbConcurrentRetryPolicy = policyRegistry.Get<IAsyncPolicy>(Policies.Policies.DbConcurrentExceptionPolicyKey);
+		_dbContext = dbContext;
+	}
 
 	public Task<ICommandResult<TResult?>> Handle(TCommand request,
 												 RequestHandlerDelegate<ICommandResult<TResult?>> next,
@@ -47,7 +61,7 @@ public class ConcurrencyExceptionBehavior<TCommand, TResult>(IReadOnlyPolicyRegi
 												  }
 												  catch (DbUpdateConcurrencyException)
 												  {
-													  dbContext.ChangeTracker.Clear();
+													  _dbContext.ChangeTracker.Clear();
 													  throw;
 												  }
 											  });

@@ -9,10 +9,19 @@ namespace Monaco.Template.Backend.Common.Application.Commands.Behaviors;
 /// Behavior to perform validations of Commands that do not return any other data in the CommandResult
 /// </summary>
 /// <typeparam name="TCommand">The type of the Command to process</typeparam>
-public class CommandValidationBehavior<TCommand>(IValidator<TCommand> validator) : IPipelineBehavior<TCommand, ICommandResult>
+public class CommandValidationBehavior<TCommand> : IPipelineBehavior<TCommand, ICommandResult>
 	where TCommand : CommandBase
 {
-	protected readonly IValidator<TCommand> Validator = validator;
+	protected readonly IValidator<TCommand> Validator;
+
+	/// <summary>
+	/// Behavior to perform validations of Commands that do not return any other data in the CommandResult
+	/// </summary>
+	/// <typeparam name="TCommand">The type of the Command to process</typeparam>
+	public CommandValidationBehavior(IValidator<TCommand> validator)
+	{
+		Validator = validator;
+	}
 
 	public virtual async Task<ICommandResult> Handle(TCommand request, RequestHandlerDelegate<ICommandResult> next, CancellationToken cancellationToken)
 	{
@@ -29,10 +38,20 @@ public class CommandValidationBehavior<TCommand>(IValidator<TCommand> validator)
 /// </summary>
 /// <typeparam name="TCommand">The type of Command to process</typeparam>
 /// <typeparam name="TResult">The type of data to return along with the CommandResult</typeparam>
-public class CommandValidationBehavior<TCommand, TResult>(IValidator<TCommand> validator) : IPipelineBehavior<TCommand, ICommandResult<TResult?>>
+public class CommandValidationBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, ICommandResult<TResult?>>
 	where TCommand : CommandBase<TResult?>
 {
-	protected readonly IValidator<TCommand> Validator = validator;
+	protected readonly IValidator<TCommand> Validator;
+
+	/// <summary>
+	/// Behavior to perform validations on Commands that return data in the CommandResult
+	/// </summary>
+	/// <typeparam name="TCommand">The type of Command to process</typeparam>
+	/// <typeparam name="TResult">The type of data to return along with the CommandResult</typeparam>
+	public CommandValidationBehavior(IValidator<TCommand> validator)
+	{
+		Validator = validator;
+	}
 
 	public virtual async Task<ICommandResult<TResult?>> Handle(TCommand request,
 															   RequestHandlerDelegate<ICommandResult<TResult?>> next,
@@ -50,10 +69,19 @@ public class CommandValidationBehavior<TCommand, TResult>(IValidator<TCommand> v
 /// Behavior to validate the existence of the entity represented by the Command Id.
 /// </summary>
 /// <typeparam name="TCommand">The type of the Command to process</typeparam>
-public class CommandValidationExistsBehavior<TCommand>(IValidator<TCommand> validator) : IPipelineBehavior<TCommand, ICommandResult>
+public class CommandValidationExistsBehavior<TCommand> : IPipelineBehavior<TCommand, ICommandResult>
 	where TCommand : CommandBase
 {
-	protected readonly IValidator<TCommand> Validator = validator;
+	protected readonly IValidator<TCommand> Validator;
+
+	/// <summary>
+	/// Behavior to validate the existence of the entity represented by the Command Id.
+	/// </summary>
+	/// <typeparam name="TCommand">The type of the Command to process</typeparam>
+	public CommandValidationExistsBehavior(IValidator<TCommand> validator)
+	{
+		Validator = validator;
+	}
 
 	public virtual async Task<ICommandResult> Handle(TCommand request, RequestHandlerDelegate<ICommandResult> next, CancellationToken cancellationToken)
 	{
@@ -70,10 +98,20 @@ public class CommandValidationExistsBehavior<TCommand>(IValidator<TCommand> vali
 /// </summary>
 /// <typeparam name="TCommand">The type of the Command to process</typeparam>
 /// <typeparam name="TResult">The type of data to return along with the CommandResult</typeparam>
-public class CommandValidationExistsBehavior<TCommand, TResult>(IValidator<TCommand> validator) : IPipelineBehavior<TCommand, ICommandResult<TResult?>>
+public class CommandValidationExistsBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, ICommandResult<TResult?>>
 	where TCommand : CommandBase<TResult?>
 {
-	protected readonly IValidator<TCommand> Validator = validator;
+	protected readonly IValidator<TCommand> Validator;
+
+	/// <summary>
+	/// Behavior to validate the existence of the entity represented by the Command Id.
+	/// </summary>
+	/// <typeparam name="TCommand">The type of the Command to process</typeparam>
+	/// <typeparam name="TResult">The type of data to return along with the CommandResult</typeparam>
+	public CommandValidationExistsBehavior(IValidator<TCommand> validator)
+	{
+		Validator = validator;
+	}
 
 	public virtual async Task<ICommandResult<TResult?>> Handle(TCommand request,
 															   RequestHandlerDelegate<ICommandResult<TResult?>> next,

@@ -5,8 +5,15 @@ using System.Net;
 
 namespace Monaco.Template.Backend.Common.Api.Swagger;
 
-public class AuthorizeCheckOperationFilter(string audience) : IOperationFilter
+public class AuthorizeCheckOperationFilter : IOperationFilter
 {
+	private readonly string _audience;
+
+	public AuthorizeCheckOperationFilter(string audience)
+	{
+		_audience = audience;
+	}
+
 	public void Apply(OpenApiOperation operation, OperationFilterContext context)
 	{
 		var allowAnonymous = context.MethodInfo
@@ -34,7 +41,7 @@ public class AuthorizeCheckOperationFilter(string audience) : IOperationFilter
 
 		operation.Security = new List<OpenApiSecurityRequirement>
 							 {
-								 new() { [oAuthScheme] = new List<string> { audience } }
+								 new() { [oAuthScheme] = new List<string> { _audience } }
 							 };
 	}
 }

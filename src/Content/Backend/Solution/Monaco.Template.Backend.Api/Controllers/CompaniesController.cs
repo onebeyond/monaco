@@ -20,46 +20,53 @@ namespace Monaco.Template.Backend.Api.Controllers;
 
 [Route("api/v{apiVersion:apiVersion}/[controller]")]
 [ApiController]
-public class CompaniesController(IMediator mediator) : ControllerBase
+public class CompaniesController : ControllerBase
 {
+	private readonly IMediator _mediator;
+
+	public CompaniesController(IMediator mediator)
+	{
+		_mediator = mediator;
+	}
+
 	[HttpGet]
-#if (!disableAuth)
+	#if (!disableAuth)
 	[Authorize(Scopes.CompaniesRead)]
-#endif
+	#endif
 	public Task<ActionResult<Page<CompanyDto>>> Get() =>
-		mediator.ExecuteQueryAsync(new GetCompanyPageQuery(Request.Query));
+		_mediator.ExecuteQueryAsync(new GetCompanyPageQuery(Request.Query));
 
 	[HttpGet("{id:guid}")]
-#if (!disableAuth)
+	#if (!disableAuth)
 	[Authorize(Scopes.CompaniesRead)]
-#endif
+	#endif
 	public Task<ActionResult<CompanyDto?>> Get(Guid id) =>
-		mediator.ExecuteQueryAsync(new GetCompanyByIdQuery(id));
+		_mediator.ExecuteQueryAsync(new GetCompanyByIdQuery(id));
 
 	[HttpPost]
-#if (!disableAuth)
+	#if (!disableAuth)
 	[Authorize(Scopes.CompaniesWrite)]
-#endif
+	#endif
 	public Task<ActionResult<Guid>> Post([FromRoute] ApiVersion apiVersion, [FromBody] CompanyCreateEditDto dto) =>
-		mediator.ExecuteCommandAsync(dto.MapCreateCommand(),
+		_mediator.ExecuteCommandAsync(dto.MapCreateCommand(),
 									  ModelState,
 									  "api/v{0}/Companies/{1}",
 									  apiVersion);
 
 	[HttpPut("{id:guid}")]
-#if (!disableAuth)
+	#if (!disableAuth)
 	[Authorize(Scopes.CompaniesWrite)]
-#endif
+	#endif
 	public Task<IActionResult> Put(Guid id, [FromBody] CompanyCreateEditDto dto) =>
-		mediator.ExecuteCommandAsync(dto.MapEditCommand(id),
+		_mediator.ExecuteCommandAsync(dto.MapEditCommand(id),
 									  ModelState,
 									  ResponseType.NoContent);
 
 	[HttpDelete("{id:guid}")]
-#if (!disableAuth)
+	#if (!disableAuth)
 	[Authorize(Scopes.CompaniesWrite)]
-#endif
+	#endif
 	public Task<IActionResult> Delete(Guid id) =>
-		mediator.ExecuteCommandAsync(new CompanyDeleteCommand(id),
+		_mediator.ExecuteCommandAsync(new CompanyDeleteCommand(id),
 									  ModelState);
 }

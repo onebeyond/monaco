@@ -28,7 +28,7 @@ public class CommandResult<T> : CommandResult, ICommandResult<T>
 	public T Result { get; set; }
 }
 
-public class CommandResult(ValidationResult validationResult, bool itemNotFound) : ICommandResult
+public class CommandResult : ICommandResult
 {
 	public CommandResult(bool itemNotFound) : this(new ValidationResult(), itemNotFound)
 	{
@@ -42,6 +42,12 @@ public class CommandResult(ValidationResult validationResult, bool itemNotFound)
 	{
 	}
 
-	public ValidationResult ValidationResult { get; set; } = validationResult;
-	public bool ItemNotFound { get; set; } = itemNotFound;
+	public CommandResult(ValidationResult validationResult, bool itemNotFound)
+	{
+		ValidationResult = validationResult;
+		ItemNotFound = itemNotFound;
+	}
+
+	public ValidationResult ValidationResult { get; set; }
+	public bool ItemNotFound { get; set; }
 }

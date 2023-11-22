@@ -4,8 +4,15 @@ using System.Security.Claims;
 
 namespace Monaco.Template.Backend.Common.Api.Middleware;
 
-public class SerilogContextEnricherMiddleware(RequestDelegate next)
+public class SerilogContextEnricherMiddleware
 {
+	private readonly RequestDelegate _next;
+
+	public SerilogContextEnricherMiddleware(RequestDelegate next)
+	{
+		_next = next;
+	}
+
 	private const string UserIdType = "sub";
 	private const string UserNameType = "preferred_username";
 
@@ -18,6 +25,6 @@ public class SerilogContextEnricherMiddleware(RequestDelegate next)
 		if (user.HasClaim(x => x.Type == UserNameType))
 			LogContext.PushProperty("userName", context.User.FindFirstValue(UserNameType));
 
-		return next(context);
+		return _next(context);
 	}
 }

@@ -2,9 +2,14 @@
 
 namespace Monaco.Template.Backend.Common.Domain.Model;
 
-public abstract class Enumeration(Guid id, string name) : Entity(id), IComparable
+public abstract class Enumeration : Entity, IComparable
 {
-	public string Name { get; protected set; } = name;
+	protected Enumeration(Guid id, string name) : base(id)
+	{
+		Name = name;
+	}
+
+	public string Name { get; protected set; }
 
 	public override string ToString() =>
 		Name;
