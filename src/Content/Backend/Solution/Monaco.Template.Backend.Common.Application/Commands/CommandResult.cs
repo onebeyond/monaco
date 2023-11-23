@@ -36,22 +36,16 @@ public class CommandResult : ICommandResult
 		ItemNotFound = itemNotFound;
 	}
 
-	public CommandResult(bool itemNotFound)
+	public CommandResult(bool itemNotFound) : this(new ValidationResult(), itemNotFound)
 	{
-		ValidationResult = new ValidationResult();
-		ItemNotFound = itemNotFound;
 	}
 
-	public CommandResult(ValidationResult validationResult)
+	public CommandResult(ValidationResult validationResult) : this(validationResult, false)
 	{
-		ValidationResult = validationResult;
-		ItemNotFound = false;
 	}
 
-	public CommandResult()
+	public CommandResult() : this(new ValidationResult(), false)
 	{
-		ValidationResult = new ValidationResult();
-		ItemNotFound = false;
 	}
 
 	public ValidationResult ValidationResult { get; set; }

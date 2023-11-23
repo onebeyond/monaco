@@ -35,13 +35,9 @@ public sealed class FileQueriesHandlers : IRequestHandler<GetFileByIdQuery, File
 
 		var file = await _blobStorageService.DownloadAsync(request.Id, item.IsTemp, cancellationToken);
 
-		var dto = new FileDownloadDto
-				  {
-					  FileContent = file,
-					  FileName = $"{item.Name}{item.Extension}",
-					  ContentType = item.ContentType
-				  };
-		return dto;
+		return new(file,
+				   $"{item.Name}{item.Extension}",
+				   item.ContentType);
 	}
 
 	private Task<Domain.Model.File?> GetFile(Guid id, CancellationToken cancellationToken) =>

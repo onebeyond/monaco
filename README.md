@@ -17,7 +17,7 @@ Each of the different solution templates also provide some basic business compon
 
 ### Supported .NET version:
 
-7.0
+8.0
 
 ### Installation
 

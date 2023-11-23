@@ -1,5 +1,4 @@
 ﻿#if (!disableAuth)
-
 namespace Monaco.Template.Backend.Api.Auth;
 
 public static class Scopes
@@ -7,8 +6,8 @@ public static class Scopes
 	public const string CompaniesRead = "companies:read";
 	public const string CompaniesWrite = "companies:write";
 #if filesSupport
-    public const string FilesRead = "files:read";
-    public const string FilesWrite = "files:write";
+	public const string FilesRead = "files:read";
+	public const string FilesWrite = "files:write";
 #endif
 
 	public static List<string> List => new()
@@ -16,9 +15,9 @@ public static class Scopes
 										   CompaniesRead,
 										   CompaniesWrite,
 #if filesSupport
-                                           FilesRead,
-                                           FilesWrite
+										   FilesRead,
+										   FilesWrite
 #endif
-                                       };
+									   };
 }
 #endif

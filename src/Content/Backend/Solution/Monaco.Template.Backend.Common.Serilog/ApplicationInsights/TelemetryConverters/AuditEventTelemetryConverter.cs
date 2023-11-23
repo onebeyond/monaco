@@ -14,8 +14,7 @@ public class AuditEventTelemetryConverter : TelemetryConverterBase
 
 	public override IEnumerable<ITelemetry> Convert(LogEvent logEvent, IFormatProvider formatProvider)
 	{
-		if (logEvent == null)
-			throw new ArgumentNullException(nameof(logEvent));
+		ArgumentNullException.ThrowIfNull(logEvent);
 
 		//For complying with S4456:
 		return GetTelemetries(logEvent, formatProvider);
@@ -24,9 +23,9 @@ public class AuditEventTelemetryConverter : TelemetryConverterBase
 	private IEnumerable<ITelemetry> GetTelemetries(LogEvent logEvent, IFormatProvider formatProvider)
 	{
 		var telemetry = new EventTelemetry("Audit Trail")
-		{
-			Timestamp = logEvent.Timestamp
-		};
+						{
+							Timestamp = logEvent.Timestamp
+						};
 
 		ForwardPropertiesToTelemetryProperties(logEvent, telemetry, formatProvider, false, true, false);
 

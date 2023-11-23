@@ -7,7 +7,8 @@ using Polly.Registry;
 
 namespace Monaco.Template.Backend.Common.Application.Commands.Behaviors;
 
-public class ConcurrencyExceptionBehavior<TCommand> : IPipelineBehavior<TCommand, ICommandResult> where TCommand : CommandBase
+public class ConcurrencyExceptionBehavior<TCommand> : IPipelineBehavior<TCommand, ICommandResult>
+	where TCommand : CommandBase
 {
 	private readonly IAsyncPolicy _dbConcurrentRetryPolicy;
 	private readonly BaseDbContext _dbContext;
@@ -36,7 +37,8 @@ public class ConcurrencyExceptionBehavior<TCommand> : IPipelineBehavior<TCommand
 											  });
 }
 
-public class ConcurrencyExceptionBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, ICommandResult<TResult?>> where TCommand : CommandBase<TResult?>
+public class ConcurrencyExceptionBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, ICommandResult<TResult?>>
+	where TCommand : CommandBase<TResult?>
 {
 	private readonly IAsyncPolicy _dbConcurrentRetryPolicy;
 	private readonly BaseDbContext _dbContext;

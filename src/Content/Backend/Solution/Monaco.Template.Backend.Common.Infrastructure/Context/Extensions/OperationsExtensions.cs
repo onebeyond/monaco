@@ -35,9 +35,9 @@ public static class OperationsExtensions
 									.Invoke(context, Array.Empty<object?>())!;
 
 	public static async Task<List<T>> GetListByIdsAsync<T>(this DbContext dbContext,
-														   IEnumerable<Guid> items,
+														   Guid[] items,
 														   CancellationToken cancellationToken) where T : Entity =>
-		items?.Any() == true
+		items.Any()
 			? await dbContext.Set<T>()
 							 .Where(x => items.Contains(x.Id))
 							 .ToListAsync(cancellationToken)

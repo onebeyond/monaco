@@ -1,6 +1,5 @@
 ﻿#if filesSupport
 using MediatR;
-using Monaco.Template.Backend.Application.Features.File.Commands;
 using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Application.Commands;
 using Monaco.Template.Backend.Common.Application.Commands.Contracts;

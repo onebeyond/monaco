@@ -8,7 +8,7 @@ public static class SerilogExtensions
 {
 	public static LoggerConfiguration WithOperationId(this LoggerEnrichmentConfiguration enrichConfiguration)
 	{
-		if (enrichConfiguration is null) throw new ArgumentNullException(nameof(enrichConfiguration));
+		ArgumentNullException.ThrowIfNull(enrichConfiguration);
 
 		return enrichConfiguration.With<OperationIdEnricher>();
 	}

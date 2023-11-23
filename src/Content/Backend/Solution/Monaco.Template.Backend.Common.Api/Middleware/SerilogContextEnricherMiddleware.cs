@@ -7,6 +7,7 @@ namespace Monaco.Template.Backend.Common.Api.Middleware;
 public class SerilogContextEnricherMiddleware
 {
 	private readonly RequestDelegate _next;
+
 	private const string UserIdType = "sub";
 	private const string UserNameType = "preferred_username";
 

@@ -33,8 +33,8 @@ public static class AuthExtensions
 								  options.TokenValidationParameters.NameClaimType = "name";
 								  options.TokenValidationParameters.RoleClaimType = "roles";
 
-								  options.SecurityTokenValidators.Clear();
-								  options.SecurityTokenValidators.Add(new JwtSecurityTokenHandler { MapInboundClaims = false });
+								  options.TokenHandlers.Clear();
+								  options.TokenHandlers.Add(new JwtSecurityTokenHandler { MapInboundClaims = false });
 
 								  options.TokenValidationParameters.ValidTypes = new[] { "JWT" };
 							  });

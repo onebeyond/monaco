@@ -8,11 +8,8 @@ public static class CountryExtensions
 	public static CountryDto? Map(this Country? value) =>
 		value is null
 			? null
-			: new()
-			{
-				Id = value.Id,
-				Name = value.Name
-			};
+			: new(value.Id,
+				  value.Name);
 
 	public static Dictionary<string, Expression<Func<Country, object>>> GetMappedFields() =>
 		new()

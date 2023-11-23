@@ -20,7 +20,8 @@ public class AuthorizeCheckOperationFilter : IOperationFilter
 									.DeclaringType?
 									.GetCustomAttributes(true)
 									.OfType<AllowAnonymousAttribute>()
-									.Any() ?? false;
+									.Any() ??
+							 false;
 		if (allowAnonymous)
 			return;
 
@@ -30,13 +31,13 @@ public class AuthorizeCheckOperationFilter : IOperationFilter
 								new OpenApiResponse { Description = HttpStatusCode.Forbidden.ToString() });
 
 		var oAuthScheme = new OpenApiSecurityScheme
-		{
-			Reference = new OpenApiReference
-			{
-				Id = "oauth2",
-				Type = ReferenceType.SecurityScheme
-			}
-		};
+						  {
+							  Reference = new OpenApiReference
+										  {
+											  Id = "oauth2",
+											  Type = ReferenceType.SecurityScheme
+										  }
+						  };
 
 		operation.Security = new List<OpenApiSecurityRequirement>
 							 {

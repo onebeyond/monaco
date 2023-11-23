@@ -9,10 +9,15 @@ namespace Monaco.Template.Backend.Common.Application.Commands.Behaviors;
 /// Behavior to perform validations of Commands that do not return any other data in the CommandResult
 /// </summary>
 /// <typeparam name="TCommand">The type of the Command to process</typeparam>
-public class CommandValidationBehavior<TCommand> : IPipelineBehavior<TCommand, ICommandResult> where TCommand : CommandBase
+public class CommandValidationBehavior<TCommand> : IPipelineBehavior<TCommand, ICommandResult>
+	where TCommand : CommandBase
 {
 	protected readonly IValidator<TCommand> Validator;
 
+	/// <summary>
+	/// Behavior to perform validations of Commands that do not return any other data in the CommandResult
+	/// </summary>
+	/// <typeparam name="TCommand">The type of the Command to process</typeparam>
 	public CommandValidationBehavior(IValidator<TCommand> validator)
 	{
 		Validator = validator;
@@ -33,10 +38,16 @@ public class CommandValidationBehavior<TCommand> : IPipelineBehavior<TCommand, I
 /// </summary>
 /// <typeparam name="TCommand">The type of Command to process</typeparam>
 /// <typeparam name="TResult">The type of data to return along with the CommandResult</typeparam>
-public class CommandValidationBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, ICommandResult<TResult?>> where TCommand : CommandBase<TResult?>
+public class CommandValidationBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, ICommandResult<TResult?>>
+	where TCommand : CommandBase<TResult?>
 {
 	protected readonly IValidator<TCommand> Validator;
 
+	/// <summary>
+	/// Behavior to perform validations on Commands that return data in the CommandResult
+	/// </summary>
+	/// <typeparam name="TCommand">The type of Command to process</typeparam>
+	/// <typeparam name="TResult">The type of data to return along with the CommandResult</typeparam>
 	public CommandValidationBehavior(IValidator<TCommand> validator)
 	{
 		Validator = validator;
@@ -58,10 +69,15 @@ public class CommandValidationBehavior<TCommand, TResult> : IPipelineBehavior<TC
 /// Behavior to validate the existence of the entity represented by the Command Id.
 /// </summary>
 /// <typeparam name="TCommand">The type of the Command to process</typeparam>
-public class CommandValidationExistsBehavior<TCommand> : IPipelineBehavior<TCommand, ICommandResult> where TCommand : CommandBase
+public class CommandValidationExistsBehavior<TCommand> : IPipelineBehavior<TCommand, ICommandResult>
+	where TCommand : CommandBase
 {
 	protected readonly IValidator<TCommand> Validator;
 
+	/// <summary>
+	/// Behavior to validate the existence of the entity represented by the Command Id.
+	/// </summary>
+	/// <typeparam name="TCommand">The type of the Command to process</typeparam>
 	public CommandValidationExistsBehavior(IValidator<TCommand> validator)
 	{
 		Validator = validator;
@@ -82,10 +98,16 @@ public class CommandValidationExistsBehavior<TCommand> : IPipelineBehavior<TComm
 /// </summary>
 /// <typeparam name="TCommand">The type of the Command to process</typeparam>
 /// <typeparam name="TResult">The type of data to return along with the CommandResult</typeparam>
-public class CommandValidationExistsBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, ICommandResult<TResult?>> where TCommand : CommandBase<TResult?>
+public class CommandValidationExistsBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, ICommandResult<TResult?>>
+	where TCommand : CommandBase<TResult?>
 {
 	protected readonly IValidator<TCommand> Validator;
 
+	/// <summary>
+	/// Behavior to validate the existence of the entity represented by the Command Id.
+	/// </summary>
+	/// <typeparam name="TCommand">The type of the Command to process</typeparam>
+	/// <typeparam name="TResult">The type of data to return along with the CommandResult</typeparam>
 	public CommandValidationExistsBehavior(IValidator<TCommand> validator)
 	{
 		Validator = validator;

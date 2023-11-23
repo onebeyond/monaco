@@ -11,7 +11,12 @@ public class Document : File
 					string extension,
 					long size,
 					string contentType,
-					bool isTemp) : base(id, name, extension, size, contentType, isTemp)
+					bool isTemp) : base(id,
+										name,
+										extension,
+										size,
+										contentType,
+										isTemp)
 	{
 	}
 }

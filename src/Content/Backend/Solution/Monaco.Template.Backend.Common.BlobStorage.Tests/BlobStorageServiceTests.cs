@@ -11,14 +11,7 @@ namespace Monaco.Template.Backend.Common.BlobStorage.Tests;
 [Trait("Common Application Services", "Blob Storage Service")]
 public class BlobStorageServiceTests
 {
-	private readonly Mock<BlobServiceClient> _blobServiceClientMock;
-	private readonly BlobStorageService _blobStorageService;
-
-	public BlobStorageServiceTests()
-	{
-		_blobServiceClientMock = new Mock<BlobServiceClient>();
-		_blobStorageService = new(_blobServiceClientMock.Object, It.IsAny<string>());
-	}
+	private readonly BlobStorageService _blobStorageService = new(new Mock<BlobServiceClient>().Object, It.IsAny<string>());
 
 	[Theory(DisplayName = "Get file type succeeds")]
 	[MemberData(nameof(GetFileTypeTestData))]

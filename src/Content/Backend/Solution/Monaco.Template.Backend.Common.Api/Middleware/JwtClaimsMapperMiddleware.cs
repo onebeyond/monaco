@@ -9,6 +9,7 @@ namespace Monaco.Template.Backend.Common.Api.Middleware;
 public class JwtClaimsMapperMiddleware
 {
 	private readonly RequestDelegate _next;
+
 	private const string SchemeStr = $"{JwtBearerDefaults.AuthenticationScheme} ";
 	private const string ScopeClaimType = "scope";
 	private const string NameClaimType = "name";

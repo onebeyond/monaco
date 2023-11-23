@@ -29,10 +29,10 @@ public class FileService : IFileService
 		var fileType = _blobStorageService.GetFileType(Path.GetExtension(fileName));
 
 		return fileType switch
-		{
-			FileTypeEnum.Image => await UploadImage(stream, fileName, contentType, cancellationToken),
-			_ => await UploadDocument(stream, fileName, contentType, cancellationToken),
-		};
+			   {
+				   FileTypeEnum.Image => await UploadImage(stream, fileName, contentType, cancellationToken),
+				   _ => await UploadDocument(stream, fileName, contentType, cancellationToken),
+			   };
 	}
 
 	public async Task<Document> UploadDocument(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)

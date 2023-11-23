@@ -10,35 +10,29 @@ public static class FileExtensions
 	public static FileDto? Map(this File? value) =>
 		value is null
 			? null
-			: new()
-			{
-				Id = value.Id,
-				Name = value.Name,
-				Extension = value.Extension,
-				ContentType = value.ContentType,
-				Size = value.Size,
-				UploadedOn = value.UploadedOn,
-				IsTemp = value.IsTemp
-			};
+			: new(value.Id,
+				  value.Name,
+				  value.Extension,
+				  value.ContentType,
+				  value.Size,
+				  value.UploadedOn,
+				  value.IsTemp);
 
 	public static ImageDto? Map(this Image? value) =>
 		value is null
 			? null
-			: new()
-			{
-				DateTaken = value.DateTaken,
-				Width = value.Width,
-				Height = value.Height,
-				ThumbnailId = value.ThumbnailId,
-				Thumbnail = value.ThumbnailId.HasValue ? value.Thumbnail.Map() : null,
-				Id = value.Id,
-				Name = value.Name,
-				Extension = value.Extension,
-				ContentType = value.ContentType,
-				Size = value.Size,
-				UploadedOn = value.UploadedOn,
-				IsTemp = value.IsTemp
-			};
+			: new(value.Id,
+				  value.Name,
+				  value.Extension,
+				  value.ContentType,
+				  value.Size,
+				  value.UploadedOn,
+				  value.IsTemp,
+				  value.DateTaken,
+				  value.Width,
+				  value.Height,
+				  value.ThumbnailId,
+				  value.ThumbnailId.HasValue ? value.Thumbnail.Map() : null);
 
 	public static File Map(this FileCreateCommand value, Guid id, FileTypeEnum fileType) =>
 		fileType switch
