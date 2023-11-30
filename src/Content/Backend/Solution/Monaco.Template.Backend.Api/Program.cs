@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Monaco.Template.Backend.Application.DependencyInjection;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
-using Monaco.Template.Backend.Api.Auth;
 #if (!disableAuth)
+using Monaco.Template.Backend.Api.Auth;
 using Monaco.Template.Backend.Common.Api.Auth;
 #endif
 using Monaco.Template.Backend.Common.Api.Cors;
