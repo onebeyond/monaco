@@ -1,10 +1,10 @@
-﻿using Monaco.Template.Backend.Application.Features.Company.Commands;
+﻿using Monaco.Template.Backend.Application.Features.Company;
 
 namespace Monaco.Template.Backend.Api.DTOs.Extensions;
 
 public static class CompanyExtensions
 {
-	public static CompanyCreateCommand MapCreateCommand(this CompanyCreateEditDto value) =>
+	public static CreateCompany.Command MapCreateCommand(this CompanyCreateEditDto value) =>
 		new(value.Name!,
 			value.Email!,
 			value.WebSiteUrl!,
@@ -14,7 +14,7 @@ public static class CompanyExtensions
 			value.PostCode,
 			value.CountryId);
 
-	public static CompanyEditCommand MapEditCommand(this CompanyCreateEditDto value, Guid id) =>
+	public static EditCompany.Command MapEditCommand(this CompanyCreateEditDto value, Guid id) =>
 		new(id,
 			value.Name!,
 			value.Email!,

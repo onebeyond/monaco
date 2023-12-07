@@ -1,4 +1,4 @@
-﻿using Monaco.Template.Backend.Application.Features.Company.Commands;
+﻿using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Domain.Model;
 using System.Linq.Expressions;
 
@@ -20,7 +20,7 @@ public static class CompanyExtensions
 				  value.Address?.CountryId,
 				  expandCountry ? value.Address?.Country.Map() : null);
 
-	public static Company Map(this CompanyCreateCommand value, Country? country) =>
+	public static Company Map(this CreateCompany.Command value, Country? country) =>
 		new(value.Name,
 			value.Email,
 			value.WebSiteUrl,
@@ -32,7 +32,7 @@ public static class CompanyExtensions
 					  country)
 				: null);
 
-	public static void Map(this CompanyEditCommand value, Company item, Country? country) =>
+	public static void Map(this EditCompany.Command value, Company item, Country? country) =>
 		item.Update(value.Name,
 					value.Email,
 					value.WebSiteUrl,

@@ -2,8 +2,7 @@
 using FluentValidation;
 using FluentValidation.TestHelper;
 using MockQueryable.Moq;
-using Monaco.Template.Backend.Application.Features.Company.Commands;
-using Monaco.Template.Backend.Application.Features.Company.Commands.Validators;
+using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 using Monaco.Template.Backend.Common.Tests.Factories;
@@ -24,7 +23,7 @@ public class CompanyDeleteCommandValidatorTests
 	[Fact(DisplayName = "Validator's rule level cascade mode is 'Stop'")]
 	public void ValidatorRuleLevelCascadeModeIsStop()
 	{
-		var sut = new CompanyDeleteCommandValidator(new Mock<AppDbContext>().Object);
+		var sut = new DeleteCompany.Validator(new Mock<AppDbContext>().Object);
 
 		sut.RuleLevelCascadeMode.Should().Be(CascadeMode.Stop);
 	}
@@ -36,9 +35,9 @@ public class CompanyDeleteCommandValidatorTests
 		var dbContextMock = new Mock<AppDbContext>();
 		var companyDbSetMock = new List<Domain.Model.Company>(new[] { company }).AsQueryable().BuildMockDbSet();
 		dbContextMock.Setup(x => x.Set<Domain.Model.Company>()).Returns(companyDbSetMock.Object);
-		var cmdMock = new Mock<CompanyDeleteCommand>(company.Id);
+		var cmdMock = new Mock<DeleteCompany.Command>(company.Id);
 
-		var sut = new CompanyDeleteCommandValidator(dbContextMock.Object);
+		var sut = new DeleteCompany.Validator(dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, s => s.IncludeRuleSets(ValidatorsExtensions.ExistsRulesetName));
 
 		validationResult.RuleSetsExecuted.Should().Contain(ValidatorsExtensions.ExistsRulesetName);
@@ -52,9 +51,9 @@ public class CompanyDeleteCommandValidatorTests
 		var dbContextMock = new Mock<AppDbContext>();
 		var companyDbSetMock = new List<Domain.Model.Company>(new[] { company }).AsQueryable().BuildMockDbSet();
 		dbContextMock.Setup(x => x.Set<Domain.Model.Company>()).Returns(companyDbSetMock.Object);
-		var cmdMock = new Mock<CompanyDeleteCommand>(id);
+		var cmdMock = new Mock<DeleteCompany.Command>(id);
 
-		var sut = new CompanyDeleteCommandValidator(dbContextMock.Object);
+		var sut = new DeleteCompany.Validator(dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, s => s.IncludeRuleSets(ValidatorsExtensions.ExistsRulesetName));
 
 		validationResult.RuleSetsExecuted.Should().Contain(ValidatorsExtensions.ExistsRulesetName);

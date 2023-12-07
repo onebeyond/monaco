@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Primitives;
 using MockQueryable.Moq;
 using Monaco.Template.Backend.Application.DTOs;
-using Monaco.Template.Backend.Application.Features.Country.Queries;
+using Monaco.Template.Backend.Application.Features.Country;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Common.Tests.Factories.Entities;
@@ -26,9 +26,9 @@ public class CountryQueriesHandlersTests
 	public async Task GetCountryListWithoutParamsSucceeds(List<Domain.Model.Country> countries)
 	{
 		var dbContextMock = SetupMock(countries);
-		var query = new GetCountryListQuery(new List<KeyValuePair<string, StringValues>>());
+		var query = new GetCountryList.Query(new List<KeyValuePair<string, StringValues>>());
 
-		var sut = new CountryQueriesHandlers(dbContextMock.Object);
+		var sut = new GetCountryList.Handler(dbContextMock.Object);
 		var result = await sut.Handle(query, new CancellationToken());
 
 		result.Should()
@@ -43,14 +43,17 @@ public class CountryQueriesHandlersTests
 	{
 		var dbContextMock = SetupMock(countries);
 		var countriesSet = countries.GetRange(0, 2);
-		var query = new GetCountryListQuery(new List<KeyValuePair<string, StringValues>>(new KeyValuePair<string, StringValues>[]
-																						 {
-																							 new(nameof(CountryDto.Name),
-																								 new(countriesSet.Select(x => x.Name).ToArray())),
-																							 new("sort", $"-{nameof(CountryDto.Name)}")
-																						 }));
 
-		var sut = new CountryQueriesHandlers(dbContextMock.Object);
+		var queryString = new List<KeyValuePair<string, StringValues>>
+		{
+			new(nameof(CountryDto.Name),
+				new(countriesSet.Select(x => x.Name).ToArray())),
+			new("sort", $"-{nameof(CountryDto.Name)}")
+		};
+
+		var query = new GetCountryList.Query(queryString);
+
+		var sut = new GetCountryList.Handler(dbContextMock.Object);
 
 		var result = await sut.Handle(query, new CancellationToken());
 
@@ -66,9 +69,9 @@ public class CountryQueriesHandlersTests
 		var countries = CountryFactory.CreateMany().ToList();
 		var dbContextMock = SetupMock(countries);
 		var country = countries.First();
-		var query = new GetCountryByIdQuery(country.Id);
+		var query = new GetCountryById.Query(country.Id);
 
-		var sut = new CountryQueriesHandlers(dbContextMock.Object);
+		var sut = new GetCountryById.Handler(dbContextMock.Object);
 		var result = await sut.Handle(query, new CancellationToken());
 
 		result.Should().NotBeNull();
@@ -80,9 +83,9 @@ public class CountryQueriesHandlersTests
 	{
 		var countries = CountryFactory.CreateMany().ToList();
 		var dbContextMock = SetupMock(countries);
-		var query = new GetCountryByIdQuery(Guid.NewGuid());
+		var query = new GetCountryById.Query(Guid.NewGuid());
 
-		var sut = new CountryQueriesHandlers(dbContextMock.Object);
+		var sut = new GetCountryById.Handler(dbContextMock.Object);
 		var result = await sut.Handle(query, new CancellationToken());
 
 		result.Should().BeNull();

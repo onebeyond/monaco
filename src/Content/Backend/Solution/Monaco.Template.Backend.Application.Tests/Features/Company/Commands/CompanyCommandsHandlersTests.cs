@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 using MockQueryable.Moq;
-using Monaco.Template.Backend.Application.Features.Company.Commands;
+using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
@@ -30,16 +30,16 @@ public class CompanyCommandsHandlersTests
 		var countryDbSetMock = new[] { country }.AsQueryable().BuildMockDbSet();
 		dbContextMock.Setup(x => x.Set<Domain.Model.Country>())
 					 .Returns(countryDbSetMock.Object);
-		var commandMock = new Mock<CompanyCreateCommand>(It.IsAny<string>(),
-														 It.IsAny<string>(),
-														 It.IsAny<string>(),
-														 It.IsAny<string>(),
-														 It.IsAny<string>(),
-														 It.IsAny<string>(),
-														 It.IsAny<string>(),
-														 It.IsAny<Guid>());
+		var commandMock = new Mock<CreateCompany.Command>(It.IsAny<string>(),
+														  It.IsAny<string>(),
+														  It.IsAny<string>(),
+														  It.IsAny<string>(),
+														  It.IsAny<string>(),
+														  It.IsAny<string>(),
+														  It.IsAny<string>(),
+														  It.IsAny<Guid>());
 
-		var sut = new CompanyCommandsHandlers(dbContextMock.Object);
+		var sut = new CreateCompany.Handler(dbContextMock.Object);
 		var result = await sut.Handle(commandMock.Object, new CancellationToken());
 
 		companyDbSetMock.Verify(x => x.Attach(It.IsAny<Domain.Model.Company>()), Times.Once);
@@ -62,17 +62,17 @@ public class CompanyCommandsHandlersTests
 		var countryDbSetMock = new[] { country }.AsQueryable().BuildMockDbSet();
 		dbContextMock.Setup(x => x.Set<Domain.Model.Country>())
 					 .Returns(countryDbSetMock.Object);
-		var commandMock = new Mock<CompanyEditCommand>(It.IsAny<Guid>(),
-													   It.IsAny<string>(),
-													   It.IsAny<string>(),
-													   It.IsAny<string>(),
-													   It.IsAny<string>(),
-													   It.IsAny<string>(),
-													   It.IsAny<string>(),
-													   It.IsAny<string>(),
-													   It.IsAny<Guid>());
+		var commandMock = new Mock<EditCompany.Command>(It.IsAny<Guid>(),
+													    It.IsAny<string>(),
+													    It.IsAny<string>(),
+													    It.IsAny<string>(),
+													    It.IsAny<string>(),
+													    It.IsAny<string>(),
+													    It.IsAny<string>(),
+													    It.IsAny<string>(),
+													    It.IsAny<Guid>());
 
-		var sut = new CompanyCommandsHandlers(dbContextMock.Object);
+		var sut = new EditCompany.Handler(dbContextMock.Object);
 		var result = await sut.Handle(commandMock.Object, new CancellationToken());
 
 		companyMock.Verify(x => x.Update(It.IsAny<string>(),

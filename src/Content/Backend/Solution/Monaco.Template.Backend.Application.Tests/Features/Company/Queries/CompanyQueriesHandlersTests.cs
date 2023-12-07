@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Primitives;
 using MockQueryable.Moq;
 using Monaco.Template.Backend.Application.DTOs;
-using Monaco.Template.Backend.Application.Features.Company.Queries;
+using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Common.Tests.Factories.Entities;
@@ -26,9 +26,9 @@ public class CompanyQueriesHandlersTests
 	public async Task GetCompanyPageWithoutParamsSucceeds(List<Domain.Model.Company> companies)
 	{
 		var dbContextMock = SetupMock(companies);
-		var query = new GetCompanyPageQuery(new List<KeyValuePair<string, StringValues>>());
+		var query = new GetCompanyPage.Query(new List<KeyValuePair<string, StringValues>>());
 
-		var sut = new CompanyQueriesHandlers(dbContextMock.Object);
+		var sut = new GetCompanyPage.Handler(dbContextMock.Object);
 		var result = await sut.Handle(query, new CancellationToken());
 
 		result.Should().NotBeNull();
@@ -46,14 +46,16 @@ public class CompanyQueriesHandlersTests
 	{
 		var dbContextMock = SetupMock(companies);
 		var companiesSet = companies.GetRange(0, 2);
-		var query = new GetCompanyPageQuery(new List<KeyValuePair<string, StringValues>>(new KeyValuePair<string, StringValues>[]
-																						 {
-																							 new (nameof(CompanyDto.Name),
-																								  new(companiesSet.Select(x => x.Name).ToArray())),
-																							 new ("sort", $"-{nameof(CompanyDto.Name)}")
-																						 }));
+		var queryStrings = new List<KeyValuePair<string, StringValues>>
+		{
+			new (nameof(CompanyDto.Name),
+				new(companiesSet.Select(x => x.Name).ToArray())),
+			new ("sort", $"-{nameof(CompanyDto.Name)}")
+		};
 
-		var sut = new CompanyQueriesHandlers(dbContextMock.Object);
+		var query = new GetCompanyPage.Query(queryStrings);
+
+		var sut = new GetCompanyPage.Handler(dbContextMock.Object);
 		var result = await sut.Handle(query, new CancellationToken());
 
 		result.Should().NotBeNull();
@@ -72,9 +74,9 @@ public class CompanyQueriesHandlersTests
 		var companies = CompanyFactory.CreateMany().ToList();
 		var dbContextMock = SetupMock(companies);
 		var company = companies.First();
-		var query = new GetCompanyByIdQuery(company.Id);
+		var query = new GetCompanyById.Query(company.Id);
 
-		var sut = new CompanyQueriesHandlers(dbContextMock.Object);
+		var sut = new GetCompanyById.Handler(dbContextMock.Object);
 		var result = await sut.Handle(query, new CancellationToken());
 
 		result.Should().NotBeNull();
@@ -86,9 +88,9 @@ public class CompanyQueriesHandlersTests
 	{
 		var companies = CompanyFactory.CreateMany().ToList();
 		var dbContextMock = SetupMock(companies);
-		var query = new GetCompanyByIdQuery(Guid.NewGuid());
+		var query = new GetCompanyById.Query(Guid.NewGuid());
 
-		var sut = new CompanyQueriesHandlers(dbContextMock.Object);
+		var sut = new GetCompanyById.Handler(dbContextMock.Object);
 		var result = await sut.Handle(query, new CancellationToken());
 
 		result.Should().BeNull();
