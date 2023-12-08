@@ -423,11 +423,11 @@ public class CompanyCreateCommandValidatorTests
 		var cmdMock = new Mock<CreateCompany.Command>(It.IsAny<string>(),    // Name
 													  It.IsAny<string>(),    // Email
 													  It.IsAny<string>(),    // WebSiteUrl
-													  null,                  // Street
-													  null,                  // City
-													  null,                  // County
-													  null,                  // PostCode
-													  null);                 // country.Id
+													  null!,                 // Street
+													  null!,                 // City
+													  null!,                 // County
+													  null!,                 // PostCode
+													  null!);                // country.Id
 
 		var sut = new CreateCompany.Validator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Street,
@@ -449,7 +449,7 @@ public class CompanyCreateCommandValidatorTests
 													  string.Empty,       // City
 													  string.Empty,       // County
 													  string.Empty,       // PostCode
-													  null);              // country.Id
+													  null!);             // country.Id
 
 		var sut = new CreateCompany.Validator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(cmdMock.Object, strategy => strategy.IncludeProperties(cmd => cmd.Street,
