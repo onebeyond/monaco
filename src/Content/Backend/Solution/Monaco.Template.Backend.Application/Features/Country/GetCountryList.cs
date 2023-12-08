@@ -8,7 +8,7 @@ using Monaco.Template.Backend.Common.Application.Queries.Extensions;
 
 namespace Monaco.Template.Backend.Application.Features.Country;
 
-public class GetCountryList
+public sealed class GetCountryList
 {
 	public record Query(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryBase<List<CountryDto>>(QueryString);
 

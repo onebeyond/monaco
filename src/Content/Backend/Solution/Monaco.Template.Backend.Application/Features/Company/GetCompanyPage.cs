@@ -10,7 +10,7 @@ using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
 namespace Monaco.Template.Backend.Application.Features.Company;
 
-public class GetCompanyPage
+public sealed class GetCompanyPage
 {
 	public record Query(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryPagedBase<CompanyDto>(QueryString)
 	{

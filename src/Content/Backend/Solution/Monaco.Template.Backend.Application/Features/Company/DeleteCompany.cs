@@ -8,7 +8,7 @@ using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 
 namespace Monaco.Template.Backend.Application.Features.Company;
 
-public class DeleteCompany
+public sealed class DeleteCompany
 {
 	public record Command(Guid Id) : CommandBase(Id);
 

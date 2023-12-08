@@ -9,7 +9,7 @@ using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
 namespace Monaco.Template.Backend.Application.Features.Company;
 
-public class CreateCompany
+public sealed class CreateCompany
 {
 	public record Command(string Name,
 						  string Email,
@@ -20,7 +20,7 @@ public class CreateCompany
 						  string? PostCode,
 						  Guid? CountryId) : CommandBase<Guid>;
 
-	public class Validator : AbstractValidator<Command>
+	public sealed class Validator : AbstractValidator<Command>
 	{
 		public Validator(AppDbContext dbContext)
 		{
@@ -60,7 +60,7 @@ public class CreateCompany
 		}
 	}
 
-	public class Handler : IRequestHandler<Command, ICommandResult<Guid>>
+	public sealed class Handler : IRequestHandler<Command, ICommandResult<Guid>>
 	{
 		private readonly AppDbContext _dbContext;
 

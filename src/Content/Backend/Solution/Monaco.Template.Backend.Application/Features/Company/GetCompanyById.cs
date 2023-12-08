@@ -8,7 +8,7 @@ using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
 namespace Monaco.Template.Backend.Application.Features.Company;
 
-public class GetCompanyById
+public sealed class GetCompanyById
 {
 	public record Query(Guid Id) : QueryByIdBase<CompanyDto?>(Id);
 
