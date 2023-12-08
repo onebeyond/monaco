@@ -27,23 +27,23 @@ public class ImagesController : ControllerBase
 	}
 
 	[HttpGet("{id:guid}")]
-#if (!disableAuth)
+	#if (!disableAuth)
 	[Authorize(Scopes.FilesRead)]
-#endif
+	#endif
 	public Task<ActionResult<ImageDto>> Get(Guid id) =>
 		_mediator.ExecuteQueryAsync(new GetImageById.Query(id));
 
 	[HttpGet("{id:guid}/Thumbnail")]
-#if (!disableAuth)
+	#if (!disableAuth)
 	[Authorize(Scopes.FilesRead)]
-#endif
+	#endif
 	public Task<ActionResult<ImageDto>> GetThumbnail(Guid id) =>
 		_mediator.ExecuteQueryAsync(new GetThumbnailByImageId.Query(id));
 
 	[HttpGet("{id:guid}/Download")]
-#if (!disableAuth)
+	#if (!disableAuth)
 	[Authorize(Scopes.FilesRead)]
-#endif
+	#endif
 	[ProducesResponseType(typeof(FileContentResult), (int)HttpStatusCode.OK)]
 	[ProducesResponseType((int)HttpStatusCode.NotFound)]
 	public async Task<IActionResult> Download(Guid id)
@@ -57,9 +57,9 @@ public class ImagesController : ControllerBase
 	}
 
 	[HttpGet("{id:guid}/Thumbnail/Download")]
-#if (!disableAuth)
+	#if (!disableAuth)
 	[Authorize(Scopes.FilesRead)]
-#endif
+	#endif
 	[ProducesResponseType(typeof(FileContentResult), (int)HttpStatusCode.OK)]
 	[ProducesResponseType((int)HttpStatusCode.NotFound)]
 	public async Task<IActionResult> DownloadThumbnail(Guid id)

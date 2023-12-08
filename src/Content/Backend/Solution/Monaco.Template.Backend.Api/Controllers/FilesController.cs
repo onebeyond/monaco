@@ -27,9 +27,9 @@ public class FilesController : ControllerBase
 	}
 
 	[HttpPost]
-#if (!disableAuth)
+	#if (!disableAuth)
 	[Authorize(Scopes.FilesWrite)]
-#endif
+	#endif
 	public Task<ActionResult<Guid>> Post([FromRoute] ApiVersion apiVersion, [FromForm] IFormFile file) =>
 		_mediator.ExecuteCommandAsync(new CreateFile.Command(file.OpenReadStream(), file.FileName, file.ContentType),
 									 ModelState,
@@ -37,16 +37,16 @@ public class FilesController : ControllerBase
 									 apiVersion);
 
 	[HttpGet("{id:guid}")]
-#if (!disableAuth)
+	#if (!disableAuth)
 	[Authorize(Scopes.FilesRead)]
-#endif
+	#endif
 	public Task<ActionResult<FileDto>> Get(Guid id) =>
 		_mediator.ExecuteQueryAsync(new GetFileById.Query(id));
 
 	[HttpGet("{id:guid}/Download")]
-#if (!disableAuth)
+	#if (!disableAuth)
 	[Authorize(Scopes.FilesRead)]
-#endif
+	#endif
 	[ProducesResponseType(typeof(FileContentResult), (int)HttpStatusCode.OK)]
 	[ProducesResponseType((int)HttpStatusCode.NotFound)]
 	public async Task<IActionResult> Download(Guid id)
@@ -60,9 +60,9 @@ public class FilesController : ControllerBase
 	}
 
 	[HttpDelete("{id:guid}")]
-#if (!disableAuth)
+	#if (!disableAuth)
 	[Authorize(Scopes.FilesWrite)]
-#endif
+	#endif
 	public Task<IActionResult> Delete(Guid id) =>
 		_mediator.ExecuteCommandAsync(new DeleteFile.Command(id),
 									 ModelState);

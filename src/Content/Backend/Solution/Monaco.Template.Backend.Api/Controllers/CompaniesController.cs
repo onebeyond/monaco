@@ -10,10 +10,10 @@ using Monaco.Template.Backend.Api.DTOs.Extensions;
 using Monaco.Template.Backend.Api.Auth;
 #endif
 using Monaco.Template.Backend.Application.DTOs;
+using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Common.Api.Application;
 using Monaco.Template.Backend.Common.Api.Application.Enums;
 using Monaco.Template.Backend.Common.Domain.Model;
-using Monaco.Template.Backend.Application.Features.Company;
 
 namespace Monaco.Template.Backend.Api.Controllers;
 

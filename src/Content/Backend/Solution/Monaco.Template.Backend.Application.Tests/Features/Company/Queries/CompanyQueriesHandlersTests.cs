@@ -46,14 +46,14 @@ public class CompanyQueriesHandlersTests
 	{
 		var dbContextMock = SetupMock(companies);
 		var companiesSet = companies.GetRange(0, 2);
-		var queryStrings = new List<KeyValuePair<string, StringValues>>
+		var queryString = new List<KeyValuePair<string, StringValues>>
 		{
 			new (nameof(CompanyDto.Name),
 				new(companiesSet.Select(x => x.Name).ToArray())),
 			new ("sort", $"-{nameof(CompanyDto.Name)}")
 		};
 
-		var query = new GetCompanyPage.Query(queryStrings);
+		var query = new GetCompanyPage.Query(queryString);
 
 		var sut = new GetCompanyPage.Handler(dbContextMock.Object);
 		var result = await sut.Handle(query, new CancellationToken());
