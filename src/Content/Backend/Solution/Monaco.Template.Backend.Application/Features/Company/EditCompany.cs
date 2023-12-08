@@ -10,7 +10,7 @@ using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
 namespace Monaco.Template.Backend.Application.Features.Company;
 
-public class EditCompany
+public sealed class EditCompany
 {
 	public record Command(Guid Id,
 						  string Name,

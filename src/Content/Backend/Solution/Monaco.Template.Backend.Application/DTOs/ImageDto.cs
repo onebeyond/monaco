@@ -1,4 +1,5 @@
-﻿namespace Monaco.Template.Backend.Application.DTOs;
+﻿#if filesSupport
+namespace Monaco.Template.Backend.Application.DTOs;
 
 public record ImageDto(Guid Id,
 					   string Name,
@@ -18,3 +19,4 @@ public record ImageDto(Guid Id,
 													  Size,
 													  UploadedOn,
 													  IsTemp);
+#endif
