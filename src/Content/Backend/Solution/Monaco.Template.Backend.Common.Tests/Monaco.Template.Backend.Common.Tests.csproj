@@ -11,9 +11,11 @@
     <PackageReference Include="AutoFixture.Xunit2" Version="4.18.0" />
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
     <PackageReference Include="Moq" Version="4.20.69" />
+	<PackageReference Include="MockQueryable.Moq" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Monaco.Template.Backend.Application.Infrastructure\Monaco.Template.Backend.Application.Infrastructure.csproj" />
     <ProjectReference Include="..\Monaco.Template.Backend.Domain\Monaco.Template.Backend.Domain.csproj" />
   </ItemGroup>
 

@@ -5,10 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Primitives;
-using MockQueryable.Moq;
 using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Common.Tests.Factories;
 using Moq;
 using Xunit;
@@ -16,17 +16,20 @@ using Xunit;
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
 
 [ExcludeFromCodeCoverage]
-[Trait("Application Queries", "Company Queries")]
+[Trait("Application Queries", "Get Company Page")]
 public class GetCompanyPageTests
 {
+	private readonly Mock<AppDbContext> _dbContextMock = new();
+
 	[Theory(DisplayName = "Get company page without params succeeds")]
 	[AnonymousData]
 	public async Task GetCompanyPageWithoutParamsSucceeds(List<Domain.Model.Company> companies)
 	{
-		var dbContextMock = SetupMock(companies);
+		_dbContextMock.CreateAndSetupDbSetMock(companies);
+
 		var query = new GetCompanyPage.Query(new List<KeyValuePair<string, StringValues>>());
 
-		var sut = new GetCompanyPage.Handler(dbContextMock.Object);
+		var sut = new GetCompanyPage.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(query, new CancellationToken());
 
 		result.Should().NotBeNull();
@@ -42,7 +45,7 @@ public class GetCompanyPageTests
 	[AnonymousData]
 	public async Task GetCompanyPageWithParamsSucceeds(List<Domain.Model.Company> companies)
 	{
-		var dbContextMock = SetupMock(companies);
+		_dbContextMock.CreateAndSetupDbSetMock(companies);
 		var companiesSet = companies.GetRange(0, 2);
 		var queryString = new List<KeyValuePair<string, StringValues>>
 		{
@@ -53,7 +56,7 @@ public class GetCompanyPageTests
 
 		var query = new GetCompanyPage.Query(queryString);
 
-		var sut = new GetCompanyPage.Handler(dbContextMock.Object);
+		var sut = new GetCompanyPage.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(query, new CancellationToken());
 
 		result.Should().NotBeNull();
@@ -63,15 +66,5 @@ public class GetCompanyPageTests
 			  .HaveCount(companiesSet.Count).And
 			  .Contain(x => companiesSet.Any(c => c.Name == x.Name)).And
 			  .BeInDescendingOrder(x => x.Name);
-	}
-
-	private static Mock<AppDbContext> SetupMock(IEnumerable<Domain.Model.Company> companies)
-	{
-		var dbSetMock = companies.AsQueryable().BuildMockDbSet();
-		var dbContextMock = new Mock<AppDbContext>();
-		dbContextMock.Setup(x => x.Set<Domain.Model.Company>())
-					 .Returns(dbSetMock.Object);
-
-		return dbContextMock;
 	}
 }
