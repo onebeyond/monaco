@@ -171,6 +171,7 @@
 						"Monaco.Template.Backend.Application.Infrastructure/EntityConfigurations/DocumentEntityConfiguration.cs",
 						"Monaco.Template.Backend.Application.Infrastructure/EntityConfigurations/FileEntityConfiguration.cs",
 						"Monaco.Template.Backend.Application.Infrastructure/EntityConfigurations/ImageEntityConfiguration.cs",
+						"Monaco.Template.Backend.Application.Tests/Services/FileServiceTests.cs",
 						"Monaco.Template.Backend.Domain/Model/Document.cs",
 						"Monaco.Template.Backend.Domain/Model/File.cs",
 						"Monaco.Template.Backend.Domain/Model/Image.cs"
