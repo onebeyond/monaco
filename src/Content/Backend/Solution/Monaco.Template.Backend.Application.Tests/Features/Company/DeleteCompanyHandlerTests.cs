@@ -21,7 +21,7 @@ public class DeleteCompanyHandlerTests
 	[Fact(DisplayName = "Delete company succeeds")]
 	public async Task DeleteCompanySucceeds()
 	{
-		_dbContextMock.CreateEntityMockAndSetupDbSetMock<Domain.Model.Company>();
+		_dbContextMock.CreateEntityMockAndSetupDbSetMock<AppDbContext, Domain.Model.Company>();
 
 		var sut = new DeleteCompany.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(_command, new CancellationToken());

@@ -32,7 +32,7 @@ public class EditCompanyHandlerTests
 	[AnonymousData]
 	public async Task EditCompanySucceeds(Domain.Model.Country country)
 	{
-		_dbContextMock.CreateEntityMockAndSetupDbSetMock<Domain.Model.Company>(out var companyMock)
+		_dbContextMock.CreateEntityMockAndSetupDbSetMock<AppDbContext, Domain.Model.Company>(out var companyMock)
 					  .CreateAndSetupDbSetMock(country);
 
 		var sut = new EditCompany.Handler(_dbContextMock.Object);
