@@ -22,6 +22,7 @@ public sealed class CreateFile
 		}
 	}
 
+	#if filesSupport
 	public sealed class Handler : IRequestHandler<Command, ICommandResult<Guid>>
 	{
 		private readonly IFileService _fileService;
@@ -38,4 +39,5 @@ public sealed class CreateFile
 			return new CommandResult<Guid>(file.Id);
 		}
 	}
+	#endif
 }

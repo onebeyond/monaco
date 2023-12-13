@@ -22,6 +22,7 @@ public sealed class DeleteFile
 		}
 	}
 
+	#if filesSupport
 	public sealed class Handler : IRequestHandler<Command, ICommandResult>
 	{
 		private readonly IFileService _fileService;
@@ -38,4 +39,5 @@ public sealed class DeleteFile
 			return new CommandResult();
 		}
 	}
+	#endif
 }

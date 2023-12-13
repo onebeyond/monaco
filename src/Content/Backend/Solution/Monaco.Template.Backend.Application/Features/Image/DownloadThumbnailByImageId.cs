@@ -11,6 +11,7 @@ public sealed class DownloadThumbnailByImageId
 {
 	public record Query(Guid Id) : QueryByIdBase<FileDownloadDto>(Id);
 
+	#if filesSupport
 	public sealed class Handler : IRequestHandler<Query, FileDownloadDto?>
 	{
 		private readonly AppDbContext _dbContext;
@@ -36,4 +37,5 @@ public sealed class DownloadThumbnailByImageId
 					   item.ContentType);
 		}
 	}
+	#endif
 }

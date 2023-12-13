@@ -11,6 +11,7 @@ public sealed class GetImageById
 {
 	public record Query(Guid Id) : QueryByIdBase<ImageDto>(Id);
 
+	#if filesSupport
 	public sealed class Handler : IRequestHandler<Query, ImageDto?>
 	{
 		private readonly AppDbContext _dbContext;
@@ -26,4 +27,5 @@ public sealed class GetImageById
 			return item.Map();
 		}
 	}
+	#endif
 }

@@ -11,6 +11,7 @@ public sealed class GetFileById
 {
 	public record Query(Guid Id) : QueryByIdBase<FileDto>(Id);
 
+	#if filesSupport
 	public sealed class Handler : IRequestHandler<Query, FileDto?>
 	{
 		private readonly AppDbContext _dbContext;
@@ -26,4 +27,5 @@ public sealed class GetFileById
 			return item.Map();
 		}
 	}
+	#endif
 }
