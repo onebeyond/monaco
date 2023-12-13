@@ -2,9 +2,8 @@
 #if (!disableAuth)
 using Monaco.Template.Backend.Api.Auth;
 #endif
-using Monaco.Template.Backend.Application.Features.File.Commands;
 using Monaco.Template.Backend.Application.DTOs;
-using Monaco.Template.Backend.Application.Features.File.Queries;
+using Monaco.Template.Backend.Application.Features.File;
 using Monaco.Template.Backend.Common.Api.Application;
 using MediatR;
 #if (!disableAuth)
@@ -32,7 +31,7 @@ public class FilesController : ControllerBase
 	[Authorize(Scopes.FilesWrite)]
 	#endif
 	public Task<ActionResult<Guid>> Post([FromRoute] ApiVersion apiVersion, [FromForm] IFormFile file) =>
-		_mediator.ExecuteCommandAsync(new FileCreateCommand(file.OpenReadStream(), file.FileName, file.ContentType),
+		_mediator.ExecuteCommandAsync(new CreateFile.Command(file.OpenReadStream(), file.FileName, file.ContentType),
 									 ModelState,
 									 "api/v{0}/files/{1}",
 									 apiVersion);
@@ -42,7 +41,7 @@ public class FilesController : ControllerBase
 	[Authorize(Scopes.FilesRead)]
 	#endif
 	public Task<ActionResult<FileDto>> Get(Guid id) =>
-		_mediator.ExecuteQueryAsync(new GetFileByIdQuery(id));
+		_mediator.ExecuteQueryAsync(new GetFileById.Query(id));
 
 	[HttpGet("{id:guid}/Download")]
 	#if (!disableAuth)
@@ -52,7 +51,7 @@ public class FilesController : ControllerBase
 	[ProducesResponseType((int)HttpStatusCode.NotFound)]
 	public async Task<IActionResult> Download(Guid id)
 	{
-		var result = await _mediator.Send(new DownloadFileByIdQuery(id));
+		var result = await _mediator.Send(new DownloadFileById.Query(id));
 
 		if (result == null)
 			return NotFound();
@@ -65,7 +64,7 @@ public class FilesController : ControllerBase
 	[Authorize(Scopes.FilesWrite)]
 	#endif
 	public Task<IActionResult> Delete(Guid id) =>
-		_mediator.ExecuteCommandAsync(new FileDeleteCommand(id),
+		_mediator.ExecuteCommandAsync(new DeleteFile.Command(id),
 									 ModelState);
 }
 #endif

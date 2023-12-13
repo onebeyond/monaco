@@ -10,8 +10,7 @@ using Monaco.Template.Backend.Api.DTOs.Extensions;
 using Monaco.Template.Backend.Api.Auth;
 #endif
 using Monaco.Template.Backend.Application.DTOs;
-using Monaco.Template.Backend.Application.Features.Company.Commands;
-using Monaco.Template.Backend.Application.Features.Company.Queries;
+using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Common.Api.Application;
 using Monaco.Template.Backend.Common.Api.Application.Enums;
 using Monaco.Template.Backend.Common.Domain.Model;
@@ -34,14 +33,14 @@ public class CompaniesController : ControllerBase
 	[Authorize(Scopes.CompaniesRead)]
 	#endif
 	public Task<ActionResult<Page<CompanyDto>>> Get() =>
-		_mediator.ExecuteQueryAsync(new GetCompanyPageQuery(Request.Query));
+		_mediator.ExecuteQueryAsync(new GetCompanyPage.Query(Request.Query));
 
 	[HttpGet("{id:guid}")]
 	#if (!disableAuth)
 	[Authorize(Scopes.CompaniesRead)]
 	#endif
 	public Task<ActionResult<CompanyDto?>> Get(Guid id) =>
-		_mediator.ExecuteQueryAsync(new GetCompanyByIdQuery(id));
+		_mediator.ExecuteQueryAsync(new GetCompanyById.Query(id));
 
 	[HttpPost]
 	#if (!disableAuth)
@@ -67,6 +66,6 @@ public class CompaniesController : ControllerBase
 	[Authorize(Scopes.CompaniesWrite)]
 	#endif
 	public Task<IActionResult> Delete(Guid id) =>
-		_mediator.ExecuteCommandAsync(new CompanyDeleteCommand(id),
+		_mediator.ExecuteCommandAsync(new DeleteCompany.Command(id),
 									  ModelState);
 }

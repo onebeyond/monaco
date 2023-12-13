@@ -3,8 +3,8 @@
 using Monaco.Template.Backend.Api.Auth;
 #endif
 using Monaco.Template.Backend.Application.DTOs;
-using Monaco.Template.Backend.Application.Features.File.Queries;
-using Monaco.Template.Backend.Application.Features.Image.Queries;
+using Monaco.Template.Backend.Application.Features.File;
+using Monaco.Template.Backend.Application.Features.Image;
 using MediatR;
 #if (!disableAuth)
 using Microsoft.AspNetCore.Authorization;
@@ -31,14 +31,14 @@ public class ImagesController : ControllerBase
 	[Authorize(Scopes.FilesRead)]
 	#endif
 	public Task<ActionResult<ImageDto>> Get(Guid id) =>
-		_mediator.ExecuteQueryAsync(new GetImageByIdQuery(id));
+		_mediator.ExecuteQueryAsync(new GetImageById.Query(id));
 
 	[HttpGet("{id:guid}/Thumbnail")]
 	#if (!disableAuth)
 	[Authorize(Scopes.FilesRead)]
 	#endif
 	public Task<ActionResult<ImageDto>> GetThumbnail(Guid id) =>
-		_mediator.ExecuteQueryAsync(new GetThumbnailByImageIdQuery(id));
+		_mediator.ExecuteQueryAsync(new GetThumbnailByImageId.Query(id));
 
 	[HttpGet("{id:guid}/Download")]
 	#if (!disableAuth)
@@ -48,7 +48,7 @@ public class ImagesController : ControllerBase
 	[ProducesResponseType((int)HttpStatusCode.NotFound)]
 	public async Task<IActionResult> Download(Guid id)
 	{
-		var result = await _mediator.Send(new DownloadFileByIdQuery(id));
+		var result = await _mediator.Send(new DownloadFileById.Query(id));
 
 		if (result is null)
 			return NotFound();
@@ -64,7 +64,7 @@ public class ImagesController : ControllerBase
 	[ProducesResponseType((int)HttpStatusCode.NotFound)]
 	public async Task<IActionResult> DownloadThumbnail(Guid id)
 	{
-		var result = await _mediator.Send(new DownloadThumbnailByImageIdQuery(id));
+		var result = await _mediator.Send(new DownloadThumbnailByImageId.Query(id));
 
 		if (result is null)
 			return NotFound();
