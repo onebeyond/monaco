@@ -12,7 +12,7 @@ using Xunit;
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
 
 [ExcludeFromCodeCoverage]
-[Trait("Application Commands", "Delete Company Handler")]
+[Trait("Application Commands", "Delete Company")]
 public class DeleteCompanyHandlerTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();

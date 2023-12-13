@@ -1,5 +1,4 @@
-﻿#if filesSupport
-namespace Monaco.Template.Backend.Application.DTOs;
+﻿namespace Monaco.Template.Backend.Application.DTOs;
 
 public record FileDto(Guid Id,
 					  string Name,
@@ -8,4 +7,3 @@ public record FileDto(Guid Id,
 					  long Size,
 					  DateTime UploadedOn,
 					  bool IsTemp);
-#endif

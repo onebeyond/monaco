@@ -14,7 +14,7 @@ using Xunit;
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
 
 [ExcludeFromCodeCoverage]
-[Trait("Application Commands", "Company Commands")]
+[Trait("Application Commands", "Edit Company")]
 public class EditCompanyHandlerTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();

@@ -1,5 +1,4 @@
-﻿#if filesSupport
-using MediatR;
+﻿using MediatR;
 using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Application.DTOs.Extensions;
 using Monaco.Template.Backend.Application.Features.File.Extensions;
@@ -28,4 +27,3 @@ public sealed class GetFileById
 		}
 	}
 }
-#endif

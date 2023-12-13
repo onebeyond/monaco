@@ -1,5 +1,4 @@
-﻿#if filesSupport
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Application.Commands;
@@ -40,4 +39,3 @@ public sealed class CreateFile
 		}
 	}
 }
-#endif

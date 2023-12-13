@@ -1,5 +1,4 @@
-﻿#if filesSupport
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Monaco.Template.Backend.Application.Features.File.Extensions;
 
@@ -10,4 +9,3 @@ internal static class FileExtensions
 				 .AsNoTracking()
 				 .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
 }
-#endif

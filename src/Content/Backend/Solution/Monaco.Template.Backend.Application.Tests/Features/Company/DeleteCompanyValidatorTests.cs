@@ -15,7 +15,7 @@ using Xunit;
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
 
 [ExcludeFromCodeCoverage]
-[Trait("Application Validators", "Delete Company Validator")]
+[Trait("Application Commands", "Delete Company")]
 public class DeleteCompanyValidatorTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();

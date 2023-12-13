@@ -1,5 +1,4 @@
-﻿#if filesSupport
-using FluentValidation;
+﻿using FluentValidation;
 using MediatR;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Application.Services.Contracts;
@@ -40,4 +39,3 @@ public sealed class DeleteFile
 		}
 	}
 }
-#endif

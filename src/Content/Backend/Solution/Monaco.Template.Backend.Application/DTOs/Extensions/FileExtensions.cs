@@ -1,5 +1,4 @@
-﻿#if filesSupport
-using Monaco.Template.Backend.Application.Features.File;
+﻿using Monaco.Template.Backend.Application.Features.File;
 using Monaco.Template.Backend.Common.BlobStorage;
 using Monaco.Template.Backend.Domain.Model;
 using File = Monaco.Template.Backend.Domain.Model.File;
@@ -35,7 +34,7 @@ public static class FileExtensions
 				  value.ThumbnailId,
 				  value.ThumbnailId.HasValue ? value.Thumbnail.Map() : null);
 
-	public static File Map(this FileCreate.Command value, Guid id, FileTypeEnum fileType) =>
+	public static File Map(this CreateFile.Command value, Guid id, FileTypeEnum fileType) =>
 		fileType switch
 		{
 			FileTypeEnum.Image => new Image(id,
@@ -54,4 +53,3 @@ public static class FileExtensions
 							  true)
 		};
 }
-#endif

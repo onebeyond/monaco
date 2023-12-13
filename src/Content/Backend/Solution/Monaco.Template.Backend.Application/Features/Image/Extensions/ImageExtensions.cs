@@ -1,5 +1,4 @@
-﻿#if filesSupport
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Monaco.Template.Backend.Application.Features.Image.Extensions;
 
@@ -18,4 +17,3 @@ internal static class ImageExtensions
 				 .Select(x => x.Thumbnail)
 				 .SingleOrDefaultAsync(cancellationToken);
 }
-#endif

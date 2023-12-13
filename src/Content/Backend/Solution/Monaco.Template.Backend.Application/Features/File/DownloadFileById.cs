@@ -1,5 +1,4 @@
-﻿#if filesSupport
-using MediatR;
+﻿using MediatR;
 using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Application.Features.File.Extensions;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
@@ -38,4 +37,3 @@ public sealed class DownloadFileById
 		}
 	}
 }
-#endif
