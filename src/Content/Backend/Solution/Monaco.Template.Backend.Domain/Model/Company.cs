@@ -30,6 +30,9 @@ public class Company : Entity
 
 	public Address? Address { get; private set; }
 
+	private readonly List<Product> _products = new();
+	public virtual IReadOnlyList<Product> Products => _products;
+
 	public virtual void Update(string name,
 							   string email,
 							   string webSiteUrl,
@@ -39,5 +42,17 @@ public class Company : Entity
 		Email = email;
 		WebSiteUrl = webSiteUrl;
 		Address = address;
+	}
+
+	public void AddProduct(Product product)
+	{
+		if (!Products.Contains(product))
+			_products.Add(product);
+	}
+
+	public void RemoveProduct(Product product)
+	{
+		if (Products.Contains(product))
+			_products.Remove(product);
 	}
 }

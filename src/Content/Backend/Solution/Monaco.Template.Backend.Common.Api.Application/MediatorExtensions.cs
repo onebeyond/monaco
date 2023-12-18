@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Monaco.Template.Backend.Common.Api.Application.Enums;
 using Monaco.Template.Backend.Common.Application.Commands;
+using Monaco.Template.Backend.Common.Application.DTOs;
 using Monaco.Template.Backend.Common.Application.Queries;
 using Monaco.Template.Backend.Common.Domain.Model;
 
@@ -58,6 +59,59 @@ public static class MediatorExtensions
 			? new NotFoundResult()
 			: new OkObjectResult(result);
 	}
+
+	/// <summary>
+	/// Executes the query passed and returns the corresponding response that can be either Ok(result) or a NotFound() result depending on whether the returned item is null or not
+	/// </summary>
+	/// <typeparam name="TResult">The type of the item returned by the query</typeparam>
+	/// <typeparam name="TKey">The type of the key to search the item by</typeparam>
+	/// <param name="mediator"></param>
+	/// <param name="query"></param>
+	/// <returns></returns>
+	public static async Task<ActionResult<TResult>> ExecuteQueryAsync<TResult, TKey>(this IMediator mediator,
+																					 QueryByKeyBase<TResult, TKey> query)
+	{
+		var item = await mediator.Send(query);
+		return item is null
+				   ? new NotFoundResult()
+				   : new OkObjectResult(item);
+	}
+
+	/// <summary>
+	/// Executes the query passed and returns a FileStreamResult for allowing download of a file or a NotFound() result depending on whether the returned item is null or not
+	/// </summary>
+	/// <typeparam name="TResult"></typeparam>
+	/// <param name="mediator"></param>
+	/// <param name="query"></param>
+	/// <returns></returns>
+	public static async Task<IActionResult> ExecuteFileDownloadAsync<TResult>(this IMediator mediator,
+																			  QueryBase<TResult?> query) where TResult : FileDownloadDto
+	{
+		var item = await mediator.Send(query);
+		return GetFileDownload(item);
+	}
+
+	/// <summary>
+	/// Executes the query passed and returns a FileStreamResult for allowing download of a file or a NotFound() result depending on whether the returned item is null or not
+	/// </summary>
+	/// <typeparam name="TResult"></typeparam>
+	/// <param name="mediator"></param>
+	/// <param name="query"></param>
+	/// <returns></returns>
+	public static async Task<IActionResult> ExecuteFileDownloadAsync<TResult>(this IMediator mediator,
+																			  QueryByIdBase<TResult?> query) where TResult : FileDownloadDto
+	{
+		var item = await mediator.Send(query);
+		return GetFileDownload(item);
+	}
+
+	private static IActionResult GetFileDownload<TResult>(TResult? item) where TResult : FileDownloadDto =>
+		item is null
+			? new NotFoundResult()
+			: new FileStreamResult(item.FileContent, item.ContentType)
+			  {
+				  FileDownloadName = item.FileName
+			  };
 
 	/// <summary>
 	/// Executes the command passed and returns the corresponding response that can be either Created(result) or a NotFound() or a BadRequest() depending on the validations and processing

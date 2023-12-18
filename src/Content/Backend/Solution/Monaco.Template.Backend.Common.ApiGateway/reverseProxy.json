@@ -37,7 +37,7 @@
 					}
 				]
 			},
-			//#if (filesSupport)
+			//#if (!excludeFilesSupport)
 			"FilesRead": {
 				"ClusterId": "api",
 				"AuthorizationPolicy": "files:read",

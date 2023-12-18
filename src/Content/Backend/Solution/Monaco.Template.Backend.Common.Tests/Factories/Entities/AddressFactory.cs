@@ -39,7 +39,6 @@ public static class AddressFactoryExtensions
 														  fixture.Create<string?>(),
 														  fixture.Create<string?>()?[..10],
 														  country);
-							 mock.SetupGet(x => x.CountryId).Returns(country.Id);
 							 return mock.Object;
 						 });
 		return fixture;

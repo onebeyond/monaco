@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
-using FluentAssertions;
+﻿using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Monaco.Template.Backend.Application.Features.Company;
@@ -10,23 +6,27 @@ using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Common.Tests.Factories;
 using Moq;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
 
 [ExcludeFromCodeCoverage]
-[Trait("Application Commands", "Create Company")]
+[Trait("Application Commands - Company", "Create")]
 public class CreateCompanyValidatorTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
-	private static readonly CreateCompany.Command _command = new(It.IsAny<string>(),    // Name
-																 It.IsAny<string>(),    // Email
-																 It.IsAny<string>(),    // WebsiteUrl
-																 It.IsAny<string>(),    // Street
-																 It.IsAny<string>(),    // City
-																 It.IsAny<string>(),    // County
-																 It.IsAny<string>(),    // PostCode
-																 It.IsAny<Guid>());     // CountryId
+	private readonly CreateCompany.Command _command = new(It.IsAny<string>(),	// Name
+														  It.IsAny<string>(),	// Email
+														  It.IsAny<string>(),	// WebsiteUrl
+														  It.IsAny<string>(),	// Street
+														  It.IsAny<string>(),	// City
+														  It.IsAny<string>(),	// County
+														  It.IsAny<string>(),	// PostCode
+														  It.IsAny<Guid>());	// CountryId
 
 	[Fact(DisplayName = "Validator's rule level cascade mode is 'Stop'")]
 	public void ValidatorRuleLevelCascadeModeIsStop()
@@ -290,13 +290,13 @@ public class CreateCompanyValidatorTests
 	public async Task CountryWithNullValueDoesNotGenerateErrorWhenAddressFieldsNull()
 	{
 		var command = _command with
-		{
-			Street = null,
-			City = null,
-			County = null,
-			PostCode = null,
-			CountryId = null
-		};
+					  {
+						  Street = null,
+						  City = null,
+						  County = null,
+						  PostCode = null,
+						  CountryId = null
+					  };
 
 		var sut = new CreateCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.Street,
@@ -312,13 +312,13 @@ public class CreateCompanyValidatorTests
 	public async Task CountryWithNullValueGeneratesErrorWhenAddressFieldsPresent()
 	{
 		var command = _command with
-		{
-			Street = string.Empty,
-			City = string.Empty,
-			County = string.Empty,
-			PostCode = string.Empty,
-			CountryId = null
-		};
+					  {
+						  Street = string.Empty,
+						  City = string.Empty,
+						  County = string.Empty,
+						  PostCode = string.Empty,
+						  CountryId = null
+					  };
 
 		var sut = new CreateCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.Street,

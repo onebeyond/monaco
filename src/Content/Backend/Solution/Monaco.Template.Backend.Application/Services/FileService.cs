@@ -1,6 +1,6 @@
 ﻿using ExifLibrary;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Application.Services.Contracts;
+using Monaco.Template.Backend.Common.Application.DTOs;
 using Monaco.Template.Backend.Common.BlobStorage;
 using Monaco.Template.Backend.Common.BlobStorage.Contracts;
 using Monaco.Template.Backend.Domain.Model;
@@ -12,41 +12,41 @@ namespace Monaco.Template.Backend.Application.Services;
 
 public class FileService : IFileService
 {
-	private readonly AppDbContext _dbContext;
 	private readonly IBlobStorageService _blobStorageService;
 
 	private const int ThumbnailWidth = 120;
 	private const int ThumbnailHeight = 120;
 
-	public FileService(AppDbContext dbContext, IBlobStorageService blobStorageService)
+	public FileService(IBlobStorageService blobStorageService)
 	{
-		_dbContext = dbContext;
 		_blobStorageService = blobStorageService;
 	}
 
-	public async Task<File> Upload(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)
+	public async Task<File> UploadAsync(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)
 	{
 		var fileType = _blobStorageService.GetFileType(Path.GetExtension(fileName));
 
 		return fileType switch
 			   {
-				   FileTypeEnum.Image => await UploadImage(stream, fileName, contentType, cancellationToken),
-				   _ => await UploadDocument(stream, fileName, contentType, cancellationToken),
+				   FileTypeEnum.Image => await UploadImageAsync(stream, fileName, contentType, cancellationToken),
+				   _ => await UploadDocumentAsync(stream, fileName, contentType, cancellationToken),
 			   };
 	}
 
-	public async Task<Document> UploadDocument(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)
+	public async Task<Document> UploadDocumentAsync(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)
 	{
-		var docId = await _blobStorageService.UploadTempFileAsync(stream, fileName, contentType, cancellationToken);
+		var docId = await _blobStorageService.UploadTempFileAsync(stream,
+																  fileName,
+																  contentType,
+																  cancellationToken);
 
 		try
 		{
-			return await SaveDocument(docId,
-									  Path.GetFileNameWithoutExtension(fileName),
-									  Path.GetExtension(fileName),
-									  contentType,
-									  stream.Length,
-									  cancellationToken);
+			return CreateDocument(docId,
+								  Path.GetFileNameWithoutExtension(fileName),
+								  Path.GetExtension(fileName),
+								  contentType,
+								  stream.Length);
 		}
 		catch
 		{
@@ -55,7 +55,7 @@ public class FileService : IFileService
 		}
 	}
 
-	public async Task<Image> UploadImage(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)
+	public async Task<Image> UploadImageAsync(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)
 	{
 		using var image = SKImage.FromEncodedData(stream);
 		using var thumb = GetThumbnail(image, ThumbnailWidth, ThumbnailHeight);
@@ -77,19 +77,18 @@ public class FileService : IFileService
 																				  cancellationToken));
 		try
 		{
-			return await SaveImage(imageIds[0],
-								   imageIds[1],
-								   Path.GetFileNameWithoutExtension(fileName),
-								   Path.GetExtension(fileName),
-								   contentType,
-								   stream.Length,
-								   thumbStream.Length,
-								   (image.Width, image.Height),
-								   (thumb.Width, thumb.Height),
-								   dateTaken,
-								   gpsLat,
-								   gpsLong,
-								   cancellationToken);
+			return CreateImage(imageIds[0],
+							   imageIds[1],
+							   Path.GetFileNameWithoutExtension(fileName),
+							   Path.GetExtension(fileName),
+							   contentType,
+							   stream.Length,
+							   thumbStream.Length,
+							   (image.Width, image.Height),
+							   (thumb.Width, thumb.Height),
+							   dateTaken,
+							   gpsLat,
+							   gpsLong);
 		}
 		catch
 		{
@@ -99,110 +98,99 @@ public class FileService : IFileService
 		}
 	}
 
-	public async Task MakePermanent(Guid id, CancellationToken cancellationToken)
-	{
-		var file = await GetFile(id, cancellationToken);
-		switch (file)
+	public Task MakePermanentFileAsync(File file, CancellationToken cancellationToken) =>
+		file switch
 		{
-			case Image image:
-				await MakePermanentPicture(image, cancellationToken);
-				break;
-			case Document document:
-				await MakePermanentDocument(document, cancellationToken);
-				break;
-		}
-	}
+			Image image => MakePermanentImageAsync(image, cancellationToken),
+			Document document => MakePermanentDocumentAsync(document, cancellationToken),
+			_ => throw new NotImplementedException()
+		};
 
-	public async Task MakePermanentPicture(Image file, CancellationToken cancellationToken)
+	public Task MakePermanentFilesAsync(File[] files, CancellationToken cancellationToken) =>
+		Task.WhenAll(files.Select(f => MakePermanentFileAsync(f, cancellationToken)));
+
+	public Task MakePermanentImageAsync(Image image, CancellationToken cancellationToken) =>
+		Task.WhenAll(_blobStorageService.MakePermanentAsync(image.Id, cancellationToken),
+					 image.ThumbnailId.HasValue
+						 ? _blobStorageService.MakePermanentAsync(image.ThumbnailId.Value, cancellationToken)
+						 : Task.CompletedTask);
+
+	public Task MakePermanentImagesAsync(Image[] images, CancellationToken cancellationToken) =>
+		Task.WhenAll(images.Select(img => MakePermanentImageAsync(img, cancellationToken)));
+
+	public Task MakePermanentDocumentAsync(Document document, CancellationToken cancellationToken) =>
+		_blobStorageService.MakePermanentAsync(document.Id, cancellationToken);
+
+	public Task MakePermanentDocumentsAsync(Document[] documents, CancellationToken cancellationToken) =>
+		Task.WhenAll(documents.Select(doc => MakePermanentDocumentAsync(doc, cancellationToken)));
+
+	public async Task<FileDownloadDto> DownloadFileAsync(File item, CancellationToken cancellationToken)
 	{
-		file.MakePermanent();
-		file.Thumbnail?.MakePermanent();
-		await _dbContext.SaveEntitiesAsync(cancellationToken);
+		var file = await _blobStorageService.DownloadAsync(item.Id, item.IsTemp, cancellationToken);
 
-		await _blobStorageService.MakePermanentAsync(file.Id, cancellationToken);
-		if (file.ThumbnailId.HasValue)
-			await _blobStorageService.MakePermanentAsync(file.ThumbnailId.Value, cancellationToken);
+		return new(file,
+				   $"{item.Name}{item.Extension}",
+				   item.ContentType);
 	}
-
-	public async Task MakePermanentDocument(Document file, CancellationToken cancellationToken)
-	{
-		file.MakePermanent();
-		await _dbContext.SaveEntitiesAsync(cancellationToken);
-
-		await _blobStorageService.MakePermanentAsync(file.Id, cancellationToken);
-	}
-
-	public async Task Delete(Guid id, CancellationToken cancellationToken)
-	{
-		var file = await GetFile(id, cancellationToken);
-		switch (file)
+	
+	public Task DeleteFileAsync(File file, CancellationToken cancellationToken) =>
+		file switch
 		{
-			case Image image:
-				await DeleteImage(image, cancellationToken);
-				break;
-			case Document document:
-				await DeleteDocument(document, cancellationToken);
-				break;
-		}
-	}
+			Image image => DeleteImageAsync(image, cancellationToken),
+			Document document => DeleteDocumentAsync(document, cancellationToken),
+			_ => throw new NotImplementedException()
+		};
 
-	public async Task DeleteDocument(Document file, CancellationToken cancellationToken)
+	public Task DeleteDocumentAsync(Document file, CancellationToken cancellationToken) =>
+		_blobStorageService.DeleteAsync(file.Id, file.IsTemp, cancellationToken);
+
+	public Task DeleteImageAsync(Image image, CancellationToken cancellationToken) =>
+		Task.WhenAll(_blobStorageService.DeleteAsync(image.Id, image.IsTemp, cancellationToken),
+					 image.ThumbnailId.HasValue
+						 ? _blobStorageService.DeleteAsync(image.ThumbnailId.Value, image.IsTemp, cancellationToken)
+						 : Task.CompletedTask);
+
+	public Task DeleteDocumentsAsync(Document[] documents, CancellationToken cancellationToken) =>
+		Task.WhenAll(documents.Select(d => DeleteDocumentAsync(d, cancellationToken)));
+
+	public Task DeleteImagesAsync(Image[] images, CancellationToken cancellationToken) =>
+		Task.WhenAll(images.Select(img => DeleteImageAsync(img, cancellationToken)));
+
+	public Task DeleteFilesAsync(File[] files, CancellationToken cancellationToken) =>
+		Task.WhenAll(files.Select(f => DeleteFileAsync(f, cancellationToken)));
+
+	public async Task<File> CopyFileAsync(File file, CancellationToken cancellationToken)
 	{
-		_dbContext.Set<Document>().Remove(file);
-		await _dbContext.SaveEntitiesAsync(cancellationToken);
+		var copyId = await _blobStorageService.CopyAsync(file.Id, file.IsTemp, cancellationToken);
 
-		await _blobStorageService.DeleteAsync(file.Id, file.IsTemp, cancellationToken);
-	}
-
-	public async Task DeleteImage(Image file, CancellationToken cancellationToken)
-	{
-		var thumbId = file.ThumbnailId;
-
-		if (file.Thumbnail != null)
-			_dbContext.Set<Image>().Remove(file.Thumbnail);
-		_dbContext.Set<Image>().Remove(file);
-		await _dbContext.SaveEntitiesAsync(cancellationToken);
-
-		await Task.WhenAll(_blobStorageService.DeleteAsync(file.Id, file.IsTemp, cancellationToken),
-						   thumbId.HasValue
-							   ? _blobStorageService.DeleteAsync(thumbId.Value, file.IsTemp, cancellationToken)
-							   : Task.CompletedTask);
-	}
-
-	public async Task<File> CopyFile(Guid id, CancellationToken cancellationToken)
-	{
-		var file = await GetFile(id, cancellationToken);
-		var copyId = await _blobStorageService.CopyAsync(id, file.IsTemp, cancellationToken);
-
-		switch (file)
-		{
-			case Image image:
-				Guid? thumbCopyId = image.ThumbnailId.HasValue
-						? await _blobStorageService.CopyAsync(image.ThumbnailId.Value, image.IsTemp, cancellationToken)
-						: null;
-
-				return await SaveImage(copyId,
-									   thumbCopyId,
-									   image.Name,
-									   image.Extension,
-									   image.ContentType,
-									   image.Size,
-									   image.Thumbnail?.Size,
-									   (image.Width, image.Height),
-									   image.ThumbnailId.HasValue ? (image.Thumbnail!.Width, image.Thumbnail.Height) : null,
-									   image.DateTaken,
-									   image.GpsLatitude,
-									   image.GpsLongitude,
-									   cancellationToken);
-
-			default:
-				return await SaveDocument(copyId,
-										  file.Name,
-										  file.Extension,
-										  file.ContentType,
-										  file.Size,
-										  cancellationToken);
-		}
+		return file switch
+			   {
+				   Image image => CreateImage(copyId,
+											  image.ThumbnailId.HasValue
+												  ? await _blobStorageService.CopyAsync(image.ThumbnailId.Value,
+																						image.IsTemp,
+																						cancellationToken)
+												  : null,
+											  image.Name,
+											  image.Extension,
+											  image.ContentType,
+											  image.Size,
+											  image.Thumbnail?.Size,
+											  (image.Dimensions.Width,
+											   image.Dimensions.Height),
+											  image.ThumbnailId.HasValue
+												  ? (image.Thumbnail!.Dimensions.Width,
+													 image.Thumbnail.Dimensions.Height)
+												  : null,
+											  image.DateTaken,
+											  image.Position?.Latitude,
+											  image.Position?.Longitude),
+				   _ => CreateDocument(copyId,
+									   file.Name,
+									   file.Extension,
+									   file.ContentType,
+									   file.Size)
+			   };
 	}
 
 	public ExifPropertyCollection<ExifProperty> GetMetadata(Stream stream)
@@ -226,77 +214,52 @@ public class FileService : IFileService
 		return SKImage.FromBitmap(scaledBitmap);
 	}
 
-	private async Task<File> GetFile(Guid id, CancellationToken cancellationToken)
-	{
-		return (await _dbContext.Set<File>().FindAsync(new object[] { id }, cancellationToken))!;
-	}
+	private Image CreateImage(Guid imageId,
+							  Guid? thumbnailId,
+							  string name,
+							  string extension,
+							  string contentType,
+							  long imageSize,
+							  long? thumbSize,
+							  (int Height, int Width) imageDimensions,
+							  (int Height, int Width)? thumbDimensions,
+							  DateTime? dateTaken,
+							  float? gpsLatitude,
+							  float? gpsLongitude) =>
+		new(imageId,
+			name,
+			extension,
+			imageSize,
+			contentType,
+			true,
+			imageDimensions.Height,
+			imageDimensions.Width,
+			dateTaken,
+			gpsLatitude,
+			gpsLongitude,
+			thumbnailId.HasValue
+				? new Image(thumbnailId.Value,
+							name,
+							extension,
+							thumbSize!.Value,
+							contentType,
+							true,
+							thumbDimensions!.Value.Height,
+							thumbDimensions!.Value.Width,
+							dateTaken,
+							gpsLatitude,
+							gpsLongitude)
+				: null);
 
-	private async Task<Image> SaveImage(Guid imageId,
-										Guid? thumbnailId,
-										string name,
-										string extension,
-										string contentType,
-										long imageSize,
-										long? thumbSize,
-										(int Height, int Width) imageDimensions,
-										(int Height, int Width)? thumbDimensions,
-										DateTime? dateTaken,
-										float? gpsLatitude,
-										float? gpsLongitude,
-										CancellationToken cancellationToken)
-	{
-		var thumb = thumbnailId.HasValue
-						? new Image(thumbnailId.Value,
-									name,
-									extension,
-									thumbSize!.Value,
-									contentType,
-									true,
-									thumbDimensions!.Value.Height,
-									thumbDimensions!.Value.Width,
-									dateTaken,
-									gpsLatitude,
-									gpsLongitude)
-						: null;
-
-		var item = new Image(imageId,
-							 name,
-							 extension,
-							 imageSize,
-							 contentType,
-							 true,
-							 imageDimensions.Height,
-							 imageDimensions.Width,
-							 dateTaken,
-							 gpsLatitude,
-							 gpsLongitude,
-							 thumb);
-
-		return await Save(item, cancellationToken);
-	}
-
-	private async Task<Document> SaveDocument(Guid id,
-											  string name,
-											  string extension,
-											  string contentType,
-											  long size,
-											  CancellationToken cancellationToken)
-	{
-		var item = new Document(id,
-								name,
-								extension,
-								size,
-								contentType,
-								true);
-
-		return await Save(item, cancellationToken);
-	}
-
-	private async Task<T> Save<T>(T item, CancellationToken cancellationToken) where T : File
-	{
-		await _dbContext.Set<T>().AddAsync(item, cancellationToken);
-		await _dbContext.SaveEntitiesAsync(cancellationToken);
-
-		return item;
-	}
+	private Document CreateDocument(Guid id,
+									string name,
+									string extension,
+									string contentType,
+									long size) =>
+		new(id,
+			name,
+			extension,
+			size,
+			contentType,
+			true);
 }

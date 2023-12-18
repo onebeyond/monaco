@@ -26,4 +26,8 @@
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Tests\Monaco.Template.Backend.Common.Tests.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\File\" />
+  </ItemGroup>
+
 </Project>

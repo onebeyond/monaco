@@ -29,8 +29,8 @@ public static class FileExtensions
 				  value.UploadedOn,
 				  value.IsTemp,
 				  value.DateTaken,
-				  value.Width,
-				  value.Height,
+				  value.Dimensions.Width,
+				  value.Dimensions.Height,
 				  value.ThumbnailId,
 				  value.ThumbnailId.HasValue ? value.Thumbnail.Map() : null);
 

@@ -8,20 +8,29 @@ public class ImageEntityConfiguration : IEntityTypeConfiguration<Image>
 {
 	public void Configure(EntityTypeBuilder<Image> builder)
 	{
-		builder.Property(x => x.Height)
-			   .IsRequired();
-
-		builder.Property(x => x.Width)
-			   .IsRequired();
-
 		builder.Property(x => x.DateTaken)
 			   .IsRequired(false);
 
-		builder.Property(x => x.GpsLatitude)
-			   .IsRequired(false);
+		builder.OwnsOne(x => x.Dimensions,
+						b =>
+						{
+							b.Property(x => x.Height)
+							 .IsRequired();
 
-		builder.Property(x => x.GpsLongitude)
-			   .IsRequired(false);
+							b.Property(x => x.Width)
+							 .IsRequired();
+						});
+
+		builder.OwnsOne(x => x.Position,
+						b =>
+						{
+							b.Property(x => x.Latitude)
+							 .IsRequired();
+
+							b.Property(x => x.Longitude)
+							 .IsRequired();
+						});
+
 
 		builder.HasOne(x => x.Thumbnail)
 			   .WithOne()

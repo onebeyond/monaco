@@ -30,7 +30,7 @@ public abstract class File : Entity
 	public DateTime UploadedOn { get; protected set; }
 	public bool IsTemp { get; protected set; }
 
-	public void MakePermanent()
+	public virtual void MakePermanent()
 	{
 		IsTemp = false;
 	}

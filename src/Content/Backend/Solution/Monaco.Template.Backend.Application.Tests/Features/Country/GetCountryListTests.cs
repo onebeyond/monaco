@@ -16,7 +16,7 @@ using Xunit;
 namespace Monaco.Template.Backend.Application.Tests.Features.Country;
 
 [ExcludeFromCodeCoverage]
-[Trait("Application Queries", "Get Country List")]
+[Trait("Application Queries - Country", "Get Country List")]
 public class GetCountryListTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();

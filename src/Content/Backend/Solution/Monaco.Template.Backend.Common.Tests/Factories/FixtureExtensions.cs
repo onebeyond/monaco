@@ -20,7 +20,10 @@ public static class FixtureExtensions
 
 		fixture.RegisterCompany()
 			   .RegisterAddress()
-			   .RegisterCountry();
+			   .RegisterCountry()
+			   .RegisterDocument()
+			   .RegisterImage()
+			   .RegisterProduct();
 
 		return fixture;
 	}
@@ -39,7 +42,10 @@ public static class FixtureExtensions
 
 		fixture.RegisterCompanyMock()
 			   .RegisterAddressMock()
-			   .RegisterCountryMock();
+			   .RegisterCountryMock()
+			   .RegisterDocumentMock()
+			   .RegisterImage()
+			   .RegisterProductMock();
 
 		return fixture;
 	}

@@ -51,7 +51,7 @@ builder.Services
 							 {
 								 options.EntityFramework.ConnectionString = configuration.GetConnectionString("AppDbContext")!;
 								 options.EntityFramework.EnableEfSensitiveLogging = bool.Parse(configuration["EnableEFSensitiveLogging"] ?? "false");
-#if filesSupport
+#if !excludeFilesSupport
 								 options.BlobStorage.ConnectionString = configuration["BlobStorage:ConnectionString"]!;
 								 options.BlobStorage.ContainerName = configuration["BlobStorage:Container"]!;
 #endif

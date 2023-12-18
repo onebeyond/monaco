@@ -14,7 +14,7 @@ using Xunit;
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
 
 [ExcludeFromCodeCoverage]
-[Trait("Application Queries", "Get Company by Id")]
+[Trait("Application Queries - Company", "Get Company by Id")]
 public class GetCompanyByIdTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();

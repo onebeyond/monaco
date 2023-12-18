@@ -12,16 +12,21 @@
   </ItemGroup>
 
   <ItemGroup>
-	<!--#if (filesSupport)-->
+	<!--#if (!excludeFilesSupport)-->
+    <PackageReference Include="AsyncEnumerator" Version="4.0.2" />
     <PackageReference Include="ExifLibNet" Version="2.1.4" />
 	<!--#endif-->
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.8.0" />
     <!--#if (massTransitIntegration)-->
     <PackageReference Include="MassTransit" Version="8.1.2" />
     <!--#endif-->
-	<!--#if (filesSupport)-->
+	<!--#if (!excludeFilesSupport)-->
     <PackageReference Include="SkiaSharp" Version="2.88.6" />
 	<!--#endif-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Features\Product\Extensions\" />
   </ItemGroup>
 
 </Project>
