@@ -26,7 +26,7 @@
 			"displayName": "Exclude Common projects",
 			"description": "Exclude all the Common.* projects from the solution generated"
 		},
-		"filesSupport": {
+		"excludeFilesSupport": {
 			"type": "parameter",
 			"datatype": "bool",
 			"defaultValue": "false",
@@ -156,25 +156,39 @@
 					]
 				},
 				{
-					"condition": "(!filesSupport)",
+					"condition": "(!excludeFilesSupport)",
 					"exclude": [
 						"Monaco.Template.Backend.Common.BlobStorage/**/*",
 						"Monaco.Template.Backend.Common.BlobStorage.Tests/**/*",
 						"Monaco.Template.Backend.Api/Controllers/FilesController.cs",
-						"Monaco.Template.Backend.Api/Controllers/ImagesController.cs",
+						"Monaco.Template.Backend.Api/Controllers/ProductsController.cs",
+						"Monaco.Template.Backend.Api/DTOs/ProductCreateEditDto.cs",
+						"Monaco.Template.Backend.Api/DTOs/Extensions/ProductExtensions.cs",
 						"Monaco.Template.Backend.Application/Features/File/**/*",
-						"Monaco.Template.Backend.Application/Features/Image/**/*",
+						"Monaco.Template.Backend.Application/Features/Product/**/*",
 						"Monaco.Template.Backend.Application/DTOs/Extensions/FileExtensions.cs",
-						"Monaco.Template.Backend.Application/DTOs/File*.cs",
+						"Monaco.Template.Backend.Application/DTOs/FileDto.cs",
 						"Monaco.Template.Backend.Application/DTOs/ImageDto.cs",
+						"Monaco.Template.Backend.Application/DTOs/ProductDto.cs",
 						"Monaco.Template.Backend.Application/Services/**/*FileService.*",
 						"Monaco.Template.Backend.Application.Infrastructure/EntityConfigurations/DocumentEntityConfiguration.cs",
 						"Monaco.Template.Backend.Application.Infrastructure/EntityConfigurations/FileEntityConfiguration.cs",
 						"Monaco.Template.Backend.Application.Infrastructure/EntityConfigurations/ImageEntityConfiguration.cs",
+						"Monaco.Template.Backend.Application.Infrastructure/EntityConfigurations/ProductEntityConfiguration.cs",
 						"Monaco.Template.Backend.Application.Tests/Services/FileServiceTests.cs",
+						"Monaco.Template.Backend.Application.Tests/Features/File/**/*",
+						"Monaco.Template.Backend.Application.Tests/Features/Product/**/*",
 						"Monaco.Template.Backend.Domain/Model/Document.cs",
 						"Monaco.Template.Backend.Domain/Model/File.cs",
-						"Monaco.Template.Backend.Domain/Model/Image.cs"
+						"Monaco.Template.Backend.Domain/Model/GpsPosition.cs",
+						"Monaco.Template.Backend.Domain/Model/Image.cs",
+						"Monaco.Template.Backend.Domain/Model/ImageDimensions.cs",
+						"Monaco.Template.Backend.Domain/Model/Product.cs",
+						"Monaco.Template.Backend.Domain.Tests/DocumentTests.cs",
+						"Monaco.Template.Backend.Domain.Tests/GpsPositionTests.cs",
+						"Monaco.Template.Backend.Domain.Tests/ImageDimensionsTests.cs",
+						"Monaco.Template.Backend.Domain.Tests/ImageTests.cs",
+						"Monaco.Template.Backend.Domain.Tests/ProductTests.cs"
 					]
 				},
 				{
