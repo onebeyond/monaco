@@ -25,16 +25,31 @@ public class ProductsController : ControllerBase
 		_mediator = mediator;
 	}
 
+	/// <summary>
+	/// Gets a page of products
+	/// </summary>
+	/// <returns></returns>
 	[HttpGet]
 	[AllowAnonymous]
 	public Task<ActionResult<Page<ProductDto>>> Get() =>
 		_mediator.ExecuteQueryAsync(new GetProductPage.Query(Request.Query));
 
+	/// <summary>
+	/// Gets a product by Id
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns></returns>
 	[HttpGet("{id:guid}")]
 	[AllowAnonymous]
 	public Task<ActionResult<ProductDto?>> Get(Guid id) =>
 		_mediator.ExecuteQueryAsync(new GetProductById.Query(id));
 
+	/// <summary>
+	/// Creates a new product
+	/// </summary>
+	/// <param name="apiVersion"></param>
+	/// <param name="dto"></param>
+	/// <returns></returns>
 	[HttpPost]
 	#if (!disableAuth)
 	[Authorize(Scopes.ProductsWrite)]
@@ -45,6 +60,12 @@ public class ProductsController : ControllerBase
 									  "api/v{0}/Products/{1}",
 									  apiVersion);
 
+	/// <summary>
+	/// Edits an existing product
+	/// </summary>
+	/// <param name="id"></param>
+	/// <param name="dto"></param>
+	/// <returns></returns>
 	[HttpPut("{id:guid}")]
 	#if (!disableAuth)
 	[Authorize(Scopes.ProductsWrite)]
@@ -54,6 +75,11 @@ public class ProductsController : ControllerBase
 									  ModelState,
 									  ResponseType.NoContent);
 
+	/// <summary>
+	/// Deletes a product
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns></returns>
 	[HttpDelete("{id:guid}")]
 	#if (!disableAuth)
 	[Authorize(Scopes.ProductsWrite)]
@@ -62,6 +88,12 @@ public class ProductsController : ControllerBase
 		_mediator.ExecuteCommandAsync(new DeleteProduct.Command(id),
 									  ModelState);
 
+	/// <summary>
+	/// Downloads a picture from a product
+	/// </summary>
+	/// <param name="productId"></param>
+	/// <param name="pictureId"></param>
+	/// <returns></returns>
 	[HttpGet("{productId:guid}/Pictures/{pictureId:guid}")]
 	[AllowAnonymous]
 	[ProducesResponseType(typeof(FileContentResult), (int)HttpStatusCode.OK)]

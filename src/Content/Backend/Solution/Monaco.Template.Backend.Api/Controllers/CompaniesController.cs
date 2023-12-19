@@ -28,6 +28,10 @@ public class CompaniesController : ControllerBase
 		_mediator = mediator;
 	}
 
+	/// <summary>
+	/// Gets a list of companies
+	/// </summary>
+	/// <returns></returns>
 	[HttpGet]
 	#if (!disableAuth)
 	[Authorize(Scopes.CompaniesRead)]
@@ -35,6 +39,11 @@ public class CompaniesController : ControllerBase
 	public Task<ActionResult<Page<CompanyDto>>> Get() =>
 		_mediator.ExecuteQueryAsync(new GetCompanyPage.Query(Request.Query));
 
+	/// <summary>
+	/// Gets a company by Id
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns></returns>
 	[HttpGet("{id:guid}")]
 	#if (!disableAuth)
 	[Authorize(Scopes.CompaniesRead)]
@@ -42,6 +51,12 @@ public class CompaniesController : ControllerBase
 	public Task<ActionResult<CompanyDto?>> Get(Guid id) =>
 		_mediator.ExecuteQueryAsync(new GetCompanyById.Query(id));
 
+	/// <summary>
+	/// Creates a new company
+	/// </summary>
+	/// <param name="apiVersion"></param>
+	/// <param name="dto"></param>
+	/// <returns></returns>
 	[HttpPost]
 	#if (!disableAuth)
 	[Authorize(Scopes.CompaniesWrite)]
@@ -52,6 +67,12 @@ public class CompaniesController : ControllerBase
 									  "api/v{0}/Companies/{1}",
 									  apiVersion);
 
+	/// <summary>
+	/// Edits an existing company
+	/// </summary>
+	/// <param name="id"></param>
+	/// <param name="dto"></param>
+	/// <returns></returns>
 	[HttpPut("{id:guid}")]
 	#if (!disableAuth)
 	[Authorize(Scopes.CompaniesWrite)]
@@ -61,6 +82,11 @@ public class CompaniesController : ControllerBase
 									  ModelState,
 									  ResponseType.NoContent);
 
+	/// <summary>
+	/// Deletes a company
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns></returns>
 	[HttpDelete("{id:guid}")]
 	#if (!disableAuth)
 	[Authorize(Scopes.CompaniesWrite)]

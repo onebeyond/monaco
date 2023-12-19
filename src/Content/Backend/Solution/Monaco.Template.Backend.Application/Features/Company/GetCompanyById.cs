@@ -4,7 +4,6 @@ using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Application.DTOs.Extensions;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Application.Queries;
-using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
 namespace Monaco.Template.Backend.Application.Features.Company;
 

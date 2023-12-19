@@ -24,6 +24,12 @@ public class FilesController : ControllerBase
 		_mediator = mediator;
 	}
 
+	/// <summary>
+	/// Uploads a new file that remains as temporal until it is referenced somewhere else in the app
+	/// </summary>
+	/// <param name="apiVersion"></param>
+	/// <param name="file"></param>
+	/// <returns></returns>
 	[HttpPost]
 	#if (!disableAuth)
 	[Authorize(Scopes.FilesWrite)]
