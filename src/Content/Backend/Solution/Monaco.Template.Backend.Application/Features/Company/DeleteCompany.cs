@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 #if !excludeFilesSupport
 using Monaco.Template.Backend.Application.Services.Contracts;
-#endif
 using Monaco.Template.Backend.Domain.Model;
+#endif
 using Monaco.Template.Backend.Common.Application.Commands;
 using Monaco.Template.Backend.Common.Application.Commands.Contracts;
 using Monaco.Template.Backend.Common.Application.Validators.Extensions;
