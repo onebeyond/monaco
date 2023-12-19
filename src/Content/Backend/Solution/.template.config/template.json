@@ -167,6 +167,7 @@
 						"Monaco.Template.Backend.Application/Features/File/**/*",
 						"Monaco.Template.Backend.Application/Features/Product/**/*",
 						"Monaco.Template.Backend.Application/DTOs/Extensions/FileExtensions.cs",
+						"Monaco.Template.Backend.Application/DTOs/Extensions/ProductExtensions.cs",
 						"Monaco.Template.Backend.Application/DTOs/FileDto.cs",
 						"Monaco.Template.Backend.Application/DTOs/ImageDto.cs",
 						"Monaco.Template.Backend.Application/DTOs/ProductDto.cs",
