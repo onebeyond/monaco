@@ -11,6 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Monaco.Template.Backend.Common.Tests.Factories.Entities;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Product;
@@ -36,8 +37,10 @@ public class EditProductHandlerTests
 											   Image[] pictures)
 	{
 		_dbContextMock.CreateEntityMockAndSetupDbSetMock<AppDbContext, Domain.Model.Product>(out var productMock)
-					  .CreateAndSetupDbSetMock(company)
+					  .CreateAndSetupDbSetMock(company, out var companyDbSetMock)
 					  .CreateAndSetupDbSetMock(pictures);
+		companyDbSetMock.Setup(x => x.FindAsync(It.IsAny<object?[]?>(), It.IsAny<CancellationToken>()))
+						.ReturnsAsync(company);
 		productMock.SetupGet(x => x.Pictures)
 				   .Returns(pictures);
 		productMock.SetupGet(x => x.Company)
@@ -60,8 +63,7 @@ public class EditProductHandlerTests
 
 		productMock.Verify(x => x.Update(It.IsAny<string>(),
 										 It.IsAny<string>(),
-										 It.IsAny<decimal>(),
-										 It.IsAny<Domain.Model.Company>()));
+										 It.IsAny<decimal>()));
 		_dbContextMock.Verify(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()),
 							  Times.Once);
 		_fileServiceMock.Verify(x => x.DeleteImagesAsync(It.IsAny<Image[]>(), It.IsAny<CancellationToken>()),

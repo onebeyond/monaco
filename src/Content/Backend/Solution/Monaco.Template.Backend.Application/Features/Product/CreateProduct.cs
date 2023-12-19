@@ -75,9 +75,8 @@ public class CreateProduct
 		{
 			var (company, pictures) = await _dbContext.GetProductData(request.CompanyId, request.Pictures, cancellationToken);
 
-			var item = request.Map(company,
-								   pictures,
-								   pictures.Single(x => x.Id == request.DefaultPictureId));
+			var item = request.Map(pictures);
+			company.AddProduct(item);
 
 			_dbContext.Set<Domain.Model.Product>().Attach(item);
 			await _dbContext.SaveEntitiesAsync(cancellationToken);

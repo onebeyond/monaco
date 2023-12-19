@@ -10,13 +10,11 @@ public class Product : Entity
 
 	public Product(string title,
 				   string description,
-				   decimal price,
-				   Company company)
+				   decimal price)
 	{
 		Title = title;
 		Description = description;
 		Price = price;
-		Company = company;
 	}
 
 	public string Title { get; private set; }
@@ -33,14 +31,12 @@ public class Product : Entity
 	public virtual Image DefaultPicture { get; private set; }
 
 	public virtual void Update(string title,
-					   string description,
-					   decimal price,
-					   Company company)
+							   string description,
+							   decimal price)
 	{
 		Title = title;
 		Description = description;
 		Price = price;
-		Company = company;
 	}
 
 	public void AddPicture(Image picture, bool @default = false)

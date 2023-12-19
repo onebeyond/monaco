@@ -43,7 +43,7 @@ public class CreateFileHandlerTests
 												   It.IsAny<string>(),
 												   It.IsAny<CancellationToken>()),
 								Times.Once);
-		fileDbSetMock.Verify(x => x.Attach(It.IsAny<Domain.Model.File>()),
+		fileDbSetMock.Verify(x => x.AddAsync(It.IsAny<Domain.Model.File>(), It.IsAny<CancellationToken>()),
 							 Times.Once);
 		_dbContextMock.Verify(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()),
 							  Times.Once);
@@ -84,7 +84,7 @@ public class CreateFileHandlerTests
 												   It.IsAny<string>(),
 												   It.IsAny<CancellationToken>()),
 								Times.Once);
-		fileDbSetMock.Verify(x => x.Attach(It.IsAny<Domain.Model.File>()),
+		fileDbSetMock.Verify(x => x.AddAsync(It.IsAny<Domain.Model.File>(), It.IsAny<CancellationToken>()),
 							 Times.Once);
 	}
 }

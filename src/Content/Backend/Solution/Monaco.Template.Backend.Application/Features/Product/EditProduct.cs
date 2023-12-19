@@ -82,15 +82,15 @@ public class EditProduct
 		public async Task<ICommandResult> Handle(Command request, CancellationToken cancellationToken)
 		{
 			var item = await _dbContext.Set<Domain.Model.Product>()
+									   .Include(x => x.Company)
 									   .Include(x => x.Pictures)
 									   .ThenInclude(x => x.Thumbnail)
 									   .SingleAsync(x => x.Id == request.Id, cancellationToken);
 			var (company, pictures) = await _dbContext.GetProductData(request.CompanyId, request.Pictures, cancellationToken);
 
-			var (newPics, deletedPics) = request.Map(item,
-													 company,
-													 pictures,
-													 pictures.Single(x => x.Id == request.DefaultPictureId));
+			var (newPics, deletedPics) = request.Map(item, pictures);
+			if (company != item.Company)
+				company.AddProduct(item);
 
 			_dbContext.Set<Domain.Model.Image>()
 					  .RemoveRange(deletedPics);

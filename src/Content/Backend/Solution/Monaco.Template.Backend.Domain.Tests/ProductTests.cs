@@ -16,19 +16,16 @@ public class ProductTests
 	[AnonymousData]
 	public void NewProductSucceeds(string title,
 								   string description,
-								   decimal price,
-								   Company company)
+								   decimal price)
 	{
 		price *= price;	//positive always
 		var sut = new Product(title,
 							  description,
-							  price,
-							  company);
+							  price);
 
 		sut.Title.Should().Be(title);
 		sut.Description.Should().Be(description);
 		sut.Price.Should().Be(price);
-		sut.Company.Should().Be(company);
 	}
 
 	[Theory(DisplayName = "Update product succeeds")]
@@ -36,19 +33,16 @@ public class ProductTests
 	public void UpdateProductSucceeds(Product sut,
 									  string title,
 									  string description,
-									  decimal price,
-									  Company company)
+									  decimal price)
 	{
 		price *= price; //positive always
 		sut.Update(title,
 				   description,
-				   price,
-				   company);
+				   price);
 
 		sut.Title.Should().Be(title);
 		sut.Description.Should().Be(description);
 		sut.Price.Should().Be(price);
-		sut.Company.Should().Be(company);
 	}
 
 	[Theory(DisplayName = "Add new picture succeeds")]

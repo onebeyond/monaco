@@ -33,24 +33,26 @@ public static class ProductExtensions
 							 .Map()
 					  : null);
 
-	public static Product Map(this CreateProduct.Command value, Company company, Image[] pictures, Image defaultPicture)
+	public static Product Map(this CreateProduct.Command value, Image[] pictures)
 	{
+		var defaultPicture = pictures.Single(x => x.Id == value.DefaultPictureId);
+
 		var item = new Product(value.Title,
 							   value.Description,
-							   value.Price,
-							   company);
+							   value.Price);
 		foreach (var picture in pictures)
 			item.AddPicture(picture, picture == defaultPicture);
 
 		return item;
 	}
 
-	public static (Image[]newPics, Image[] deletedPics) Map(this EditProduct.Command value, Product item, Company company, Image[] pictures, Image defaultPicture)
+	public static (Image[]newPics, Image[] deletedPics) Map(this EditProduct.Command value, Product item, Image[] pictures)
 	{
+		var defaultPicture = pictures.Single(x => x.Id == value.DefaultPictureId);
+
 		item.Update(value.Title,
 					value.Description,
-					value.Price,
-					company);
+					value.Price);
 
 		var deletedPics = item.Pictures
 							  .Where(p => !pictures.Contains(p))

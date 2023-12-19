@@ -29,10 +29,12 @@ public class Company : Entity
 	public byte[] Version { get; }
 
 	public Address? Address { get; private set; }
+	#if !excludeFilesSupport
 
 	private readonly List<Product> _products = new();
 	public virtual IReadOnlyList<Product> Products => _products;
-
+	#endif
+	
 	public virtual void Update(string name,
 							   string email,
 							   string webSiteUrl,
@@ -43,6 +45,7 @@ public class Company : Entity
 		WebSiteUrl = webSiteUrl;
 		Address = address;
 	}
+	#if !excludeFilesSupport
 
 	public void AddProduct(Product product)
 	{
@@ -55,4 +58,5 @@ public class Company : Entity
 		if (Products.Contains(product))
 			_products.Remove(product);
 	}
+	#endif
 }

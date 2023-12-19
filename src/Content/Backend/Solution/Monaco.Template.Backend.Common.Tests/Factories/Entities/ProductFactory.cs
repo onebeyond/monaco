@@ -29,8 +29,7 @@ public static class ProductFactoryExtension
 						 {
 							 var product = new Product(fixture.Create<string>(),
 													   fixture.Create<string>(),
-													   fixture.Create<decimal>(),
-													   fixture.Create<Company>());
+													   fixture.Create<decimal>());
 							 var images = fixture.CreateMany<Image>();
 							 foreach (var image in images)
 								 product.AddPicture(image);
@@ -46,10 +45,11 @@ public static class ProductFactoryExtension
 						 {
 							 var mock = new Mock<Product>(fixture.Create<string>(),
 														  fixture.Create<string>(),
-														  fixture.Create<decimal>(),
-														  fixture.Create<Company>());
+														  fixture.Create<decimal>());
 							 mock.SetupGet(x => x.Id)
 								 .Returns(Guid.NewGuid());
+							 mock.SetupGet(x => x.Company)
+								 .Returns(fixture.Create<Company>());
 
 							 var images = fixture.CreateMany<Image>();
 							 mock.SetupGet(x => x.Pictures)

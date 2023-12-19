@@ -37,6 +37,7 @@ public static class CompanyFactoryExtension
 														  fixture.Create<string>(),
 														  fixture.Create<Address>());
 							 mock.SetupGet(x => x.Id).Returns(Guid.NewGuid());
+							 mock.SetupGet(x => x.Products).Returns(new List<Product>());
 							 return mock.Object;
 						 });
 		return fixture;
