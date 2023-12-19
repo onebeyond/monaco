@@ -41,7 +41,8 @@ public sealed class CreateFile
 
 			try
 			{
-				_dbContext.Set<Domain.Model.File>().Attach(file);
+				await _dbContext.Set<Domain.Model.File>()
+								.AddAsync(file, cancellationToken);
 				await _dbContext.SaveEntitiesAsync(cancellationToken);
 			}
 			catch
