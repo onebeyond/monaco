@@ -23,7 +23,7 @@ public sealed class CreateFile
 		}
 	}
 
-	#if !excludeFilesSupport
+	#if (!excludeFilesSupport)
 	public sealed class Handler : IRequestHandler<Command, ICommandResult<Guid>>
 	{
 		private readonly AppDbContext _dbContext;

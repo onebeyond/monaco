@@ -2,7 +2,9 @@
 using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
 using System.Diagnostics.CodeAnalysis;
+#if (!excludeFilesSupport)
 using System.Linq;
+#endif
 using Xunit;
 
 namespace Monaco.Template.Backend.Domain.Tests;
@@ -49,6 +51,7 @@ public class CompanyTests
 		sut.Address.Should().Be(address);
 		sut.Version.Should().BeNull();
 	}
+	#if (!excludeFilesSupport)
 
 	[Theory(DisplayName = "Add product succeeds")]
 	[AnonymousData]
@@ -82,4 +85,5 @@ public class CompanyTests
 		   .And
 		   .NotContain(deletedProduct);
 	}
+	#endif
 }

@@ -29,7 +29,7 @@ public class Company : Entity
 	public byte[] Version { get; }
 
 	public Address? Address { get; private set; }
-	#if !excludeFilesSupport
+	#if (!excludeFilesSupport)
 
 	private readonly List<Product> _products = new();
 	public virtual IReadOnlyList<Product> Products => _products;
@@ -45,7 +45,7 @@ public class Company : Entity
 		WebSiteUrl = webSiteUrl;
 		Address = address;
 	}
-	#if !excludeFilesSupport
+	#if (!excludeFilesSupport)
 
 	public void AddProduct(Product product)
 	{

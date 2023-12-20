@@ -20,10 +20,14 @@ public static class FixtureExtensions
 
 		fixture.RegisterCompany()
 			   .RegisterAddress()
+			   #if (excludeFilesSupport)
+			   .RegisterCountry();
+			   #else
 			   .RegisterCountry()
 			   .RegisterDocument()
 			   .RegisterImage()
 			   .RegisterProduct();
+			   #endif
 
 		return fixture;
 	}
@@ -42,10 +46,14 @@ public static class FixtureExtensions
 
 		fixture.RegisterCompanyMock()
 			   .RegisterAddressMock()
+			   #if (excludeFilesSupport)
+			   .RegisterCountryMock();
+			   #else
 			   .RegisterCountryMock()
 			   .RegisterDocumentMock()
 			   .RegisterImage()
 			   .RegisterProductMock();
+			   #endif
 
 		return fixture;
 	}

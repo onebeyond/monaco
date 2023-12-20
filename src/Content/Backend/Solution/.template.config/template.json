@@ -158,7 +158,7 @@
 					]
 				},
 				{
-					"condition": "(!excludeFilesSupport)",
+					"condition": "(excludeFilesSupport)",
 					"exclude": [
 						"Monaco.Template.Backend.Common.BlobStorage/**/*",
 						"Monaco.Template.Backend.Common.BlobStorage.Tests/**/*",
@@ -181,6 +181,9 @@
 						"Monaco.Template.Backend.Application.Tests/Services/FileServiceTests.cs",
 						"Monaco.Template.Backend.Application.Tests/Features/File/**/*",
 						"Monaco.Template.Backend.Application.Tests/Features/Product/**/*",
+						"Monaco.Template.Backend.Common.Tests/Factories/Entities/DocumentFactory.cs",
+						"Monaco.Template.Backend.Common.Tests/Factories/Entities/ImageFactory.cs",
+						"Monaco.Template.Backend.Common.Tests/Factories/Entities/ProductFactory.cs",
 						"Monaco.Template.Backend.Domain/Model/Document.cs",
 						"Monaco.Template.Backend.Domain/Model/File.cs",
 						"Monaco.Template.Backend.Domain/Model/GpsPosition.cs",

@@ -1,24 +1,24 @@
-﻿#if !excludeFilesSupport
+﻿#if (!excludeFilesSupport)
 using AutoFixture;
 #endif
 using FluentAssertions;
 using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
-#if !excludeFilesSupport
+#if (!excludeFilesSupport)
 using Monaco.Template.Backend.Application.Services.Contracts;
 #endif
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Common.Tests.Factories;
-#if !excludeFilesSupport
+#if (!excludeFilesSupport)
 using Monaco.Template.Backend.Domain.Model;
 #endif
 using Moq;
 using System;
-#if !excludeFilesSupport
+#if (!excludeFilesSupport)
 using System.Collections.Generic;
 #endif
 using System.Diagnostics.CodeAnalysis;
-#if !excludeFilesSupport
+#if (!excludeFilesSupport)
 using System.Linq;
 #endif
 using System.Threading;
@@ -33,19 +33,19 @@ public class DeleteCompanyHandlerTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
 	private static readonly DeleteCompany.Command Command = new(It.IsAny<Guid>());
-#if !excludeFilesSupport
+	#if (!excludeFilesSupport)
 	private readonly Mock<IFileService> _fileServiceMock = new();
-#endif
+	#endif
 
 	[Theory(DisplayName = "Delete company succeeds")]
 	[AnonymousData(true)]
-#if !excludeFilesSupport
+	#if (!excludeFilesSupport)
 	public async Task DeleteCompanySucceeds(IFixture fixture, Domain.Model.Product[] products)
-#else
+	#else
 	public async Task DeleteCompanySucceeds(Domain.Model.Company company)
-#endif
+	#endif
 	{
-#if !excludeFilesSupport
+		#if (!excludeFilesSupport)
 		var companyMock = new Mock<Domain.Model.Company>(fixture.Create<string>(),
 														 fixture.Create<string>(),
 														 fixture.Create<string>(),
@@ -61,38 +61,38 @@ public class DeleteCompanyHandlerTests
 
 		_dbContextMock.CreateAndSetupDbSetMock(companyMock.Object, out var companyDbSetMock);
 		_dbContextMock.CreateAndSetupDbSetMock(pictures, out var imageDbSetMock);
-#else
+		#else
 		_dbContextMock.CreateAndSetupDbSetMock(company, out var companyDbSetMock);
-#endif
+		#endif
 
 		var command = Command with
 					  {
-#if !excludeFilesSupport
+						  #if (!excludeFilesSupport)
 						  Id = companyMock.Object.Id
-#else
+						  #else
 						  Id = company.Id
-#endif
+						  #endif
 					  };
-
-#if !excludeFilesSupport
+		
+		#if (!excludeFilesSupport)
 		var sut = new DeleteCompany.Handler(_dbContextMock.Object, _fileServiceMock.Object);
-#else
+		#else
 		var sut = new DeleteCompany.Handler(_dbContextMock.Object);
-#endif
+		#endif
 		var result = await sut.Handle(command, new CancellationToken());
 
 		companyDbSetMock.Verify(x => x.Remove(It.IsAny<Domain.Model.Company>()),
 								Times.Once);
-#if !excludeFilesSupport
+		#if (!excludeFilesSupport)
 		imageDbSetMock.Verify(x => x.RemoveRange(It.IsAny<IEnumerable<Image>>()),
 							  Times.Once);
-#endif
+		#endif
 		_dbContextMock.Verify(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()),
 							  Times.Once);
-#if !excludeFilesSupport
+		#if (!excludeFilesSupport)
 		_fileServiceMock.Verify(x => x.DeleteImagesAsync(It.IsAny<Image[]>(), It.IsAny<CancellationToken>()),
 								Times.Once);
-#endif
+		#endif
 
 		result.ValidationResult
 			  .IsValid

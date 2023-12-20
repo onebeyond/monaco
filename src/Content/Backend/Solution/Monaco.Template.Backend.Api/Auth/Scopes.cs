@@ -5,7 +5,7 @@ public static class Scopes
 {
 	public const string CompaniesRead = "companies:read";
 	public const string CompaniesWrite = "companies:write";
-#if !excludeFilesSupport
+#if (!excludeFilesSupport)
 	public const string FilesWrite = "files:write";
 	public const string ProductsWrite = "products:write";
 #endif
@@ -14,7 +14,7 @@ public static class Scopes
 									   {
 										   CompaniesRead,
 										   CompaniesWrite,
-#if !excludeFilesSupport
+#if (!excludeFilesSupport)
 										   FilesWrite,
 										   ProductsWrite
 #endif
