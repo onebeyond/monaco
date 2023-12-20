@@ -13,16 +13,7 @@ using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
 #endif
 using Moq;
-using System;
-#if (!excludeFilesSupport)
-using System.Collections.Generic;
-#endif
 using System.Diagnostics.CodeAnalysis;
-#if (!excludeFilesSupport)
-using System.Linq;
-#endif
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;

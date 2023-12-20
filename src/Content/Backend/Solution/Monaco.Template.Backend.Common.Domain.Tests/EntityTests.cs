@@ -3,10 +3,7 @@ using FluentAssertions;
 using Monaco.Template.Backend.Common.Domain.Model;
 using Monaco.Template.Backend.Common.Tests.Factories;
 using Moq;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using Xunit;
 
 namespace Monaco.Template.Backend.Common.Domain.Tests;

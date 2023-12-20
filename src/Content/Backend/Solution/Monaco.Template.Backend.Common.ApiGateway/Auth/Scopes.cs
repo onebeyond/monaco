@@ -9,13 +9,13 @@ public static class Scopes
 	public const string FilesWrite = "files:write";
 	#endif
 
-	public static List<string> List => new()
-									   {
-										   CompaniesRead,
-										   CompaniesWrite,
-										   #if (!excludeFilesSupport)
-										   FilesRead,
-										   FilesWrite
-										   #endif
-									   };
+	public static List<string> List =>
+	[
+		CompaniesRead,
+		CompaniesWrite,
+		#if (!excludeFilesSupport)
+		FilesRead,
+		FilesWrite
+		#endif
+	];
 }

@@ -8,11 +8,7 @@ using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
 using Moq;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Product;
@@ -313,8 +309,8 @@ public class EditProductValidatorTests
 	{
 		var command = Command with
 					  {
-						  Pictures = Array.Empty<Guid>()
-					  };
+						  Pictures = []
+		};
 
 		var sut = new EditProduct.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Pictures));
@@ -330,7 +326,7 @@ public class EditProductValidatorTests
 	{
 		var command = Command with
 					  {
-						  Pictures = new []{ Guid.Empty }
+						  Pictures = [Guid.Empty]
 					  };
 
 		var sut = new EditProduct.Validator(_dbContextMock.Object);
@@ -349,7 +345,7 @@ public class EditProductValidatorTests
 
 		var command = Command with
 					  {
-						  Pictures = new[] { Guid.NewGuid() }
+						  Pictures = [Guid.NewGuid()]
 					  };
 
 		var sut = new EditProduct.Validator(_dbContextMock.Object);
@@ -419,7 +415,7 @@ public class EditProductValidatorTests
 	{
 		var command = Command with
 					  {
-						  Pictures = new[] { Guid.NewGuid() },
+						  Pictures = [Guid.NewGuid()],
 						  DefaultPictureId = Guid.NewGuid()
 					  };
 

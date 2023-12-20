@@ -7,11 +7,7 @@ using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
 using Moq;
 using SkiaSharp;
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 using File = Monaco.Template.Backend.Domain.Model.File;
 

@@ -64,7 +64,7 @@ public static class SortingExtensions
 		var methodCallExpression = (MethodCallExpression)sortMethod.Body;
 		var method = methodCallExpression.Method.GetGenericMethodDefinition();
 		var genericSortMethod = method.MakeGenericMethod(typeof(T), bodyExpression.Type);
-		return (IOrderedQueryable<T>)genericSortMethod.Invoke(source, new object[] { source, sortLambda })!;
+		return (IOrderedQueryable<T>)genericSortMethod.Invoke(source, [source, sortLambda])!;
 	}
 
 	private static IOrderedEnumerable<T> GetOrderedQuery<T>(this IEnumerable<T> source, Expression<Func<T, object>> expression, bool ascending, bool firstSort)
@@ -83,7 +83,7 @@ public static class SortingExtensions
 
 		var meth = methodCallExpression.Method.GetGenericMethodDefinition();
 		var genericSortMethod = meth.MakeGenericMethod(typeof(T), bodyExpression.Type);
-		return (IOrderedEnumerable<T>)genericSortMethod.Invoke(source, new object[] { source, sortLambda.Compile() })!;
+		return (IOrderedEnumerable<T>)genericSortMethod.Invoke(source, [source, sortLambda.Compile()])!;
 	}
 
 	private static Dictionary<string, bool> ProcessSortParam<T>(IEnumerable<string?> sortFields,

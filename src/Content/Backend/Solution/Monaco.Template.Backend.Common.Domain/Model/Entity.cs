@@ -19,7 +19,7 @@ public abstract class Entity : IEntity
 	public virtual Guid Id { get; }
 
 
-	private readonly List<DomainEvent> _domainEvents = new();
+	private readonly List<DomainEvent> _domainEvents = [];
 	/// <summary>
 	/// List that holds Domain Events for this entity instance 
 	/// </summary>

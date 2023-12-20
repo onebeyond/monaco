@@ -31,7 +31,7 @@ public class Company : Entity
 	public Address? Address { get; private set; }
 	#if (!excludeFilesSupport)
 
-	private readonly List<Product> _products = new();
+	private readonly List<Product> _products = [];
 	public virtual IReadOnlyList<Product> Products => _products;
 	#endif
 	

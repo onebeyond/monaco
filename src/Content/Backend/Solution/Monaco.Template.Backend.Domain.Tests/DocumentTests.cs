@@ -1,7 +1,5 @@
-﻿using System;
-using Monaco.Template.Backend.Domain.Model;
+﻿using Monaco.Template.Backend.Domain.Model;
 using System.Diagnostics.CodeAnalysis;
-using System.Security.Cryptography;
 using FluentAssertions;
 using Monaco.Template.Backend.Common.Tests.Factories;
 using Xunit;

@@ -4,8 +4,6 @@ using FluentValidation.TestHelper;
 using Monaco.Template.Backend.Application.Features.File;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.File;

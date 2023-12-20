@@ -2,7 +2,6 @@
 using FluentAssertions;
 using Moq;
 using Xunit;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Monaco.Template.Backend.Common.BlobStorage.Tests;

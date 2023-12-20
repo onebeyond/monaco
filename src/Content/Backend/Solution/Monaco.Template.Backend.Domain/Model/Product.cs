@@ -24,7 +24,7 @@ public class Product : Entity
 	public Guid CompanyId { get; }
 	public virtual Company Company { get; private set; }
 
-	private readonly List<Image> _pictures = new();
+	private readonly List<Image> _pictures = [];
 	public virtual IReadOnlyList<Image> Pictures => _pictures;
 
 	public Guid DefaultPictureId { get; }

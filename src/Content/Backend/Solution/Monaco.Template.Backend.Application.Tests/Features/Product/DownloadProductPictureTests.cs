@@ -7,13 +7,7 @@ using Monaco.Template.Backend.Common.Application.DTOs;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Common.Tests.Factories;
 using Moq;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Product;

@@ -136,7 +136,7 @@ public static class MediatorExtensions
 
 		if (result.ValidationResult.IsValid)
 		{
-			var parameters = (uriParams ?? Array.Empty<object>()).Append(result.Result!);
+			var parameters = (uriParams ?? []).Append(result.Result!);
 			return new CreatedResult(string.Format(resultUri, parameters.ToArray()), result.Result);
 		}
 

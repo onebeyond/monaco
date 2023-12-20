@@ -2,9 +2,6 @@
 using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
 using System.Diagnostics.CodeAnalysis;
-#if (!excludeFilesSupport)
-using System.Linq;
-#endif
 using Xunit;
 
 namespace Monaco.Template.Backend.Domain.Tests;

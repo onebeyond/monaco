@@ -39,9 +39,6 @@ public class AuthorizeCheckOperationFilter : IOperationFilter
 										  }
 						  };
 
-		operation.Security = new List<OpenApiSecurityRequirement>
-							 {
-								 new() { [oAuthScheme] = new List<string> { _audience } }
-							 };
+		operation.Security = [new OpenApiSecurityRequirement { [oAuthScheme] = new List<string> { _audience } }];
 	}
 }
