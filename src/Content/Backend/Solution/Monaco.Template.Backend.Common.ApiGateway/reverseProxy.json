@@ -38,42 +38,42 @@
 				]
 			},
 			//#if (!excludeFilesSupport)
-			"FilesRead": {
-				"ClusterId": "api",
-				"AuthorizationPolicy": "files:read",
-				"Match": {
-					"Path": "/api/v1/Files/{**remainder}",
-					"Methods": [ "GET" ]
-				},
-				"Transforms": [
-					{
-						"PathPattern": "/api/v1/Files/{**remainder}"
-					}
-				]
-			},
 			"FilesWrite": {
 				"ClusterId": "api",
 				"AuthorizationPolicy": "files:write",
 				"Match": {
-					"Path": "/api/v1/Files/{**remainder}",
-					"Methods": [ "POST", "PUT", "DELETE" ]
+					"Path": "/api/v1/Files",
+					"Methods": [ "POST" ]
 				},
 				"Transforms": [
 					{
-						"PathPattern": "/api/v1/Files/{**remainder}"
+						"PathPattern": "/api/v1/Files"
 					}
 				]
 			},
-			"ImagesRead": {
+			"ProductsRead": {
 				"ClusterId": "api",
-				"AuthorizationPolicy": "files:read",
+				"AuthorizationPolicy": "anonymous",
 				"Match": {
-					"Path": "/api/v1/Images/{**remainder}",
+					"Path": "/api/v1/Products/{**remainder}",
 					"Methods": [ "GET" ]
 				},
 				"Transforms": [
 					{
-						"PathPattern": "/api/v1/Images/{**remainder}"
+						"PathPattern": "/api/v1/Products/{**remainder}"
+					}
+				]
+			},
+			"ProductsWrite": {
+				"ClusterId": "api",
+				"AuthorizationPolicy": "products:write",
+				"Match": {
+					"Path": "/api/v1/Products/{**remainder}",
+					"Methods": [ "POST", "PUT", "DELETE" ]
+				},
+				"Transforms": [
+					{
+						"PathPattern": "/api/v1/Products/{**remainder}"
 					}
 				]
 			},

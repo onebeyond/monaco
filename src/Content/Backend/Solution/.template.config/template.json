@@ -30,8 +30,8 @@
 			"type": "parameter",
 			"datatype": "bool",
 			"defaultValue": "false",
-			"displayName": "Include files support and structure",
-			"description": "Include support for Azure BlobStorage and file handling structure"
+			"displayName": "Exclude files support and structure",
+			"description": "Exclude support for Azure BlobStorage and file handling structure"
 		},
 		"massTransitIntegration": {
 			"type": "parameter",
@@ -144,7 +144,9 @@
 				"**/*.filelist",
 				"**/*.user",
 				"**/*.lock.json",
-				"**/.vs/**/*"
+				"**/.vs/**/*",
+				"**/logs/**",
+				"**/TestResults/**"
 			],
 			"modifiers": [
 				{
