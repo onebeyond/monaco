@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -24,10 +24,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Monaco.Template.Backend.Application\Monaco.Template.Backend.Application.csproj" />
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Tests\Monaco.Template.Backend.Common.Tests.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Features\File\" />
   </ItemGroup>
 
 </Project>

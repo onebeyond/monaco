@@ -19,12 +19,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Context\Contracts\" />
-    <Folder Include="Context\Extensions\" />
-    <Folder Include="EntityConfigurations\Extensions\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="DelegateDecompiler.EntityFrameworkCore5" Version="0.32.0" />
     <PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="7.1.4" />
     <PackageReference Include="MediatR" Version="12.1.1" />

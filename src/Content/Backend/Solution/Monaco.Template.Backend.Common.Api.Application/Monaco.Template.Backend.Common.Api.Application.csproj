@@ -28,8 +28,4 @@
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Application\Monaco.Template.Backend.Common.Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Enums\" />
-  </ItemGroup>
-
 </Project>
