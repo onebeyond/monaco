@@ -14,15 +14,15 @@ public class ImageTests
 	[Theory(DisplayName = "New Image succeeds")]
 	[AnonymousData]
 	public void NewImageSucceeds(Guid id,
-									string name,
-									string extension,
-									long size,
-									string contentType,
-									bool isTemp,
-									int height,
-									int width,
-									DateTime dateTaken,
-									Image thumbnail)
+								 string name,
+								 string extension,
+								 long size,
+								 string contentType,
+								 bool isTemp,
+								 int height,
+								 int width,
+								 DateTime dateTaken,
+								 Image thumbnail)
 	{
 		var latitude = RandomNumberGenerator.GetInt32(-90, 90);
 		var longitude = RandomNumberGenerator.GetInt32(-180, 180);
@@ -61,11 +61,11 @@ public class ImageTests
 		sut.Dimensions
 		   .Should()
 		   .NotBeNull();
-		sut.Dimensions!
+		sut.Dimensions
 		   .Height
 		   .Should()
 		   .Be(height);
-		sut.Dimensions!
+		sut.Dimensions
 		   .Width
 		   .Should()
 		   .Be(width);
