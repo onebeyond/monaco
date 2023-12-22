@@ -16,14 +16,14 @@ namespace Monaco.Template.Backend.Application.Tests.Features.Company;
 public class CreateCompanyValidatorTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
-	private readonly CreateCompany.Command _command = new(It.IsAny<string>(),	// Name
-														  It.IsAny<string>(),	// Email
-														  It.IsAny<string>(),	// WebsiteUrl
-														  It.IsAny<string>(),	// Street
-														  It.IsAny<string>(),	// City
-														  It.IsAny<string>(),	// County
-														  It.IsAny<string>(),	// PostCode
-														  It.IsAny<Guid>());	// CountryId
+	private static readonly CreateCompany.Command Command = new(It.IsAny<string>(),	// Name
+																It.IsAny<string>(),	// Email
+																It.IsAny<string>(),	// WebsiteUrl
+																It.IsAny<string>(),	// Street
+																It.IsAny<string>(),	// City
+																It.IsAny<string>(),	// County
+																It.IsAny<string>(),	// PostCode
+																It.IsAny<Guid>());	// CountryId
 
 	[Fact(DisplayName = "Validator's rule level cascade mode is 'Stop'")]
 	public void ValidatorRuleLevelCascadeModeIsStop()
@@ -36,7 +36,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "Name being valid does not generate validation error")]
 	public async Task NameDoesNotGenerateErrorWhenValid()
 	{
-		var command = _command with { Name = new string(It.IsAny<char>(), 100) };
+		var command = Command with { Name = new string(It.IsAny<char>(), 100) };
 
 		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Company>());
 
@@ -49,7 +49,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "Name with empty value generates validation error")]
 	public async Task NameIsEmptyGeneratesError()
 	{
-		var command = _command with { Name = string.Empty };
+		var command = Command with { Name = string.Empty };
 
 		var sut = new CreateCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.Name));
@@ -63,7 +63,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "Name with long value generates validation error")]
 	public async Task NameWithLongValueGeneratesError()
 	{
-		var command = _command with { Name = new string(It.IsAny<char>(), 101) };
+		var command = Command with { Name = new string(It.IsAny<char>(), 101) };
 
 		var sut = new CreateCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.Name));
@@ -79,7 +79,7 @@ public class CreateCompanyValidatorTests
 	[AnonymousData]
 	public async Task NameAlreadyExistsGeneratesError(Domain.Model.Company company)
 	{
-		var command = _command with { Name = company.Name };
+		var command = Command with { Name = company.Name };
 
 		_dbContextMock.CreateAndSetupDbSetMock([company]);
 
@@ -95,7 +95,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "Email being valid does not generate validation error")]
 	public async Task EmailIsValidDoesNotGenerateError()
 	{
-		var command = _command with { Email = "valid@email.com" };
+		var command = Command with { Email = "valid@email.com" };
 
 		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Company>());
 
@@ -108,7 +108,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "Email with empty value generates validation error")]
 	public async Task EmailIsEmptyGeneratesError()
 	{
-		var command = _command with { Email = string.Empty };
+		var command = Command with { Email = string.Empty };
 
 		var sut = new CreateCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.Email));
@@ -123,7 +123,7 @@ public class CreateCompanyValidatorTests
 	[AnonymousData]
 	public async Task EmailAddressIsInvalidGeneratesError(string email)
 	{
-		var command = _command with { Email = email };
+		var command = Command with { Email = email };
 
 		var sut = new CreateCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.Email));
@@ -137,7 +137,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "Website URL with long value generates validation error")]
 	public async Task WebsiteUrlWithLongValueGeneratesError()
 	{
-		var command = _command with { WebSiteUrl = new string(It.IsAny<char>(), 301) };
+		var command = Command with { WebSiteUrl = new string(It.IsAny<char>(), 301) };
 
 		var sut = new CreateCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.WebSiteUrl));
@@ -152,7 +152,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "Website URL with empty value does not generate validation error")]
 	public async Task WebsiteUrlWithEmptyValueDoesNotGenerateError()
 	{
-		var command = _command with { WebSiteUrl = string.Empty };
+		var command = Command with { WebSiteUrl = string.Empty };
 
 		var sut = new CreateCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.WebSiteUrl));
@@ -163,7 +163,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "Street with long value generates validation error")]
 	public async Task StreetWithLongValueGeneratesError()
 	{
-		var command = _command with { Street = new string(It.IsAny<char>(), 101) };
+		var command = Command with { Street = new string(It.IsAny<char>(), 101) };
 
 		var validator = new CreateCompany.Validator(_dbContextMock.Object);
 		var validationResult = await validator.TestValidateAsync(command, s => s.IncludeProperties(x => x.Street));
@@ -178,7 +178,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "Street with empty value does not generate validation error")]
 	public async Task StreetWithEmptyValueDoesNotGenerateError()
 	{
-		var command = _command with { Street = string.Empty };
+		var command = Command with { Street = string.Empty };
 
 		var sut = new CreateCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.Street));
@@ -189,7 +189,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "City with long value generates validation error")]
 	public async Task CityWithLongValueGeneratesError()
 	{
-		var command = _command with { City = new string(It.IsAny<char>(), 101) };
+		var command = Command with { City = new string(It.IsAny<char>(), 101) };
 
 		var sut = new CreateCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.City));
@@ -204,7 +204,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "City with empty value does not generate validation error")]
 	public async Task CityWithEmptyValueDoesNotGenerateError()
 	{
-		var command = _command with { City = string.Empty };
+		var command = Command with { City = string.Empty };
 
 		var sut = new CreateCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.City));
@@ -215,7 +215,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "County with long value generates validation error")]
 	public async Task CountyWithLongValueGeneratesError()
 	{
-		var command = _command with { County = new string(It.IsAny<char>(), 101) };
+		var command = Command with { County = new string(It.IsAny<char>(), 101) };
 
 		var sut = new CreateCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.County));
@@ -230,7 +230,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "County with empty value does not generate validation error")]
 	public async Task CountyWithEmptyValueDoesNotGenerateError()
 	{
-		var command = _command with { County = string.Empty };
+		var command = Command with { County = string.Empty };
 
 		var sut = new CreateCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.County));
@@ -241,7 +241,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "Postcode with long value generates validation error")]
 	public async Task PostcodeWithLongValueGeneratesError()
 	{
-		var command = _command with { PostCode = new string(It.IsAny<char>(), 11) };
+		var command = Command with { PostCode = new string(It.IsAny<char>(), 11) };
 
 		var sut = new CreateCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.PostCode));
@@ -256,7 +256,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "Postcode with empty value does not generate validation error")]
 	public async Task PostcodeWithEmptyValueDoesNotGenerateError()
 	{
-		var command = _command with { PostCode = string.Empty };
+		var command = Command with { PostCode = string.Empty };
 
 		var sut = new CreateCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.PostCode));
@@ -268,7 +268,7 @@ public class CreateCompanyValidatorTests
 	[AnonymousData(true)]
 	public async Task CountryIsValidDoesNotGenerateError(Domain.Model.Country country)
 	{
-		var command = _command with { CountryId = country.Id };
+		var command = Command with { CountryId = country.Id };
 
 		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Company>())
 					  .CreateAndSetupDbSetMock([country]);
@@ -286,7 +286,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "Country with null value does not generate validation error when Address fields null")]
 	public async Task CountryWithNullValueDoesNotGenerateErrorWhenAddressFieldsNull()
 	{
-		var command = _command with
+		var command = Command with
 					  {
 						  Street = null,
 						  City = null,
@@ -308,7 +308,7 @@ public class CreateCompanyValidatorTests
 	[Fact(DisplayName = "Country with null value generates validation error when Address fields present")]
 	public async Task CountryWithNullValueGeneratesErrorWhenAddressFieldsPresent()
 	{
-		var command = _command with
+		var command = Command with
 					  {
 						  Street = string.Empty,
 						  City = string.Empty,
@@ -331,7 +331,7 @@ public class CreateCompanyValidatorTests
 	[AnonymousData]
 	public async Task CountryMustExistValidation(Domain.Model.Country country)
 	{
-		var command = _command with { CountryId = Guid.NewGuid() };
+		var command = Command with { CountryId = Guid.NewGuid() };
 
 		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Company>())
 					  .CreateAndSetupDbSetMock(country);
