@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
 using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
@@ -15,11 +13,11 @@ using Xunit;
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
 
 [ExcludeFromCodeCoverage]
-[Trait("Application Commands", "Delete Company")]
+[Trait("Application Commands - Company", "Delete")]
 public class DeleteCompanyValidatorTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
-	private static readonly DeleteCompany.Command _command = new(It.IsAny<Guid>());
+	private static readonly DeleteCompany.Command Command = new(It.IsAny<Guid>());
 
 	[Fact(DisplayName = "Validator's rule level cascade mode is 'Stop'")]
 	public void ValidatorRuleLevelCascadeModeIsStop()
@@ -33,7 +31,7 @@ public class DeleteCompanyValidatorTests
 	[AnonymousData]
 	public async Task ExistingCompanyPassesValidationCorrectly(Domain.Model.Company company)
 	{
-		var command = _command with { Id = company.Id };
+		var command = Command with { Id = company.Id };
 
 		_dbContextMock.CreateAndSetupDbSetMock(company);
 
@@ -48,7 +46,7 @@ public class DeleteCompanyValidatorTests
 	[AnonymousData]
 	public async Task NonExistingCompanyPassesValidationCorrectly(Domain.Model.Company company, Guid id)
 	{
-		var command = _command with { Id = id };
+		var command = Command with { Id = id };
 
 		_dbContextMock.CreateAndSetupDbSetMock(company);
 

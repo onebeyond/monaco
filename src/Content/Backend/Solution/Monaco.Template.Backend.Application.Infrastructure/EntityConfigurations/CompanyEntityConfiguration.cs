@@ -25,6 +25,14 @@ public class CompanyEntityConfiguration : IEntityTypeConfiguration<Company>
 
 		builder.Property(x => x.Version)
 			   .IsRowVersion();
+		#if (!excludeFilesSupport)
+
+		builder.HasMany(x => x.Products)
+			   .WithOne(x => x.Company)
+			   .HasForeignKey(x => x.CompanyId)
+			   .OnDelete(DeleteBehavior.Cascade)
+			   .IsRequired();
+		#endif
 
 		builder.OwnsOne(x => x.Address,
 						b =>

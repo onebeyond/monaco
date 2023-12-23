@@ -126,7 +126,7 @@ public static class FilterExtensions
 			else // otherwise searches with Contains
 			{
 				expression = Expression.Call(expression,
-											 type.GetMethod(nameof(string.Contains), new[] { type })!,
+											 type.GetMethod(nameof(string.Contains), [type])!,
 											 Expression.Constant(Convert.ChangeType(strValue, type)));
 				if (not) expression = Expression.Not(expression);
 			}

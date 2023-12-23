@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
 using FluentAssertions;
 using Microsoft.Extensions.Primitives;
 using Monaco.Template.Backend.Application.DTOs;
@@ -16,7 +12,7 @@ using Xunit;
 namespace Monaco.Template.Backend.Application.Tests.Features.Country;
 
 [ExcludeFromCodeCoverage]
-[Trait("Application Queries", "Get Country List")]
+[Trait("Application Queries - Country", "Get Country List")]
 public class GetCountryListTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();

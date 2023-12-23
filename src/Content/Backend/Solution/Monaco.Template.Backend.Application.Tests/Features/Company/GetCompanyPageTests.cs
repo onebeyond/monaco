@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.Extensions.Primitives;
 using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Application.Features.Company;
@@ -11,12 +6,13 @@ using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Common.Tests.Factories;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
 
 [ExcludeFromCodeCoverage]
-[Trait("Application Queries", "Get Company Page")]
+[Trait("Application Queries - Company", "Get Company Page")]
 public class GetCompanyPageTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
@@ -32,8 +28,12 @@ public class GetCompanyPageTests
 		var sut = new GetCompanyPage.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(query, new CancellationToken());
 
-		result.Should().NotBeNull();
-		result!.Pager.Count.Should().Be(companies.Count);
+		result.Should()
+			  .NotBeNull();
+		result!.Pager
+			   .Count
+			   .Should()
+			   .Be(companies.Count);
 		result.Items
 			  .Should()
 			  .HaveCount(companies.Count).And
@@ -48,19 +48,25 @@ public class GetCompanyPageTests
 		_dbContextMock.CreateAndSetupDbSetMock(companies);
 		var companiesSet = companies.GetRange(0, 2);
 		var queryString = new List<KeyValuePair<string, StringValues>>
-		{
-			new (nameof(CompanyDto.Name),
-				new(companiesSet.Select(x => x.Name).ToArray())),
-			new ("sort", $"-{nameof(CompanyDto.Name)}")
-		};
+						  {
+							  new(nameof(CompanyDto.Name),
+								  new(companiesSet.Select(x => x.Name)
+												  .ToArray())),
+							  new("expand", nameof(CompanyDto.Country)),
+							  new("sort", $"-{nameof(CompanyDto.Name)}")
+						  };
 
 		var query = new GetCompanyPage.Query(queryString);
 
 		var sut = new GetCompanyPage.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(query, new CancellationToken());
 
-		result.Should().NotBeNull();
-		result!.Pager.Count.Should().Be(companiesSet.Count);
+		result.Should()
+			  .NotBeNull();
+		result!.Pager
+			   .Count
+			   .Should()
+			   .Be(companiesSet.Count);
 		result.Items
 			  .Should()
 			  .HaveCount(companiesSet.Count).And

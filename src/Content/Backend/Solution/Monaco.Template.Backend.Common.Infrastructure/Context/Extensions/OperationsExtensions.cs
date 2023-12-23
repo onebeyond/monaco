@@ -26,13 +26,13 @@ public static class OperationsExtensions
 	public static async Task<T> GetAsync<T>(this DbContext dbContext,
 											Guid id,
 											CancellationToken cancellationToken) where T : class =>
-		(await dbContext.Set<T>().FindAsync(new object?[] { id }, cancellationToken))!;
+		(await dbContext.Set<T>().FindAsync([id], cancellationToken))!;
 
 	public static IQueryable<TResult> Set<TResult>(this DbContext context, Type t) =>
 		(IQueryable<TResult>)context.GetType()
 									.GetMethod("Set", Type.EmptyTypes)?
 									.MakeGenericMethod(t)
-									.Invoke(context, Array.Empty<object?>())!;
+									.Invoke(context, [])!;
 
 	public static async Task<List<T>> GetListByIdsAsync<T>(this DbContext dbContext,
 														   Guid[] items,
@@ -41,5 +41,5 @@ public static class OperationsExtensions
 			? await dbContext.Set<T>()
 							 .Where(x => items.Contains(x.Id))
 							 .ToListAsync(cancellationToken)
-			: new();
+			: [];
 }

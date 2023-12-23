@@ -10,9 +10,9 @@
 			"isVisible": true
 		},
 		{
-			"id": "filesSupport",
+			"id": "excludeFilesSupport",
 			"name": {
-				"text": "Include files support and structure"
+				"text": "Exclude files support and structure"
 			},
 			"isVisible": true
 		},

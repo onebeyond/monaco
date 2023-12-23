@@ -61,7 +61,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.App
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Application.Infrastructure.Migrations", "Monaco.Template.Backend.Application.Infrastructure.Migrations\Monaco.Template.Backend.Application.Infrastructure.Migrations.csproj", "{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}"
 EndProject
-#if (filesSupport)
+#if (!excludeFilesSupport)
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.BlobStorage", "Monaco.Template.Backend.Common.BlobStorage\Monaco.Template.Backend.Common.BlobStorage.csproj", "{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.BlobStorage.Tests", "Monaco.Template.Backend.Common.BlobStorage.Tests\Monaco.Template.Backend.Common.BlobStorage.Tests.csproj", "{D8623B90-59C1-4753-A0E6-F2DBD4305C9B}"
@@ -147,7 +147,7 @@ Global
 		{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}.Release|Any CPU.Build.0 = Release|Any CPU
-		#if (filesSupport)
+		#if (!excludeFilesSupport)
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -181,7 +181,7 @@ Global
 		#endif
 		{E5781B96-E0CA-4762-9412-C4202E0CA08F} = {920A23AF-59DA-4453-B825-0549B1C04F5B}
 		{B09E0906-8522-4B70-8C55-958415DAF21D} = {920A23AF-59DA-4453-B825-0549B1C04F5B}
-		#if (filesSupport)
+		#if (!excludeFilesSupport)
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{D8623B90-59C1-4753-A0E6-F2DBD4305C9B} = {35484293-234F-40DA-B430-A95170EDE449}
 		#endif

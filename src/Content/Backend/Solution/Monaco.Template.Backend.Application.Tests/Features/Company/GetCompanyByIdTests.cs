@@ -1,8 +1,4 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
 using FluentAssertions;
 using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
@@ -14,7 +10,7 @@ using Xunit;
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
 
 [ExcludeFromCodeCoverage]
-[Trait("Application Queries", "Get Company by Id")]
+[Trait("Application Queries - Company", "Get Company by Id")]
 public class GetCompanyByIdTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();

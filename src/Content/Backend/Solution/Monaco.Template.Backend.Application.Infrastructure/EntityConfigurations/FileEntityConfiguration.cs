@@ -12,7 +12,7 @@ public class FileEntityConfiguration : IEntityTypeConfiguration<File>
 	{
 		builder.ConfigureIdWithDefaultAndValueGeneratedNever();
 
-		builder.ToTable("File")
+		builder.ToTable(nameof(File))
 			   .HasDiscriminator<string>("Discriminator")
 			   .HasValue<Document>(nameof(Document))
 			   .HasValue<Image>(nameof(Image))

@@ -3,8 +3,7 @@
 public class Image : File
 {
 	protected Image()
-	{
-	}
+	{ }
 
 	public Image(Guid id,
 				 string name,
@@ -17,22 +16,31 @@ public class Image : File
 				 DateTime? dateTaken = null,
 				 float? gpsLatitude = null,
 				 float? gpsLongitude = null,
-				 Image? thumbnail = null) : base(id, name, extension, size, contentType, isTemp)
+				 Image? thumbnail = null) : base(id,
+												 name,
+												 extension,
+												 size,
+												 contentType,
+												 isTemp)
 	{
-		Height = height;
-		Width = width;
+		Dimensions = new(height, width);
 		DateTaken = dateTaken;
-		GpsLatitude = gpsLatitude;
-		GpsLongitude = gpsLongitude;
+		Position = gpsLatitude.HasValue && gpsLongitude.HasValue
+					   ? new(gpsLatitude.Value, gpsLongitude.Value)
+					   : null;
 		Thumbnail = thumbnail;
 	}
 
-	public DateTime? DateTaken { get; private set; }
-	public int Height { get; private set; }
-	public int Width { get; private set; }
-	public float? GpsLatitude { get; private set; }
-	public float? GpsLongitude { get; private set; }
+	public DateTime? DateTaken { get; }
+	public ImageDimensions Dimensions { get; }
+	public GpsPosition? Position { get; }
 
 	public Guid? ThumbnailId { get; private set; }
-	public virtual Image? Thumbnail { get; private set; }
+	public virtual Image? Thumbnail { get; }
+
+	public override void MakePermanent()
+	{
+		base.MakePermanent();
+		Thumbnail?.MakePermanent();
+	}
 }

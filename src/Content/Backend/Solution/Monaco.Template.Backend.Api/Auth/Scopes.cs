@@ -5,19 +5,19 @@ public static class Scopes
 {
 	public const string CompaniesRead = "companies:read";
 	public const string CompaniesWrite = "companies:write";
-#if filesSupport
-	public const string FilesRead = "files:read";
+	#if (!excludeFilesSupport)
 	public const string FilesWrite = "files:write";
-#endif
+	public const string ProductsWrite = "products:write";
+	#endif
 
-	public static List<string> List => new()
-									   {
-										   CompaniesRead,
-										   CompaniesWrite,
-#if filesSupport
-										   FilesRead,
-										   FilesWrite
-#endif
-									   };
+	public static List<string> List =>
+	[
+		CompaniesRead,
+		CompaniesWrite,
+		#if (!excludeFilesSupport)
+		FilesWrite,
+		ProductsWrite
+		#endif
+	];
 }
 #endif
