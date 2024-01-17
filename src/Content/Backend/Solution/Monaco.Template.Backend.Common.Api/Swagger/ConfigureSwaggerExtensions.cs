@@ -1,6 +1,5 @@
 ﻿using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
-using Asp.Versioning.Conventions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -18,7 +17,8 @@ public static class ConfigureSwaggerExtensions
 																string contactName,
 																string contactEmail,
 																string termsOfServiceUrl,
-																string? authority = null,
+																string? authEndpoint = null,
+																string? tokenEndpoint = null,
 																string? apiName = null,
 																List<string>? scopes = null)
 	{
@@ -27,8 +27,8 @@ public static class ConfigureSwaggerExtensions
 											 options.ReportApiVersions = true;
 											 options.DefaultApiVersion = new ApiVersion(1, 0);
 											 options.AssumeDefaultVersionWhenUnspecified = true;
+											 options.ApiVersionReader = new UrlSegmentApiVersionReader();
 										 })
-					   .AddMvc(options => options.Conventions.Add(new VersionByNamespaceConvention()))
 					   .AddApiExplorer(options =>
 									   {
 										   options.GroupNameFormat = "'v'VVV";
@@ -41,7 +41,8 @@ public static class ConfigureSwaggerExtensions
 										 contactName,
 										 contactEmail,
 										 termsOfServiceUrl,
-										 authority,
+										 authEndpoint,
+										 tokenEndpoint,
 										 apiName,
 										 scopes);
 	}
@@ -53,7 +54,8 @@ public static class ConfigureSwaggerExtensions
 													  string contactName,
 													  string contactEmail,
 													  string termsOfServiceUrl,
-													  string? authority = null,
+													  string? authEndpoint = null,
+													  string? tokenEndpoint = null,
 													  string? apiName = null,
 													  List<string>? scopesList = null) =>
 		services.AddTransient<IConfigureOptions<SwaggerGenOptions>, SwaggerOptions>(provider => new SwaggerOptions(provider.GetRequiredService<IApiVersionDescriptionProvider>(),
@@ -72,7 +74,7 @@ public static class ConfigureSwaggerExtensions
 								   foreach (var xmlFile in xmlFiles)
 									   options.IncludeXmlComments(xmlFile);
 
-								   if (authority is not null && apiName is not null && scopesList is not null)
+								   if (authEndpoint is not null && tokenEndpoint is not null && apiName is not null && scopesList is not null)
 								   {
 									   //Add security for authenticated APIs
 									   options.AddSecurityDefinition("oauth2",
@@ -80,38 +82,36 @@ public static class ConfigureSwaggerExtensions
 																	 {
 																		 Type = SecuritySchemeType.OAuth2,
 																		 Flows = new OpenApiOAuthFlows
-																		 {
-																			 AuthorizationCode = new OpenApiOAuthFlow
-																			 {
-																				 AuthorizationUrl = new Uri($"{authority}/protocol/openid-connect/auth"),
-																				 TokenUrl = new Uri($"{authority}/protocol/openid-connect/token"),
-																				 Scopes = new Dictionary<string, string>(scopesList.ToDictionary(x => x, _ => "")) { { apiName, apiDescription } }
-																			 }
-																		 }
+																				 {
+																					 AuthorizationCode = new OpenApiOAuthFlow
+																										 {
+																											 AuthorizationUrl = new Uri(authEndpoint),
+																											 TokenUrl = new Uri(tokenEndpoint),
+																											 Scopes = new Dictionary<string, string>(scopesList.ToDictionary(x => x, _ => "")) { { apiName, apiDescription } }
+																										 }
+																				 }
 																	 });
 									   options.OperationFilter<AuthorizeCheckOperationFilter>(apiName);
 								   }
 							   });
 
-#if (disableAuth)
-	public static IApplicationBuilder UseSwaggerConfiguration(this IApplicationBuilder app) =>
-#else
-	public static IApplicationBuilder UseSwaggerConfiguration(this IApplicationBuilder app,
-															  string clientId,
-															  string appName) =>
-#endif
+	public static IApplicationBuilder UseSwaggerConfiguration(this WebApplication app,
+															  string? clientId = null,
+															  string? appName = null) =>
 		app.UseSwagger() // Enable middleware to serve generated Swagger as a JSON endpoint.
 		   .UseSwaggerUI(options =>
 						 { // build a swagger endpoint for each discovered API version
-							 var provider = app.ApplicationServices.GetRequiredService<IApiVersionDescriptionProvider>();
-							 foreach (var groupName in provider.ApiVersionDescriptions.Select(x => x.GroupName))
+							 var apiVersions = app.DescribeApiVersions();
+							 foreach (var groupName in apiVersions.Select(x => x.GroupName))
 								 options.SwaggerEndpoint($"{groupName}/swagger.json", groupName.ToUpperInvariant());
-#if (!disableAuth)
-							 options.OAuthClientId(clientId);
-							 options.OAuthAppName(appName);
-							 options.OAuthScopeSeparator(" ");
-							 options.OAuthUsePkce();
-#endif
+
+							 if (clientId is not null && appName is not null)
+							 {
+								 options.OAuthClientId(clientId);
+								 options.OAuthAppName(appName);
+								 options.OAuthScopeSeparator(" ");
+								 options.OAuthUsePkce();
+							 }
 						 });
 
 	/// <summary>
@@ -164,13 +164,13 @@ public static class ConfigureSwaggerExtensions
 		private OpenApiInfo CreateInfoForApiVersion(ApiVersionDescription description)
 		{
 			var info = new OpenApiInfo
-			{
-				Title = _title,
-				Version = description.ApiVersion.ToString(),
-				Description = _description,
-				Contact = new OpenApiContact { Name = _contactName, Email = _contactEmail },
-				TermsOfService = new Uri(_termsOfServiceUrl)
-			};
+					   {
+						   Title = _title,
+						   Version = description.ApiVersion.ToString(),
+						   Description = _description,
+						   Contact = new OpenApiContact { Name = _contactName, Email = _contactEmail },
+						   TermsOfService = new Uri(_termsOfServiceUrl)
+					   };
 
 			if (description.IsDeprecated)
 				info.Description += " This API version has been deprecated.";

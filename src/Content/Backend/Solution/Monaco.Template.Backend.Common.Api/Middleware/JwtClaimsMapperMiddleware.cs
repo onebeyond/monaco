@@ -6,6 +6,11 @@ using Monaco.Template.Backend.Common.Api.Attributes;
 
 namespace Monaco.Template.Backend.Common.Api.Middleware;
 
+/// <summary>
+/// Middleware to read and parse a JWT coming in the Authorization header and later populate the request's Principal in order to have this data available for the remaining of the request execution.
+/// This middleware is useful for cases where there's an API Gateway in front of the API but some endpoints still need to validate some user's claims as part of the business rules, so this makes that available.
+/// It's assumed that the JWT token passed has already been validated by the eventual API Gateway on top of the API.
+/// </summary>
 public class JwtClaimsMapperMiddleware
 {
 	private readonly RequestDelegate _next;

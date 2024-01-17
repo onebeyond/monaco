@@ -16,19 +16,18 @@ public class AuthorizeCheckOperationFilter : IOperationFilter
 
 	public void Apply(OpenApiOperation operation, OperationFilterContext context)
 	{
-		var allowAnonymous = context.MethodInfo
-									.DeclaringType?
-									.GetCustomAttributes(true)
-									.OfType<AllowAnonymousAttribute>()
-									.Any() ??
-							 false;
-		if (allowAnonymous)
+		if (context.ApiDescription
+				   .ActionDescriptor
+				   .EndpointMetadata
+				   .Any(m => m is IAllowAnonymous))
 			return;
 
-		operation.Responses.Add(((int)HttpStatusCode.Unauthorized).ToString(),
-								new OpenApiResponse { Description = HttpStatusCode.Unauthorized.ToString() });
-		operation.Responses.Add(((int)HttpStatusCode.Forbidden).ToString(),
-								new OpenApiResponse { Description = HttpStatusCode.Forbidden.ToString() });
+		if (!operation.Responses.ContainsKey(((int)HttpStatusCode.Unauthorized).ToString()))
+			operation.Responses.Add(((int)HttpStatusCode.Unauthorized).ToString(),
+									new OpenApiResponse { Description = HttpStatusCode.Unauthorized.ToString() });
+		if (!operation.Responses.ContainsKey(((int)HttpStatusCode.Forbidden).ToString()))
+			operation.Responses.Add(((int)HttpStatusCode.Forbidden).ToString(),
+									new OpenApiResponse { Description = HttpStatusCode.Forbidden.ToString() });
 
 		var oAuthScheme = new OpenApiSecurityScheme
 						  {

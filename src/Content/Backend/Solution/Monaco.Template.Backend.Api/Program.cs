@@ -2,7 +2,6 @@
 using MassTransit;
 #endif
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Mvc;
 using Monaco.Template.Backend.Application.DependencyInjection;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 #if (!disableAuth)
@@ -14,9 +13,8 @@ using Monaco.Template.Backend.Common.Api.Middleware.Extensions;
 using Monaco.Template.Backend.Common.Api.Swagger;
 using Monaco.Template.Backend.Common.Serilog;
 using Monaco.Template.Backend.Common.Serilog.ApplicationInsights.TelemetryConverters;
+using Monaco.Template.Backend.Api.Endpoints.Extensions;
 using Serilog;
-
-[assembly: ApiConventionType(typeof(DefaultApiConventions))]
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
@@ -56,7 +54,7 @@ builder.Services
 								 options.BlobStorage.ContainerName = configuration["BlobStorage:Container"]!;
 #endif
 							 })
-#if disableAuth
+#if (disableAuth)
 	   .ConfigureApiVersionSwagger(configuration["Swagger:ApiDescription"]!,
 								   configuration["Swagger:Title"]!,
 								   configuration["Swagger:Description"]!,
@@ -70,11 +68,12 @@ builder.Services
 								   configuration["Swagger:ContactName"]!,
 								   configuration["Swagger:ContactEmail"]!,
 								   configuration["Swagger:TermsOfService"]!,
-								   configuration["SSO:Authority"],
+								   configuration["Swagger:AuthEndpoint"],
+								   configuration["Swagger:TokenEndpoint"],
 								   configuration["SSO:Audience"],
 								   Scopes.List)
 #endif
-#if massTransitIntegration
+#if (massTransitIntegration)
 	   .AddMassTransit(cfg =>
 					   {
 						   if (builder.Environment.IsDevelopment())
@@ -100,8 +99,7 @@ builder.Services
 	   .AddDbContextCheck<AppDbContext>(nameof(AppDbContext));
 
 builder.Services
-	   .AddCorsPolicies(configuration)
-	   .AddControllers();
+	   .AddCorsPolicies(configuration);
 
 var app = builder.Build();
 
@@ -117,19 +115,14 @@ app.UseSwaggerConfiguration(configuration["SSO:SwaggerUIClientId"]!,
 #endif
 
 app.UseCors()
-#if (!disableAuth)
+   .UseRouting()
    .UseHttpsRedirection()
+#if (!disableAuth)
    .UseAuthorization()
 #endif
+   .UseEndpoints(b => b.RegisterEndpoints())
    .UseSerilogContextEnricher();
 
 app.MapHealthChecks("/health", new HealthCheckOptions { Predicate = _ => true });
-
-#if disableAuth
-app.MapControllers();
-#else
-app.MapControllers()
-   .RequireAuthorization();
-#endif
 
 app.Run();

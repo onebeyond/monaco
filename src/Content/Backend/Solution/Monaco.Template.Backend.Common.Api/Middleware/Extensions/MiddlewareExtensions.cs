@@ -15,8 +15,8 @@ public static class MiddlewareExtensions
 	/// <summary>
 	/// Uses a middleware for mapping all claims from a JWT token to the Context.User but without running any kind of authentication/authorization middleware
 	/// </summary>
-	/// <param name="builder"></param>
+	/// <param name="app"></param>
 	/// <returns></returns>
-	public static IApplicationBuilder UseJwtClaimsMapper(this IApplicationBuilder builder) =>
-		builder.UseMiddleware<JwtClaimsMapperMiddleware>();
+	public static IApplicationBuilder UseJwtClaimsMapper(this IApplicationBuilder app) =>
+		app.UseMiddleware<JwtClaimsMapperMiddleware>();
 }

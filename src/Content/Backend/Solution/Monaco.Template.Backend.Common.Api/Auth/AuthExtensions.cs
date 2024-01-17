@@ -36,7 +36,7 @@ public static class AuthExtensions
 								  options.TokenHandlers.Clear();
 								  options.TokenHandlers.Add(new JwtSecurityTokenHandler { MapInboundClaims = false });
 
-								  options.TokenValidationParameters.ValidTypes = new[] { "JWT" };
+								  options.TokenValidationParameters.ValidTypes = ["JWT"];
 							  });
 
 	/// <summary>
