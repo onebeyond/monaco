@@ -22,7 +22,7 @@ public static class Countries
 						 "GetCountries",
 						 "Gets a list of countries");
 
-		countries.MapGet("/{id:guid}",
+		countries.MapGet("{id:guid}",
 						 Task<Results<Ok<CountryDto?>, NotFound>> ([FromServices] ISender sender,
 																   [FromRoute] Guid id) =>
 							 sender.ExecuteQueryAsync(new GetCountryById.Query(id)),

@@ -33,7 +33,7 @@ public static class Companies
 				 .RequireAuthorization(Scopes.CompaniesRead);
 #endif
 
-		companies.MapGet("/{id:guid}",
+		companies.MapGet("{id:guid}",
 						 Task<Results<Ok<CompanyDto?>, NotFound>> ([FromServices] ISender sender,
 																   [FromRoute] Guid id) =>
 							 sender.ExecuteQueryAsync(new GetCompanyById.Query(id)),

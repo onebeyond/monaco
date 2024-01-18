@@ -33,7 +33,7 @@ public static class Products
 				.AllowAnonymous();
 #endif
 
-		products.MapGet("/{id:guid}",
+		products.MapGet("{id:guid}",
 						Task<Results<Ok<ProductDto?>, NotFound>> ([FromServices] ISender sender,
 																  [FromRoute] Guid id) =>
 							sender.ExecuteQueryAsync(new GetProductById.Query(id)),
