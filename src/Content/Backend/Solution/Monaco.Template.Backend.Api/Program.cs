@@ -54,19 +54,14 @@ builder.Services
 								 options.BlobStorage.ContainerName = configuration["BlobStorage:Container"]!;
 #endif
 							 })
-#if (disableAuth)
 	   .ConfigureApiVersionSwagger(configuration["Swagger:ApiDescription"]!,
 								   configuration["Swagger:Title"]!,
 								   configuration["Swagger:Description"]!,
 								   configuration["Swagger:ContactName"]!,
 								   configuration["Swagger:ContactEmail"]!,
+#if (disableAuth)
 								   configuration["Swagger:TermsOfService"]!)
 #else
-	   .ConfigureApiVersionSwagger(configuration["Swagger:ApiDescription"]!,
-								   configuration["Swagger:Title"]!,
-								   configuration["Swagger:Description"]!,
-								   configuration["Swagger:ContactName"]!,
-								   configuration["Swagger:ContactEmail"]!,
 								   configuration["Swagger:TermsOfService"]!,
 								   configuration["Swagger:AuthEndpoint"],
 								   configuration["Swagger:TokenEndpoint"],
