@@ -22,7 +22,8 @@ public static class ConfigureSwaggerExtensions
 																string? apiName = null,
 																List<string>? scopes = null)
 	{
-		return services.AddApiVersioning(options =>
+		return services.AddEndpointsApiExplorer()
+					   .AddApiVersioning(options =>
 										 {
 											 options.ReportApiVersions = true;
 											 options.DefaultApiVersion = new ApiVersion(1, 0);
