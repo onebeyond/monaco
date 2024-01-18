@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Monaco.Template</id>
-		<version>2.3.0</version>
+		<version>2.4.0</version>
 		<title>Monaco Template</title>
 		<description>
 			Templates for .NET projects
