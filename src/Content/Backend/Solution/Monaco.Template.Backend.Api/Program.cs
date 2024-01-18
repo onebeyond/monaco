@@ -1,4 +1,4 @@
-#if massTransitIntegration
+#if (massTransitIntegration)
 using MassTransit;
 #endif
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -93,7 +93,7 @@ builder.Services
 					   })
 #endif
 	   .AddHealthChecks()
-#if !disableAuth
+#if (!disableAuth)
 	   .AddUrlGroup(new Uri($"{configuration["SSO:Authority"]}/.well-known/openid-configuration"), "SSO")
 #endif
 	   .AddDbContextCheck<AppDbContext>(nameof(AppDbContext));
