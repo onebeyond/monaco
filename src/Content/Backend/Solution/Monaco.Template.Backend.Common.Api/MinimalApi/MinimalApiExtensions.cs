@@ -16,8 +16,12 @@ public static class MinimalApiExtensions
 			   .WithDisplayName(collectionName)
 			   .WithTags(collectionName)
 			   .WithApiVersionSet(versionSet)
+#if (disableAuth)
+			   .HasApiVersion(version);
+#else
 			   .HasApiVersion(version)
 			   .RequireAuthorization();
+#endif
 
 	public static RouteHandlerBuilder MapGet(this IEndpointRouteBuilder builder,
 											 string pattern,
