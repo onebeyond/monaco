@@ -54,7 +54,7 @@ public class DeleteProduct
 
 			await _dbContext.SaveEntitiesAsync(cancellationToken);
 
-			await _fileService.DeleteImagesAsync(item.Pictures.ToArray(), cancellationToken);
+			await _fileService.DeleteImagesAsync([.. item.Pictures], cancellationToken);
 
 			return new CommandResult();
 		}

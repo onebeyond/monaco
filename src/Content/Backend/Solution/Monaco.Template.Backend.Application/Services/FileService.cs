@@ -214,18 +214,18 @@ public class FileService : IFileService
 		return SKImage.FromBitmap(scaledBitmap);
 	}
 
-	private Image CreateImage(Guid imageId,
-							  Guid? thumbnailId,
-							  string name,
-							  string extension,
-							  string contentType,
-							  long imageSize,
-							  long? thumbSize,
-							  (int Height, int Width) imageDimensions,
-							  (int Height, int Width)? thumbDimensions,
-							  DateTime? dateTaken,
-							  float? gpsLatitude,
-							  float? gpsLongitude) =>
+	private static Image CreateImage(Guid imageId,
+									 Guid? thumbnailId,
+									 string name,
+									 string extension,
+									 string contentType,
+									 long imageSize,
+									 long? thumbSize,
+									 (int Height, int Width) imageDimensions,
+									 (int Height, int Width)? thumbDimensions,
+									 DateTime? dateTaken,
+									 float? gpsLatitude,
+									 float? gpsLongitude) =>
 		new(imageId,
 			name,
 			extension,
@@ -251,11 +251,11 @@ public class FileService : IFileService
 							gpsLongitude)
 				: null);
 
-	private Document CreateDocument(Guid id,
-									string name,
-									string extension,
-									string contentType,
-									long size) =>
+	private static Document CreateDocument(Guid id,
+										   string name,
+										   string extension,
+										   string contentType,
+										   long size) =>
 		new(id,
 			name,
 			extension,
