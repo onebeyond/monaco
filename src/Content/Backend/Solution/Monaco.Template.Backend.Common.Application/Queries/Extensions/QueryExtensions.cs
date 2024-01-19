@@ -9,12 +9,12 @@ namespace Monaco.Template.Backend.Common.Application.Queries.Extensions;
 public static class QueryExtensions
 {
 	public static async Task<List<TResult>> ExecuteQueryAsync<T, TResult>(this QueryBase<List<TResult>> request,
-																		   BaseDbContext dbContext,
-																		   Func<T, TResult> selector,
-																		   string defaultSortField,
-																		   Dictionary<string, Expression<Func<T, object>>> mappedFieldsFilter,
-																		   Dictionary<string, Expression<Func<T, object>>> mappedFieldsSort,
-																		   CancellationToken cancellationToken) where T : Entity
+																		  BaseDbContext dbContext,
+																		  Func<T, TResult> selector,
+																		  string defaultSortField,
+																		  Dictionary<string, Expression<Func<T, object>>> mappedFieldsFilter,
+																		  Dictionary<string, Expression<Func<T, object>>> mappedFieldsSort,
+																		  CancellationToken cancellationToken) where T : Entity
 	{
 		var result = await dbContext.Set<T>()
 									.AsNoTracking()
@@ -26,11 +26,11 @@ public static class QueryExtensions
 	}
 
 	public static Task<List<TResult>> ExecuteQueryAsync<T, TResult>(this QueryBase<List<TResult>> request,
-																	 BaseDbContext dbContext,
-																	 Func<T, TResult> selector,
-																	 string defaultSortField,
-																	 Dictionary<string, Expression<Func<T, object>>> mappedFieldsFilter,
-																	 CancellationToken cancellationToken) where T : Entity =>
+																	BaseDbContext dbContext,
+																	Func<T, TResult> selector,
+																	string defaultSortField,
+																	Dictionary<string, Expression<Func<T, object>>> mappedFieldsFilter,
+																	CancellationToken cancellationToken) where T : Entity =>
 		request.ExecuteQueryAsync(dbContext,
 								  selector,
 								  defaultSortField,
