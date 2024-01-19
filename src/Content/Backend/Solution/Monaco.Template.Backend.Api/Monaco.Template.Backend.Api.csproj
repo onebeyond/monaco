@@ -6,6 +6,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>8ac1d4e3-61ef-452f-a386-ff3ec448fbff</UserSecretsId>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <RuntimeIdentifiers>linux-x64</RuntimeIdentifiers>
+    <EnableSdkContainerDebugging>True</EnableSdkContainerDebugging>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,6 +34,15 @@
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Api.Application\Monaco.Template.Backend.Common.Api.Application.csproj" />
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Api\Monaco.Template.Backend.Common.Api.csproj" />
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Serilog\Monaco.Template.Backend.Common.Serilog.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<ContainerEnvironmentVariable Include="ASPNETCORE_HTTP_PORTS">
+      <Value>8080</Value>
+    </ContainerEnvironmentVariable>
+    <ContainerEnvironmentVariable Include="ASPNETCORE_HTTPS_PORTS">
+      <Value>8081</Value>
+    </ContainerEnvironmentVariable>
   </ItemGroup>
 
 </Project>
