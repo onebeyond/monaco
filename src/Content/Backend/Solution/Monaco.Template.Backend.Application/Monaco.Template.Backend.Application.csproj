@@ -9,6 +9,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Application\Monaco.Template.Backend.Common.Application.csproj" />
     <ProjectReference Include="..\Monaco.Template.Backend.Application.Infrastructure\Monaco.Template.Backend.Application.Infrastructure.csproj" />
+    <!--#if (massTransitIntegration)-->
+    <ProjectReference Include="..\Monaco.Template.Backend.Messages\Monaco.Template.Backend.Messages.csproj" />
+    <!--#endif-->
   </ItemGroup>
 
   <ItemGroup>
@@ -24,5 +27,4 @@
     <PackageReference Include="SkiaSharp" Version="2.88.7" />
 	<!--#endif-->
   </ItemGroup>
-
 </Project>
