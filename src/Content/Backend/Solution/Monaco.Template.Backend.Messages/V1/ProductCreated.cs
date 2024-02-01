@@ -1,4 +1,4 @@
-﻿namespace Monaco.Template.Backend.Messages;
+﻿namespace Monaco.Template.Backend.Messages.V1;
 
 public record ProductCreated(Guid Id,
 							 string Title,

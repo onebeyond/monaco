@@ -1,7 +1,7 @@
 ﻿using MassTransit;
 using MediatR;
 using Monaco.Template.Backend.Application.Features.Product;
-using Monaco.Template.Backend.Messages;
+using Monaco.Template.Backend.Messages.V1;
 
 namespace Monaco.Template.Backend.Service.Consumers;
 
