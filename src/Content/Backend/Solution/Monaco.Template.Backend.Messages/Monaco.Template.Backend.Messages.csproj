@@ -4,6 +4,18 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+	<PackageVersion>0.0.1-alpha1</PackageVersion>
+    <Title>Monaco.Template.Backend.Messages</Title>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>One Beyond</Authors>
+    <Company>One Beyond</Company>
+    <Copyright>One Beyond</Copyright>
+    <PackageProjectUrl>https://github.com/onebeyond/monaco</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/onebeyond/monaco.git</RepositoryUrl>
+    <Description>Monaco.Template.Backend contracts for messaging.</Description>
+    <RepositoryType>Git</RepositoryType>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
 
 </Project>
