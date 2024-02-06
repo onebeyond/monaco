@@ -12,7 +12,7 @@ using Monaco.Template.Backend.Common.Application.Commands.Contracts;
 using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 #if (massTransitIntegration)
-using Monaco.Template.Backend.Messages;
+using Monaco.Template.Backend.Messages.V1;
 #endif
 
 namespace Monaco.Template.Backend.Application.Features.Product;

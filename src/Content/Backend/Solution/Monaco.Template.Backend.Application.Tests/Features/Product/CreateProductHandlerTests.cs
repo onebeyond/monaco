@@ -9,7 +9,7 @@ using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
 #if (massTransitIntegration)
-using Monaco.Template.Backend.Messages;
+using Monaco.Template.Backend.Messages.V1;
 #endif
 using Moq;
 using System.Diagnostics.CodeAnalysis;

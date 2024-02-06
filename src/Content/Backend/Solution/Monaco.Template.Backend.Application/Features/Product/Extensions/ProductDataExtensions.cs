@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 #if (massTransitIntegration)
-using Monaco.Template.Backend.Messages;
+using Monaco.Template.Backend.Messages.V1;
 #endif
 
 namespace Monaco.Template.Backend.Application.Features.Product.Extensions;
