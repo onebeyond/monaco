@@ -54,6 +54,13 @@
 			"displayName": "Disable Authentication/Authorization",
 			"description": "Disable Authentication and Authorization implementation for the solution"
 		},
+		"workerService": {
+			"type": "parameter",
+			"datatype": "bool",
+			"defaultValue": "false",
+			"displayName": "Include Worker Service project",
+			"description": "Include Worker Service project for background service implementation"
+		},
 		"keycloakConfig": {
 			"type": "parameter",
 			"datatype": "bool",
@@ -146,7 +153,8 @@
 				"**/*.lock.json",
 				"**/.vs/**/*",
 				"**/logs/**",
-				"**/TestResults/**"
+				"**/TestResults/**",
+				"**/[Pp]ublish/**/*"
 			],
 			"modifiers": [
 				{
@@ -200,7 +208,8 @@
 				{
 					"condition": "(!massTransitIntegration)",
 					"exclude": [
-						"Monaco.Template.Backend.Common.Messaging.Messages/**/*"
+						"Monaco.Template.Backend.Messages/**/*",
+						"Monaco.Template.Backend.Service/Consumers/**/*"
 					]
 				},
 				{
@@ -213,6 +222,18 @@
 					"condition": "(disableAuth)",
 					"exclude": [
 						"Monaco.Template.Backend.Api/Auth/**/*"
+					]
+				},
+				{
+					"condition": "(!workerService)",
+					"exclude": [
+						"Monaco.Template.Backend.Service/**/*"
+					]
+				},
+				{
+					"condition": "(!massTransitIntegration || !workerService)",
+					"exclude": [
+						"Monaco.Template.Backend.Application/Features/Product/LongRunningProcessCommand.cs"
 					]
 				},
 				{
@@ -587,6 +608,11 @@
 		"5a3893d1-1e36-310c-7633-8f36ffa26315",
 		"a2689ae3-3643-6250-a748-8f055cc72da8",
 		"be447a08-0a85-5779-8c65-cf15c2c9a5a8",
-		"c776f397-182b-6d0d-09f2-4e440dc093d3"
+		"c776f397-182b-6d0d-09f2-4e440dc093d3",
+		"8783ba16-eb5c-4c28-ae1d-14de7638b5c1",
+		"8d8e327d-41d9-466f-a81a-cc66f1a3fffe",
+		"baf0203f-b036-46b3-ac04-e3847315b616",
+		"fae04ec0-301f-11d3-bf4b-00c04f79efbc",
+		"ccaa345b-ede0-441f-8d19-ddafe52efb9d"
 	]
 }

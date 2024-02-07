@@ -37,10 +37,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.Api.Application", "Monaco.Template.Backend.Common.Api.Application\Monaco.Template.Backend.Common.Api.Application.csproj", "{F733BD0F-4C55-4E65-92E8-837191C37357}"
 EndProject
 #endif
-#if (massTransitIntegration)
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.Messaging.Messages", "Monaco.Template.Backend.Common.Messaging.Messages\Monaco.Template.Backend.Common.Messaging.Messages.csproj", "{45B82388-702E-4485-BEB5-995051DB9952}"
-EndProject
-#endif
 #if (apiGateway)
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.ApiGateway", "Monaco.Template.Backend.Common.ApiGateway\Monaco.Template.Backend.Common.ApiGateway.csproj", "{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}"
 EndProject
@@ -65,6 +61,14 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.BlobStorage", "Monaco.Template.Backend.Common.BlobStorage\Monaco.Template.Backend.Common.BlobStorage.csproj", "{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.BlobStorage.Tests", "Monaco.Template.Backend.Common.BlobStorage.Tests\Monaco.Template.Backend.Common.BlobStorage.Tests.csproj", "{D8623B90-59C1-4753-A0E6-F2DBD4305C9B}"
+EndProject
+#endif
+#if (workerService)
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Service", "Monaco.Template.Backend.Service\Monaco.Template.Backend.Service.csproj", "{BAF0203F-B036-46B3-AC04-E3847315B616}"
+EndProject
+#endif
+#if (massTransitIntegration)
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Messages", "Monaco.Template.Backend.Messages\Monaco.Template.Backend.Messages.csproj", "{CCAA345B-EDE0-441F-8D19-DDAFE52EFB9D}"
 EndProject
 #endif
 Global
@@ -106,12 +110,6 @@ Global
 		{F733BD0F-4C55-4E65-92E8-837191C37357}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F733BD0F-4C55-4E65-92E8-837191C37357}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F733BD0F-4C55-4E65-92E8-837191C37357}.Release|Any CPU.Build.0 = Release|Any CPU
-		#endif
-		#if (massTransitIntegration)
-		{45B82388-702E-4485-BEB5-995051DB9952}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{45B82388-702E-4485-BEB5-995051DB9952}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{45B82388-702E-4485-BEB5-995051DB9952}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{45B82388-702E-4485-BEB5-995051DB9952}.Release|Any CPU.Build.0 = Release|Any CPU
 		#endif
 		#if (apiGateway)
 		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -157,6 +155,18 @@ Global
 		{D8623B90-59C1-4753-A0E6-F2DBD4305C9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8623B90-59C1-4753-A0E6-F2DBD4305C9B}.Release|Any CPU.Build.0 = Release|Any CPU
 		#endif
+		#if (workerService)
+		{BAF0203F-B036-46B3-AC04-E3847315B616}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAF0203F-B036-46B3-AC04-E3847315B616}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAF0203F-B036-46B3-AC04-E3847315B616}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAF0203F-B036-46B3-AC04-E3847315B616}.Release|Any CPU.Build.0 = Release|Any CPU
+		#endif
+		#if (massTransitIntegration)
+		{CCAA345B-EDE0-441F-8D19-DDAFE52EFB9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCAA345B-EDE0-441F-8D19-DDAFE52EFB9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCAA345B-EDE0-441F-8D19-DDAFE52EFB9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCAA345B-EDE0-441F-8D19-DDAFE52EFB9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		#endif
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -172,9 +182,6 @@ Global
 		{B82D784A-81A2-46C5-A966-B472B8FCAD46} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{0FB378C2-9DE1-437F-8A62-774747105CE5} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		{F733BD0F-4C55-4E65-92E8-837191C37357} = {8BFE9C37-2620-4156-88B8-286537954C5E}
-		#endif
-		#if (massTransitIntegration)
-		{45B82388-702E-4485-BEB5-995051DB9952} = {8BFE9C37-2620-4156-88B8-286537954C5E}
 		#endif
 		#if (apiGateway)
 		{815EF0B0-5FDA-4D1E-BACE-DA7E440D5D34} = {8BFE9C37-2620-4156-88B8-286537954C5E}
