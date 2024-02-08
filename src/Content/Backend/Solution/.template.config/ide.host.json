@@ -3,27 +3,6 @@
   "icon": "icon.png",
 	"symbolInfo": [
 		{
-			"id": "excludeCommon",
-			"name": {
-				"text": "Exclude Common projects"
-			},
-			"isVisible": true
-		},
-		{
-			"id": "excludeFilesSupport",
-			"name": {
-				"text": "Exclude files support and structure"
-			},
-			"isVisible": true
-		},
-		{
-			"id": "massTransitIntegration",
-			"name": {
-				"text": "Include MassTransit support"
-			},
-			"isVisible": true
-		},
-		{
 			"id": "apiGateway",
 			"name": {
 				"text": "Include API Gateway"
@@ -31,16 +10,30 @@
 			"isVisible": true
 		},
 		{
-			"id": "disableAuth",
+			"id": "apiService",
 			"name": {
-				"text": "Disable Authentication/Authorization"
+				"text": "Include API service"
 			},
 			"isVisible": true
 		},
 		{
-			"id": "workerService",
+			"id": "auth",
 			"name": {
-				"text": "Include Worker Service project"
+				"text": "Enable Authentication/Authorization"
+			},
+			"isVisible": true
+		},
+		{
+			"id": "commonLibraries",
+			"name": {
+				"text": "Include Common projects in the solution"
+			},
+			"isVisible": true
+		},
+		{
+			"id": "filesSupport",
+			"name": {
+				"text": "Include files support and structure"
 			},
 			"isVisible": true
 		},
@@ -55,6 +48,27 @@
 			"id": "keycloakRealm",
 			"name": {
 				"text": "Keycloak Realm"
+			},
+			"isVisible": true
+		},
+		{
+			"id": "massTransitIntegration",
+			"name": {
+				"text": "Include MassTransit support"
+			},
+			"isVisible": true
+		},
+		{
+			"id": "tests",
+			"name": {
+				"text": "Include Tests projects"
+			},
+			"isVisible": true
+		},
+		{
+			"id": "workerService",
+			"name": {
+				"text": "Include Worker Service project"
 			},
 			"isVisible": true
 		}

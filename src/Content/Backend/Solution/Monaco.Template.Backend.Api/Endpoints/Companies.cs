@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-#if (!disableAuth)
+#if (auth)
 using Monaco.Template.Backend.Api.Auth;
 #endif
 using Monaco.Template.Backend.Api.DTOs;
@@ -26,7 +26,7 @@ public static class Companies
 																		HttpRequest request) =>
 							 sender.ExecuteQueryAsync(new GetCompanyPage.Query(request.Query)),
 						 "GetCompanies",
-#if (disableAuth)
+#if (!auth)
 						 "Gets a page of companies");
 #else
 						 "Gets a page of companies")
@@ -38,7 +38,7 @@ public static class Companies
 																   [FromRoute] Guid id) =>
 							 sender.ExecuteQueryAsync(new GetCompanyById.Query(id)),
 						 "GetCompany",
-#if (disableAuth)
+#if (!auth)
 						 "Gets a company by Id");
 #else
 						 "Gets a company by Id")
@@ -51,7 +51,7 @@ public static class Companies
 																					 HttpContext context) =>
 							  sender.ExecuteCommandAsync(dto.MapCreateCommand(), "api/v{0}/Companies/{1}", context.GetRequestedApiVersion()!),
 						  "CreateCompany",
-#if (disableAuth)
+#if (!auth)
 						  "Create a new company");
 #else
 						  "Create a new company")
@@ -64,7 +64,7 @@ public static class Companies
 																				[FromBody] CompanyCreateEditDto dto) =>
 							 sender.ExecuteCommandEditAsync(dto.MapEditCommand(id)),
 						 "EditCompany",
-#if (disableAuth)
+#if (!auth)
 						 "Edit an existing company by Id");
 #else
 						 "Edit an existing company by Id")
@@ -76,7 +76,7 @@ public static class Companies
 																			[FromRoute] Guid id) =>
 								sender.ExecuteCommandDeleteAsync(new DeleteCompany.Command(id)),
 							"DeleteCompany",
-#if (disableAuth)
+#if (!auth)
 							"Delete an existing company by Id");
 #else
 							"Delete an existing company by Id")

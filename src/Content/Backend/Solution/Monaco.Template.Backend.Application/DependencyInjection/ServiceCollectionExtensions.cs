@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
-#if (!excludeFilesSupport)
+#if (filesSupport)
 using Monaco.Template.Backend.Application.Services;
 using Monaco.Template.Backend.Application.Services.Contracts;
 #endif
@@ -11,7 +11,7 @@ using Monaco.Template.Backend.Common.Application.Validators.Contracts;
 using System.Reflection;
 using Monaco.Template.Backend.Common.Application.Policies;
 using Monaco.Template.Backend.Common.Infrastructure.Context;
-#if (!excludeFilesSupport)
+#if (filesSupport)
 using Monaco.Template.Backend.Common.BlobStorage.Extensions;
 #endif
 
@@ -47,7 +47,7 @@ public static class ServiceCollectionExtensions
 														.UseLazyLoadingProxies()
 														.EnableSensitiveDataLogging(optionsValue.EntityFramework.EnableEfSensitiveLogging))
 				.AddScoped<BaseDbContext, AppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
-		#if (!excludeFilesSupport)
+		#if (filesSupport)
 		services.RegisterBlobStorageService(opts =>
 											{
 												opts.ConnectionString = optionsValue.BlobStorage.ConnectionString;

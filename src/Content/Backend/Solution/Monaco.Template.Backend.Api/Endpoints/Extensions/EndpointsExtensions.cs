@@ -17,7 +17,12 @@ public static class EndpointsExtensions
 
 		return builder.AddCompanies(versionSet)
 					  .AddCountries(versionSet)
+#if (filesSupport)
 					  .AddFiles(versionSet)
 					  .AddProducts(versionSet);
+#else
+					  .AddCountries(versionSet);
+#endif
+
 	}
 }

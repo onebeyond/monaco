@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-#if (!disableAuth)
+#if (auth)
 using Monaco.Template.Backend.Api.Auth;
 #endif
 using Monaco.Template.Backend.Api.DTOs;
@@ -26,7 +26,7 @@ public static class Products
 																	   HttpRequest request) =>
 							sender.ExecuteQueryAsync(new GetProductPage.Query(request.Query)),
 						"GetProducts",
-#if (disableAuth)
+#if (!auth)
 						"Gets a page of products");
 #else
 						"Gets a page of products")
@@ -38,7 +38,7 @@ public static class Products
 																  [FromRoute] Guid id) =>
 							sender.ExecuteQueryAsync(new GetProductById.Query(id)),
 						"GetProduct",
-#if (disableAuth)
+#if (!auth)
 						"Gets a product by Id");
 #else
 						"Gets a product by Id")
@@ -53,7 +53,7 @@ public static class Products
 														"api/v{0}/Products/{1}",
 														context.GetRequestedApiVersion()!),
 						 "CreateProduct",
-#if (disableAuth)
+#if (!auth)
 						 "Create a new product");
 #else
 						 "Create a new product")
@@ -66,7 +66,7 @@ public static class Products
 																			   [FromBody] ProductCreateEditDto dto) =>
 							sender.ExecuteCommandEditAsync(dto.Map(id)),
 						"EditProduct",
-#if (disableAuth)
+#if (!auth)
 						"Edit an existing product by Id");
 #else
 						"Edit an existing product by Id")
@@ -78,7 +78,7 @@ public static class Products
 																		   [FromRoute] Guid id) =>
 							   sender.ExecuteCommandDeleteAsync(new DeleteProduct.Command(id)),
 						   "DeleteProduct",
-#if (disableAuth)
+#if (!auth)
 						   "Delete an existing product by Id");
 #else
 						   "Delete an existing product by Id")
@@ -95,7 +95,7 @@ public static class Products
 																							 request.Query)),
 						"DownloadProductPicture",
 						"Download a picture from a product by Id")
-#if (disableAuth)
+#if (!auth)
 				.Produces(StatusCodes.Status200OK);
 #else
 				.Produces(StatusCodes.Status200OK)

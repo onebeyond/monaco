@@ -4,7 +4,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Monaco.Template.Backend.Application.DependencyInjection;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
-#if (!disableAuth)
+#if (auth)
 using Monaco.Template.Backend.Api.Auth;
 using Monaco.Template.Backend.Common.Api.Auth;
 #endif
@@ -36,7 +36,7 @@ builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(conte
 
 // Add services to the container.
 var configuration = builder.Configuration;
-#if (!disableAuth)
+#if (auth)
 builder.Services
 	   .AddAuthorizationWithPolicies(Scopes.List)
 	   .AddJwtBearerAuthentication(configuration["SSO:Authority"]!,
@@ -49,7 +49,7 @@ builder.Services
 							 {
 								 options.EntityFramework.ConnectionString = configuration.GetConnectionString("AppDbContext")!;
 								 options.EntityFramework.EnableEfSensitiveLogging = bool.Parse(configuration["EnableEFSensitiveLogging"] ?? bool.FalseString);
-#if (!excludeFilesSupport)
+#if (filesSupport)
 								 options.BlobStorage.ConnectionString = configuration["BlobStorage:ConnectionString"]!;
 								 options.BlobStorage.ContainerName = configuration["BlobStorage:Container"]!;
 #endif
@@ -59,7 +59,7 @@ builder.Services
 								   configuration["Swagger:Description"]!,
 								   configuration["Swagger:ContactName"]!,
 								   configuration["Swagger:ContactEmail"]!,
-#if (disableAuth)
+#if (!auth)
 								   configuration["Swagger:TermsOfService"]!)
 #else
 								   configuration["Swagger:TermsOfService"]!,
@@ -88,7 +88,7 @@ builder.Services
 					   })
 #endif
 	   .AddHealthChecks()
-#if (!disableAuth)
+#if (auth)
 	   .AddUrlGroup(new Uri($"{configuration["SSO:Authority"]}/.well-known/openid-configuration"), "SSO")
 #endif
 	   .AddDbContextCheck<AppDbContext>(nameof(AppDbContext));
@@ -102,7 +102,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 	app.UseDeveloperExceptionPage();
 
-#if (disableAuth)
+#if (!auth)
 app.UseSwaggerConfiguration();
 #else
 app.UseSwaggerConfiguration(configuration["SSO:SwaggerUIClientId"]!,
@@ -112,7 +112,7 @@ app.UseSwaggerConfiguration(configuration["SSO:SwaggerUIClientId"]!,
 app.UseCors()
    .UseRouting()
    .UseHttpsRedirection()
-#if (!disableAuth)
+#if (auth)
    .UseAuthorization()
 #endif
    .UseEndpoints(b => b.RegisterEndpoints())

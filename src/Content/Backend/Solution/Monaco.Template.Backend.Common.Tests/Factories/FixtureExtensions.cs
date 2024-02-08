@@ -20,7 +20,7 @@ public static class FixtureExtensions
 
 		fixture.RegisterCompany()
 			   .RegisterAddress()
-			   #if (excludeFilesSupport)
+			   #if (!filesSupport)
 			   .RegisterCountry();
 			   #else
 			   .RegisterCountry()
@@ -46,7 +46,7 @@ public static class FixtureExtensions
 
 		fixture.RegisterCompanyMock()
 			   .RegisterAddressMock()
-			   #if (excludeFilesSupport)
+			   #if (!filesSupport)
 			   .RegisterCountryMock();
 			   #else
 			   .RegisterCountryMock()
