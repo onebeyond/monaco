@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Monaco.Template.Backend.Functions": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7205",
+      "launchBrowser": false
+    }
+  }
+}
