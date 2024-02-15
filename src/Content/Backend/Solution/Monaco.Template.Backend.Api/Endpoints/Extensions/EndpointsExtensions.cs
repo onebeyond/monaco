@@ -16,8 +16,8 @@ public static class EndpointsExtensions
 								.Build();
 
 		return builder.AddCompanies(versionSet)
-					  .AddCountries(versionSet)
 #if (filesSupport)
+					  .AddCountries(versionSet)
 					  .AddFiles(versionSet)
 					  .AddProducts(versionSet);
 #else
