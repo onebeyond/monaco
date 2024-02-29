@@ -1,0 +1,45 @@
+{
+	"$schema": "http://json.schemastore.org/dotnetcli.host",
+	"symbolInfo": {
+		"apiGateway": {
+			"longName": "apiGateway",
+			"shortName": "ag"
+		},
+		"apiService": {
+			"longName": "apiService",
+			"shortName": "api"
+		},
+		"auth": {
+			"longName": "auth",
+			"shortName": ""
+		},
+		"commonLibraries": {
+			"longName": "commonLibraries",
+			"shortName": "cl"
+		},
+		"filesSupport": {
+			"longName": "filesSupport",
+			"shortName": "fs"
+		},
+		"keycloakConfig": {
+			"longName": "keycloakConfig",
+			"shortName": "kc"
+		},
+		"keycloakRealm": {
+			"longName": "keycloakRealm",
+			"shortName": "kr"
+		},
+		"massTransitIntegration": {
+			"longName": "massTransitIntegration",
+			"shortName": "mt"
+		},
+		"tests": {
+			"longName": "tests",
+			"shortName": ""
+		},
+		"workerService": {
+			"longName": "workerService",
+			"shortName": "w"
+		}
+	}
+}

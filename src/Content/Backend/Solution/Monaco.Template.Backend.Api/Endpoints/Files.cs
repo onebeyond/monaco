@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-#if (!disableAuth)
+#if (auth)
 using Monaco.Template.Backend.Api.Auth;
 #endif
 using Monaco.Template.Backend.Application.Features.File;
@@ -28,7 +28,7 @@ public static class Files
 													 context.GetRequestedApiVersion()!),
 					  "CreateFile",
 					  "Upload and create a new file")
-#if (disableAuth)
+#if (!auth)
 			 .DisableAntiforgery();
 #else
 			 .DisableAntiforgery()

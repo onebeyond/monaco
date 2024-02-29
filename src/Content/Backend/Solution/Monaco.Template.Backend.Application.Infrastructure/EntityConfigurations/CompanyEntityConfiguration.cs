@@ -25,7 +25,7 @@ public class CompanyEntityConfiguration : IEntityTypeConfiguration<Company>
 
 		builder.Property(x => x.Version)
 			   .IsRowVersion();
-		#if (!excludeFilesSupport)
+		#if (filesSupport)
 
 		builder.HasMany(x => x.Products)
 			   .WithOne(x => x.Company)

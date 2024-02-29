@@ -21,17 +21,23 @@ Each of the different solution templates also provide some basic business compon
 
 ### Installation
 
-`dotnet new install Monaco.Template`
+```console
+dotnet new install Monaco.Template
+```
 
 ### Uninstalling
 
-`dotnet new uninstall Monaco.Template`
+```console
+dotnet new uninstall Monaco.Template
+```
 
 ### How to create a Monaco based solution
 
 For generating a new backend solution, you can run the following command:
 
-`dotnet new monaco-backend-solution -n MyFirstSolution`
+```console
+dotnet new monaco-backend-solution -n MyFirstSolution
+```
 
 This will create a folder named `MyFirstSolution`, which will contain a structure of directories prefixed with the name as part of the namespace declaration. The resulting solution will include the default layout and all the files required to run the application (more info about this [here](https://github.com/onebeyond/monaco/wiki/Solution-projects-structure))
 
@@ -39,7 +45,9 @@ From there, is enough to configure `appsettings.json` with the required settings
 
 ### Getting help about template's options
 
-`dotnet new monaco-backend-solution --help`
+```console
+dotnet new monaco-backend-solution --help
+```
 
 (For more information about Monaco options please refer [here](https://github.com/onebeyond/monaco/wiki/Template-options))
 
@@ -49,10 +57,9 @@ For more detailed documentation, please refer to our [Wiki](https://github.com/o
 
 # Visual Studio support
 
-Monaco provides support for generating the solution and projects from Visual Studio as well as providing the UI interface for configuring the project generation options.
+From version 2.4.0 Monaco has stopped supporting Visual Studio for the template `backend-solution-template` and it won't show up on its templates list until further notice due to the existing issues in VS to generate projects with this kind of template.
 
-However, it's not recommended to use VS for generating new solutions. Monaco provides a default layout for the solution with the projects organized in different folders and some solution files already included in it, but this default layout from the template is ignored by VS, which also creates an additional level of folders in the generated folder. Because of these behaviors we strongly recommend using the console for running Monaco and generating any new solutions.
-
+The experience offered on Visual Studio was subpar as the output generated from within the IDE excluded all the solution folders that Monaco intended to create by default and the file system folders structure was also generated incorrectly; while everything works as expected when ran from the CLI. Because of all this, we decided to leave the CLI as the only valid alternative for using Monaco as it's the only one that guarantees a correct structure both in the file system and in the solution folders generated.
 
 # Contributing
 

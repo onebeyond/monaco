@@ -7,6 +7,12 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <!--#if (templateDebug)-->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);auth;commonLibraries;filesSupport</DefineConstants>
+  </PropertyGroup>
+
+  <!--#endif-->
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
     <PackageReference Include="MockQueryable.Moq" Version="7.0.0" />

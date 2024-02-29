@@ -1,15 +1,15 @@
-﻿#if (!excludeFilesSupport)
+﻿#if (filesSupport)
 using AutoFixture;
 #endif
 using FluentAssertions;
 using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
-#if (!excludeFilesSupport)
+#if (filesSupport)
 using Monaco.Template.Backend.Application.Services.Contracts;
 #endif
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Common.Tests.Factories;
-#if (!excludeFilesSupport)
+#if (filesSupport)
 using Monaco.Template.Backend.Domain.Model;
 #endif
 using Moq;
@@ -24,19 +24,19 @@ public class DeleteCompanyHandlerTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
 	private static readonly DeleteCompany.Command Command = new(It.IsAny<Guid>());
-	#if (!excludeFilesSupport)
+	#if (filesSupport)
 	private readonly Mock<IFileService> _fileServiceMock = new();
 	#endif
 
 	[Theory(DisplayName = "Delete company succeeds")]
 	[AnonymousData(true)]
-	#if (!excludeFilesSupport)
+	#if (filesSupport)
 	public async Task DeleteCompanySucceeds(IFixture fixture, Domain.Model.Product[] products)
 	#else
 	public async Task DeleteCompanySucceeds(Domain.Model.Company company)
 	#endif
 	{
-		#if (!excludeFilesSupport)
+		#if (filesSupport)
 		var companyMock = new Mock<Domain.Model.Company>(fixture.Create<string>(),
 														 fixture.Create<string>(),
 														 fixture.Create<string>(),
@@ -58,14 +58,14 @@ public class DeleteCompanyHandlerTests
 
 		var command = Command with
 					  {
-						  #if (!excludeFilesSupport)
+						  #if (filesSupport)
 						  Id = companyMock.Object.Id
 						  #else
 						  Id = company.Id
 						  #endif
 					  };
 		
-		#if (!excludeFilesSupport)
+		#if (filesSupport)
 		var sut = new DeleteCompany.Handler(_dbContextMock.Object, _fileServiceMock.Object);
 		#else
 		var sut = new DeleteCompany.Handler(_dbContextMock.Object);
@@ -74,13 +74,13 @@ public class DeleteCompanyHandlerTests
 
 		companyDbSetMock.Verify(x => x.Remove(It.IsAny<Domain.Model.Company>()),
 								Times.Once);
-		#if (!excludeFilesSupport)
+		#if (filesSupport)
 		imageDbSetMock.Verify(x => x.RemoveRange(It.IsAny<IEnumerable<Image>>()),
 							  Times.Once);
 		#endif
 		_dbContextMock.Verify(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()),
 							  Times.Once);
-		#if (!excludeFilesSupport)
+		#if (filesSupport)
 		_fileServiceMock.Verify(x => x.DeleteImagesAsync(It.IsAny<Image[]>(), It.IsAny<CancellationToken>()),
 								Times.Once);
 		#endif

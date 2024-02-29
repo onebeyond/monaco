@@ -11,6 +11,12 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
+  <!--#if (templateDebug)-->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);auth;commonLibraries;filesSupport</DefineConstants>
+  </PropertyGroup>
+
+  <!--#endif-->
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="8.0.0" />
     <!--#if (massTransitIntegration)-->
