@@ -1,8 +1,8 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Monaco.Template.Backend.Common.Api.Attributes;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace Monaco.Template.Backend.Common.Api.Middleware;
 
@@ -11,21 +11,14 @@ namespace Monaco.Template.Backend.Common.Api.Middleware;
 /// This middleware is useful for cases where there's an API Gateway in front of the API but some endpoints still need to validate some user's claims as part of the business rules, so this makes that available.
 /// It's assumed that the JWT token passed has already been validated by the eventual API Gateway on top of the API.
 /// </summary>
-public class JwtClaimsMapperMiddleware
+public class JwtClaimsMapperMiddleware : IMiddleware
 {
-	private readonly RequestDelegate _next;
-
 	private const string SchemeStr = $"{JwtBearerDefaults.AuthenticationScheme} ";
 	private const string ScopeClaimType = "scope";
 	private const string NameClaimType = "name";
 	private const string RoleClaimType = "role";
-
-	public JwtClaimsMapperMiddleware(RequestDelegate next)
-	{
-		_next = next;
-	}
-
-	public Task InvokeAsync(HttpContext context)
+	
+	public Task InvokeAsync(HttpContext context, RequestDelegate next)
 	{
 		if (context.GetEndpoint()?.Metadata.Any(x => x is JwtMapClaimsAttribute) ?? false)
 		{
@@ -47,6 +40,6 @@ public class JwtClaimsMapperMiddleware
 			}
 		}
 
-		return _next(context);
+		return next(context);
 	}
 }
