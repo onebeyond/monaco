@@ -1,0 +1,87 @@
+{
+	"$schema": "http://json.schemastore.org/template",
+	"author": "One Beyond",
+	"classifications": [ "Common", "Code" ],
+	"name": "Monaco Query Template",
+	"identity": "Monaco.Template.Backend.Solution.Query",
+	"shortName": "monaco-backend-query",
+	"sourceName": "MyFeature",
+	"tags": {
+		"language": "C#",
+		"type": "item"
+	},
+	"symbols": {
+		"applicationProjectNamespace": {
+			"type": "bind",
+			"binding": "msbuild:RootNamespace",
+			"replaces": "ProjectName",
+			"defaultValue": "MyProjectNamespace"
+		},
+		"solutionName": {
+			"type": "derived",
+			"valueSource": "applicationProjectNamespace",
+			"valueTransform": "ValueAfterLastDot"
+		},
+		"commonSolutionNamespace": {
+			"type": "parameter",
+			"datatype": "text",
+			"defaultValue": "",
+			"displayName": "Solution Namespace"
+		},
+		"generatedSolutionNamespace": {
+			"type": "generated",
+			"generator": "switch",
+			//"replaces": "CommonSolutionName",
+			"parameters": {
+				"datatype": "text",
+				"cases": [
+					{
+						"condition": "(commonSolutionNamespace == '')",
+						"value": "(solutionName)"
+					},
+					{
+						"condition": "(commonSolutionNamespace != '')",
+						"value": "(commonSolutionNamespace)"
+					}
+				]
+			}
+		},
+		//"derivedSolutionNamespace": {
+		//	"type": "derived",
+			
+		//},
+		//"generatedSolutionNamespace": {
+		//	"type": "generated",
+		//	"generator": "coalesce",
+		//	"parameters": {
+		//		"sourceVariableName": "commonSolutionNamespace",
+		//		"fallbackVariableName": "solutionName"
+		//	},
+		//	"replaces": "RootSolutionName"
+		//},
+		"queryName": {
+			"type": "parameter",
+			"datatype": "text",
+			"defaultValue": "GetItemsList",
+			"displayName": "Query name",
+			"description": "Name of the Query feature",
+			"replaces": "GetItemsList",
+			"fileRename": "GetItemsList"
+		},
+		"returnType": {
+			"type": "parameter",
+			"datatype": "text",
+			"defaultValue": "List<ItemDto>",
+			"displayName": "Return type",
+			"description": "Type of the return value",
+			"replaces": "List<ItemDto>"
+		}
+	},
+	"forms": {
+		"ValueAfterLastDot": {
+			"identifier": "replace",
+			"pattern": "([.\\w]+\\.)\\w+", // regex to match everything up to and including the final "."
+			"replacement": "" // replace it with empty string
+		}
+	}
+}
