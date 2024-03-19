@@ -6,8 +6,14 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
+	<!--#if (templateDebug)-->
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DefineConstants>$(DefineConstants);auth;commonLibraries;filesSupport</DefineConstants>
+	</PropertyGroup>
+
+	<!--#endif-->
 	<ItemGroup>
-		<!--#if (!excludeFilesSupport)-->
+		<!--#if (filesSupport)-->
 		<ProjectReference Include="..\Monaco.Template.Backend.Common.BlobStorage\Monaco.Template.Backend.Common.BlobStorage.csproj" />
 		<!--#endif-->
 		<ProjectReference Include="..\Monaco.Template.Backend.Common.Infrastructure\Monaco.Template.Backend.Common.Infrastructure.csproj" />

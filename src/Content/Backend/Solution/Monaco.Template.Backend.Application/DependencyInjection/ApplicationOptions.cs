@@ -3,7 +3,7 @@
 public class ApplicationOptions
 {
 	public EntityFrameworkOptions EntityFramework { get; set; } = new();
-#if (!excludeFilesSupport)
+#if (filesSupport)
 	public BlobStorageOptions BlobStorage { get; set; } = new();
 #endif
 
@@ -12,7 +12,7 @@ public class ApplicationOptions
 		public string ConnectionString { get; set; } = string.Empty;
 		public bool EnableEfSensitiveLogging { get; set; }
 	}
-#if (!excludeFilesSupport)
+#if (filesSupport)
 
 	public class BlobStorageOptions
 	{

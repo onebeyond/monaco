@@ -48,7 +48,7 @@ public class CompanyTests
 		sut.Address.Should().Be(address);
 		sut.Version.Should().BeNull();
 	}
-	#if (!excludeFilesSupport)
+	#if (filesSupport)
 
 	[Theory(DisplayName = "Add product succeeds")]
 	[AnonymousData]

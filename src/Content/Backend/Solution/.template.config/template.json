@@ -19,27 +19,6 @@
 		}
 	],
 	"symbols": {
-		"excludeCommon": {
-			"type": "parameter",
-			"datatype": "bool",
-			"defaultValue": "false",
-			"displayName": "Exclude Common projects",
-			"description": "Exclude all the Common.* projects from the solution generated"
-		},
-		"excludeFilesSupport": {
-			"type": "parameter",
-			"datatype": "bool",
-			"defaultValue": "false",
-			"displayName": "Exclude files support and structure",
-			"description": "Exclude support for Azure BlobStorage and file handling structure"
-		},
-		"massTransitIntegration": {
-			"type": "parameter",
-			"datatype": "bool",
-			"defaultValue": "false",
-			"displayName": "Include MassTransit integration",
-			"description": "Includes MassTransit for integration events"
-		},
 		"apiGateway": {
 			"type": "parameter",
 			"datatype": "bool",
@@ -47,12 +26,33 @@
 			"displayName": "Include API Gateway",
 			"description": "Include API Gateway project with YARP implementation"
 		},
-		"disableAuth": {
+		"apiService": {
 			"type": "parameter",
 			"datatype": "bool",
-			"defaultValue": "false",
-			"displayName": "Disable Authentication/Authorization",
-			"description": "Disable Authentication and Authorization implementation for the solution"
+			"defaultValue": "true",
+			"displayName": "Include API Service",
+			"description": "Include API Service project"
+		},
+		"auth": {
+			"type": "parameter",
+			"datatype": "bool",
+			"defaultValue": "true",
+			"displayName": "Enable Authentication/Authorization",
+			"description": "Enable Authentication and Authorization implementation for the solution"
+		},
+		"commonLibraries": {
+			"type": "parameter",
+			"datatype": "bool",
+			"defaultValue": "true",
+			"displayName": "Include Common projects in the solution",
+			"description": "Include all the Common.* projects in the solution generated"
+		},
+		"filesSupport": {
+			"type": "parameter",
+			"datatype": "bool",
+			"defaultValue": "true",
+			"displayName": "Include files support and structure",
+			"description": "Include support for Azure Blob Storage and file handling structure"
 		},
 		"keycloakConfig": {
 			"type": "parameter",
@@ -69,6 +69,27 @@
 			"isRequired": false,
 			"defaultValue": "monaco-template",
 			"replaces": "monaco-template"
+		},
+		"massTransitIntegration": {
+			"type": "parameter",
+			"datatype": "bool",
+			"defaultValue": "false",
+			"displayName": "Include MassTransit integration",
+			"description": "Includes MassTransit for integration events"
+		},
+		"tests": {
+			"type": "parameter",
+			"datatype": "bool",
+			"defaultValue": "true",
+			"displayName": "Include Tests projects",
+			"description": "Include all the Tests projects for the generated solution"
+		},
+		"workerService": {
+			"type": "parameter",
+			"datatype": "bool",
+			"defaultValue": "false",
+			"displayName": "Include Worker Service",
+			"description": "Include Worker Service project for background service implementation"
 		},
 		"apiIisHttpPort": {
 			"type": "generated",
@@ -133,6 +154,10 @@
 				"fallback": 7075
 			},
 			"replaces": "7075"
+		},
+		"templateDebug": {
+			"type": "computed",
+			"value": "(false)"
 		}
 	},
 	"sources": [
@@ -146,11 +171,31 @@
 				"**/*.lock.json",
 				"**/.vs/**/*",
 				"**/logs/**",
-				"**/TestResults/**"
+				"**/TestResults/**",
+				"**/[Pp]ublish/**/*"
 			],
 			"modifiers": [
 				{
-					"condition": "(excludeCommon)",
+					"condition": "(!apiGateway)",
+					"exclude": [
+						"Monaco.Template.Backend.Common.ApiGateway/**/*"
+					]
+				},
+				{
+					"condition": "(!apiService)",
+					"exclude": [
+						"Monaco.Template.Backend.Api/**/*",
+						"Monaco.Template.Backend.*.Api*/**/*"
+					]
+				},
+				{
+					"condition": "(!auth)",
+					"exclude": [
+						"Monaco.Template.Backend.Api/Auth/**/*"
+					]
+				},
+				{
+					"condition": "(!commonLibraries)",
 					"exclude": [
 						"nuget.config",
 						"realm-export-template.json",
@@ -158,14 +203,14 @@
 					]
 				},
 				{
-					"condition": "(excludeFilesSupport)",
+					"condition": "(!filesSupport)",
 					"exclude": [
 						"Monaco.Template.Backend.Common.BlobStorage/**/*",
 						"Monaco.Template.Backend.Common.BlobStorage.Tests/**/*",
-						"Monaco.Template.Backend.Api/Controllers/FilesController.cs",
-						"Monaco.Template.Backend.Api/Controllers/ProductsController.cs",
 						"Monaco.Template.Backend.Api/DTOs/ProductCreateEditDto.cs",
 						"Monaco.Template.Backend.Api/DTOs/Extensions/ProductExtensions.cs",
+						"Monaco.Template.Backend.Api/Endpoints/Files.cs",
+						"Monaco.Template.Backend.Api/Endpoints/Products.cs",
 						"Monaco.Template.Backend.Application/Features/File/**/*",
 						"Monaco.Template.Backend.Application/Features/Product/**/*",
 						"Monaco.Template.Backend.Application/DTOs/Extensions/FileExtensions.cs",
@@ -194,31 +239,40 @@
 						"Monaco.Template.Backend.Domain.Tests/GpsPositionTests.cs",
 						"Monaco.Template.Backend.Domain.Tests/ImageDimensionsTests.cs",
 						"Monaco.Template.Backend.Domain.Tests/ImageTests.cs",
-						"Monaco.Template.Backend.Domain.Tests/ProductTests.cs"
-					]
-				},
-				{
-					"condition": "(!massTransitIntegration)",
-					"exclude": [
-						"Monaco.Template.Backend.Common.Messaging.Messages/**/*"
-					]
-				},
-				{
-					"condition": "(!apiGateway)",
-					"exclude": [
-						"Monaco.Template.Backend.Common.ApiGateway/**/*"
-					]
-				},
-				{
-					"condition": "(disableAuth)",
-					"exclude": [
-						"Monaco.Template.Backend.Api/Auth/**/*"
+						"Monaco.Template.Backend.Domain.Tests/ProductTests.cs",
+						"Monaco.Template.Backend.Messages/V1/ProductCreated.cs",
+						"Monaco.Template.Backend.Service/Consumers/ProductCreatedConsumer.cs"
 					]
 				},
 				{
 					"condition": "(!keycloakConfig)",
 					"exclude": [
 						"realm-export-template.json"
+					]
+				},
+				{
+					"condition": "(!massTransitIntegration)",
+					"exclude": [
+						"Monaco.Template.Backend.Messages/**/*",
+						"Monaco.Template.Backend.Service/Consumers/**/*"
+					]
+				},
+				{
+					"condition": "(!massTransitIntegration || !workerService)",
+					"exclude": [
+						"Monaco.Template.Backend.Application/Features/Product/LongRunningProcessCommand.cs"
+					]
+				},
+				{
+					"condition": "(!tests)",
+					"exclude": [
+						"Monaco.Template.Backend.*.Tests/**/*"
+					]
+				},
+				{
+					"condition": "(!workerService)",
+					"exclude": [
+						"Monaco.Template.Backend.Service/**/*"
 					]
 				}
 			]
@@ -587,6 +641,11 @@
 		"5a3893d1-1e36-310c-7633-8f36ffa26315",
 		"a2689ae3-3643-6250-a748-8f055cc72da8",
 		"be447a08-0a85-5779-8c65-cf15c2c9a5a8",
-		"c776f397-182b-6d0d-09f2-4e440dc093d3"
+		"c776f397-182b-6d0d-09f2-4e440dc093d3",
+		"8783ba16-eb5c-4c28-ae1d-14de7638b5c1",
+		"8d8e327d-41d9-466f-a81a-cc66f1a3fffe",
+		"baf0203f-b036-46b3-ac04-e3847315b616",
+		"fae04ec0-301f-11d3-bf4b-00c04f79efbc",
+		"ccaa345b-ede0-441f-8d19-ddafe52efb9d"
 	]
 }

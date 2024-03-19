@@ -6,6 +6,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <!--#if (templateDebug)-->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);auth;commonLibraries;filesSupport</DefineConstants>
+  </PropertyGroup>
+
+  <!--#endif-->
   <ItemGroup>
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Domain\Monaco.Template.Backend.Common.Domain.csproj" />
   </ItemGroup>

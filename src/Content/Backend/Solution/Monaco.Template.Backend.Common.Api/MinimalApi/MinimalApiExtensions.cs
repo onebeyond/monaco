@@ -16,7 +16,7 @@ public static class MinimalApiExtensions
 			   .WithDisplayName(collectionName)
 			   .WithTags(collectionName)
 			   .WithApiVersionSet(versionSet)
-#if (disableAuth)
+#if (!auth)
 			   .HasApiVersion(version);
 #else
 			   .HasApiVersion(version)

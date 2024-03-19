@@ -6,6 +6,12 @@
 	  <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <!--#if (templateDebug)-->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);auth;commonLibraries;filesSupport</DefineConstants>
+  </PropertyGroup>
+
+  <!--#endif-->
   <ItemGroup>
     <PackageReference Include="AutoFixture.AutoMoq" Version="4.18.1" />
     <PackageReference Include="AutoFixture.Xunit2" Version="4.18.1" />

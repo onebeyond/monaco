@@ -37,7 +37,7 @@
 					}
 				]
 			},
-			//#if (!excludeFilesSupport)
+			//#if (filesSupport)
 			"FilesWrite": {
 				"ClusterId": "api",
 				"AuthorizationPolicy": "files:write",

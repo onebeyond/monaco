@@ -1,4 +1,7 @@
 ﻿using FluentValidation;
+#if (massTransitIntegration)
+using MassTransit;
+#endif
 using MediatR;
 using Monaco.Template.Backend.Application.DTOs.Extensions;
 using Monaco.Template.Backend.Application.Features.Product.Extensions;
@@ -8,6 +11,9 @@ using Monaco.Template.Backend.Common.Application.Commands;
 using Monaco.Template.Backend.Common.Application.Commands.Contracts;
 using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
+#if (massTransitIntegration)
+using Monaco.Template.Backend.Messages.V1;
+#endif
 
 namespace Monaco.Template.Backend.Application.Features.Product;
 
@@ -63,11 +69,21 @@ public class CreateProduct
 	public sealed class Handler : IRequestHandler<Command, ICommandResult<Guid>>
 	{
 		private readonly AppDbContext _dbContext;
+#if (massTransitIntegration)
+		private readonly IPublishEndpoint _publishEndpoint;
+#endif
 		private readonly IFileService _fileService;
 
-		public Handler(AppDbContext dbContext, IFileService fileService)
+		public Handler(AppDbContext dbContext,
+#if (massTransitIntegration)
+					   IPublishEndpoint publishEndpoint,
+#endif
+					   IFileService fileService)
 		{
 			_dbContext = dbContext;
+#if (massTransitIntegration)
+			_publishEndpoint = publishEndpoint;
+#endif
 			_fileService = fileService;
 		}
 
@@ -80,6 +96,11 @@ public class CreateProduct
 
 			_dbContext.Set<Domain.Model.Product>().Attach(item);
 			await _dbContext.SaveEntitiesAsync(cancellationToken);
+#if (massTransitIntegration)
+
+			//NOTE: It is strongly recommended to implement MT's Transactional Outbox for ensuring transaction of DB and message publishing
+			await _publishEndpoint.Publish(item.MapMessage(), cancellationToken);
+#endif
 
 			await _fileService.MakePermanentImagesAsync(pictures, cancellationToken);
 

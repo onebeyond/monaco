@@ -6,13 +6,22 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <!--#if (templateDebug)-->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);auth;commonLibraries;filesSupport</DefineConstants>
+  </PropertyGroup>
+
+  <!--#endif-->
   <ItemGroup>
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Application\Monaco.Template.Backend.Common.Application.csproj" />
     <ProjectReference Include="..\Monaco.Template.Backend.Application.Infrastructure\Monaco.Template.Backend.Application.Infrastructure.csproj" />
+    <!--#if (massTransitIntegration)-->
+    <ProjectReference Include="..\Monaco.Template.Backend.Messages\Monaco.Template.Backend.Messages.csproj" />
+    <!--#endif-->
   </ItemGroup>
 
   <ItemGroup>
-	<!--#if (!excludeFilesSupport)-->
+	<!--#if (filesSupport)-->
     <PackageReference Include="AsyncEnumerator" Version="4.0.2" />
     <PackageReference Include="ExifLibNet" Version="2.1.4" />
 	<!--#endif-->
@@ -20,9 +29,9 @@
     <!--#if (massTransitIntegration)-->
     <PackageReference Include="MassTransit" Version="8.1.3" />
     <!--#endif-->
-	<!--#if (!excludeFilesSupport)-->
+	<!--#if (filesSupport)-->
     <PackageReference Include="SkiaSharp" Version="2.88.7" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.7" />
 	<!--#endif-->
   </ItemGroup>
-
 </Project>
