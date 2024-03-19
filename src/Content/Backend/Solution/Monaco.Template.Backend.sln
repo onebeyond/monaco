@@ -87,6 +87,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Messages", "Monaco.Template.Backend.Messages\Monaco.Template.Backend.Messages.csproj", "{CCAA345B-EDE0-441F-8D19-DDAFE52EFB9D}"
 EndProject
 #endif
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Functions", "Monaco.Template.Backend.Functions\Monaco.Template.Backend.Functions.csproj", "{71C35DFD-218A-4C90-BF65-6D31968B8921}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -197,6 +199,10 @@ Global
 		{CCAA345B-EDE0-441F-8D19-DDAFE52EFB9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CCAA345B-EDE0-441F-8D19-DDAFE52EFB9D}.Release|Any CPU.Build.0 = Release|Any CPU
 		#endif
+		{71C35DFD-218A-4C90-BF65-6D31968B8921}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71C35DFD-218A-4C90-BF65-6D31968B8921}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71C35DFD-218A-4C90-BF65-6D31968B8921}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71C35DFD-218A-4C90-BF65-6D31968B8921}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
