@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Monaco.Template.Backend.Application.DTOs.Extensions;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Application.Commands;
-using Monaco.Template.Backend.Common.Application.Commands.Contracts;
 using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
@@ -66,7 +65,7 @@ public sealed class EditCompany
 		}
 	}
 
-	public sealed class Handler : IRequestHandler<Command, ICommandResult>
+	public sealed class Handler : IRequestHandler<Command, CommandResult>
 	{
 		private readonly AppDbContext _dbContext;
 
@@ -75,7 +74,7 @@ public sealed class EditCompany
 			_dbContext = dbContext;
 		}
 
-		public async Task<ICommandResult> Handle(Command request, CancellationToken cancellationToken)
+		public async Task<CommandResult> Handle(Command request, CancellationToken cancellationToken)
 		{
 			var item = await _dbContext.Set<Domain.Model.Company>().SingleAsync(x => x.Id == request.Id, cancellationToken);
 			var country = await _dbContext.GetAsync<Domain.Model.Country>(request.CountryId, cancellationToken);
@@ -84,7 +83,7 @@ public sealed class EditCompany
 
 			await _dbContext.SaveEntitiesAsync(cancellationToken);
 
-			return new CommandResult();
+			return CommandResult.Success();
 		}
 	}
 }

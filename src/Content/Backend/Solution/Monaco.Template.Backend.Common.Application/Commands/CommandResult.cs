@@ -1,34 +1,27 @@
 ﻿using FluentValidation.Results;
-using Monaco.Template.Backend.Common.Application.Commands.Contracts;
 
 namespace Monaco.Template.Backend.Common.Application.Commands;
 
-public class CommandResult<T> : CommandResult, ICommandResult<T>
+public class CommandResult<T> : CommandResult
 {
 	public CommandResult(ValidationResult validationResult, bool itemNotFound, T result) : base(validationResult, itemNotFound)
 	{
 		Result = result;
 	}
 
-	public CommandResult(ValidationResult validationResult, T result) : base(validationResult)
-	{
-		Result = result;
-	}
-
-	public CommandResult(bool itemNotFound, T result) : base(itemNotFound)
-	{
-		Result = result;
-	}
-
-	public CommandResult(T result)
-	{
-		Result = result;
-	}
-
 	public T Result { get; set; }
+
+	public static CommandResult<T> Success(T result) =>
+		new(new(), false, result);
+
+	public new static CommandResult<T?> NotFound() =>
+		new(new(), true, default);
+
+	public static CommandResult<T?> ValidationFailed(ValidationResult validationResult, T? result) =>
+		new(validationResult, false, result);
 }
 
-public class CommandResult : ICommandResult
+public class CommandResult
 {
 	public CommandResult(ValidationResult validationResult, bool itemNotFound)
 	{
@@ -36,18 +29,15 @@ public class CommandResult : ICommandResult
 		ItemNotFound = itemNotFound;
 	}
 
-	public CommandResult(bool itemNotFound) : this(new ValidationResult(), itemNotFound)
-	{
-	}
-
-	public CommandResult(ValidationResult validationResult) : this(validationResult, false)
-	{
-	}
-
-	public CommandResult() : this(new ValidationResult(), false)
-	{
-	}
-
 	public ValidationResult ValidationResult { get; set; }
 	public bool ItemNotFound { get; set; }
+
+	public static CommandResult Success() =>
+		new(new(), false);
+
+	public static CommandResult NotFound() =>
+		new(new(), true);
+	
+	public static CommandResult ValidationFailed(ValidationResult validationResult) =>
+		new(validationResult, false);
 }

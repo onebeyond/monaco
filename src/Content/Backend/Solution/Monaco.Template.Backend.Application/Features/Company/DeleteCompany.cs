@@ -7,7 +7,6 @@ using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Domain.Model;
 #endif
 using Monaco.Template.Backend.Common.Application.Commands;
-using Monaco.Template.Backend.Common.Application.Commands.Contracts;
 using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 
 namespace Monaco.Template.Backend.Application.Features.Company;
@@ -26,7 +25,7 @@ public sealed class DeleteCompany
 		}
 	}
 
-	public sealed class Handler : IRequestHandler<Command, ICommandResult>
+	public sealed class Handler : IRequestHandler<Command, CommandResult>
 	{
 		private readonly AppDbContext _dbContext;
 		#if (filesSupport)
@@ -45,7 +44,7 @@ public sealed class DeleteCompany
 			#endif
 		}
 
-		public async Task<ICommandResult> Handle(Command request, CancellationToken cancellationToken)
+		public async Task<CommandResult> Handle(Command request, CancellationToken cancellationToken)
 		{
 			var item = await _dbContext.Set<Domain.Model.Company>()
 									   #if (filesSupport)
@@ -75,7 +74,7 @@ public sealed class DeleteCompany
 			await _fileService.DeleteImagesAsync(pictures, cancellationToken);
 			#endif
 
-			return new CommandResult();
+			return CommandResult.Success();
 		}
 	}
 }

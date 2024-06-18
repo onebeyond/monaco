@@ -1,7 +1,6 @@
 ﻿using LinqKit;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using Monaco.Template.Backend.Common.Application.Commands.Contracts;
 using System.Reflection;
 
 namespace Monaco.Template.Backend.Common.Application.Commands.Behaviors;
@@ -16,9 +15,9 @@ public static class BehaviorExtensions
 		//Gets the CommandBase derived classes
 		var commandBaseTypes = GetCommandBaseDerivedTypes(assembly);
 		//And adds the corresponding scoped behaviors for all the detected commands (for both existing and validation checks)
-		commandBaseTypes.ForEach(t => services.AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(ICommandResult)),
+		commandBaseTypes.ForEach(t => services.AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(CommandResult)),
 														 typeof(CommandValidationExistsBehavior<>).MakeGenericType(t))
-											  .AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(ICommandResult)),
+											  .AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(CommandResult)),
 														 typeof(CommandValidationBehavior<>).MakeGenericType(t)));
 		//Gets the CommandBases<T> derived classes
 		var commandBaseResultTypes = GetCommandBaseOfResultDerivedTypes(assembly);
@@ -27,9 +26,9 @@ public static class BehaviorExtensions
 		commandBaseResultTypes.ForEach(t =>
 									   {
 										   var tResult = t.BaseType!.GenericTypeArguments.First();
-										   services.AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(ICommandResult<>).MakeGenericType(tResult)),
+										   services.AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(CommandResult<>).MakeGenericType(tResult)),
 															  typeof(CommandValidationExistsBehavior<,>).MakeGenericType(t, tResult))
-												   .AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(ICommandResult<>).MakeGenericType(tResult)),
+												   .AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(CommandResult<>).MakeGenericType(tResult)),
 															  typeof(CommandValidationBehavior<,>).MakeGenericType(t, tResult));
 									   });
 		return services;
@@ -40,7 +39,7 @@ public static class BehaviorExtensions
 		//Gets the CommandBase derived classes
 		var commandBaseTypes = GetCommandBaseDerivedTypes(assembly);
 		//And adds the corresponding scoped behaviors for all the detected commands
-		commandBaseTypes.ForEach(t => services.AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(ICommandResult)),
+		commandBaseTypes.ForEach(t => services.AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(CommandResult)),
 														 typeof(ConcurrencyExceptionBehavior<>).MakeGenericType(t)));
 		//Gets the CommandBases<T> derived classes
 		var commandBaseResultTypes = GetCommandBaseOfResultDerivedTypes(assembly);
@@ -49,7 +48,7 @@ public static class BehaviorExtensions
 		commandBaseResultTypes.ForEach(t =>
 									   {
 										   var tResult = t.BaseType!.GenericTypeArguments.First();
-										   services.AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(ICommandResult<>).MakeGenericType(tResult)),
+										   services.AddScoped(typeof(IPipelineBehavior<,>).MakeGenericType(t, typeof(CommandResult<>).MakeGenericType(tResult)),
 															  typeof(ConcurrencyExceptionBehavior<,>).MakeGenericType(t, tResult));
 									   });
 		return services;
