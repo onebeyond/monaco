@@ -8,7 +8,6 @@ using Monaco.Template.Backend.Common.Application.Queries;
 
 namespace Monaco.Template.Backend.Application.Features.Product;
 
-
 public class DownloadProductPicture
 {
 	public record Query(Guid ProductId,
@@ -42,10 +41,10 @@ public class DownloadProductPicture
 
 			var item = await query.SingleOrDefaultAsync(cancellationToken);
 
-			if (item is null)
-				return null;
-
-			return await _fileService.DownloadFileAsync(item, cancellationToken);
+			return item is null
+					   ? null
+					   : await _fileService.DownloadFileAsync(item,
+															  cancellationToken);
 		}
 	}
 }

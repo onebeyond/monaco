@@ -1,13 +1,12 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Monaco.Template.Backend.Common.Application.Commands.Contracts;
 using Monaco.Template.Backend.Common.Infrastructure.Context;
 using Polly;
 using Polly.Registry;
 
 namespace Monaco.Template.Backend.Common.Application.Commands.Behaviors;
 
-public class ConcurrencyExceptionBehavior<TCommand> : IPipelineBehavior<TCommand, ICommandResult>
+public class ConcurrencyExceptionBehavior<TCommand> : IPipelineBehavior<TCommand, CommandResult>
 	where TCommand : CommandBase
 {
 	private readonly IAsyncPolicy _dbConcurrentRetryPolicy;
@@ -20,9 +19,9 @@ public class ConcurrencyExceptionBehavior<TCommand> : IPipelineBehavior<TCommand
 		_dbContext = dbContext;
 	}
 
-	public Task<ICommandResult> Handle(TCommand request,
-									   RequestHandlerDelegate<ICommandResult> next,
-									   CancellationToken cancellationToken) =>
+	public Task<CommandResult> Handle(TCommand request,
+									  RequestHandlerDelegate<CommandResult> next,
+									  CancellationToken cancellationToken) =>
 		_dbConcurrentRetryPolicy.ExecuteAsync(async () =>
 											  {
 												  try
@@ -37,7 +36,7 @@ public class ConcurrencyExceptionBehavior<TCommand> : IPipelineBehavior<TCommand
 											  });
 }
 
-public class ConcurrencyExceptionBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, ICommandResult<TResult?>>
+public class ConcurrencyExceptionBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, CommandResult<TResult?>>
 	where TCommand : CommandBase<TResult?>
 {
 	private readonly IAsyncPolicy _dbConcurrentRetryPolicy;
@@ -50,9 +49,9 @@ public class ConcurrencyExceptionBehavior<TCommand, TResult> : IPipelineBehavior
 		_dbContext = dbContext;
 	}
 
-	public Task<ICommandResult<TResult?>> Handle(TCommand request,
-												 RequestHandlerDelegate<ICommandResult<TResult?>> next,
-												 CancellationToken cancellationToken) =>
+	public Task<CommandResult<TResult?>> Handle(TCommand request,
+												RequestHandlerDelegate<CommandResult<TResult?>> next,
+												CancellationToken cancellationToken) =>
 		_dbConcurrentRetryPolicy.ExecuteAsync(() =>
 											  {
 												  try

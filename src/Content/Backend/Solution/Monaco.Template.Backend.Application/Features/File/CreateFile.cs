@@ -3,7 +3,6 @@ using MediatR;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Application.Commands;
-using Monaco.Template.Backend.Common.Application.Commands.Contracts;
 
 namespace Monaco.Template.Backend.Application.Features.File;
 
@@ -24,7 +23,7 @@ public sealed class CreateFile
 	}
 
 	#if (filesSupport)
-	public sealed class Handler : IRequestHandler<Command, ICommandResult<Guid>>
+	public sealed class Handler : IRequestHandler<Command, CommandResult<Guid>>
 	{
 		private readonly AppDbContext _dbContext;
 		private readonly IFileService _fileService;
@@ -35,7 +34,7 @@ public sealed class CreateFile
 			_fileService = fileService;
 		}
 
-		public async Task<ICommandResult<Guid>> Handle(Command request, CancellationToken cancellationToken)
+		public async Task<CommandResult<Guid>> Handle(Command request, CancellationToken cancellationToken)
 		{
 			var file = await _fileService.UploadAsync(request.Stream, request.FileName, request.ContentType, cancellationToken);
 
@@ -51,7 +50,7 @@ public sealed class CreateFile
 				throw;
 			}
 			
-			return new CommandResult<Guid>(file.Id);
+			return CommandResult<Guid>.Success(file.Id);
 		}
 	}
 	#endif

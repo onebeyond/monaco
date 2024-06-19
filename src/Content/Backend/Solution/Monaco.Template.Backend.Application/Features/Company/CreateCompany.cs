@@ -3,7 +3,6 @@ using MediatR;
 using Monaco.Template.Backend.Application.DTOs.Extensions;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Application.Commands;
-using Monaco.Template.Backend.Common.Application.Commands.Contracts;
 using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
@@ -60,7 +59,7 @@ public sealed class CreateCompany
 		}
 	}
 
-	public sealed class Handler : IRequestHandler<Command, ICommandResult<Guid>>
+	public sealed class Handler : IRequestHandler<Command, CommandResult<Guid>>
 	{
 		private readonly AppDbContext _dbContext;
 
@@ -69,7 +68,7 @@ public sealed class CreateCompany
 			_dbContext = dbContext;
 		}
 
-		public async Task<ICommandResult<Guid>> Handle(Command request, CancellationToken cancellationToken)
+		public async Task<CommandResult<Guid>> Handle(Command request, CancellationToken cancellationToken)
 		{
 			var country = await _dbContext.GetAsync<Domain.Model.Country>(request.CountryId, cancellationToken);
 			var item = request.Map(country);
@@ -77,7 +76,7 @@ public sealed class CreateCompany
 			_dbContext.Set<Domain.Model.Company>().Attach(item);
 			await _dbContext.SaveEntitiesAsync(cancellationToken);
 
-			return new CommandResult<Guid>(item.Id);
+			return CommandResult<Guid>.Success(item.Id);
 		}
 	}
 }

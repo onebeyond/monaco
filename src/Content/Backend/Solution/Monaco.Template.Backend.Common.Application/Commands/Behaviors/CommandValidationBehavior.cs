@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using MediatR;
-using Monaco.Template.Backend.Common.Application.Commands.Contracts;
 using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 
 namespace Monaco.Template.Backend.Common.Application.Commands.Behaviors;
@@ -9,7 +8,7 @@ namespace Monaco.Template.Backend.Common.Application.Commands.Behaviors;
 /// Behavior to perform validations of Commands that do not return any other data in the CommandResult
 /// </summary>
 /// <typeparam name="TCommand">The type of the Command to process</typeparam>
-public class CommandValidationBehavior<TCommand> : IPipelineBehavior<TCommand, ICommandResult>
+public class CommandValidationBehavior<TCommand> : IPipelineBehavior<TCommand, CommandResult>
 	where TCommand : CommandBase
 {
 	protected readonly IValidator<TCommand> Validator;
@@ -23,11 +22,11 @@ public class CommandValidationBehavior<TCommand> : IPipelineBehavior<TCommand, I
 		Validator = validator;
 	}
 
-	public virtual async Task<ICommandResult> Handle(TCommand request, RequestHandlerDelegate<ICommandResult> next, CancellationToken cancellationToken)
+	public virtual async Task<CommandResult> Handle(TCommand request, RequestHandlerDelegate<CommandResult> next, CancellationToken cancellationToken)
 	{
 		var validationResult = await Validator.ValidateAsync(request, cancellationToken);
 		if (!validationResult.IsValid)
-			return new CommandResult(validationResult);
+			return CommandResult.ValidationFailed(validationResult);
 
 		return await next();
 	}
@@ -38,7 +37,7 @@ public class CommandValidationBehavior<TCommand> : IPipelineBehavior<TCommand, I
 /// </summary>
 /// <typeparam name="TCommand">The type of Command to process</typeparam>
 /// <typeparam name="TResult">The type of data to return along with the CommandResult</typeparam>
-public class CommandValidationBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, ICommandResult<TResult?>>
+public class CommandValidationBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, CommandResult<TResult?>>
 	where TCommand : CommandBase<TResult?>
 {
 	protected readonly IValidator<TCommand> Validator;
@@ -53,13 +52,13 @@ public class CommandValidationBehavior<TCommand, TResult> : IPipelineBehavior<TC
 		Validator = validator;
 	}
 
-	public virtual async Task<ICommandResult<TResult?>> Handle(TCommand request,
-															   RequestHandlerDelegate<ICommandResult<TResult?>> next,
-															   CancellationToken cancellationToken)
+	public virtual async Task<CommandResult<TResult?>> Handle(TCommand request,
+															  RequestHandlerDelegate<CommandResult<TResult?>> next,
+															  CancellationToken cancellationToken)
 	{
 		var validationResult = await Validator.ValidateAsync(request, cancellationToken);
 		if (!validationResult.IsValid)
-			return new CommandResult<TResult?>(validationResult, default);
+			return CommandResult<TResult?>.ValidationFailed(validationResult, default);
 
 		return await next();
 	}
@@ -69,7 +68,7 @@ public class CommandValidationBehavior<TCommand, TResult> : IPipelineBehavior<TC
 /// Behavior to validate the existence of the entity represented by the Command Id.
 /// </summary>
 /// <typeparam name="TCommand">The type of the Command to process</typeparam>
-public class CommandValidationExistsBehavior<TCommand> : IPipelineBehavior<TCommand, ICommandResult>
+public class CommandValidationExistsBehavior<TCommand> : IPipelineBehavior<TCommand, CommandResult>
 	where TCommand : CommandBase
 {
 	protected readonly IValidator<TCommand> Validator;
@@ -83,11 +82,13 @@ public class CommandValidationExistsBehavior<TCommand> : IPipelineBehavior<TComm
 		Validator = validator;
 	}
 
-	public virtual async Task<ICommandResult> Handle(TCommand request, RequestHandlerDelegate<ICommandResult> next, CancellationToken cancellationToken)
+	public virtual async Task<CommandResult> Handle(TCommand request,
+													RequestHandlerDelegate<CommandResult> next,
+													CancellationToken cancellationToken)
 	{
 		var validationResult = await Validator.ValidateAsync(request, options => options.IncludeRuleSets(ValidatorsExtensions.ExistsRulesetName), cancellationToken);
 		if (!validationResult.IsValid)
-			return new CommandResult(true);
+			return CommandResult.NotFound();
 
 		return await next();
 	}
@@ -98,7 +99,7 @@ public class CommandValidationExistsBehavior<TCommand> : IPipelineBehavior<TComm
 /// </summary>
 /// <typeparam name="TCommand">The type of the Command to process</typeparam>
 /// <typeparam name="TResult">The type of data to return along with the CommandResult</typeparam>
-public class CommandValidationExistsBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, ICommandResult<TResult?>>
+public class CommandValidationExistsBehavior<TCommand, TResult> : IPipelineBehavior<TCommand, CommandResult<TResult?>>
 	where TCommand : CommandBase<TResult?>
 {
 	protected readonly IValidator<TCommand> Validator;
@@ -113,15 +114,15 @@ public class CommandValidationExistsBehavior<TCommand, TResult> : IPipelineBehav
 		Validator = validator;
 	}
 
-	public virtual async Task<ICommandResult<TResult?>> Handle(TCommand request,
-															   RequestHandlerDelegate<ICommandResult<TResult?>> next,
-															   CancellationToken cancellationToken)
+	public virtual async Task<CommandResult<TResult?>> Handle(TCommand request,
+															  RequestHandlerDelegate<CommandResult<TResult?>> next,
+															  CancellationToken cancellationToken)
 	{
 		var validationResult = await Validator.ValidateAsync(request,
 															 options => options.IncludeRuleSets(ValidatorsExtensions.ExistsRulesetName),
 															 cancellationToken);
 		if (!validationResult.IsValid)
-			return new CommandResult<TResult?>(true, default);
+			return CommandResult<TResult?>.NotFound();
 
 		return await next();
 	}

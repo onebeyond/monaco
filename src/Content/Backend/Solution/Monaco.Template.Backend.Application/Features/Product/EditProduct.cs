@@ -6,7 +6,6 @@ using Monaco.Template.Backend.Application.Features.Product.Extensions;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Application.Commands;
-using Monaco.Template.Backend.Common.Application.Commands.Contracts;
 using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
@@ -68,7 +67,7 @@ public class EditProduct
 		}
 	}
 
-	public sealed class Handler : IRequestHandler<Command, ICommandResult>
+	public sealed class Handler : IRequestHandler<Command, CommandResult>
 	{
 		private readonly AppDbContext _dbContext;
 		private readonly IFileService _fileService;
@@ -79,7 +78,7 @@ public class EditProduct
 			_fileService = fileService;
 		}
 
-		public async Task<ICommandResult> Handle(Command request, CancellationToken cancellationToken)
+		public async Task<CommandResult> Handle(Command request, CancellationToken cancellationToken)
 		{
 			var item = await _dbContext.Set<Domain.Model.Product>()
 									   .Include(x => x.Company)
@@ -100,7 +99,7 @@ public class EditProduct
 			await Task.WhenAll(_fileService.DeleteImagesAsync(deletedPics, cancellationToken),
 							   _fileService.MakePermanentImagesAsync(newPics, cancellationToken));
 
-			return new CommandResult();
+			return CommandResult.Success();
 		}
 	}
 }
