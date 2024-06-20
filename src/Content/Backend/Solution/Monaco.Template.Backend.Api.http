@@ -1,0 +1,142 @@
+@ApiHost=https://localhost:7070/api/v1
+@JWT=XXXXXXXXXXXXXXXX.XXXXXXXXXXXXXXXX.XXXXXXXXXXXXXXXX
+@AuthorizationHeader=Bearer {{JWT}}
+
+
+# Get Countries
+GET {{ApiHost}}/Countries
+Content-Type: application/json
+Authorization: {{AuthorizationHeader}}
+
+###
+
+# Get Country By Id
+GET {{ApiHost}}/Countries/534a826b-70ef-2128-1a4c-52e23b7d5447
+Content-Type: application/json
+Authorization: {{AuthorizationHeader}}
+
+###
+
+# Get Companies
+GET {{ApiHost}}/Companies?expand=country
+Content-Type: application/json
+Authorization: {{AuthorizationHeader}}
+
+###
+
+# Get Company By Id
+GET {{ApiHost}}/Companies/8cefe8fa-f747-4a3a-d8c9-08dc18c76cdc
+Content-Type: application/json
+Authorization: {{AuthorizationHeader}}
+
+###
+
+# Create new Company
+POST {{ApiHost}}/Companies
+Content-Type: application/json
+Authorization: {{AuthorizationHeader}}
+
+{
+	"Name": "CompanyA",
+	"Email": "email@companya.com",
+	"Street": "Paseo de la Castellana 1",
+	"city": "Madrid",
+	"county": "Madrid",
+	"postCode": 28046,
+	"CountryId": "534A826B-70EF-2128-1A4C-52E23B7D5447"
+}
+
+###
+
+# Edit Company
+PUT {{ApiHost}}/Companies/48f3b49f-e097-4d9c-1a06-08dc90a3a60d
+Content-Type: application/json
+Authorization: {{AuthorizationHeader}}
+
+{
+	"Name": "CompanyA1",
+	"Email": "email1@companya.com",
+	"Street": "Paseo de la Castellana 1",
+	"city": "Madrid",
+	"county": "Madrid",
+	"postCode": 28046,
+	"CountryId": "534A826B-70EF-2128-1A4C-52E23B7D5447"
+}
+
+###
+
+# Delete Company
+DELETE {{ApiHost}}/Companies/48f3b49f-e097-4d9c-1a06-08dc90a3a60d
+Content-Type: application/json
+Authorization: {{AuthorizationHeader}}
+
+###
+
+# Upload new File
+POST {{ApiHost}}/Files
+Authorization: {{AuthorizationHeader}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="monaco-solid.png"
+Content-Type: image/png
+
+< ../../../../monaco-solid.png
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+
+# Get Products
+GET {{ApiHost}}/Products
+Content-Type: application/json
+Authorization: {{AuthorizationHeader}}
+
+###
+
+# Get Product By Id
+GET {{ApiHost}}/Products/6431b0f4-27bd-4a65-e509-08dc90b531a8
+Content-Type: application/json
+Authorization: {{AuthorizationHeader}}
+
+###
+
+# Create new Product
+POST {{ApiHost}}/Products
+Content-Type: application/json
+Authorization: {{AuthorizationHeader}}
+
+{
+	"title": "Product A",
+	"description": "Product A description",
+	"price": 2.55,
+	"companyId": "8cefe8fa-f747-4a3a-d8c9-08dc18c76cdc",
+	"pictures": [
+		"5bfc70f9-944c-4637-9399-671ae60ae24d"
+	],
+	"defaultPictureId": "5bfc70f9-944c-4637-9399-671ae60ae24d"
+}
+
+###
+
+# Edit Product
+PUT {{ApiHost}}/Products/6431b0f4-27bd-4a65-e509-08dc90b531a8
+Content-Type: application/json
+Authorization: {{AuthorizationHeader}}
+
+{
+	"title": "Product X1",
+	"description": "Product X1 description",
+	"price": 3,
+	"companyId": "8cefe8fa-f747-4a3a-d8c9-08dc18c76cdc",
+	"pictures": [
+		"5bfc70f9-944c-4637-9399-671ae60ae24d"
+	],
+	"defaultPictureId": "5bfc70f9-944c-4637-9399-671ae60ae24d"
+}
+
+###
+
+# Delete Product
+DELETE {{ApiHost}}/Products/6431b0f4-27bd-4a65-e509-08dc90b531a8
+Content-Type: application/json
+Authorization: {{AuthorizationHeader}}
