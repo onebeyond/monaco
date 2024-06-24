@@ -13,8 +13,8 @@ using Monaco.Template.Backend.Common.Application.Policies;
 using Monaco.Template.Backend.Common.Infrastructure.Context;
 #if (filesSupport)
 using Monaco.Template.Backend.Common.BlobStorage.Extensions;
-using Monaco.Template.Backend.Common.Application.Queries.Contracts;
 #endif
+using Monaco.Template.Backend.Common.Application.Queries.Contracts;
 
 namespace Monaco.Template.Backend.Application.DependencyInjection;
 
