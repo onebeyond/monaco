@@ -13,6 +13,7 @@ using Monaco.Template.Backend.Common.Application.Policies;
 using Monaco.Template.Backend.Common.Infrastructure.Context;
 #if (filesSupport)
 using Monaco.Template.Backend.Common.BlobStorage.Extensions;
+using Monaco.Template.Backend.Common.Application.Queries.Contracts;
 #endif
 
 namespace Monaco.Template.Backend.Application.DependencyInjection;
@@ -54,7 +55,10 @@ public static class ServiceCollectionExtensions
 												opts.ContainerName = optionsValue.BlobStorage.ContainerName;
 											})
 				.AddScoped<IFileService, FileService>();
-		#endif
+#endif
+
+		services.AddMemoryCache();
+		services.AddSingleton<ICachedQueryService, CachedQueryService>();
 
 		return services;
 	}
