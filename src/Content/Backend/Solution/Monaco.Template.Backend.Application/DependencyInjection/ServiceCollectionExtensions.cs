@@ -9,7 +9,7 @@ using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Application.Commands.Behaviors;
 using Monaco.Template.Backend.Common.Application.Validators.Contracts;
 using System.Reflection;
-using Monaco.Template.Backend.Common.Application.Policies;
+using Monaco.Template.Backend.Application.ResiliencePipelines;
 using Monaco.Template.Backend.Common.Infrastructure.Context;
 #if (filesSupport)
 using Monaco.Template.Backend.Common.BlobStorage.Extensions;
@@ -30,7 +30,7 @@ public static class ServiceCollectionExtensions
 	{
 		var optionsValue = new ApplicationOptions();
 		options.Invoke(optionsValue);
-		services.AddPolicies<Policies.Policies>()
+		services.AddResiliencePipelines()
 				.AddMediatR(config => config.RegisterServicesFromAssemblies(GetApplicationAssembly()))
 				.RegisterCommandConcurrencyExceptionBehaviors(GetApplicationAssembly())
 				.RegisterCommandValidationBehaviors(GetApplicationAssembly())
