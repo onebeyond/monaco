@@ -37,13 +37,13 @@ Content-Type: application/json
 Authorization: {{AuthorizationHeader}}
 
 {
-	"Name": "CompanyA",
-	"Email": "email@companya.com",
-	"Street": "Paseo de la Castellana 1",
+	"name": "CompanyA",
+	"email": "email@companya.com",
+	"street": "Paseo de la Castellana 1",
 	"city": "Madrid",
 	"county": "Madrid",
-	"postCode": 28046,
-	"CountryId": "534A826B-70EF-2128-1A4C-52E23B7D5447"
+	"postCode": "28046",
+	"countryId": "534A826B-70EF-2128-1A4C-52E23B7D5447"
 }
 
 ###
@@ -54,13 +54,13 @@ Content-Type: application/json
 Authorization: {{AuthorizationHeader}}
 
 {
-	"Name": "CompanyA1",
-	"Email": "email1@companya.com",
-	"Street": "Paseo de la Castellana 1",
+	"name": "CompanyA1",
+	"email": "email1@companya.com",
+	"street": "Paseo de la Castellana 1",
 	"city": "Madrid",
 	"county": "Madrid",
-	"postCode": 28046,
-	"CountryId": "534A826B-70EF-2128-1A4C-52E23B7D5447"
+	"postCode": "28046",
+	"countryId": "534A826B-70EF-2128-1A4C-52E23B7D5447"
 }
 
 ###
