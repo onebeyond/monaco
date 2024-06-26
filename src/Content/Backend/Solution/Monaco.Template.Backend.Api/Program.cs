@@ -41,7 +41,7 @@ builder.Services
 	   .AddAuthorizationWithPolicies(Scopes.List)
 	   .AddJwtBearerAuthentication(configuration["SSO:Authority"]!,
 								   configuration["SSO:Audience"]!,
-								   bool.Parse(configuration["SSO:RequireHttpsMetadata"] ?? "false"));
+								   bool.Parse(configuration["SSO:RequireHttpsMetadata"] ?? bool.FalseString));
 #endif
 
 builder.Services
