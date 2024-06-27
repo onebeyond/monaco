@@ -10,7 +10,10 @@ namespace Monaco.Template.Backend.Application.Features.Country;
 
 public sealed class GetCountryList
 {
-	public record Query(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryBase<List<CountryDto>>(QueryString);
+	public record Query(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : CachedQueryBase<List<CountryDto>>(QueryString)
+	{
+		public override string CacheKey => $"get-country-list-{GetQueryStringHashCode()}";
+	}
 
 	public sealed class Handler : IRequestHandler<Query, List<CountryDto>>
 	{

@@ -59,4 +59,15 @@ public abstract record QueryBase<T>(IEnumerable<KeyValuePair<string, StringValue
 																						.Value
 																						.Select(x => Enum.TryParse<TEnum>(x, true, out var y) ? y : (TEnum?)null)
 																						.FirstOrDefault(x => x is not null);
+
+	public int GetQueryStringHashCode()
+	{
+		int hash = 17;
+		foreach (var (key, value) in QueryString)
+		{
+			hash = (hash * 23) + key.GetHashCode();
+			hash = (hash * 23) + value.GetHashCode();
+		}
+		return hash;
+	}
 }
