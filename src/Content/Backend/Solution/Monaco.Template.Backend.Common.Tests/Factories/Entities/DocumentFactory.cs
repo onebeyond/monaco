@@ -21,7 +21,7 @@ public static class DocumentFactoryExtension
 	{
 		fixture.Register(() => new Document(fixture.Create<Guid>(),
 											fixture.Create<string>(),
-											fixture.Create<string>(),
+											fixture.Create<string>()[..20],
 											fixture.Create<long>(),
 											fixture.Create<string>(),
 											false));
@@ -34,7 +34,7 @@ public static class DocumentFactoryExtension
 						 {
 							 var mock = new Mock<Document>(fixture.Create<Guid>(),
 														   fixture.Create<string>(),
-														   fixture.Create<string>(),
+														   fixture.Create<string>()[..20],
 														   fixture.Create<long>(),
 														   fixture.Create<string>(),
 														   false);

@@ -19,6 +19,8 @@ public class DocumentTests
 									string contentType,
 									bool isTemp)
 	{
+		extension = extension[..20];
+
 		var sut = new Document(id,
 							   name,
 							   extension,

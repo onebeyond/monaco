@@ -1,4 +1,5 @@
 ﻿using Monaco.Template.Backend.Common.Domain.Model;
+using Throw;
 
 namespace Monaco.Template.Backend.Domain.Model;
 
@@ -15,10 +16,17 @@ public abstract class File : Entity
 				   string contentType,
 				   bool isTemp) : base(id)
 	{
-		Name = name;
-		Extension = extension;
-		Size = size;
-		ContentType = contentType;
+		Name = name.Throw()
+				   .IfEmpty()
+				   .IfLongerThan(300);
+		Extension = extension.Throw()
+							 .IfEmpty()
+							 .IfLongerThan(20);
+		Size = size.Throw()
+				   .IfNegativeOrZero();
+		ContentType = contentType.Throw()
+								 .IfEmpty()
+								 .IfLongerThan(50);
 		UploadedOn = DateTime.UtcNow;
 		IsTemp = isTemp;
 	}

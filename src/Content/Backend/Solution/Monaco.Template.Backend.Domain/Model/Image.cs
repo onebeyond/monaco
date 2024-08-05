@@ -35,7 +35,7 @@ public class Image : File
 	public ImageDimensions Dimensions { get; }
 	public GpsPosition? Position { get; }
 
-	public Guid? ThumbnailId { get; private set; }
+	public Guid? ThumbnailId { get; protected set; }
 	public virtual Image? Thumbnail { get; }
 
 	public override void MakePermanent()

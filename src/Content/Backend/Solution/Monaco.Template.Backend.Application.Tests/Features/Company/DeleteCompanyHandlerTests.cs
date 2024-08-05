@@ -23,7 +23,7 @@ namespace Monaco.Template.Backend.Application.Tests.Features.Company;
 public class DeleteCompanyHandlerTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
-	private static readonly DeleteCompany.Command Command = new(It.IsAny<Guid>());
+	private static readonly DeleteCompany.Command Command = new(new Fixture().Create<Guid>());
 	#if (filesSupport)
 	private readonly Mock<IFileService> _fileServiceMock = new();
 	#endif

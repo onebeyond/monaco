@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using AutoFixture;
+using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Monaco.Template.Backend.Application.Features.File;
@@ -12,9 +13,15 @@ namespace Monaco.Template.Backend.Application.Tests.Features.File;
 [Trait("Application Commands - File", "Create")]
 public class CreateFileValidatorTests
 {
-	private static readonly CreateFile.Command Command = new(It.IsAny<Stream>(),	// Stream
-															 It.IsAny<string>(),	// FileName
-															 It.IsAny<string>());   // ContentType
+	private static readonly CreateFile.Command Command;
+
+	static CreateFileValidatorTests()
+	{
+		var fixture = new Fixture();
+		Command = new(It.IsAny<Stream>(),			// Stream
+					  fixture.Create<string>(),		// FileName
+					  fixture.Create<string>());	// ContentType
+	}
 
 	[Fact(DisplayName = "Validator's rule level cascade mode is 'Stop'")]
 	public void ValidatorRuleLevelCascadeModeIsStop()
@@ -29,10 +36,7 @@ public class CreateFileValidatorTests
 	[Fact(DisplayName = "Stream being valid does not generate validation error")]
 	public async Task StreamDoesNotGenerateErrorWhenValid()
 	{
-		var command = Command with
-					  {
-						  Stream = new MemoryStream("Content"u8.ToArray())
-					  };
+		var command = Command with { Stream = new MemoryStream("Content"u8.ToArray()) };
 
 		var sut = new CreateFile.Validator();
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Stream));
@@ -43,10 +47,7 @@ public class CreateFileValidatorTests
 	[Fact(DisplayName = "Stream empty generates validation error")]
 	public async Task StreamEmptyGeneratesError()
 	{
-		var command = Command with
-					  {
-						  Stream = new MemoryStream()
-					  };
+		var command = Command with { Stream = new MemoryStream() };
 
 		var sut = new CreateFile.Validator();
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Stream));

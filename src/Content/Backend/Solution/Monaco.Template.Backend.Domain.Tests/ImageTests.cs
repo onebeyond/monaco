@@ -24,6 +24,7 @@ public class ImageTests
 								 DateTime dateTaken,
 								 Image thumbnail)
 	{
+		extension = extension[..20];
 		var latitude = RandomNumberGenerator.GetInt32(-90, 90);
 		var longitude = RandomNumberGenerator.GetInt32(-180, 180);
 

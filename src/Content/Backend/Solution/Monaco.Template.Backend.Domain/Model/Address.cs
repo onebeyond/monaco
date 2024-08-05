@@ -1,5 +1,5 @@
-﻿using Dawn;
-using Monaco.Template.Backend.Common.Domain.Model;
+﻿using Monaco.Template.Backend.Common.Domain.Model;
+using Throw;
 
 namespace Monaco.Template.Backend.Domain.Model;
 
@@ -14,16 +14,15 @@ public class Address : ValueObject
 				   string? postCode,
 				   Country country)
 	{
-		Street = Guard.Argument(street, nameof(street))
-					  .MaxLength(100);
-		City = Guard.Argument(city, nameof(city))
-					.MaxLength(100);
-		County = Guard.Argument(county, nameof(county))
-					  .MaxLength(100);
-		PostCode = Guard.Argument(postCode, nameof(postCode))
-						.MaxLength(10);
-		Country = Guard.Argument(country, nameof(country))
-					   .NotNull();
+		Street = street?.Throw()
+					   .IfLongerThan(100);
+		City = city?.Throw()
+				   .IfLongerThan(100);
+		County = county?.Throw()
+					   .IfLongerThan(100);
+		PostCode = postCode?.Throw()
+						   .IfLongerThan(10);
+		Country = country.ThrowIfNull();
 	}
 
 	public string? Street { get; }

@@ -1,4 +1,5 @@
 ﻿using Monaco.Template.Backend.Common.Domain.Model;
+using Throw;
 
 namespace Monaco.Template.Backend.Domain.Model;
 
@@ -9,8 +10,10 @@ public class ImageDimensions : ValueObject
 
 	public ImageDimensions(int height, int width)
 	{
-		Height = height;
-		Width = width;
+		Height = height.Throw()
+					   .IfNegativeOrZero();
+		Width = width.Throw()
+					 .IfNegativeOrZero();
 	}
 
 	public int Height { get; }

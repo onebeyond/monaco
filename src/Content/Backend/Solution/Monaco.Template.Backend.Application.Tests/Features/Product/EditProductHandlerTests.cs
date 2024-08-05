@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using AutoFixture;
+using FluentAssertions;
 using Monaco.Template.Backend.Application.Features.Product;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Application.Services.Contracts;
@@ -17,13 +18,19 @@ public class EditProductHandlerTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
 	private readonly Mock<IFileService> _fileServiceMock = new();
-	private static readonly EditProduct.Command Command = new(It.IsAny<Guid>(),		// Id
-															  It.IsAny<string>(),	// Title
-															  It.IsAny<string>(),	// Description
-															  It.IsAny<decimal>(),	// Price
-															  It.IsAny<Guid>(),		// CompanyId
-															  It.IsAny<Guid[]>(),	// Pictures
-															  It.IsAny<Guid>());	// DefaultPictureId
+	private static readonly EditProduct.Command Command;
+
+	static EditProductHandlerTests()
+	{
+		var fixture = new Fixture();
+		Command = new(fixture.Create<Guid>(),		// Id
+					  fixture.Create<string>(),		// Title
+					  fixture.Create<string>(),		// Description
+					  fixture.Create<decimal>(),	// Price
+					  fixture.Create<Guid>(),		// CompanyId
+					  fixture.Create<Guid[]>(),		// Pictures
+					  fixture.Create<Guid>());		// DefaultPictureId
+	}
 
 
 	[Theory(DisplayName = "Edit existing Product succeeds")]

@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using AutoFixture;
+using FluentAssertions;
 using Monaco.Template.Backend.Application.Features.Product;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Application.Services.Contracts;
@@ -17,7 +18,7 @@ public class DeleteProductHandlerTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
 	private readonly Mock<IFileService> _fileServiceMock = new();
-	private static readonly DeleteProduct.Command Command = new(It.IsAny<Guid>());	// Id
+	private static readonly DeleteProduct.Command Command = new(new Fixture().Create<Guid>());	// Id
 
 
 	[Theory(DisplayName = "Delete existing Product succeeds")]

@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using AutoFixture;
+using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Monaco.Template.Backend.Application.Features.Product;
@@ -17,7 +18,7 @@ namespace Monaco.Template.Backend.Application.Tests.Features.Product;
 public class DeleteProductValidatorTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
-	private static readonly DeleteProduct.Command Command = new(It.IsAny<Guid>());	// Id
+	private static readonly DeleteProduct.Command Command = new(new Fixture().Create<Guid>());	// Id
 
 	[Fact(DisplayName = "Validator's rule level cascade mode is 'Stop'")]
 	public void ValidatorRuleLevelCascadeModeIsStop()
@@ -35,10 +36,7 @@ public class DeleteProductValidatorTests
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(product);
 
-		var command = Command with
-					  {
-						  Id = product.Id
-					  };
+		var command = Command with { Id = product.Id };
 
 		var sut = new DeleteProduct.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeRuleSets(ValidatorsExtensions.ExistsRulesetName));
@@ -55,10 +53,7 @@ public class DeleteProductValidatorTests
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(product);
 
-		var command = Command with
-					  {
-						  Id = id
-					  };
+		var command = Command with { Id = id };
 		
 		var sut = new DeleteProduct.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeRuleSets(ValidatorsExtensions.ExistsRulesetName));

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.Extensions.Primitives;
 using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Application.Features.Country;
@@ -7,6 +6,7 @@ using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Common.Tests.Factories;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Country;

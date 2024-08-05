@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using AutoFixture;
+using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Monaco.Template.Backend.Application.Features.Company;
@@ -17,17 +18,21 @@ namespace Monaco.Template.Backend.Application.Tests.Features.Company;
 public class EditCompanyValidatorTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
-	private static readonly EditCompany.Command Command = new(It.IsAny<Guid>(),    // Id
-															  It.IsAny<string>(),  // Name
-															  It.IsAny<string>(),  // Email
-															  It.IsAny<string>(),  // WebSiteUrl
-															  It.IsAny<string>(),  // Street
-															  It.IsAny<string>(),  // City
-															  It.IsAny<string>(),  // County
-															  It.IsAny<string>(),  // PostCode
-															  It.IsAny<Guid>());   // CountryId
+	private static readonly EditCompany.Command Command;
 
-
+	static EditCompanyValidatorTests()
+	{
+		var fixture = new Fixture();
+		Command = new(fixture.Create<Guid>(),     // Id
+					  fixture.Create<string>(),   // Name
+					  fixture.Create<string>(),   // Email
+					  fixture.Create<string>(),   // WebSiteUrl
+					  fixture.Create<string>(),   // Street
+					  fixture.Create<string>(),   // City
+					  fixture.Create<string>(),   // County
+					  fixture.Create<string>(),   // PostCode
+					  fixture.Create<Guid>());    // CountryId
+	}
 
 	[Fact(DisplayName = "Validator's rule level cascade mode is 'Stop'")]
 	public void ValidatorRuleLevelCascadeModeIsStop()
@@ -313,15 +318,33 @@ public class EditCompanyValidatorTests
 		validationResult.ShouldNotHaveValidationErrorFor(x => x.CountryId);
 	}
 
-	[Fact(DisplayName = "Country with null value does not generate validation error")]
-	public async Task CountryWithNullValueDoesNotGenerateError()
+	[Fact(DisplayName = "Country with null value and no other address data does not generate validation error")]
+	public async Task CountryWithNullValueAndNoAddressDataDoesNotGenerateError()
+	{
+		var command = Command with
+					  {
+						  Street = null,
+						  City = null,
+						  County = null,
+						  PostCode = null,
+						  CountryId = null
+					  };
+
+		var sut = new EditCompany.Validator(_dbContextMock.Object);
+		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.CountryId));
+
+		validationResult.ShouldNotHaveValidationErrorFor(x => x.CountryId);
+	}
+
+	[Fact(DisplayName = "Country with null value and other address data generates validation error")]
+	public async Task CountryWithNullValueAndOtherAddressDataDoesNotGenerateError()
 	{
 		var command = Command with { CountryId = null };
 
 		var sut = new EditCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.CountryId));
 
-		validationResult.ShouldNotHaveValidationErrorFor(x => x.CountryId);
+		validationResult.ShouldHaveValidationErrorFor(x => x.CountryId);
 	}
 
 	[Theory(DisplayName = "Country that doesn't exist generates validation error")]

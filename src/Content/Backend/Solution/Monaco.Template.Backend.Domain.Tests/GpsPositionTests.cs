@@ -26,15 +26,16 @@ public class GpsPositionTests
 		   .Be(longitude);
 	}
 
+	[Theory(DisplayName = "New GpsPosition with invalid positions fails")]
 	[InlineData(-91, 0)]
 	[InlineData(91, 0)]
 	[InlineData(0, -181)]
 	[InlineData(0, 181)]
-	[Theory(DisplayName = "New GpsPosition with invalid positions fails")]
 	public void NewGpsPositionWithInvalidPositionsFails(int latitude, int longitude)
 	{
 		var sut = () => new GpsPosition(latitude, longitude);
+
 		sut.Should()
-		   .Throw<ArgumentOutOfRangeException>();
+		   .ThrowExactly<ArgumentOutOfRangeException>();
 	}
 }

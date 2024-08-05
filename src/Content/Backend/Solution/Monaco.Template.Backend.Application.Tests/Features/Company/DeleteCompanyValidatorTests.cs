@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using AutoFixture;
 using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
@@ -8,6 +8,7 @@ using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Common.Tests.Factories;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
@@ -17,7 +18,7 @@ namespace Monaco.Template.Backend.Application.Tests.Features.Company;
 public class DeleteCompanyValidatorTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
-	private static readonly DeleteCompany.Command Command = new(It.IsAny<Guid>());
+	private static readonly DeleteCompany.Command Command = new(new Fixture().Create<Guid>());
 
 	[Fact(DisplayName = "Validator's rule level cascade mode is 'Stop'")]
 	public void ValidatorRuleLevelCascadeModeIsStop()

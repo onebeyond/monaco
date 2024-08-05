@@ -78,7 +78,7 @@ public class FileServiceTests
 		var sut = new FileService(_blobStorageServiceMock.Object);
 
 		await using var stream = new MemoryStream(Convert.FromBase64String(TxtBase64));
-		var action = () => sut.UploadDocumentAsync(null, "sample-text-file.txt", "text/plain", CancellationToken.None);
+		var action = () => sut.UploadDocumentAsync(null!, "sample-text-file.txt", "text/plain", CancellationToken.None);
 
 		await action.Should().ThrowAsync<Exception>();
 		_blobStorageServiceMock.Verify(x => x.UploadTempFileAsync(It.IsAny<Stream>(),

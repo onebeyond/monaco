@@ -2,6 +2,7 @@
 using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
 using System.Diagnostics.CodeAnalysis;
+using Moq;
 using Xunit;
 
 namespace Monaco.Template.Backend.Domain.Tests;
@@ -15,7 +16,7 @@ public class CompanyTests
 	public void NewCompanySucceeds(string name,
 								   string email,
 								   string webSiteUrl,
-								   Address address)
+								   Address? address)
 	{
 		var sut = new Company(name,
 							  email,
@@ -27,6 +28,81 @@ public class CompanyTests
 		sut.WebSiteUrl.Should().Be(webSiteUrl);
 		sut.Address.Should().Be(address);
 		sut.Version.Should().BeNull();
+	}
+
+	[Theory(DisplayName = "New company with empty name fails")]
+	[AnonymousData]
+	public void NewCompanyWithEmptyNameFails(string email,
+											 string webSiteUrl,
+											 Address address)
+	{
+		var sut = () => new Company(string.Empty,
+									email,
+									webSiteUrl,
+									address);
+
+		sut.Should()
+		   .ThrowExactly<ArgumentException>();
+	}
+
+	[Theory(DisplayName = "New company with name too long fails")]
+	[AnonymousData]
+	public void NewCompanyWithNameTooLongFails(string email,
+											   string webSiteUrl,
+											   Address address)
+	{
+		var sut = () => new Company(new string(It.IsAny<char>(), 101),
+									email,
+									webSiteUrl,
+									address);
+
+		sut.Should()
+		   .ThrowExactly<ArgumentException>();
+	}
+
+	[Theory(DisplayName = "New company with empty email fails")]
+	[AnonymousData]
+	public void NewCompanyWithEmptyEmailFails(string name,
+											  string webSiteUrl,
+											  Address address)
+	{
+		var sut = () => new Company(name,
+									string.Empty,
+									webSiteUrl,
+									address);
+
+		sut.Should()
+		   .ThrowExactly<ArgumentException>();
+	}
+
+	[Theory(DisplayName = "New company with email too long fails")]
+	[AnonymousData]
+	public void NewCompanyWithEmailTooLongFails(string name,
+												string webSiteUrl,
+												Address address)
+	{
+		var sut = () => new Company(name,
+									new string(It.IsAny<char>(), 256),
+									webSiteUrl,
+									address);
+
+		sut.Should()
+		   .ThrowExactly<ArgumentException>();
+	}
+
+	[Theory(DisplayName = "New company with webSiteUrl too long fails")]
+	[AnonymousData]
+	public void NewCompanyWithWebSiteUrlTooLongFails(string name,
+													 string email,
+													 Address address)
+	{
+		var sut = () => new Company(name,
+									email,
+									new string(It.IsAny<char>(), 301),
+									address);
+
+		sut.Should()
+		   .ThrowExactly<ArgumentException>();
 	}
 
 	[Theory(DisplayName = "Update company succeeds")]
@@ -48,7 +124,87 @@ public class CompanyTests
 		sut.Address.Should().Be(address);
 		sut.Version.Should().BeNull();
 	}
-	#if (filesSupport)
+
+	[Theory(DisplayName = "Update company with empty name fails")]
+	[AnonymousData]
+	public void UpdateCompanyWithEmptyNameFails(Company sut,
+												string email,
+												string webSiteUrl,
+												Address address)
+	{
+		var call = () => sut.Update(string.Empty,
+									email,
+									webSiteUrl,
+									address);
+
+		call.Should()
+			.ThrowExactly<ArgumentException>();
+	}
+
+	[Theory(DisplayName = "Update company with name too long fails")]
+	[AnonymousData]
+	public void UpdateCompanyWithNameTooLongFails(Company sut,
+												  string email,
+												  string webSiteUrl,
+												  Address address)
+	{
+		var call = () => sut.Update(new string(It.IsAny<char>(), 101),
+									email,
+									webSiteUrl,
+									address);
+
+		call.Should()
+			.ThrowExactly<ArgumentException>();
+	}
+
+	[Theory(DisplayName = "Update company with empty email fails")]
+	[AnonymousData]
+	public void UpdateCompanyWithEmptyEmailFails(Company sut,
+												 string name,
+												 string webSiteUrl,
+												 Address address)
+	{
+		var call = () => sut.Update(name,
+									string.Empty,
+									webSiteUrl,
+									address);
+
+		call.Should()
+			.ThrowExactly<ArgumentException>();
+	}
+
+	[Theory(DisplayName = "Update company with email too long fails")]
+	[AnonymousData]
+	public void UpdateCompanyWithEmailTooLongFails(Company sut,
+												   string name,
+												   string webSiteUrl,
+												   Address address)
+	{
+		var call = () => sut.Update(name,
+									new string(It.IsAny<char>(), 256),
+									webSiteUrl,
+									address);
+
+		call.Should()
+			.ThrowExactly<ArgumentException>();
+	}
+
+	[Theory(DisplayName = "Update company with webSiteUrl too long fails")]
+	[AnonymousData]
+	public void UpdateCompanyWithWebSiteUrlTooLongFails(Company sut,
+														string name,
+														string description,
+														Address address)
+	{
+		var call = () => sut.Update(name,
+									description,
+									new string(It.IsAny<char>(), 301),
+									address);
+
+		call.Should()
+			.ThrowExactly<ArgumentException>();
+	}
+#if (filesSupport)
 
 	[Theory(DisplayName = "Add product succeeds")]
 	[AnonymousData]
@@ -82,5 +238,5 @@ public class CompanyTests
 		   .And
 		   .NotContain(deletedProduct);
 	}
-	#endif
+#endif
 }

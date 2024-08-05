@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using AutoFixture;
+using FluentAssertions;
 using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
@@ -14,15 +15,20 @@ namespace Monaco.Template.Backend.Application.Tests.Features.Company;
 public class CreateCompanyHandlerTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
-	private static readonly CreateCompany.Command Command = new(It.IsAny<string>(), // Name
-																It.IsAny<string>(), // Email
-																It.IsAny<string>(), // WebsiteUrl
-																It.IsAny<string>(), // Street
-																It.IsAny<string>(), // City
-																It.IsAny<string>(), // County
-																It.IsAny<string>(), // PostCode
-																It.IsAny<Guid>()); // CountryId
+	private static readonly CreateCompany.Command Command;
 
+	static CreateCompanyHandlerTests()
+	{
+		var fixture = new Fixture();
+		Command = new(fixture.Create<string>(), // Name
+					  fixture.Create<string>(), // Email
+					  fixture.Create<string>(), // WebsiteUrl
+					  fixture.Create<string>(), // Street
+					  fixture.Create<string>(), // City
+					  fixture.Create<string>(), // County
+					  fixture.Create<string>(), // PostCode
+					  fixture.Create<Guid>()); // CountryId
+	}
 
 	[Theory(DisplayName = "Create new company succeeds")]
 	[AnonymousData]

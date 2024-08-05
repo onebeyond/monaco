@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using AutoFixture;
+using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Monaco.Template.Backend.Application.Features.Company;
@@ -16,14 +17,20 @@ namespace Monaco.Template.Backend.Application.Tests.Features.Company;
 public class CreateCompanyValidatorTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
-	private static readonly CreateCompany.Command Command = new(It.IsAny<string>(),	// Name
-																It.IsAny<string>(),	// Email
-																It.IsAny<string>(),	// WebsiteUrl
-																It.IsAny<string>(),	// Street
-																It.IsAny<string>(),	// City
-																It.IsAny<string>(),	// County
-																It.IsAny<string>(),	// PostCode
-																It.IsAny<Guid>());	// CountryId
+	private static readonly CreateCompany.Command Command;
+
+	static CreateCompanyValidatorTests()
+	{
+		var fixture = new Fixture();
+		Command = new(fixture.Create<string>(), // Name
+					  fixture.Create<string>(), // Email
+					  fixture.Create<string>(), // WebsiteUrl
+					  fixture.Create<string>(), // Street
+					  fixture.Create<string>(), // City
+					  fixture.Create<string>(), // County
+					  fixture.Create<string>(), // PostCode
+					  fixture.Create<Guid>()); // CountryId
+	}
 
 	[Fact(DisplayName = "Validator's rule level cascade mode is 'Stop'")]
 	public void ValidatorRuleLevelCascadeModeIsStop()

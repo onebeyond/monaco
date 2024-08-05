@@ -23,4 +23,15 @@ public class ImageDimensionsTests
 		   .Should()
 		   .Be(width);
 	}
+
+	[Theory(DisplayName = "New ImageDimensions with negative values throws")]
+	[InlineData(-1, 1)]
+	[InlineData(1, -1)]
+	public void NewImageDimensionsWithNegativeValuesThrows(int height, int width)
+	{
+		var sut = () => new ImageDimensions(height, width);
+
+		sut.Should()
+		   .ThrowExactly<ArgumentOutOfRangeException>();
+	}
 }
