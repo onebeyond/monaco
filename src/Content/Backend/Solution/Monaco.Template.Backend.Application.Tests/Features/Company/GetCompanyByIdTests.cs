@@ -2,7 +2,7 @@
 using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Common.Tests.Factories.Entities;
+using Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
@@ -27,8 +27,11 @@ public class GetCompanyByIdTests
 		var sut = new GetCompanyById.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(query, new CancellationToken());
 
-		result.Should().NotBeNull();
-		result!.Name.Should().Be(company.Name);
+		result.Should()
+			  .NotBeNull();
+		result!.Name
+			   .Should()
+			   .Be(company.Name);
 	}
 
 	[Fact(DisplayName = "Get non-existing company by Id fails")]
@@ -41,6 +44,7 @@ public class GetCompanyByIdTests
 		var sut = new GetCompanyById.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(query, new CancellationToken());
 
-		result.Should().BeNull();
+		result.Should()
+			  .BeNull();
 	}
 }

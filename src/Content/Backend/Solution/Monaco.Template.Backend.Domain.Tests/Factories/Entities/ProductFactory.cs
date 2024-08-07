@@ -1,24 +1,25 @@
 ﻿using AutoFixture;
+using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Model;
 using Moq;
 
-namespace Monaco.Template.Backend.Common.Tests.Factories.Entities;
+namespace Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 
 public static class ProductFactory
 {
 	public static Product Create() =>
-		new Fixture().RegisterImage()
-					 .RegisterAddress()
-					 .RegisterCompany()
-					 .RegisterProduct()
-					 .Create<Product>();
+		FixtureFactory.Create(f => f.RegisterImage()
+									.RegisterAddress()
+									.RegisterCompany()
+									.RegisterProduct())
+					  .Create<Product>();
 
 	public static IEnumerable<Product> CreateMany() =>
-		new Fixture().RegisterImage()
-					 .RegisterAddress()
-					 .RegisterCompany()
-					 .RegisterProductMock()
-					 .CreateMany<Product>();
+		FixtureFactory.Create(f => f.RegisterImage()
+									.RegisterAddress()
+									.RegisterCompany()
+									.RegisterProductMock())
+					  .CreateMany<Product>();
 }
 
 public static class ProductFactoryExtension

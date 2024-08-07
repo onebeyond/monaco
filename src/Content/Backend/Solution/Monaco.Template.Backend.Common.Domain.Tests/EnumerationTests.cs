@@ -1,8 +1,7 @@
-﻿using AutoFixture;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Monaco.Template.Backend.Common.Domain.Model;
-using Monaco.Template.Backend.Common.Tests.Factories;
-using Moq;
+using Monaco.Template.Backend.Common.Domain.Tests.Factories;
+using Monaco.Template.Backend.Common.Domain.Tests.Factories.Entities;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
@@ -13,36 +12,37 @@ namespace Monaco.Template.Backend.Common.Domain.Tests;
 public class EnumerationTests
 {
 	[Theory(DisplayName = "New enumeration instance succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewEnumerationInstanceSucceeds(Guid id, string name)
 	{
-		var fixture = new Fixture();
-		fixture.Customize<Enumeration>(c => c.FromFactory(() => new Mock<Enumeration>(id, name) { CallBase = true }.Object));
+		var sut = EnumerationFactory.CreateMock((id, name));
 
-		var sut = fixture.Create<Enumeration>();
-
-		sut.Id.Should().Be(id);
-		sut.Name.Should().Be(name);
+		sut.Id
+		   .Should()
+		   .Be(id);
+		sut.Name
+		   .Should()
+		   .Be(name);
 	}
 
 	[Theory(DisplayName = "Enumeration to string is name")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void EnumerationToStringIsName(Guid id, string name)
 	{
-		var fixture = new Fixture();
-		fixture.Customize<Enumeration>(c => c.FromFactory(() => new Mock<Enumeration>(id, name) { CallBase = true }.Object));
+		var sut = EnumerationFactory.CreateMock((id, name));
 
-		var sut = fixture.Create<Enumeration>();
-
-		sut.ToString().Should().Be(name);
+		sut.ToString()
+		   .Should()
+		   .Be(name);
 	}
 
 	[Fact(DisplayName = "Get all items from Enumeration succeeds")]
-	public void GetAllItemsFromEnumerationSucceeds()
-	{
+	public void GetAllItemsFromEnumerationSucceeds() =>
 		Enumeration.GetAll<DummyEnumerationDerived>()
-				   .Should().HaveCount(2).And.Contain(new[] { DummyEnumerationDerived.Item3, DummyEnumerationDerived.Item4 });
-	}
+				   .Should()
+				   .HaveCount(2)
+				   .And
+				   .Contain([DummyEnumerationDerived.Item3, DummyEnumerationDerived.Item4]);
 
 	[Fact(DisplayName = "Get an enumeration item from its value succeeds")]
 	public void GetAnEnumerationItemFromItsValueSucceeds()
@@ -50,17 +50,21 @@ public class EnumerationTests
 		var action = () => Enumeration.From<DummyEnumeration>(DummyEnumeration.Item1.Id);
 		var result = action.Invoke();
 
-		action.Should().NotThrow();
-		result.Should().Be(DummyEnumeration.Item1);
+		action.Should()
+			  .NotThrow();
+		result.Should()
+			  .Be(DummyEnumeration.Item1);
 	}
 
 	[Theory(DisplayName = "Get an enumeration item from invalid value fails")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void GetAnEnumerationItemFromInvalidValueFails(Guid id)
 	{
 		Action action = () => Enumeration.From<DummyEnumeration>(id);
 
-		action.Should().Throw<InvalidOperationException>().WithMessage($"'{id}' is not a valid value in {typeof(DummyEnumeration)}");
+		action.Should()
+			  .Throw<InvalidOperationException>()
+			  .WithMessage($"'{id}' is not a valid value in {typeof(DummyEnumeration)}");
 	}
 
 	[Fact(DisplayName = "Get an enumeration item from its name succeeds")]
@@ -69,24 +73,29 @@ public class EnumerationTests
 		var action = () => Enumeration.From<DummyEnumeration>(DummyEnumeration.Item1.Name);
 		var result = action.Invoke();
 
-		action.Should().NotThrow();
-		result.Should().Be(DummyEnumeration.Item1);
+		action.Should()
+			  .NotThrow();
+		result.Should()
+			  .Be(DummyEnumeration.Item1);
 	}
 
 	[Theory(DisplayName = "Get an enumeration item from invalid value fails")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void GetAnEnumerationItemFromInvalidNameFails(string name)
 	{
-		Action action = () => Enumeration.From<DummyEnumeration>(name);
+		var action = () => Enumeration.From<DummyEnumeration>(name);
 
-		action.Should().Throw<InvalidOperationException>().WithMessage($"'{name}' is not a valid display name in {typeof(DummyEnumeration)}");
+		action.Should()
+			  .Throw<InvalidOperationException>()
+			  .WithMessage($"'{name}' is not a valid display name in {typeof(DummyEnumeration)}");
 	}
 
 	[Fact(DisplayName = "Enumeration compare succeeds")]
-	public void EnumerationCompareSucceds()
-	{
-		DummyEnumeration.Item1.CompareTo(DummyEnumeration.Item1).Should().Be(0);
-	}
+	public void EnumerationCompareSucceds() =>
+		DummyEnumeration.Item1
+						.CompareTo(DummyEnumeration.Item1)
+						.Should()
+						.Be(0);
 
 	#region Dummy Enumerations
 

@@ -8,12 +8,12 @@ using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Application.Services.Contracts;
 #endif
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Common.Tests.Factories;
 #if (filesSupport)
 using Monaco.Template.Backend.Domain.Model;
 #endif
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
@@ -29,7 +29,7 @@ public class DeleteCompanyHandlerTests
 	#endif
 
 	[Theory(DisplayName = "Delete company succeeds")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	#if (filesSupport)
 	public async Task DeleteCompanySucceeds(IFixture fixture, Domain.Model.Product[] products)
 	#else

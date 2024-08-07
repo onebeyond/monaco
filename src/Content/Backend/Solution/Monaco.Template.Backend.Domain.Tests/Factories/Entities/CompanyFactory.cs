@@ -1,20 +1,21 @@
 ﻿using AutoFixture;
+using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Model;
 using Moq;
 
-namespace Monaco.Template.Backend.Common.Tests.Factories.Entities;
+namespace Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 
 public static class CompanyFactory
 {
 	public static Company Create() =>
-		new Fixture().RegisterCompany()
-					 .RegisterAddress()
-					 .Create<Company>();
+		FixtureFactory.Create(f => f.RegisterCompany()
+									.RegisterAddress())
+					  .Create<Company>();
 
 	public static IEnumerable<Company> CreateMany() =>
-		new Fixture().RegisterCompanyMock()
-					 .RegisterAddress()
-					 .CreateMany<Company>();
+		FixtureFactory.Create(f => f.RegisterCompanyMock()
+									.RegisterAddress())
+					  .CreateMany<Company>();
 }
 
 public static class CompanyFactoryExtension
@@ -37,9 +38,9 @@ public static class CompanyFactoryExtension
 														  fixture.Create<string>(),
 														  fixture.Create<Address>());
 							 mock.SetupGet(x => x.Id).Returns(Guid.NewGuid());
-							 #if (filesSupport)
+#if (filesSupport)
 							 mock.SetupGet(x => x.Products).Returns(new List<Product>());
-							 #endif
+#endif
 							 return mock.Object;
 						 });
 		return fixture;

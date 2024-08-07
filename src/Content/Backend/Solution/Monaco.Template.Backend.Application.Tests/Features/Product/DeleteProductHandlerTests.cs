@@ -4,8 +4,8 @@ using Monaco.Template.Backend.Application.Features.Product;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
@@ -22,7 +22,7 @@ public class DeleteProductHandlerTests
 
 
 	[Theory(DisplayName = "Delete existing Product succeeds")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task DeleteExistingProductSucceeds(Domain.Model.Product product)
 	{
 		var pictures = product.Pictures

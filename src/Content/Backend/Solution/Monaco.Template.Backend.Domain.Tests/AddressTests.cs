@@ -1,9 +1,11 @@
 ﻿using FluentAssertions;
-using Monaco.Template.Backend.Common.Tests.Factories;
+using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Model;
-using System.Diagnostics.CodeAnalysis;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
+using AutoFixture;
 using Xunit;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 
 namespace Monaco.Template.Backend.Domain.Tests;
 
@@ -12,7 +14,7 @@ namespace Monaco.Template.Backend.Domain.Tests;
 public class AddressTests
 {
 	[Theory(DisplayName = "New address succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewAddressSucceeds(string? street,
 								   string? city,
 								   string? county,
@@ -34,7 +36,7 @@ public class AddressTests
 	}
 
 	[Theory(DisplayName = "New address with only country succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewAddressWithOnlyCountrySucceeds(Country country)
 	{
 		var sut = new Address(null,
@@ -47,7 +49,7 @@ public class AddressTests
 	}
 
 	[Theory(DisplayName = "New address with Street too long throws")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewAddressWithStreetTooLongThrows(Country country)
 	{
 		var street = new string(It.IsAny<char>(), 101);
@@ -63,7 +65,7 @@ public class AddressTests
 	}
 
 	[Theory(DisplayName = "New address with City too long throws")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewAddressWithCityTooLongThrows(Country country)
 	{
 		var city = new string(It.IsAny<char>(), 101);
@@ -79,7 +81,7 @@ public class AddressTests
 	}
 
 	[Theory(DisplayName = "New address with County too long throws")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewAddressWithCountyTooLongThrows(Country country)
 	{
 		var county = new string(It.IsAny<char>(), 101);
@@ -95,7 +97,7 @@ public class AddressTests
 	}
 
 	[Theory(DisplayName = "New address with PostCode too long throws")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewAddressWithPostCodeTooLongThrows(Country country)
 	{
 		var postCode = new string(It.IsAny<char>(), 11);

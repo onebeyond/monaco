@@ -6,7 +6,7 @@ using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Common.Tests.Factories;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
@@ -39,11 +39,13 @@ public class EditCompanyValidatorTests
 	{
 		var sut = new EditCompany.Validator(_dbContextMock.Object);
 
-		sut.RuleLevelCascadeMode.Should().Be(CascadeMode.Stop);
+		sut.RuleLevelCascadeMode
+		   .Should()
+		   .Be(CascadeMode.Stop);
 	}
 
 	[Theory(DisplayName = "Existing company passes validation correctly")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task ExistingCompanyPassesValidationCorrectly(Domain.Model.Company company)
 	{
 		var command = Command with { Id = company.Id, CountryId = Guid.NewGuid() };
@@ -53,12 +55,14 @@ public class EditCompanyValidatorTests
 		var sut = new EditCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeRuleSets(ValidatorsExtensions.ExistsRulesetName));
 
-		validationResult.RuleSetsExecuted.Should().Contain(ValidatorsExtensions.ExistsRulesetName);
+		validationResult.RuleSetsExecuted
+						.Should()
+						.Contain(ValidatorsExtensions.ExistsRulesetName);
 		validationResult.ShouldNotHaveAnyValidationErrors();
 	}
 
 	[Theory(DisplayName = "Non existing company generates validation error")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task NonExistingCompanyGeneratesError(Domain.Model.Company company, Guid id)
 	{
 		var command = Command with { Id = id, CountryId = Guid.NewGuid() };
@@ -68,7 +72,9 @@ public class EditCompanyValidatorTests
 		var sut = new EditCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeRuleSets(ValidatorsExtensions.ExistsRulesetName));
 
-		validationResult.RuleSetsExecuted.Should().Contain(ValidatorsExtensions.ExistsRulesetName);
+		validationResult.RuleSetsExecuted
+						.Should()
+						.Contain(ValidatorsExtensions.ExistsRulesetName);
 		validationResult.ShouldHaveValidationErrorFor(x => x.Id);
 	}
 
@@ -115,7 +121,7 @@ public class EditCompanyValidatorTests
 	}
 
 	[Theory(DisplayName = "Name which already exists generates validation error")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task NameAlreadyExistsGeneratesError(Domain.Model.Company company, Guid id)
 	{
 		var command = Command with { Id = id, Name = company.Name };
@@ -159,7 +165,7 @@ public class EditCompanyValidatorTests
 	}
 
 	[Theory(DisplayName = "Email being invalid generates validation error")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task EmailAddressIsInvalidGeneratesError(string email)
 	{
 		var command = Command with { Email = email };
@@ -304,7 +310,7 @@ public class EditCompanyValidatorTests
 	}
 
 	[Theory(DisplayName = "Country being valid does not generate validation error")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task CountryIsValidDoesNotGenerateError(Domain.Model.Country country)
 	{
 		var command = Command with { CountryId = country.Id };
@@ -348,7 +354,7 @@ public class EditCompanyValidatorTests
 	}
 
 	[Theory(DisplayName = "Country that doesn't exist generates validation error")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task CountryMustExistValidation(Domain.Model.Country country)
 	{
 		var command = Command with { CountryId = Guid.NewGuid() };

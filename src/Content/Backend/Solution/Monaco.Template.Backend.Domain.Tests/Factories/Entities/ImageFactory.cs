@@ -1,18 +1,19 @@
 ﻿using AutoFixture;
+using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Model;
 using Moq;
 
-namespace Monaco.Template.Backend.Common.Tests.Factories.Entities;
+namespace Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 
 public class ImageFactory
 {
 	public static Image Create() =>
-		new Fixture().RegisterImage()
-					 .Create<Image>();
+		FixtureFactory.Create(f => f.RegisterImage())
+					  .Create<Image>();
 
 	public static IEnumerable<Image> CreateMany() =>
-		new Fixture().RegisterImage()
-					 .CreateMany<Image>();
+		FixtureFactory.Create(f => f.RegisterImage())
+					  .CreateMany<Image>();
 }
 
 public static class ImageFactoryExtension

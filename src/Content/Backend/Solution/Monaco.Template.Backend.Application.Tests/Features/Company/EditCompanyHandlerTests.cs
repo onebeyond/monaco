@@ -3,8 +3,8 @@ using FluentAssertions;
 using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
@@ -34,7 +34,7 @@ public class EditCompanyHandlerTests
 	}
 
 	[Theory(DisplayName = "Edit company succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task EditCompanySucceeds(Domain.Model.Country country)
 	{
 		_dbContextMock.CreateEntityMockAndSetupDbSetMock<AppDbContext, Domain.Model.Company>(out var companyMock)
@@ -51,7 +51,12 @@ public class EditCompanyHandlerTests
 										 It.IsAny<Address>()),
 						   Times.Once);
 		_dbContextMock.Verify(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()), Times.Once);
-		result.ValidationResult.IsValid.Should().BeTrue();
-		result.ItemNotFound.Should().BeFalse();
+		result.ValidationResult
+			  .IsValid
+			  .Should()
+			  .BeTrue();
+		result.ItemNotFound
+			  .Should()
+			  .BeFalse();
 	}
 }

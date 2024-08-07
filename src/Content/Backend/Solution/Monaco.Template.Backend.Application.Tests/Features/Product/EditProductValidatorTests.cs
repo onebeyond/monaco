@@ -6,8 +6,8 @@ using Monaco.Template.Backend.Application.Features.Product;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
@@ -44,7 +44,7 @@ public class EditProductValidatorTests
 	}
 
 	[Theory(DisplayName = "Existing Product passes validation correctly")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task ExistingProductPassesValidationCorrectly(Domain.Model.Product product)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(product);
@@ -61,7 +61,7 @@ public class EditProductValidatorTests
 	}
 
 	[Theory(DisplayName = "Non existing Product generates validation error")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task NonExistingProductGeneratesError(Domain.Model.Product product, Guid id)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(product);
@@ -78,7 +78,7 @@ public class EditProductValidatorTests
 	}
 
 	[Theory(DisplayName = "Title being valid does not generate validation error")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task TitleDoesNotGenerateErrorWhenValid(Domain.Model.Product product, Guid id)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(product);
@@ -125,7 +125,7 @@ public class EditProductValidatorTests
 	}
 
 	[Theory(DisplayName = "Title which already exists generates validation error")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task TitleAlreadyExistsGeneratesError(Domain.Model.Product product, Guid id)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(product);
@@ -215,7 +215,7 @@ public class EditProductValidatorTests
 	}
 
 	[Theory(DisplayName = "CompanyId being valid does not generate validation error")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task CompanyIdDoesNotGenerateErrorWhenValid(Domain.Model.Company[] companies)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(companies);
@@ -259,7 +259,7 @@ public class EditProductValidatorTests
 	}
 
 	[Theory(DisplayName = "Pictures being valid does not generate validation error")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task PicturesDoesNotGenerateErrorWhenValid(Domain.Model.Product[] products, Image[] newPictures)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(products);
@@ -337,7 +337,7 @@ public class EditProductValidatorTests
 	}
 
 	[Theory(DisplayName = "Default Picture being valid does not generate validation error")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task DefaultPictureDoesNotGenerateErrorWhenValid(Guid[] picturesIds)
 	{
 		var command = Command with

@@ -1,8 +1,8 @@
 ﻿using FluentAssertions;
-using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
-using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
 namespace Monaco.Template.Backend.Domain.Tests;
@@ -12,7 +12,7 @@ namespace Monaco.Template.Backend.Domain.Tests;
 public class CompanyTests
 {
 	[Theory(DisplayName = "New company succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewCompanySucceeds(string name,
 								   string email,
 								   string webSiteUrl,
@@ -31,7 +31,7 @@ public class CompanyTests
 	}
 
 	[Theory(DisplayName = "New company with empty name fails")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewCompanyWithEmptyNameFails(string email,
 											 string webSiteUrl,
 											 Address address)
@@ -46,7 +46,7 @@ public class CompanyTests
 	}
 
 	[Theory(DisplayName = "New company with name too long fails")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewCompanyWithNameTooLongFails(string email,
 											   string webSiteUrl,
 											   Address address)
@@ -61,7 +61,7 @@ public class CompanyTests
 	}
 
 	[Theory(DisplayName = "New company with empty email fails")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewCompanyWithEmptyEmailFails(string name,
 											  string webSiteUrl,
 											  Address address)
@@ -76,7 +76,7 @@ public class CompanyTests
 	}
 
 	[Theory(DisplayName = "New company with email too long fails")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewCompanyWithEmailTooLongFails(string name,
 												string webSiteUrl,
 												Address address)
@@ -91,7 +91,7 @@ public class CompanyTests
 	}
 
 	[Theory(DisplayName = "New company with webSiteUrl too long fails")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewCompanyWithWebSiteUrlTooLongFails(string name,
 													 string email,
 													 Address address)
@@ -106,7 +106,7 @@ public class CompanyTests
 	}
 
 	[Theory(DisplayName = "Update company succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void UpdateCompanySucceeds(Company sut,
 									  string name,
 									  string email,
@@ -126,7 +126,7 @@ public class CompanyTests
 	}
 
 	[Theory(DisplayName = "Update company with empty name fails")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void UpdateCompanyWithEmptyNameFails(Company sut,
 												string email,
 												string webSiteUrl,
@@ -142,7 +142,7 @@ public class CompanyTests
 	}
 
 	[Theory(DisplayName = "Update company with name too long fails")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void UpdateCompanyWithNameTooLongFails(Company sut,
 												  string email,
 												  string webSiteUrl,
@@ -158,7 +158,7 @@ public class CompanyTests
 	}
 
 	[Theory(DisplayName = "Update company with empty email fails")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void UpdateCompanyWithEmptyEmailFails(Company sut,
 												 string name,
 												 string webSiteUrl,
@@ -174,7 +174,7 @@ public class CompanyTests
 	}
 
 	[Theory(DisplayName = "Update company with email too long fails")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void UpdateCompanyWithEmailTooLongFails(Company sut,
 												   string name,
 												   string webSiteUrl,
@@ -190,7 +190,7 @@ public class CompanyTests
 	}
 
 	[Theory(DisplayName = "Update company with webSiteUrl too long fails")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void UpdateCompanyWithWebSiteUrlTooLongFails(Company sut,
 														string name,
 														string description,
@@ -207,7 +207,7 @@ public class CompanyTests
 #if (filesSupport)
 
 	[Theory(DisplayName = "Add product succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void AddProductSucceeds(Company sut, Product product)
 	{
 		var originalProductCount = sut.Products.Count;
@@ -220,7 +220,7 @@ public class CompanyTests
 	}
 
 	[Theory(DisplayName = "Remove product succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void RemoveProductSucceeds(Company sut, Product[] products)
 	{
 		foreach (var product in products)

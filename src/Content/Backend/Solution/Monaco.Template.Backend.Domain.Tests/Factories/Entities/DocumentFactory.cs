@@ -1,18 +1,19 @@
 ﻿using AutoFixture;
+using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Model;
 using Moq;
 
-namespace Monaco.Template.Backend.Common.Tests.Factories.Entities;
+namespace Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 
 public class DocumentFactory
 {
 	public static Document Create() =>
-		new Fixture().RegisterDocument()
-					 .Create<Document>();
+		FixtureFactory.Create(f => f.RegisterDocument())
+					  .Create<Document>();
 
 	public static IEnumerable<Document> CreateMany() =>
-		new Fixture().RegisterDocument()
-					 .CreateMany<Document>();
+		FixtureFactory.Create(f => f.RegisterDocument())
+					  .CreateMany<Document>();
 }
 
 public static class DocumentFactoryExtension

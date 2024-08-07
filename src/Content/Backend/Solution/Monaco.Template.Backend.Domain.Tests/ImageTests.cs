@@ -1,8 +1,8 @@
-﻿using Monaco.Template.Backend.Domain.Model;
+﻿using FluentAssertions;
+using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
-using FluentAssertions;
-using Monaco.Template.Backend.Common.Tests.Factories;
 using Xunit;
 
 namespace Monaco.Template.Backend.Domain.Tests;
@@ -12,7 +12,7 @@ namespace Monaco.Template.Backend.Domain.Tests;
 public class ImageTests
 {
 	[Theory(DisplayName = "New Image succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewImageSucceeds(Guid id,
 								 string name,
 								 string extension,

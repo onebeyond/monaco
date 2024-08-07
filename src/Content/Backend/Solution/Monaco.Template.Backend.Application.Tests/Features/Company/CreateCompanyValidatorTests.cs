@@ -5,7 +5,7 @@ using FluentValidation.TestHelper;
 using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Common.Tests.Factories;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
@@ -83,7 +83,7 @@ public class CreateCompanyValidatorTests
 	}
 
 	[Theory(DisplayName = "Name which already exists generates validation error")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task NameAlreadyExistsGeneratesError(Domain.Model.Company company)
 	{
 		var command = Command with { Name = company.Name };
@@ -127,7 +127,7 @@ public class CreateCompanyValidatorTests
 	}
 
 	[Theory(DisplayName = "Email being invalid generates validation error")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task EmailAddressIsInvalidGeneratesError(string email)
 	{
 		var command = Command with { Email = email };
@@ -272,7 +272,7 @@ public class CreateCompanyValidatorTests
 	}
 
 	[Theory(DisplayName = "Country being valid does not generate validation error")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task CountryIsValidDoesNotGenerateError(Domain.Model.Country country)
 	{
 		var command = Command with { CountryId = country.Id };
@@ -335,7 +335,7 @@ public class CreateCompanyValidatorTests
 	}
 
 	[Theory(DisplayName = "Country that doesn't exist generates validation error")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task CountryMustExistValidation(Domain.Model.Country country)
 	{
 		var command = Command with { CountryId = Guid.NewGuid() };

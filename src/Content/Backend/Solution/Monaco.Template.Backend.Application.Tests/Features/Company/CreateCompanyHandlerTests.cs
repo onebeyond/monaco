@@ -3,7 +3,7 @@ using FluentAssertions;
 using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Common.Tests.Factories;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
@@ -31,7 +31,7 @@ public class CreateCompanyHandlerTests
 	}
 
 	[Theory(DisplayName = "Create new company succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task CreateNewCompanySucceeds(Domain.Model.Country country)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Company>(), out var companyDbSetMock)

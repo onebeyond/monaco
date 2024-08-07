@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
-using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
@@ -12,7 +12,7 @@ namespace Monaco.Template.Backend.Domain.Tests;
 public class CountryTests
 {
 	[Theory(DisplayName = "New country succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewCountrySucceeds(string name)
 	{
 		var sut = new Country(name);

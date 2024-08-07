@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 using Monaco.Template.Backend.Common.Domain.Model;
-using Monaco.Template.Backend.Common.Tests.Factories;
+using Monaco.Template.Backend.Common.Domain.Tests.Factories;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
@@ -11,46 +11,60 @@ namespace Monaco.Template.Backend.Common.Domain.Tests;
 public class ValueObjectTests
 {
 	[Theory(DisplayName = "New ValueObject instance succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewValueObjectInstanceSucceeds(string field1, string? field2)
 	{
 		var sut = new DummyValueObject(field1, field2);
 
-		sut.Field1.Should().Be(field1);
-		sut.Field2.Should().Be(field2);
+		sut.Field1
+		   .Should()
+		   .Be(field1);
+		sut.Field2
+		   .Should()
+		   .Be(field2);
 	}
 
 	[Theory(DisplayName = "Different ValueObject instances with same values are equal")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void DifferentValueObjectInstancesWithSameValuesAreEqual(string field1, string? field2)
 	{
 		var val1 = new DummyValueObject(field1, field2);
 		var val2 = new DummyValueObject(field1, field2);
 
-		(val1 == val2).Should().BeTrue();
-		val1.Equals(val2).Should().BeTrue();
+		(val1 == val2).Should()
+					  .BeTrue();
+		val1.Equals(val2)
+			.Should()
+			.BeTrue();
 	}
 
 	[Theory(DisplayName = "Different ValueObject instances with same values are not equal")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void DifferentValueObjectInstancesWithDifferentValuesAreNotEqual(string field1, string? field2, string? field3)
 	{
 		var val1 = new DummyValueObject(field1, field2);
 		var val2 = new DummyValueObject(field1, field3);
 
-		(val1 != val2).Should().BeTrue();
-		val1.Equals(val2).Should().BeFalse();
+		(val1 != val2).Should()
+					  .BeTrue();
+		val1.Equals(val2)
+			.Should()
+			.BeFalse();
 	}
 
 	[Theory(DisplayName = "Different ValueObject instances with same values are not equal")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void ValueObjectComparedAgainstNullIsNotEqual(string field1, string? field2)
 	{
-		var sut = new DummyValueObject(field1, field2);
+		DummyValueObject? sut = null;
+		var action = () => sut = new DummyValueObject(field1, field2);
+		action.Invoke();
 
-		// ReSharper disable once ConditionIsAlwaysTrueOrFalse
-		(sut == null).Should().BeFalse();
-		sut!.Equals(null).Should().BeFalse();
+		(sut == null).Should()
+					 .BeFalse();
+		sut!.Equals(null)
+			.Should()
+			.BeFalse();
 	}
 
 	#region Dummy ValueObjects
