@@ -54,8 +54,6 @@ public static class FileFactoryExtensions
 															   ]) { CallBase = true };
 								 mock.SetupGet(x => x.UploadedOn)
 									 .Returns(value?.UploadedOn ?? fixture.Create<DateTime>());
-								 //mock.Setup(x => x.MakePermanent())
-									// .CallBase();
 								 return mock.Object;
 							 }
 							 catch (Exception e)
