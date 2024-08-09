@@ -139,42 +139,54 @@ public class FileTests
 		   .WithInnerException<ArgumentException>();
 	}
 
-	[Theory(DisplayName = "New File with negative or zero size fails")]
+	[Theory(DisplayName = "New File with negative size fails")]
 	[AutoDomainData]
-	public void NewFileWithNegativeOrZeroSizeFails(Guid id,
-												   string name,
-												   string extension,
-												   long size,
-												   string contentType,
-												   bool isTemp,
-												   DateTime uploadedOn)
+	public void NewFileWithNegativeSizeFails(Guid id,
+											 string name,
+											 string extension,
+											 long size,
+											 string contentType,
+											 bool isTemp,
+											 DateTime uploadedOn)
 	{
 		extension = extension[..File.ExtensionLength];
 
-		var sutNegative = () => FileFactory.CreateMock((id,
-														name,
-														extension,
-														-Math.Abs(size),
-														contentType,
-														isTemp,
-														uploadedOn));
+		var sut = () => FileFactory.CreateMock((id,
+												name,
+												extension,
+												-Math.Abs(size),
+												contentType,
+												isTemp,
+												uploadedOn));
+		sut.Should()
+		   .Throw<Exception>()
+		   .WithInnerException<Exception>()
+		   .WithInnerException<ArgumentOutOfRangeException>();
+	}
 
-		var sutZero = () => FileFactory.CreateMock((id,
-													name,
-													extension,
-													default,
-													contentType,
-													isTemp,
-													uploadedOn));
+	[Theory(DisplayName = "New File with zero size fails")]
+	[AutoDomainData]
+	public void NewFileWithZeroSizeFails(Guid id,
+										 string name,
+										 string extension,
+										 string contentType,
+										 bool isTemp,
+										 DateTime uploadedOn)
+	{
+		extension = extension[..File.ExtensionLength];
 
-		sutNegative.Should()
-				   .Throw<Exception>()
-				   .WithInnerException<Exception>()
-				   .WithInnerException<ArgumentOutOfRangeException>();
-		sutZero.Should()
-			   .Throw<Exception>()
-			   .WithInnerException<Exception>()
-			   .WithInnerException<ArgumentOutOfRangeException>();
+		var sut = () => FileFactory.CreateMock((id,
+												name,
+												extension,
+												default,
+												contentType,
+												isTemp,
+												uploadedOn));
+
+		sut.Should()
+		   .Throw<Exception>()
+		   .WithInnerException<Exception>()
+		   .WithInnerException<ArgumentOutOfRangeException>();
 	}
 
 	[Theory(DisplayName = "New File with empty content type fails")]
