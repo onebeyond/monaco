@@ -79,7 +79,7 @@ public class EditProductValidatorTests
 
 	[Theory(DisplayName = "Title being valid does not generate validation error")]
 	[AutoDomainData(true)]
-	public async Task TitleValidDoesNotGenerateError(Domain.Model.Product product, Guid id, string title)
+	public async Task TitleValidDoesNotGenerateError(Domain.Model.Product product)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(product);
 		

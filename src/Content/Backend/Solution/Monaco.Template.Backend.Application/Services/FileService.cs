@@ -10,7 +10,7 @@ using Image = Monaco.Template.Backend.Domain.Model.Image;
 
 namespace Monaco.Template.Backend.Application.Services;
 
-public class FileService : IFileService
+internal class FileService : IFileService
 {
 	private readonly IBlobStorageService _blobStorageService;
 

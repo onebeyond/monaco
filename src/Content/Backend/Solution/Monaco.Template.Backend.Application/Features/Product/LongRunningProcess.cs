@@ -11,7 +11,7 @@ public class LongRunningProcess
 						  string Price,
 						  Guid CompanyId) : IRequest;
 
-	public sealed class Handler : IRequestHandler<Command>
+	internal sealed class Handler : IRequestHandler<Command>
 	{
 		public Task Handle(Command request, CancellationToken cancellationToken)
 		{

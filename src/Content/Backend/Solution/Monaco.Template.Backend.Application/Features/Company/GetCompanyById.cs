@@ -11,7 +11,7 @@ public sealed class GetCompanyById
 {
 	public record Query(Guid Id) : QueryByIdBase<CompanyDto?>(Id);
 
-	public sealed class Handler : IRequestHandler<Query, CompanyDto?>
+	internal sealed class Handler : IRequestHandler<Query, CompanyDto?>
 	{
 		private readonly AppDbContext _dbContext;
 

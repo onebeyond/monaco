@@ -25,7 +25,7 @@ public class CreateProduct
 						  Guid[] Pictures,
 						  Guid DefaultPictureId) : CommandBase<Guid>;
 
-	public sealed class Validator : AbstractValidator<Command>
+	internal sealed class Validator : AbstractValidator<Command>
 	{
 		public Validator(AppDbContext dbContext)
 		{
@@ -65,7 +65,7 @@ public class CreateProduct
 		}
 	}
 
-	public sealed class Handler : IRequestHandler<Command, CommandResult<Guid>>
+	internal sealed class Handler : IRequestHandler<Command, CommandResult<Guid>>
 	{
 		private readonly AppDbContext _dbContext;
 #if (massTransitIntegration)

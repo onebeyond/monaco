@@ -19,7 +19,7 @@ public sealed class CreateCompany
 					      string? PostCode,
 					      Guid? CountryId) : CommandBase<Guid>;
 
-	public sealed class Validator : AbstractValidator<Command>
+	internal sealed class Validator : AbstractValidator<Command>
 	{
 		public Validator(AppDbContext dbContext)
 		{
@@ -59,7 +59,7 @@ public sealed class CreateCompany
 		}
 	}
 
-	public sealed class Handler : IRequestHandler<Command, CommandResult<Guid>>
+	internal sealed class Handler : IRequestHandler<Command, CommandResult<Guid>>
 	{
 		private readonly AppDbContext _dbContext;
 

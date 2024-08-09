@@ -10,7 +10,7 @@ public sealed class CreateFile
 {
 	public record Command(Stream Stream, string FileName, string ContentType) : CommandBase<Guid>;
 
-	public class Validator : AbstractValidator<Command>
+	internal class Validator : AbstractValidator<Command>
 	{
 		public Validator()
 		{
@@ -31,7 +31,7 @@ public sealed class CreateFile
 	}
 
 	#if (filesSupport)
-	public sealed class Handler : IRequestHandler<Command, CommandResult<Guid>>
+	internal sealed class Handler : IRequestHandler<Command, CommandResult<Guid>>
 	{
 		private readonly AppDbContext _dbContext;
 		private readonly IFileService _fileService;
