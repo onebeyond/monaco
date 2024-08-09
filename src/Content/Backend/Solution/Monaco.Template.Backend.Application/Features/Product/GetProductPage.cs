@@ -10,7 +10,6 @@ using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
 namespace Monaco.Template.Backend.Application.Features.Product;
 
-
 public class GetProductPage
 {
 	public record Query(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryPagedBase<ProductDto>(QueryString)
@@ -22,7 +21,7 @@ public class GetProductPage
 		public bool ExpandDefaultPicture => Expand(nameof(ProductDto.DefaultPicture));
 	}
 
-	public sealed class Handler : IRequestHandler<Query, Page<ProductDto>?>
+	internal sealed class Handler : IRequestHandler<Query, Page<ProductDto>?>
 	{
 		private readonly AppDbContext _dbContext;
 

@@ -1,13 +1,14 @@
-﻿using FluentAssertions;
+﻿using AutoFixture;
+using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Monaco.Template.Backend.Application.Features.Product;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Product;
@@ -17,12 +18,18 @@ namespace Monaco.Template.Backend.Application.Tests.Features.Product;
 public class CreateProductValidatorTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
-	private static readonly CreateProduct.Command Command = new(It.IsAny<string>(),		// Title
-																It.IsAny<string>(),		// Description
-																It.IsAny<decimal>(),	// Price
-																It.IsAny<Guid>(),		// CompanyId
-																It.IsAny<Guid[]>(),		// Pictures
-																It.IsAny<Guid>());		// DefaultPictureId
+	private static readonly CreateProduct.Command Command;
+
+	static CreateProductValidatorTests()
+	{
+		var fixture = new Fixture();
+		Command = new(fixture.Create<string>(),		// Title
+					  fixture.Create<string>(),		// Description
+					  fixture.Create<decimal>(),	// Price
+					  fixture.Create<Guid>(),		// CompanyId
+					  fixture.Create<Guid[]>(),		// Pictures
+					  fixture.Create<Guid>());		// DefaultPictureId
+	}
 
 	[Fact(DisplayName = "Validator's rule level cascade mode is 'Stop'")]
 	public void ValidatorRuleLevelCascadeModeIsStop()
@@ -39,13 +46,8 @@ public class CreateProductValidatorTests
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Product>());
 
-		var command = Command with
-					  {
-						  Title = new string(It.IsAny<char>(), 100)
-					  };
-
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
-		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Title));
+		var validationResult = await sut.TestValidateAsync(Command, strategy => strategy.IncludeProperties(cmd => cmd.Title));
 
 		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.Title);
 	}
@@ -53,10 +55,7 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "Title with empty value generates validation error")]
 	public async Task TitleIsEmptyGeneratesError()
 	{
-		var command = Command with
-					  {
-						  Title = string.Empty
-					  };
+		var command = Command with { Title = string.Empty };
 
 		var sut = new CreateProduct.Validator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Title));
@@ -70,31 +69,25 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "Title with long value generates validation error")]
 	public async Task TitleWithLongValueGeneratesError()
 	{
-		var command = Command with
-					  {
-						  Title = new string(It.IsAny<char>(), 101)
-					  };
+		var command = Command with { Title = new string(It.IsAny<char>(), Domain.Model.Product.TitleLength + 1) };
 
 		var sut = new CreateProduct.Validator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Title));
 
 		validationResult.ShouldHaveValidationErrorFor(cmd => cmd.Title)
 						.WithErrorCode("MaximumLengthValidator")
-						.WithMessageArgument("MaxLength", 100)
+						.WithMessageArgument("MaxLength", Domain.Model.Product.TitleLength)
 						.Should()
 						.HaveCount(1);
 	}
 
 	[Theory(DisplayName = "Title which already exists generates validation error")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task TitleAlreadyExistsGeneratesError(Domain.Model.Product product)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(product);
 
-		var command = Command with
-					  {
-						  Title = product.Title
-					  };
+		var command = Command with { Title = product.Title };
 
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Title));
@@ -110,13 +103,8 @@ public class CreateProductValidatorTests
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Product>());
 
-		var command = Command with
-					  {
-						  Description = new string(It.IsAny<char>(), 100)
-					  };
-
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
-		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Description));
+		var validationResult = await sut.TestValidateAsync(Command, strategy => strategy.IncludeProperties(cmd => cmd.Description));
 
 		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.Description);
 	}
@@ -124,10 +112,7 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "Description with empty value generates validation error")]
 	public async Task DescriptionIsEmptyGeneratesError()
 	{
-		var command = Command with
-					  {
-						  Description = string.Empty
-					  };
+		var command = Command with { Description = string.Empty };
 
 		var sut = new CreateProduct.Validator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Description));
@@ -141,17 +126,14 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "Description with long value generates validation error")]
 	public async Task DescriptionWithLongValueGeneratesError()
 	{
-		var command = Command with
-					  {
-						  Description = new string(It.IsAny<char>(), 501)
-					  };
+		var command = Command with { Description = new string(It.IsAny<char>(), Domain.Model.Product.DescriptionLength + 1) };
 
 		var sut = new CreateProduct.Validator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Description));
 
 		validationResult.ShouldHaveValidationErrorFor(cmd => cmd.Description)
 						.WithErrorCode("MaximumLengthValidator")
-						.WithMessageArgument("MaxLength", 500)
+						.WithMessageArgument("MaxLength", Domain.Model.Product.DescriptionLength)
 						.Should()
 						.HaveCount(1);
 	}
@@ -161,10 +143,7 @@ public class CreateProductValidatorTests
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Product>());
 
-		var command = Command with
-					  {
-						  Price = 1m
-					  };
+		var command = Command with { Price = 1m };
 
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Price));
@@ -175,11 +154,7 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "Price with negative value generates validation error")]
 	public async Task PriceIsNegativeGeneratesError()
 	{
-
-		var command = Command with
-					  {
-						  Price = -1m
-					  };
+		var command = Command with { Price = -1m };
 
 		var sut = new CreateProduct.Validator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Price));
@@ -191,15 +166,12 @@ public class CreateProductValidatorTests
 	}
 
 	[Theory(DisplayName = "CompanyId being valid does not generate validation error")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task CompanyIdDoesNotGenerateErrorWhenValid(Domain.Model.Company[] companies)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(companies);
 
-		var command = Command with
-					  {
-						  CompanyId = companies.First().Id
-					  };
+		var command = Command with { CompanyId = companies.First().Id };
 
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.CompanyId));
@@ -210,8 +182,10 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "CompanyId with empty value generates validation error")]
 	public async Task CompanyIdIsEmptyGeneratesError()
 	{
+		var command = Command with { CompanyId = Guid.Empty };
+
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
-		var validationResult = await sut.TestValidateAsync(Command, strategy => strategy.IncludeProperties(cmd => cmd.CompanyId));
+		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.CompanyId));
 
 		validationResult.ShouldHaveValidationErrorFor(cmd => cmd.CompanyId)
 						.WithErrorCode("NotEmptyValidator")
@@ -224,10 +198,7 @@ public class CreateProductValidatorTests
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Company>());
 
-		var command = Command with
-					  {
-						  CompanyId = Guid.NewGuid()
-					  };
+		var command = Command with { CompanyId = Guid.NewGuid() };
 
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.CompanyId));
@@ -239,7 +210,7 @@ public class CreateProductValidatorTests
 	}
 
 	[Theory(DisplayName = "Pictures being valid does not generate validation error")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task PicturesDoesNotGenerateErrorWhenValid(Domain.Model.Product[] products, Image[] newPictures)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(products);
@@ -248,10 +219,7 @@ public class CreateProductValidatorTests
 		var picturesIds = newPictures.Select(x => x.Id)
 									 .ToArray();
 
-		var command = Command with
-					  {
-						  Pictures = picturesIds
-					  };
+		var command = Command with { Pictures = picturesIds };
 
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Pictures));
@@ -262,10 +230,7 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "Pictures empty array generates validation error")]
 	public async Task PictureArrayEmptyGeneratesError()
 	{
-		var command = Command with
-					  {
-						  Pictures = []
-		};
+		var command = Command with { Pictures = [] };
 
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Pictures));
@@ -279,10 +244,7 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "Pictures with empty element generates validation error")]
 	public async Task PictureEmptyElementGeneratesError()
 	{
-		var command = Command with
-					  {
-						  Pictures = [Guid.Empty]
-					  };
+		var command = Command with { Pictures = [Guid.Empty] };
 
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Pictures));
@@ -298,10 +260,7 @@ public class CreateProductValidatorTests
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(new List<Image>());
 
-		var command = Command with
-					  {
-						  Pictures = [Guid.NewGuid()]
-					  };
+		var command = Command with { Pictures = [Guid.NewGuid()] };
 
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Pictures));
@@ -312,16 +271,12 @@ public class CreateProductValidatorTests
 						.HaveCount(1);
 	}
 
-	[Theory(DisplayName = "Pictures with another product's picture generates validation error")]
-	[AnonymousData(true)]
-	public async Task PicturesWithAnotherProductPictureGeneratesError(Domain.Model.Product[] products)
+	[Fact(DisplayName = "Pictures with another product's picture generates validation error")]
+	public async Task PicturesWithAnotherProductPictureGeneratesError()
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(new List<Image>());
 
-		var command = Command with
-					  {
-						  Pictures = [Guid.NewGuid()]
-					  };
+		var command = Command with { Pictures = [Guid.NewGuid()] };
 
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Pictures));
@@ -333,7 +288,7 @@ public class CreateProductValidatorTests
 	}
 
 	[Theory(DisplayName = "Default Picture being valid does not generate validation error")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task DefaultPictureDoesNotGenerateErrorWhenValid(Guid[] picturesIds)
 	{
 		var command = Command with
@@ -351,10 +306,7 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "Default Picture with empty value generates validation error")]
 	public async Task DefaultPictureIsEmptyGeneratesError()
 	{
-		var command = Command with
-					  {
-						  DefaultPictureId = Guid.Empty
-					  };
+		var command = Command with { DefaultPictureId = Guid.Empty };
 
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.DefaultPictureId));

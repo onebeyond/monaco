@@ -1,20 +1,21 @@
 ﻿using AutoFixture;
+using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Model;
 using Moq;
 
-namespace Monaco.Template.Backend.Common.Tests.Factories.Entities;
+namespace Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 
 public static class AddressFactory
 {
 	public static Address Create() =>
-		new Fixture().RegisterAddress()
-					 .RegisterCountry()
-					 .Create<Address>();
+		FixtureFactory.Create(f => f.RegisterAddress()
+									.RegisterCountry())
+					  .Create<Address>();
 
 	public static IEnumerable<Address> CreateMany() =>
-		new Fixture().RegisterAddress()
-					 .RegisterCountryMock()
-					 .CreateMany<Address>();
+		FixtureFactory.Create(f => f.RegisterAddress()
+									.RegisterCountryMock())
+					  .CreateMany<Address>();
 }
 
 public static class AddressFactoryExtensions
@@ -34,10 +35,10 @@ public static class AddressFactoryExtensions
 		fixture.Register(() =>
 						 {
 							 var country = fixture.Create<Country>();
-							 var mock = new Mock<Address>(fixture.Create<string?>(),
-														  fixture.Create<string?>(),
-														  fixture.Create<string?>(),
-														  fixture.Create<string?>()?[..10],
+							 var mock = new Mock<Address>(fixture.Create<string?>()!,
+														  fixture.Create<string?>()!,
+														  fixture.Create<string?>()!,
+														  fixture.Create<string?>()?[..10]!,
 														  country);
 							 return mock.Object;
 						 });

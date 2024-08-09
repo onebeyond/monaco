@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
 using Monaco.Template.Backend.Common.Domain.Model;
-using Monaco.Template.Backend.Common.Tests.Factories;
+using Monaco.Template.Backend.Common.Domain.Tests.Factories;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
@@ -11,9 +11,12 @@ namespace Monaco.Template.Backend.Common.Domain.Tests;
 public class DomainEventTests
 {
 	[Theory(DisplayName = "New domain event succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewDomainEventWithoutParametersSucceeds(DomainEvent sut)
 	{
-		sut.DateOccurred.Should().BeCloseTo(DateTime.UtcNow, new TimeSpan(0, 0, 5));
+		sut.DateOccurred
+		   .Should()
+		   .BeCloseTo(DateTime.UtcNow,
+					  new TimeSpan(0, 0, 5));
 	}
 }

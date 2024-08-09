@@ -12,7 +12,7 @@ public class GetProductById
 {
 	public record Query(Guid Id) : QueryByIdBase<ProductDto?>(Id);
 
-	public sealed class Handler : IRequestHandler<Query, ProductDto?>
+	internal sealed class Handler : IRequestHandler<Query, ProductDto?>
 	{
 		private readonly AppDbContext _dbContext;
 

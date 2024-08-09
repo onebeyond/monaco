@@ -4,7 +4,7 @@ using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Application.Features.Product;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Common.Tests.Factories;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
@@ -18,17 +18,21 @@ public class GetProductPageTests
 	private readonly Mock<AppDbContext> _dbContextMock = new();
 
 	[Theory(DisplayName = "Get product page without params succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task GetProductPageWithoutParamsSucceeds(List<Domain.Model.Product> products)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(products);
-		var query = new GetProductPage.Query(Array.Empty<KeyValuePair<string, StringValues>>());
+		var query = new GetProductPage.Query([]);
 
 		var sut = new GetProductPage.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(query, new CancellationToken());
 
-		result.Should().NotBeNull();
-		result!.Pager.Count.Should().Be(products.Count);
+		result.Should()
+			  .NotBeNull();
+		result!.Pager
+			   .Count
+			   .Should()
+			   .Be(products.Count);
 		result.Items
 			  .Should()
 			  .HaveCount(products.Count).And
@@ -37,13 +41,12 @@ public class GetProductPageTests
 	}
 
 	[Theory(DisplayName = "Get product page with params succeeds")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task GetProductPageWithParamsSucceeds(List<Domain.Model.Product> products)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(products);
 		var productsSet = products.GetRange(0, 2);
-		var query = new GetProductPage.Query(new KeyValuePair<string, StringValues>[]
-											 {
+		var query = new GetProductPage.Query([
 												 new(nameof(ProductDto.Title),
 													 new(productsSet.Select(x => x.Title)
 																	.ToArray())),
@@ -54,7 +57,7 @@ public class GetProductPageTests
 																	   nameof(ProductDto.DefaultPicture)
 																	  ])),
 												 new("sort", $"-{nameof(ProductDto.Title)}")
-											 });
+											 ]);
 
 		var sut = new GetProductPage.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(query, new CancellationToken());

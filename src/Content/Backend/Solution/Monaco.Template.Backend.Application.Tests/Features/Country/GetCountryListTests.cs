@@ -1,12 +1,12 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.Extensions.Primitives;
 using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Application.Features.Country;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Common.Tests.Factories;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Country;
@@ -18,7 +18,7 @@ public class GetCountryListTests
 	private readonly Mock<AppDbContext> _dbContextMock = new();
 
 	[Theory(DisplayName = "Get country list without params succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task GetCountryListWithoutParamsSucceeds(List<Domain.Model.Country> countries)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(countries);
@@ -35,7 +35,7 @@ public class GetCountryListTests
 	}
 
 	[Theory(DisplayName = "Get country list with params succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task GetCountryListWithParamsSucceeds(List<Domain.Model.Country> countries)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(countries);

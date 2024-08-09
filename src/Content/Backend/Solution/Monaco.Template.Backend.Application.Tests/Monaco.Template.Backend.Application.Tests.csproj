@@ -30,6 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Monaco.Template.Backend.Application\Monaco.Template.Backend.Application.csproj" />
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Tests\Monaco.Template.Backend.Common.Tests.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Backend.Domain.Tests\Monaco.Template.Backend.Domain.Tests.csproj" />
   </ItemGroup>
 
 </Project>

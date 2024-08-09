@@ -11,7 +11,7 @@ public sealed class GetCountryById
 {
 	public record Query(Guid Id) : QueryByIdBase<CountryDto?>(Id);
 
-	public sealed class Handler : IRequestHandler<Query, CountryDto?>
+	internal sealed class Handler : IRequestHandler<Query, CountryDto?>
 	{
 		private readonly AppDbContext _dbContext;
 

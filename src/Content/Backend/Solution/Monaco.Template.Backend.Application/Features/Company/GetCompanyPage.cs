@@ -17,7 +17,7 @@ public sealed class GetCompanyPage
 		public bool ExpandCountry => Expand(nameof(CompanyDto.Country));
 	}
 
-	public sealed class Handler : IRequestHandler<Query, Page<CompanyDto>?>
+	internal sealed class Handler : IRequestHandler<Query, Page<CompanyDto>?>
 	{
 		private readonly AppDbContext _dbContext;
 

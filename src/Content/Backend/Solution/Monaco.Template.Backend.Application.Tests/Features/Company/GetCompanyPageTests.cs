@@ -4,9 +4,9 @@ using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Common.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
@@ -18,7 +18,7 @@ public class GetCompanyPageTests
 	private readonly Mock<AppDbContext> _dbContextMock = new();
 
 	[Theory(DisplayName = "Get company page without params succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task GetCompanyPageWithoutParamsSucceeds(List<Domain.Model.Company> companies)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(companies);
@@ -42,7 +42,7 @@ public class GetCompanyPageTests
 	}
 
 	[Theory(DisplayName = "Get company page with params succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task GetCompanyPageWithParamsSucceeds(List<Domain.Model.Company> companies)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(companies);

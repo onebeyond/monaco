@@ -13,11 +13,11 @@ public class ProductEntityConfiguration : IEntityTypeConfiguration<Product>
 
 		builder.Property(x => x.Title)
 			   .IsRequired()
-			   .HasMaxLength(100);
+			   .HasMaxLength(Product.TitleLength);
 
 		builder.Property(x => x.Description)
 			   .IsRequired()
-			   .HasMaxLength(500);
+			   .HasMaxLength(Product.DescriptionLength);
 
 		builder.Property(x => x.Price)
 			   .IsRequired()

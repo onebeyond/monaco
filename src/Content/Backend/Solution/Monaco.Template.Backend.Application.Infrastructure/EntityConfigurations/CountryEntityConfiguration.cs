@@ -15,7 +15,7 @@ public class CountryEntityConfiguration(IHostEnvironment env) : EntityTypeConfig
 
 		builder.Property(x => x.Name)
 			   .IsRequired()
-			   .HasMaxLength(100);
+			   .HasMaxLength(Country.NameLength);
 
 		if (CanRunSeed)
 			builder.HasData(CountrySeed.GetCountries());

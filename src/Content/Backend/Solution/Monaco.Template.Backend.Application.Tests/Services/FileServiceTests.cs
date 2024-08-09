@@ -3,8 +3,8 @@ using FluentAssertions;
 using Monaco.Template.Backend.Application.Services;
 using Monaco.Template.Backend.Common.BlobStorage;
 using Monaco.Template.Backend.Common.BlobStorage.Contracts;
-using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using SkiaSharp;
 using System.Diagnostics.CodeAnalysis;
@@ -46,7 +46,10 @@ public class FileServiceTests
 		var sut = new FileService(_blobStorageServiceMock.Object);
 
 		await using var stream = new MemoryStream(Convert.FromBase64String(ImgBase64));
-		await sut.UploadAsync(stream, "sample-image.png", "image/png", CancellationToken.None);
+		await sut.UploadAsync(stream,
+							  "sample-image.png",
+							  "image/png",
+							  CancellationToken.None);
 		stream.Close();
 
 		_blobStorageServiceMock.Verify(x => x.UploadTempFileAsync(It.IsAny<Stream>(),
@@ -62,7 +65,10 @@ public class FileServiceTests
 		var sut = new FileService(_blobStorageServiceMock.Object);
 		
 		await using var stream = new MemoryStream(Convert.FromBase64String(TxtBase64));
-		await sut.UploadDocumentAsync(stream, "sample-text-file.txt", "text/plain", CancellationToken.None);
+		await sut.UploadDocumentAsync(stream,
+									  "sample-text-file.txt",
+									  "text/plain",
+									  CancellationToken.None);
 		stream.Close();
 
 		_blobStorageServiceMock.Verify(x => x.UploadTempFileAsync(It.IsAny<Stream>(),
@@ -78,9 +84,13 @@ public class FileServiceTests
 		var sut = new FileService(_blobStorageServiceMock.Object);
 
 		await using var stream = new MemoryStream(Convert.FromBase64String(TxtBase64));
-		var action = () => sut.UploadDocumentAsync(null, "sample-text-file.txt", "text/plain", CancellationToken.None);
+		var action = () => sut.UploadDocumentAsync(null!,
+												   "sample-text-file.txt",
+												   "text/plain",
+												   CancellationToken.None);
 
-		await action.Should().ThrowAsync<Exception>();
+		await action.Should()
+					.ThrowAsync<Exception>();
 		_blobStorageServiceMock.Verify(x => x.UploadTempFileAsync(It.IsAny<Stream>(),
 																  It.IsAny<string>(),
 																  It.IsAny<string>(),
@@ -109,31 +119,33 @@ public class FileServiceTests
 	}
 
 	[Theory(DisplayName = "Making Document permanent succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task MakingDocumentPermanentSucceeds(Document document)
 	{
 		var sut = new FileService(_blobStorageServiceMock.Object);
 
 		await sut.MakePermanentDocumentAsync(document, It.IsAny<CancellationToken>());
 
-		_blobStorageServiceMock.Verify(x => x.MakePermanentAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
+		_blobStorageServiceMock.Verify(x => x.MakePermanentAsync(It.IsAny<Guid>(),
+																 It.IsAny<CancellationToken>()),
 									   Times.Once);
 	}
 
 	[Theory(DisplayName = "Making Documents permanent succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task MakingDocumentsPermanentSucceeds(Document[] documents)
 	{
 		var sut = new FileService(_blobStorageServiceMock.Object);
 
 		await sut.MakePermanentDocumentsAsync(documents, It.IsAny<CancellationToken>());
 
-		_blobStorageServiceMock.Verify(x => x.MakePermanentAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
+		_blobStorageServiceMock.Verify(x => x.MakePermanentAsync(It.IsAny<Guid>(),
+																 It.IsAny<CancellationToken>()),
 									   Times.Exactly(documents.Length));
 	}
 
 	[Theory(DisplayName = "Making Image permanent succeeds")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task MakingImagePermanentSucceeds(Image image)
 	{
 		typeof(Image)
@@ -144,12 +156,13 @@ public class FileServiceTests
 
 		await sut.MakePermanentImageAsync(image, It.IsAny<CancellationToken>());
 
-		_blobStorageServiceMock.Verify(x => x.MakePermanentAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
+		_blobStorageServiceMock.Verify(x => x.MakePermanentAsync(It.IsAny<Guid>(),
+																 It.IsAny<CancellationToken>()),
 									   Times.Exactly(2));
 	}
 
 	[Theory(DisplayName = "Making Images permanent succeeds")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task MakingImagesPermanentSucceeds(Image[] images)
 	{
 		foreach (var image in images)
@@ -161,24 +174,26 @@ public class FileServiceTests
 
 		await sut.MakePermanentImagesAsync(images, It.IsAny<CancellationToken>());
 
-		_blobStorageServiceMock.Verify(x => x.MakePermanentAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
+		_blobStorageServiceMock.Verify(x => x.MakePermanentAsync(It.IsAny<Guid>(),
+																 It.IsAny<CancellationToken>()),
 									   Times.Exactly(2 * images.Length));
 	}
 
 	[Theory(DisplayName = "Making File Document permanent succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task MakingFileDocumentPermanentSucceeds(Document document)
 	{
 		var sut = new FileService(_blobStorageServiceMock.Object);
 
 		await sut.MakePermanentFileAsync(document, It.IsAny<CancellationToken>());
 
-		_blobStorageServiceMock.Verify(x => x.MakePermanentAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
+		_blobStorageServiceMock.Verify(x => x.MakePermanentAsync(It.IsAny<Guid>(),
+																 It.IsAny<CancellationToken>()),
 									   Times.Once);
 	}
 
 	[Theory(DisplayName = "Making File Image permanent succeeds")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task MakingFileImagePermanentSucceeds(Image image)
 	{
 		typeof(Image)
@@ -189,7 +204,8 @@ public class FileServiceTests
 
 		await sut.MakePermanentFileAsync(image, It.IsAny<CancellationToken>());
 
-		_blobStorageServiceMock.Verify(x => x.MakePermanentAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
+		_blobStorageServiceMock.Verify(x => x.MakePermanentAsync(It.IsAny<Guid>(),
+																 It.IsAny<CancellationToken>()),
 									   Times.Exactly(2));
 	}
 
@@ -198,14 +214,15 @@ public class FileServiceTests
 	{
 		var sut = new FileService(_blobStorageServiceMock.Object);
 
-		var action = () => sut.MakePermanentFileAsync(new DummyFile(), It.IsAny<CancellationToken>());
+		var action = () => sut.MakePermanentFileAsync(new DummyFile(),
+													  It.IsAny<CancellationToken>());
 
 		await action.Should()
 					.ThrowAsync<NotImplementedException>();
 	}
 
 	[Theory(DisplayName = "Making File Document permanent succeeds")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task MakingFilesPermanentSucceeds(Document document, Image image)
 	{
 		typeof(Image)
@@ -216,15 +233,18 @@ public class FileServiceTests
 
 		await sut.MakePermanentFilesAsync([document, image], It.IsAny<CancellationToken>());
 
-		_blobStorageServiceMock.Verify(x => x.MakePermanentAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
+		_blobStorageServiceMock.Verify(x => x.MakePermanentAsync(It.IsAny<Guid>(),
+																 It.IsAny<CancellationToken>()),
 									   Times.Exactly(3));
 	}
 
 	[Theory(DisplayName = "Download Document succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task DownloadFileSucceeds(Document document)
 	{
-		_blobStorageServiceMock.Setup(x => x.DownloadAsync(It.IsAny<Guid>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+		_blobStorageServiceMock.Setup(x => x.DownloadAsync(It.IsAny<Guid>(),
+														   It.IsAny<bool>(),
+														   It.IsAny<CancellationToken>()))
 							   .ReturnsAsync(new MemoryStream());
 
 		var sut = new FileService(_blobStorageServiceMock.Object);
@@ -244,7 +264,7 @@ public class FileServiceTests
 	}
 	
 	[Theory(DisplayName = "Delete Document succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task DeleteDocumentSucceeds(Document document)
 	{
 		var sut = new FileService(_blobStorageServiceMock.Object);
@@ -258,7 +278,7 @@ public class FileServiceTests
 	}
 
 	[Theory(DisplayName = "Delete Documents succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task DeleteDocumentsSucceeds(Document[] documents)
 	{
 		var sut = new FileService(_blobStorageServiceMock.Object);
@@ -272,7 +292,7 @@ public class FileServiceTests
 	}
 
 	[Theory(DisplayName = "Delete Image succeeds")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task DeleteImageSucceeds(Image image)
 	{
 		typeof(Image)
@@ -290,7 +310,7 @@ public class FileServiceTests
 	}
 
 	[Theory(DisplayName = "Delete Images succeeds")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task DeleteImagesSucceeds(Image[] images)
 	{
 		foreach (var image in images)
@@ -309,7 +329,7 @@ public class FileServiceTests
 	}
 
 	[Theory(DisplayName = "Delete File Document succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task DeleteFileDocumentSucceeds(Document document)
 	{
 		var sut = new FileService(_blobStorageServiceMock.Object);
@@ -323,7 +343,7 @@ public class FileServiceTests
 	}
 
 	[Theory(DisplayName = "Delete File Image succeeds")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task DeleteFileImageSucceeds(Image image)
 	{
 		typeof(Image)
@@ -352,7 +372,7 @@ public class FileServiceTests
 	}
 
 	[Theory(DisplayName = "Delete Files succeeds")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task DeleteFilesSucceeds(Document document, Image image)
 	{
 		typeof(Image)
@@ -370,7 +390,7 @@ public class FileServiceTests
 	}
 
 	[Theory(DisplayName = "Copy document succeeds")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task CopyDocumentSucceeds(Document document)
 	{
 		_blobStorageServiceMock.Setup(x => x.CopyAsync(It.IsAny<Guid>(),
@@ -388,7 +408,7 @@ public class FileServiceTests
 	}
 
 	[Theory(DisplayName = "Copy image succeeds")]
-	[AnonymousData(true)]
+	[AutoDomainData(true)]
 	public async Task CopyImageSucceeds(Image image)
 	{
 		typeof(Image)
@@ -460,6 +480,4 @@ public class FileServiceTests
 	}
 }
 
-internal class DummyFile : File
-{
-}
+internal class DummyFile : File;

@@ -3,7 +3,7 @@ using Serilog;
 
 namespace Monaco.Template.Backend.Application.Features.Product;
 
-public class LongRunningProcessCommand
+public class LongRunningProcess
 {
 	public record Command(Guid Id,
 						  string Title,
@@ -11,7 +11,7 @@ public class LongRunningProcessCommand
 						  string Price,
 						  Guid CompanyId) : IRequest;
 
-	public sealed class Handler : IRequestHandler<Command>
+	internal sealed class Handler : IRequestHandler<Command>
 	{
 		public Task Handle(Command request, CancellationToken cancellationToken)
 		{

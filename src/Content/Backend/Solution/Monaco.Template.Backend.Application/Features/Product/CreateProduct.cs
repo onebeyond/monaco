@@ -25,7 +25,7 @@ public class CreateProduct
 						  Guid[] Pictures,
 						  Guid DefaultPictureId) : CommandBase<Guid>;
 
-	public sealed class Validator : AbstractValidator<Command>
+	internal sealed class Validator : AbstractValidator<Command>
 	{
 		public Validator(AppDbContext dbContext)
 		{
@@ -33,13 +33,13 @@ public class CreateProduct
 
 			RuleFor(x => x.Title)
 				.NotEmpty()
-				.MaximumLength(100)
+				.MaximumLength(Domain.Model.Product.TitleLength)
 				.MustAsync(async (title, ct) => !await dbContext.ExistsAsync<Domain.Model.Product>(x => x.Title == title, ct))
 				.WithMessage("A product with the title {PropertyValue} already exists");
 
 			RuleFor(x => x.Description)
 				.NotEmpty()
-				.MaximumLength(500);
+				.MaximumLength(Domain.Model.Product.DescriptionLength);
 
 			RuleFor(x => x.Price)
 				.NotNull()
@@ -65,7 +65,7 @@ public class CreateProduct
 		}
 	}
 
-	public sealed class Handler : IRequestHandler<Command, CommandResult<Guid>>
+	internal sealed class Handler : IRequestHandler<Command, CommandResult<Guid>>
 	{
 		private readonly AppDbContext _dbContext;
 #if (massTransitIntegration)

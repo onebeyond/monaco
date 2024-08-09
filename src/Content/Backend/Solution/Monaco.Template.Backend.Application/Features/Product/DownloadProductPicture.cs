@@ -17,7 +17,7 @@ public class DownloadProductPicture
 		public bool? IsThumbnail => GetValueBool("thumbnail");
 	};
 
-	public sealed class Handler : IRequestHandler<Query, FileDownloadDto?>
+	internal sealed class Handler : IRequestHandler<Query, FileDownloadDto?>
 	{
 		private readonly AppDbContext _dbContext;
 		private readonly IFileService _fileService;

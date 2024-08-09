@@ -1,6 +1,6 @@
 ﻿using FluentAssertions;
-using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
@@ -11,7 +11,7 @@ namespace Monaco.Template.Backend.Domain.Tests;
 public class ImageDimensionsTests
 {
 	[Theory(DisplayName = "New ImageDimensions succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewImageDimensionsSucceeds(int height, int width)
 	{
 		var sut = new ImageDimensions(height, width);
@@ -22,5 +22,16 @@ public class ImageDimensionsTests
 		sut.Width
 		   .Should()
 		   .Be(width);
+	}
+
+	[Theory(DisplayName = "New ImageDimensions with negative values throws")]
+	[InlineData(-1, 1)]
+	[InlineData(1, -1)]
+	public void NewImageDimensionsWithNegativeValuesThrows(int height, int width)
+	{
+		var sut = () => new ImageDimensions(height, width);
+
+		sut.Should()
+		   .ThrowExactly<ArgumentOutOfRangeException>();
 	}
 }

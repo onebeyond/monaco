@@ -1,9 +1,10 @@
-﻿using FluentAssertions;
+﻿using AutoFixture;
+using FluentAssertions;
 using Monaco.Template.Backend.Application.Features.File;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Common.Tests.Factories;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
@@ -16,12 +17,18 @@ public class CreateFileHandlerTests
 {
 	private readonly Mock<IFileService> _fileServiceMock = new();
 	private readonly Mock<AppDbContext> _dbContextMock = new();
-	private static readonly CreateFile.Command Command = new(It.IsAny<Stream>(),    // Stream
-															 It.IsAny<string>(),    // FileName
-															 It.IsAny<string>());   // ContentType
+	private static readonly CreateFile.Command Command;
+
+	static CreateFileHandlerTests()
+	{
+		var fixture = new Fixture();
+		Command = new(It.IsAny<Stream>(),			// Stream
+					  fixture.Create<string>(),		// FileName
+					  fixture.Create<string>());	// ContentType
+	}
 
 	[Theory(DisplayName = "Create new File succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task CreateNewFileSucceeds(Domain.Model.Document file)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(Array.Empty<Domain.Model.File>(), out var fileDbSetMock);
@@ -57,7 +64,7 @@ public class CreateFileHandlerTests
 	}
 
 	[Theory(DisplayName = "Create new File error deletes uploaded file from store")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task CreateNewFileErrorDeletesFile(Domain.Model.Document file)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(Array.Empty<Domain.Model.File>(), out var fileDbSetMock)

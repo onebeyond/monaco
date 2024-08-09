@@ -1,9 +1,10 @@
-﻿using FluentAssertions;
+﻿using AutoFixture;
+using FluentAssertions;
 using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
@@ -16,25 +17,33 @@ public class EditCompanyHandlerTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
 
-	private static readonly EditCompany.Command Command = new(It.IsAny<Guid>(),		// Id
-															  It.IsAny<string>(),	// Name
-															  It.IsAny<string>(),	// Email
-															  It.IsAny<string>(),	// WebSiteUrl
-															  It.IsAny<string>(),	// Street
-															  It.IsAny<string>(),	// City
-															  It.IsAny<string>(),	// County
-															  It.IsAny<string>(),	// PostCode
-															  It.IsAny<Guid>());	// CountryId
+	private static readonly EditCompany.Command Command;
+
+	static EditCompanyHandlerTests()
+	{
+		var fixture = new Fixture();
+		Command = new(fixture.Create<Guid>(),     // Id
+					  fixture.Create<string>(),   // Name
+					  fixture.Create<string>(),   // Email
+					  fixture.Create<string>(),   // WebSiteUrl
+					  fixture.Create<string>(),   // Street
+					  fixture.Create<string>(),   // City
+					  fixture.Create<string>(),   // County
+					  fixture.Create<string>(),   // PostCode
+					  fixture.Create<Guid>());    // CountryId
+	}
 
 	[Theory(DisplayName = "Edit company succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task EditCompanySucceeds(Domain.Model.Country country)
 	{
 		_dbContextMock.CreateEntityMockAndSetupDbSetMock<AppDbContext, Domain.Model.Company>(out var companyMock)
 					  .CreateAndSetupDbSetMock(country);
 
+		var command = Command with { Id = companyMock.Object.Id };
+
 		var sut = new EditCompany.Handler(_dbContextMock.Object);
-		var result = await sut.Handle(Command, new CancellationToken());
+		var result = await sut.Handle(command, new CancellationToken());
 
 		companyMock.Verify(x => x.Update(It.IsAny<string>(),
 										 It.IsAny<string>(),
@@ -42,7 +51,12 @@ public class EditCompanyHandlerTests
 										 It.IsAny<Address>()),
 						   Times.Once);
 		_dbContextMock.Verify(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()), Times.Once);
-		result.ValidationResult.IsValid.Should().BeTrue();
-		result.ItemNotFound.Should().BeFalse();
+		result.ValidationResult
+			  .IsValid
+			  .Should()
+			  .BeTrue();
+		result.ItemNotFound
+			  .Should()
+			  .BeFalse();
 	}
 }

@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using AutoFixture;
+using FluentAssertions;
 #if (massTransitIntegration)
 using MassTransit;
 #endif
@@ -6,8 +7,8 @@ using Monaco.Template.Backend.Application.Features.Product;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Common.Tests.Factories;
 using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 #if (massTransitIntegration)
 using Monaco.Template.Backend.Messages.V1;
 #endif
@@ -26,16 +27,22 @@ public class CreateProductHandlerTests
 	private readonly Mock<IPublishEndpoint> _publishEndpointMock = new();
 #endif
 	private readonly Mock<IFileService> _fileServiceMock = new();
-	private static readonly CreateProduct.Command Command = new(It.IsAny<string>(),     // Title
-																It.IsAny<string>(),     // Description
-																It.IsAny<decimal>(),    // Price
-																It.IsAny<Guid>(),       // CompanyId
-																It.IsAny<Guid[]>(),     // Pictures
-																It.IsAny<Guid>());      // DefaultPictureId
+	private static readonly CreateProduct.Command Command;
+
+	static CreateProductHandlerTests()
+	{
+		var fixture = new Fixture();
+		Command = new(fixture.Create<string>(),		// Title
+					  fixture.Create<string>(),		// Description
+					  fixture.Create<decimal>(),	// Price
+					  fixture.Create<Guid>(),		// CompanyId
+					  fixture.Create<Guid[]>(),		// Pictures
+					  fixture.Create<Guid>());		// DefaultPictureId
+	}
 
 
 	[Theory(DisplayName = "Create new Product succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public async Task CreateNewProductSucceeds(Domain.Model.Company company, Image[] pictures)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Product>(), out var productDbSetMock)

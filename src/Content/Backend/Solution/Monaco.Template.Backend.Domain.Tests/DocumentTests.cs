@@ -1,7 +1,7 @@
-﻿using Monaco.Template.Backend.Domain.Model;
+﻿using FluentAssertions;
+using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using System.Diagnostics.CodeAnalysis;
-using FluentAssertions;
-using Monaco.Template.Backend.Common.Tests.Factories;
 using Xunit;
 
 namespace Monaco.Template.Backend.Domain.Tests;
@@ -11,7 +11,7 @@ namespace Monaco.Template.Backend.Domain.Tests;
 public class DocumentTests
 {
 	[Theory(DisplayName = "New Document succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewDocumentSucceeds(Guid id,
 									string name,
 									string extension,
@@ -19,6 +19,8 @@ public class DocumentTests
 									string contentType,
 									bool isTemp)
 	{
+		extension = extension[..20];
+
 		var sut = new Document(id,
 							   name,
 							   extension,

@@ -1,10 +1,14 @@
-﻿using Dawn;
-using Monaco.Template.Backend.Common.Domain.Model;
+﻿using Monaco.Template.Backend.Common.Domain.Model;
+using Throw;
 
 namespace Monaco.Template.Backend.Domain.Model;
 
 public class Company : Entity
 {
+	public const int NameLength = 100;
+	public const int EmailLength = 255;
+	public const int WebSiteUrlLength = 300;
+
 	protected Company()
 	{
 	}
@@ -14,12 +18,9 @@ public class Company : Entity
 				   string webSiteUrl,
 				   Address? address)
 	{
-		Name = Guard.Argument(name, nameof(name))
-					.NotEmpty()
-					.MaxLength(100);
-		Email = Guard.Argument(email, nameof(email))
-					 .NotEmpty();
-		WebSiteUrl = webSiteUrl;
+		(Name, Email, WebSiteUrl) = Validate(name,
+											 email,
+											 webSiteUrl);
 		Address = address;
 	}
 
@@ -40,11 +41,23 @@ public class Company : Entity
 							   string webSiteUrl,
 							   Address? address)
 	{
-		Name = name;
-		Email = email;
-		WebSiteUrl = webSiteUrl;
+		(Name, Email, WebSiteUrl) = Validate(name,
+											 email,
+											 webSiteUrl);
 		Address = address;
 	}
+
+	private static (string name, string email, string webSiteUrl) Validate(string name,
+																		   string email,
+																		   string webSiteUrl) =>
+		(name.Throw()
+			 .IfEmpty()
+			 .IfLongerThan(NameLength),
+		 email.Throw()
+			  .IfEmpty()
+			  .IfLongerThan(EmailLength),
+		 webSiteUrl.Throw()
+				   .IfLongerThan(WebSiteUrlLength));
 	#if (filesSupport)
 
 	public void AddProduct(Product product)

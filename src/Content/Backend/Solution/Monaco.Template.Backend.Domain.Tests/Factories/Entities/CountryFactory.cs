@@ -1,18 +1,19 @@
 ﻿using AutoFixture;
+using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Model;
 using Moq;
 
-namespace Monaco.Template.Backend.Common.Tests.Factories.Entities;
+namespace Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 
-public class CountryFactory
+public static class CountryFactory
 {
 	public static Country Create() =>
-		new Fixture().RegisterCountry()
-					 .Create<Country>();
+		FixtureFactory.Create(f => f.RegisterCountry())
+					  .Create<Country>();
 
 	public static IEnumerable<Country> CreateMany() =>
-		new Fixture().RegisterCountryMock()
-					 .CreateMany<Country>();
+		FixtureFactory.Create(f => f.RegisterCountryMock())
+					  .CreateMany<Country>();
 }
 
 public static class CountryFactoryExtensions

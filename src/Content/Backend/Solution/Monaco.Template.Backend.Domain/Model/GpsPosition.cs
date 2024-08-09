@@ -1,19 +1,24 @@
-﻿using Dawn;
-using Monaco.Template.Backend.Common.Domain.Model;
+﻿using Monaco.Template.Backend.Common.Domain.Model;
+using Throw;
 
 namespace Monaco.Template.Backend.Domain.Model;
 
 public class GpsPosition : ValueObject
 {
+	public const int LatitudeMin = -90;
+	public const int LatitudeMax = 90;
+	public const int LongitudeMin = -180;
+	public const int LongitudeMax = 180;
+
 	protected GpsPosition()
 	{ }
 
 	public GpsPosition(float latitude, float longitude)
 	{
-		Latitude = Guard.Argument(latitude, nameof(latitude))
-						.InRange(-90, 90);
-		Longitude = Guard.Argument(longitude, nameof(longitude))
-						 .InRange(-180, 180);
+		Latitude = latitude.Throw()
+						   .IfOutOfRange(LatitudeMin, LatitudeMax);
+		Longitude = longitude.Throw()
+							 .IfOutOfRange(LongitudeMin, LongitudeMax);
 	}
 
 	public float Latitude { get; }

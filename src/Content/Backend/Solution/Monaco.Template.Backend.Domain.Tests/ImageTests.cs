@@ -1,9 +1,10 @@
-﻿using Monaco.Template.Backend.Domain.Model;
+﻿using FluentAssertions;
+using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
-using FluentAssertions;
-using Monaco.Template.Backend.Common.Tests.Factories;
 using Xunit;
+using File = Monaco.Template.Backend.Domain.Model.File;
 
 namespace Monaco.Template.Backend.Domain.Tests;
 
@@ -12,7 +13,7 @@ namespace Monaco.Template.Backend.Domain.Tests;
 public class ImageTests
 {
 	[Theory(DisplayName = "New Image succeeds")]
-	[AnonymousData]
+	[AutoDomainData]
 	public void NewImageSucceeds(Guid id,
 								 string name,
 								 string extension,
@@ -24,8 +25,9 @@ public class ImageTests
 								 DateTime dateTaken,
 								 Image thumbnail)
 	{
-		var latitude = RandomNumberGenerator.GetInt32(-90, 90);
-		var longitude = RandomNumberGenerator.GetInt32(-180, 180);
+		extension = extension[..File.ExtensionLength];
+		var latitude = RandomNumberGenerator.GetInt32(GpsPosition.LatitudeMin, GpsPosition.LatitudeMax);
+		var longitude = RandomNumberGenerator.GetInt32(GpsPosition.LongitudeMin, GpsPosition.LongitudeMax);
 
 		var sut = new Image(id,
 							name,

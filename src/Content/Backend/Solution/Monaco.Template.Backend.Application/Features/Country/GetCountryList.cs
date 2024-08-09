@@ -12,7 +12,7 @@ public sealed class GetCountryList
 {
 	public record Query(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryBase<List<CountryDto>>(QueryString);
 
-	public sealed class Handler : IRequestHandler<Query, List<CountryDto>>
+	internal sealed class Handler : IRequestHandler<Query, List<CountryDto>>
 	{
 		private readonly AppDbContext _dbContext;
 
