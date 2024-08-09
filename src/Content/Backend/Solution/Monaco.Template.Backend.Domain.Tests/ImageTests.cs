@@ -4,6 +4,7 @@ using Monaco.Template.Backend.Domain.Tests.Factories;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using Xunit;
+using File = Monaco.Template.Backend.Domain.Model.File;
 
 namespace Monaco.Template.Backend.Domain.Tests;
 
@@ -24,9 +25,9 @@ public class ImageTests
 								 DateTime dateTaken,
 								 Image thumbnail)
 	{
-		extension = extension[..20];
-		var latitude = RandomNumberGenerator.GetInt32(-90, 90);
-		var longitude = RandomNumberGenerator.GetInt32(-180, 180);
+		extension = extension[..File.ExtensionLength];
+		var latitude = RandomNumberGenerator.GetInt32(GpsPosition.LatitudeMin, GpsPosition.LatitudeMax);
+		var longitude = RandomNumberGenerator.GetInt32(GpsPosition.LongitudeMin, GpsPosition.LongitudeMax);
 
 		var sut = new Image(id,
 							name,

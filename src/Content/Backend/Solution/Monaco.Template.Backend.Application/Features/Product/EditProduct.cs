@@ -31,7 +31,7 @@ public class EditProduct
 
 			RuleFor(x => x.Title)
 				.NotEmpty()
-				.MaximumLength(100)
+				.MaximumLength(Domain.Model.Product.TitleLength)
 				.MustAsync(async (cmd, title, ct) => !await dbContext.ExistsAsync<Domain.Model.Product>(x => x.Id != cmd.Id &&
 																											 x.Title == title,
 																										ct))
@@ -39,7 +39,7 @@ public class EditProduct
 
 			RuleFor(x => x.Description)
 				.NotEmpty()
-				.MaximumLength(500);
+				.MaximumLength(Domain.Model.Product.DescriptionLength);
 
 			RuleFor(x => x.Price)
 				.NotNull()

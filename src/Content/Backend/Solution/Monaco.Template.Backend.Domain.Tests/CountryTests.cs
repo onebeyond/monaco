@@ -32,7 +32,7 @@ public class CountryTests
 	[Fact(DisplayName = "New country with name too long fails")]
 	public void NewCountryWithNameTooLongFails()
 	{
-		var sut = () => new Country(new string(It.IsAny<char>(), 101));
+		var sut = () => new Country(new string(It.IsAny<char>(), Country.NameLength + 1));
 
 		sut.Should()
 		   .ThrowExactly<ArgumentException>();

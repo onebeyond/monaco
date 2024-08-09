@@ -13,8 +13,8 @@ public class GpsPositionTests
 	[Fact(DisplayName = "New GpsPosition with valid values succeeds")]
 	public void NewGpsPositionWithValidValuesSucceeds()
 	{
-		var latitude = RandomNumberGenerator.GetInt32(-90, 90);
-		var longitude = RandomNumberGenerator.GetInt32(-180, 180);
+		var latitude = RandomNumberGenerator.GetInt32(GpsPosition.LatitudeMin, GpsPosition.LatitudeMax);
+		var longitude = RandomNumberGenerator.GetInt32(GpsPosition.LongitudeMin, GpsPosition.LongitudeMax);
 
 		var sut = new GpsPosition(latitude, longitude);
 
@@ -27,10 +27,10 @@ public class GpsPositionTests
 	}
 
 	[Theory(DisplayName = "New GpsPosition with invalid positions fails")]
-	[InlineData(-91, 0)]
-	[InlineData(91, 0)]
-	[InlineData(0, -181)]
-	[InlineData(0, 181)]
+	[InlineData(GpsPosition.LatitudeMin - 1, 0)]
+	[InlineData(GpsPosition.LatitudeMax + 1, 0)]
+	[InlineData(0, GpsPosition.LongitudeMin - 1)]
+	[InlineData(0, GpsPosition.LongitudeMax + 1)]
 	public void NewGpsPositionWithInvalidPositionsFails(int latitude, int longitude)
 	{
 		var sut = () => new GpsPosition(latitude, longitude);

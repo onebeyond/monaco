@@ -5,7 +5,7 @@ using Moq;
 
 namespace Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 
-public class CountryFactory
+public static class CountryFactory
 {
 	public static Country Create() =>
 		FixtureFactory.Create(f => f.RegisterCountry())

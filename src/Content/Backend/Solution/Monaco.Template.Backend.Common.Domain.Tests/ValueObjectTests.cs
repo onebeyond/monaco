@@ -52,7 +52,7 @@ public class ValueObjectTests
 			.BeFalse();
 	}
 
-	[Theory(DisplayName = "Different ValueObject instances with same values are not equal")]
+	[Theory(DisplayName = "ValueObject compared against null is not equal")]
 	[AutoDomainData]
 	public void ValueObjectComparedAgainstNullIsNotEqual(string field1, string? field2)
 	{

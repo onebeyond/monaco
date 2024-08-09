@@ -79,18 +79,12 @@ public class EditProductValidatorTests
 
 	[Theory(DisplayName = "Title being valid does not generate validation error")]
 	[AutoDomainData(true)]
-	public async Task TitleDoesNotGenerateErrorWhenValid(Domain.Model.Product product, Guid id)
+	public async Task TitleValidDoesNotGenerateError(Domain.Model.Product product, Guid id, string title)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(product);
-
-		var command = Command with
-					  {
-						  Id = id,
-						  Title = new string(It.IsAny<char>(), 100)
-					  };
-
+		
 		var sut = new EditProduct.Validator(_dbContextMock.Object);
-		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Title));
+		var validationResult = await sut.TestValidateAsync(Command, strategy => strategy.IncludeProperties(cmd => cmd.Title));
 
 		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.Title);
 	}
@@ -112,14 +106,14 @@ public class EditProductValidatorTests
 	[Fact(DisplayName = "Title with long value generates validation error")]
 	public async Task TitleWithLongValueGeneratesError()
 	{
-		var command = Command with { Title = new string(It.IsAny<char>(), 101) };
+		var command = Command with { Title = new string(It.IsAny<char>(), Domain.Model.Product.TitleLength + 1) };
 
 		var sut = new EditProduct.Validator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Title));
 
 		validationResult.ShouldHaveValidationErrorFor(cmd => cmd.Title)
 						.WithErrorCode("MaximumLengthValidator")
-						.WithMessageArgument("MaxLength", 100)
+						.WithMessageArgument("MaxLength", Domain.Model.Product.TitleLength)
 						.Should()
 						.HaveCount(1);
 	}
@@ -145,12 +139,13 @@ public class EditProductValidatorTests
 						.HaveCount(1);
 	}
 
-	[Fact(DisplayName = "Description being valid does not generate validation error")]
-	public async Task DescriptionDoesNotGenerateErrorWhenValid()
+	[Theory(DisplayName = "Description being valid does not generate validation error")]
+	[AutoDomainData]
+	public async Task DescriptionDoesNotGenerateErrorWhenValid(string description)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Product>());
 
-		var command = Command with { Description = new string(It.IsAny<char>(), 100) };
+		var command = Command with { Description = description };
 
 		var sut = new EditProduct.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Description));
@@ -175,14 +170,14 @@ public class EditProductValidatorTests
 	[Fact(DisplayName = "Description with long value generates validation error")]
 	public async Task DescriptionWithLongValueGeneratesError()
 	{
-		var command = Command with { Description = new string(It.IsAny<char>(), 501) };
+		var command = Command with { Description = new string(It.IsAny<char>(), Domain.Model.Product.DescriptionLength + 1) };
 
 		var sut = new EditProduct.Validator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Description));
 
 		validationResult.ShouldHaveValidationErrorFor(cmd => cmd.Description)
 						.WithErrorCode("MaximumLengthValidator")
-						.WithMessageArgument("MaxLength", 500)
+						.WithMessageArgument("MaxLength", Domain.Model.Product.DescriptionLength)
 						.Should()
 						.HaveCount(1);
 	}

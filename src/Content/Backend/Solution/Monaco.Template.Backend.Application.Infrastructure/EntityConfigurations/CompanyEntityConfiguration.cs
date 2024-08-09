@@ -13,15 +13,15 @@ public class CompanyEntityConfiguration : IEntityTypeConfiguration<Company>
 
 		builder.Property(x => x.Name)
 			   .IsRequired()
-			   .HasMaxLength(100);
+			   .HasMaxLength(Company.NameLength);
 
 		builder.Property(x => x.Email)
 			   .IsRequired()
-			   .HasMaxLength(255);
+			   .HasMaxLength(Company.EmailLength);
 
 		builder.Property(x => x.WebSiteUrl)
 			   .IsRequired(false)
-			   .HasMaxLength(300);
+			   .HasMaxLength(Company.WebSiteUrlLength);
 
 		builder.Property(x => x.Version)
 			   .IsRowVersion();
@@ -39,19 +39,19 @@ public class CompanyEntityConfiguration : IEntityTypeConfiguration<Company>
 						{
 							b.Property(x => x.Street)
 							 .IsRequired(false)
-							 .HasMaxLength(100);
+							 .HasMaxLength(Address.StreetLength);
 
 							b.Property(x => x.City)
 							 .IsRequired(false)
-							 .HasMaxLength(100);
+							 .HasMaxLength(Address.CityLength);
 
 							b.Property(x => x.County)
 							 .IsRequired(false)
-							 .HasMaxLength(100);
+							 .HasMaxLength(Address.CountyLength);
 
 							b.Property(x => x.PostCode)
 							 .IsRequired(false)
-							 .HasMaxLength(10);
+							 .HasMaxLength(Address.PostCodeLength);
 
 							b.HasOne(x => x.Country)
 							 .WithMany()

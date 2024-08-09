@@ -33,13 +33,13 @@ public class CreateProduct
 
 			RuleFor(x => x.Title)
 				.NotEmpty()
-				.MaximumLength(100)
+				.MaximumLength(Domain.Model.Product.TitleLength)
 				.MustAsync(async (title, ct) => !await dbContext.ExistsAsync<Domain.Model.Product>(x => x.Title == title, ct))
 				.WithMessage("A product with the title {PropertyValue} already exists");
 
 			RuleFor(x => x.Description)
 				.NotEmpty()
-				.MaximumLength(500);
+				.MaximumLength(Domain.Model.Product.DescriptionLength);
 
 			RuleFor(x => x.Price)
 				.NotNull()

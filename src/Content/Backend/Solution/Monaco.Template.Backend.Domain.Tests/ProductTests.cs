@@ -22,14 +22,20 @@ public class ProductTests
 							  description,
 							  price);
 
-		sut.Title.Should().Be(title);
-		sut.Description.Should().Be(description);
-		sut.Price.Should().Be(price);
+		sut.Title
+		   .Should()
+		   .Be(title);
+		sut.Description
+		   .Should()
+		   .Be(description);
+		sut.Price
+		   .Should()
+		   .Be(price);
 	}
 
-	[Theory(DisplayName = "New product with empty name throws")]
+	[Theory(DisplayName = "New product with empty title throws")]
 	[AutoDomainData]
-	public void NewProductWithEmptyNameThrows(string description,
+	public void NewProductWithEmptyTitleThrows(string description,
 											  decimal price)
 	{
 		price = Math.Abs(price); //positive always
@@ -41,13 +47,13 @@ public class ProductTests
 		   .ThrowExactly<ArgumentException>();
 	}
 
-	[Theory(DisplayName = "New product with name too long throws")]
+	[Theory(DisplayName = "New product with title too long throws")]
 	[AutoDomainData]
-	public void NewProductWithNameToLongThrows(string description,
+	public void NewProductWithTitleToLongThrows(string description,
 											  decimal price)
 	{
 		price = Math.Abs(price); //positive always
-		var sut = () => new Product(new string(It.IsAny<char>(), 101),
+		var sut = () => new Product(new string(It.IsAny<char>(), Product.TitleLength + 1),
 									description,
 									price);
 
@@ -76,7 +82,7 @@ public class ProductTests
 	{
 		price = Math.Abs(price); //positive always
 		var sut = () => new Product(name,
-									new string(It.IsAny<char>(), 501),
+									new string(It.IsAny<char>(), Product.DescriptionLength + 1),
 									price);
 
 		sut.Should()
@@ -110,9 +116,15 @@ public class ProductTests
 				   description,
 				   price);
 
-		sut.Title.Should().Be(title);
-		sut.Description.Should().Be(description);
-		sut.Price.Should().Be(price);
+		sut.Title
+		   .Should()
+		   .Be(title);
+		sut.Description
+		   .Should()
+		   .Be(description);
+		sut.Price
+		   .Should()
+		   .Be(price);
 	}
 
 	[Theory(DisplayName = "Update product with empty name fails")]

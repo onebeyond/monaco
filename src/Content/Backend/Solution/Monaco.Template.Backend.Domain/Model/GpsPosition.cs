@@ -5,15 +5,20 @@ namespace Monaco.Template.Backend.Domain.Model;
 
 public class GpsPosition : ValueObject
 {
+	public const int LatitudeMin = -90;
+	public const int LatitudeMax = 90;
+	public const int LongitudeMin = -180;
+	public const int LongitudeMax = 180;
+
 	protected GpsPosition()
 	{ }
 
 	public GpsPosition(float latitude, float longitude)
 	{
 		Latitude = latitude.Throw()
-						   .IfOutOfRange(-90, 90);
+						   .IfOutOfRange(LatitudeMin, LatitudeMax);
 		Longitude = longitude.Throw()
-							 .IfOutOfRange(-180, 180);
+							 .IfOutOfRange(LongitudeMin, LongitudeMax);
 	}
 
 	public float Latitude { get; }

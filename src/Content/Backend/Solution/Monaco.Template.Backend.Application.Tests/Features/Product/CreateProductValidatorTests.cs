@@ -46,10 +46,8 @@ public class CreateProductValidatorTests
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Product>());
 
-		var command = Command with { Title = new string(It.IsAny<char>(), 100) };
-
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
-		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Title));
+		var validationResult = await sut.TestValidateAsync(Command, strategy => strategy.IncludeProperties(cmd => cmd.Title));
 
 		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.Title);
 	}
@@ -71,14 +69,14 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "Title with long value generates validation error")]
 	public async Task TitleWithLongValueGeneratesError()
 	{
-		var command = Command with { Title = new string(It.IsAny<char>(), 101) };
+		var command = Command with { Title = new string(It.IsAny<char>(), Domain.Model.Product.TitleLength + 1) };
 
 		var sut = new CreateProduct.Validator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Title));
 
 		validationResult.ShouldHaveValidationErrorFor(cmd => cmd.Title)
 						.WithErrorCode("MaximumLengthValidator")
-						.WithMessageArgument("MaxLength", 100)
+						.WithMessageArgument("MaxLength", Domain.Model.Product.TitleLength)
 						.Should()
 						.HaveCount(1);
 	}
@@ -105,10 +103,8 @@ public class CreateProductValidatorTests
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Product>());
 
-		var command = Command with { Description = new string(It.IsAny<char>(), 100) };
-
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
-		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Description));
+		var validationResult = await sut.TestValidateAsync(Command, strategy => strategy.IncludeProperties(cmd => cmd.Description));
 
 		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.Description);
 	}
@@ -130,14 +126,14 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "Description with long value generates validation error")]
 	public async Task DescriptionWithLongValueGeneratesError()
 	{
-		var command = Command with { Description = new string(It.IsAny<char>(), 501) };
+		var command = Command with { Description = new string(It.IsAny<char>(), Domain.Model.Product.DescriptionLength + 1) };
 
 		var sut = new CreateProduct.Validator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Description));
 
 		validationResult.ShouldHaveValidationErrorFor(cmd => cmd.Description)
 						.WithErrorCode("MaximumLengthValidator")
-						.WithMessageArgument("MaxLength", 500)
+						.WithMessageArgument("MaxLength", Domain.Model.Product.DescriptionLength)
 						.Should()
 						.HaveCount(1);
 	}

@@ -1,11 +1,9 @@
 ﻿using FluentAssertions;
-using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
-using AutoFixture;
 using Xunit;
-using Monaco.Template.Backend.Domain.Tests.Factories;
 
 namespace Monaco.Template.Backend.Domain.Tests;
 
@@ -52,7 +50,7 @@ public class AddressTests
 	[AutoDomainData]
 	public void NewAddressWithStreetTooLongThrows(Country country)
 	{
-		var street = new string(It.IsAny<char>(), 101);
+		var street = new string(It.IsAny<char>(), Address.StreetLength + 1);
 
 		var sut = () => new Address(street,
 									null,
@@ -68,7 +66,7 @@ public class AddressTests
 	[AutoDomainData]
 	public void NewAddressWithCityTooLongThrows(Country country)
 	{
-		var city = new string(It.IsAny<char>(), 101);
+		var city = new string(It.IsAny<char>(), Address.CityLength + 1);
 
 		var sut = () => new Address(null,
 									city,
@@ -84,7 +82,7 @@ public class AddressTests
 	[AutoDomainData]
 	public void NewAddressWithCountyTooLongThrows(Country country)
 	{
-		var county = new string(It.IsAny<char>(), 101);
+		var county = new string(It.IsAny<char>(), Address.CountyLength + 1);
 
 		var sut = () => new Address(null,
 									null,
@@ -100,7 +98,7 @@ public class AddressTests
 	[AutoDomainData]
 	public void NewAddressWithPostCodeTooLongThrows(Country country)
 	{
-		var postCode = new string(It.IsAny<char>(), 11);
+		var postCode = new string(It.IsAny<char>(), Address.PostCodeLength + 1);
 
 		var sut = () => new Address(null,
 									null,

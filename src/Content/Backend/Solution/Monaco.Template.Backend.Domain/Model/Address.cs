@@ -5,6 +5,11 @@ namespace Monaco.Template.Backend.Domain.Model;
 
 public class Address : ValueObject
 {
+	public const int StreetLength = 100;
+	public const int CityLength = 100;
+	public const int CountyLength = 100;
+	public const int PostCodeLength = 10;
+
 	protected Address()
 	{ }
 
@@ -15,13 +20,13 @@ public class Address : ValueObject
 				   Country country)
 	{
 		Street = street?.Throw()
-					   .IfLongerThan(100);
+					   .IfLongerThan(StreetLength);
 		City = city?.Throw()
-				   .IfLongerThan(100);
+				   .IfLongerThan(CityLength);
 		County = county?.Throw()
-					   .IfLongerThan(100);
+					   .IfLongerThan(CountyLength);
 		PostCode = postCode?.Throw()
-						   .IfLongerThan(10);
+						   .IfLongerThan(PostCodeLength);
 		Country = country.ThrowIfNull();
 	}
 

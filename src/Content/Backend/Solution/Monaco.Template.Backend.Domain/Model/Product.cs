@@ -5,6 +5,9 @@ namespace Monaco.Template.Backend.Domain.Model;
 
 public class Product : Entity
 {
+	public const int TitleLength = 100;
+	public const int DescriptionLength = 500;
+
 	protected Product()
 	{
 	}
@@ -41,10 +44,10 @@ public class Product : Entity
 																			  decimal price) =>
 		(title.Throw()
 			  .IfEmpty()
-			  .IfLongerThan(100),
+			  .IfLongerThan(TitleLength),
 		 description.Throw()
 					.IfEmpty()
-					.IfLongerThan(500),
+					.IfLongerThan(DescriptionLength),
 		 price.Throw()
 			  .IfNegative());
 

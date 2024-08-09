@@ -3,7 +3,7 @@ using Serilog;
 
 namespace Monaco.Template.Backend.Application.Features.Product;
 
-public class LongRunningProcessCommand
+public class LongRunningProcess
 {
 	public record Command(Guid Id,
 						  string Title,

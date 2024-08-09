@@ -3,8 +3,10 @@ using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Monaco.Template.Backend.Application.Features.File;
-using Moq;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using Monaco.Template.Backend.Domain.Tests.Factories;
+using Moq;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.File;
@@ -18,9 +20,9 @@ public class CreateFileValidatorTests
 	static CreateFileValidatorTests()
 	{
 		var fixture = new Fixture();
-		Command = new(It.IsAny<Stream>(),			// Stream
-					  fixture.Create<string>(),		// FileName
-					  fixture.Create<string>());	// ContentType
+		Command = new(new MemoryStream([..Encoding.UTF8.GetBytes(fixture.Create<string>())]),									// Stream
+					  $"{fixture.Create<string>()}.{fixture.Create<string>()[..(Domain.Model.File.ExtensionLength - 1)]}",		// FileName
+					  fixture.Create<string>());																				// ContentType
 	}
 
 	[Fact(DisplayName = "Validator's rule level cascade mode is 'Stop'")]
@@ -33,15 +35,13 @@ public class CreateFileValidatorTests
 		   .Be(CascadeMode.Stop);
 	}
 
-	[Fact(DisplayName = "Stream being valid does not generate validation error")]
-	public async Task StreamDoesNotGenerateErrorWhenValid()
+	[Fact(DisplayName = "File upload valid does not generate validation error")]
+	public async Task FileUploadValidDoesNotGenerateError()
 	{
-		var command = Command with { Stream = new MemoryStream("Content"u8.ToArray()) };
-
 		var sut = new CreateFile.Validator();
-		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Stream));
+		var validationResult = await sut.TestValidateAsync(Command);
 
-		validationResult.ShouldNotHaveValidationErrorFor(cmd => cmd.Stream);
+		validationResult.ShouldNotHaveAnyValidationErrors();
 	}
 
 	[Fact(DisplayName = "Stream empty generates validation error")]
@@ -50,9 +50,66 @@ public class CreateFileValidatorTests
 		var command = Command with { Stream = new MemoryStream() };
 
 		var sut = new CreateFile.Validator();
-		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Stream));
+		var validationResult = await sut.TestValidateAsync(command);
 
-		validationResult.ShouldHaveValidationErrorFor(cmd => cmd.Stream)
+		validationResult.ShouldHaveValidationErrorFor(cmd => cmd)
+						.WithErrorCode("PredicateValidator")
+						.Should()
+						.HaveCount(1);
+	}
+
+	[Fact(DisplayName = "File Name empty generates validation error")]
+	public async Task FileNameEmptyGeneratesError()
+	{
+		var command = Command with { FileName = string.Empty };
+
+		var sut = new CreateFile.Validator();
+		var validationResult = await sut.TestValidateAsync(command);
+
+		validationResult.ShouldHaveValidationErrorFor(cmd => cmd)
+						.WithErrorCode("PredicateValidator")
+						.Should()
+						.HaveCount(1);
+	}
+
+	[Fact(DisplayName = "File Name too long generates validation error")]
+	public async Task FileNameTooLongGeneratesError()
+	{
+		var command = Command with { FileName = new string(It.IsAny<char>(), Domain.Model.File.NameLength + 1) };
+
+		var sut = new CreateFile.Validator();
+		var validationResult = await sut.TestValidateAsync(command);
+
+		validationResult.ShouldHaveValidationErrorFor(cmd => cmd)
+						.WithErrorCode("PredicateValidator")
+						.Should()
+						.HaveCount(1);
+	}
+	
+	[Theory(DisplayName = "File Extension too long generates validation error")]
+	[AutoDomainData]
+	public async Task FileExtensionTooLongGeneratesError(string fileName, string fileExtension)
+	{
+		var command = Command with { FileName = $"{fileName}.{fileExtension}" };
+
+		var sut = new CreateFile.Validator();
+		var validationResult = await sut.TestValidateAsync(command);
+
+		validationResult.ShouldHaveValidationErrorFor(cmd => cmd)
+						.WithErrorCode("PredicateValidator")
+						.Should()
+						.HaveCount(1);
+	}
+
+	[Fact(DisplayName = "Content Type too long generates validation error")]
+	public async Task ContentTypeTooLongGeneratesError()
+	{
+		var command = Command with { ContentType = new string(It.IsAny<char>(), Domain.Model.File.ContentTypeLength + 1) };
+
+		var sut = new CreateFile.Validator();
+		var validationResult = await sut.TestValidateAsync(command);
+
+		validationResult.ShouldHaveValidationErrorFor(cmd => cmd)
 						.WithErrorCode("PredicateValidator")
 						.Should()
 						.HaveCount(1);

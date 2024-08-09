@@ -5,6 +5,10 @@ namespace Monaco.Template.Backend.Domain.Model;
 
 public abstract class File : Entity
 {
+	public const int NameLength = 300;
+	public const int ExtensionLength = 20;
+	public const int ContentTypeLength = 50;
+
 	protected File()
 	{
 	}
@@ -18,15 +22,15 @@ public abstract class File : Entity
 	{
 		Name = name.Throw()
 				   .IfEmpty()
-				   .IfLongerThan(300);
+				   .IfLongerThan(NameLength);
 		Extension = extension.Throw()
 							 .IfEmpty()
-							 .IfLongerThan(20);
+							 .IfLongerThan(ExtensionLength);
 		Size = size.Throw()
 				   .IfNegativeOrZero();
 		ContentType = contentType.Throw()
 								 .IfEmpty()
-								 .IfLongerThan(50);
+								 .IfLongerThan(ContentTypeLength);
 		UploadedOn = DateTime.UtcNow;
 		IsTemp = isTemp;
 	}
@@ -35,7 +39,7 @@ public abstract class File : Entity
 	public string Extension { get; protected set; }
 	public long Size { get; protected set; }
 	public string ContentType { get; protected set; }
-	public DateTime UploadedOn { get; protected set; }
+	public virtual DateTime UploadedOn { get; protected set; }
 	public bool IsTemp { get; protected set; }
 
 	public virtual void MakePermanent()

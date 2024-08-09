@@ -24,7 +24,7 @@ public static class FixtureExtensions
 			   .RegisterCountryMock();
 #else
 			   .RegisterCountryMock()
-			   .RegisterDocumentMock()
+			   .RegisterDocument()
 			   .RegisterImage()
 			   .RegisterProductMock();
 #endif

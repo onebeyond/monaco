@@ -1,11 +1,10 @@
 ﻿using AutoFixture;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Model;
-using Moq;
 
 namespace Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 
-public class DocumentFactory
+public static class DocumentFactory
 {
 	public static Document Create() =>
 		FixtureFactory.Create(f => f.RegisterDocument())
@@ -26,21 +25,6 @@ public static class DocumentFactoryExtension
 											fixture.Create<long>(),
 											fixture.Create<string>(),
 											false));
-		return fixture;
-	}
-
-	public static IFixture RegisterDocumentMock(this IFixture fixture)
-	{
-		fixture.Register(() =>
-						 {
-							 var mock = new Mock<Document>(fixture.Create<Guid>(),
-														   fixture.Create<string>(),
-														   fixture.Create<string>()[..20],
-														   fixture.Create<long>(),
-														   fixture.Create<string>(),
-														   false);
-							 return mock.Object;
-						 });
 		return fixture;
 	}
 }

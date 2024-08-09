@@ -1,11 +1,10 @@
 ﻿using AutoFixture;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Model;
-using Moq;
 
 namespace Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 
-public class ImageFactory
+public static class ImageFactory
 {
 	public static Image Create() =>
 		FixtureFactory.Create(f => f.RegisterImage())
@@ -46,39 +45,6 @@ public static class ImageFactoryExtension
 														false,
 														fixture.Create<int>(),
 														fixture.Create<int>()));
-						 });
-		return fixture;
-	}
-
-	public static IFixture RegisterImageMock(this IFixture fixture)
-	{
-		fixture.Register(() =>
-						 {
-							 var name = fixture.Create<string>();
-							 const string extension = ".png";
-							 var size = fixture.Create<long>();
-							 const string contentType = "image/png";
-
-							 var mock = new Mock<Image>(fixture.Create<Guid>(),
-														name,
-														extension,
-														size,
-														contentType,
-														false,
-														fixture.Create<int>(),
-														fixture.Create<int>(),
-														fixture.Create<DateTime>(),
-														null,
-														null,
-														new Image(fixture.Create<Guid>(),
-																  name,
-																  extension,
-																  size,
-																  contentType,
-																  false,
-																  fixture.Create<int>(),
-																  fixture.Create<int>()));
-							 return mock.Object;
 						 });
 		return fixture;
 	}

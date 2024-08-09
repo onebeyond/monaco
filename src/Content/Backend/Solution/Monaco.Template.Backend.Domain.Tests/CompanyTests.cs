@@ -51,7 +51,7 @@ public class CompanyTests
 											   string webSiteUrl,
 											   Address address)
 	{
-		var sut = () => new Company(new string(It.IsAny<char>(), 101),
+		var sut = () => new Company(new string(It.IsAny<char>(), Company.NameLength + 1),
 									email,
 									webSiteUrl,
 									address);
@@ -82,7 +82,7 @@ public class CompanyTests
 												Address address)
 	{
 		var sut = () => new Company(name,
-									new string(It.IsAny<char>(), 256),
+									new string(It.IsAny<char>(), Company.EmailLength + 1),
 									webSiteUrl,
 									address);
 
@@ -98,7 +98,7 @@ public class CompanyTests
 	{
 		var sut = () => new Company(name,
 									email,
-									new string(It.IsAny<char>(), 301),
+									new string(It.IsAny<char>(), Company.WebSiteUrlLength + 1),
 									address);
 
 		sut.Should()
@@ -148,7 +148,7 @@ public class CompanyTests
 												  string webSiteUrl,
 												  Address address)
 	{
-		var call = () => sut.Update(new string(It.IsAny<char>(), 101),
+		var call = () => sut.Update(new string(It.IsAny<char>(), Company.NameLength + 1),
 									email,
 									webSiteUrl,
 									address);
@@ -181,7 +181,7 @@ public class CompanyTests
 												   Address address)
 	{
 		var call = () => sut.Update(name,
-									new string(It.IsAny<char>(), 256),
+									new string(It.IsAny<char>(), Company.EmailLength + 1),
 									webSiteUrl,
 									address);
 
@@ -198,7 +198,7 @@ public class CompanyTests
 	{
 		var call = () => sut.Update(name,
 									description,
-									new string(It.IsAny<char>(), 301),
+									new string(It.IsAny<char>(), Company.WebSiteUrlLength + 1),
 									address);
 
 		call.Should()

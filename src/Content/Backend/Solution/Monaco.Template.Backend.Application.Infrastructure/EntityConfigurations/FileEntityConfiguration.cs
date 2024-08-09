@@ -20,15 +20,15 @@ public class FileEntityConfiguration : IEntityTypeConfiguration<File>
 
 		builder.Property(x => x.Name)
 			   .IsRequired()
-			   .HasMaxLength(300);
+			   .HasMaxLength(File.NameLength);
 
 		builder.Property(x => x.Extension)
 			   .IsRequired()
-			   .HasMaxLength(20);
+			   .HasMaxLength(File.ExtensionLength);
 
 		builder.Property(x => x.ContentType)
 			   .IsRequired()
-			   .HasMaxLength(50);
+			   .HasMaxLength(File.ContentTypeLength);
 
 		builder.Property(x => x.Size)
 			   .IsRequired();

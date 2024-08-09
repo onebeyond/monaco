@@ -16,9 +16,17 @@ public sealed class CreateFile
 		{
 			RuleLevelCascadeMode = CascadeMode.Stop;
 
-			RuleFor(x => x.Stream)
-				.Must(x => x.Length > 0)
-				.WithMessage("File uploaded cannot be empty");
+			RuleFor(x => x)
+				.Must(x => x.Stream.Length > 0)
+				.WithMessage("File uploaded cannot be empty")
+				.Must(x => Path.GetFileNameWithoutExtension(x.FileName).Length > 0)
+				.WithMessage("File name without extension cannot be empty")
+				.Must(x => Path.GetFileNameWithoutExtension(x.FileName).Length <= Domain.Model.File.NameLength)
+				.WithMessage($"File name without extension cannot be longer than {Domain.Model.File.NameLength} characters")
+				.Must(x => Path.GetExtension(x.FileName).Length <= Domain.Model.File.ExtensionLength)
+				.WithMessage($"File extension cannot be longer than {Domain.Model.File.ExtensionLength} characters")
+				.Must(x => x.ContentType.Length <= Domain.Model.File.ContentTypeLength)
+				.WithMessage($"ContentType cannot be longer than {Domain.Model.File.ContentTypeLength} characters");
 		}
 	}
 

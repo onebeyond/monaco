@@ -5,6 +5,10 @@ namespace Monaco.Template.Backend.Domain.Model;
 
 public class Company : Entity
 {
+	public const int NameLength = 100;
+	public const int EmailLength = 255;
+	public const int WebSiteUrlLength = 300;
+
 	protected Company()
 	{
 	}
@@ -48,12 +52,12 @@ public class Company : Entity
 																		   string webSiteUrl) =>
 		(name.Throw()
 			 .IfEmpty()
-			 .IfLongerThan(100),
+			 .IfLongerThan(NameLength),
 		 email.Throw()
 			  .IfEmpty()
-			  .IfLongerThan(255),
+			  .IfLongerThan(EmailLength),
 		 webSiteUrl.Throw()
-				   .IfLongerThan(300));
+				   .IfLongerThan(WebSiteUrlLength));
 	#if (filesSupport)
 
 	public void AddProduct(Product product)
