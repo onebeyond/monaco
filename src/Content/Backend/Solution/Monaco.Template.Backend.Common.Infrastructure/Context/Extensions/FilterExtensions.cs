@@ -143,10 +143,10 @@ public static class FilterExtensions
 			expression = Expression.LessThanOrEqual(bodyExpression, Expression.Constant(DateTime.Parse(value.ToString()!), type));
 		else // Handles all other generic cases (numbers, booleans, etc)
 		{
-			var underlyingType = Nullable.GetUnderlyingType(type);
+			var underlyingType = Nullable.GetUnderlyingType(type) ?? type;
 			expression = value.ToString() is ['!', ..]
-							 ? Expression.NotEqual(Expression.Convert(bodyExpression, underlyingType ?? type), Expression.Constant(Convert.ChangeType(value.ToString()![1..], underlyingType ?? type)))
-							 : Expression.Equal(Expression.Convert(bodyExpression, underlyingType ?? type), Expression.Constant(Convert.ChangeType(value, underlyingType ?? type)));
+							 ? Expression.NotEqual(Expression.Convert(bodyExpression, underlyingType), Expression.Constant(Convert.ChangeType(value.ToString()![1..], underlyingType)))
+							 : Expression.Equal(Expression.Convert(bodyExpression, underlyingType), Expression.Constant(Convert.ChangeType(value, underlyingType)));
 		}
 
 		// Create and return the lambda expression that represents the operation to run
@@ -157,18 +157,19 @@ public static class FilterExtensions
 	{
 		data = data is ['!', ..] ? data[1..] : data;
 		return data switch
-			   {
-				   null or { Length: 0 } => true,
-				   not null when type == typeof(int) || type == typeof(int?) => int.TryParse(data, out _),
-				   not null when type == typeof(long) || type == typeof(long?) => long.TryParse(data, out _),
-				   not null when type == typeof(short) || type == typeof(short?) => short.TryParse(data, out _),
-				   not null when type == typeof(float) || type == typeof(float?) => float.TryParse(data, out _),
-				   not null when type == typeof(decimal) || type == typeof(decimal?) => decimal.TryParse(data, out _),
-				   not null when type == typeof(bool) || type == typeof(bool?) => bool.TryParse(data, out _),
-				   not null when type == typeof(Guid) || type == typeof(Guid?) => Guid.TryParse(data, out _),
-				   not null when type == typeof(DateTime) || type == typeof(DateTime?) => DateTime.TryParse(data, out _),
-				   not null when type == typeof(Enum) => Enum.TryParse(type, data, true, out _),
-				   _ => type == typeof(string)
-			   };
+		{
+			null or { Length: 0 } => true,
+			not null when type == typeof(int) || type == typeof(int?) => int.TryParse(data, out _),
+			not null when type == typeof(long) || type == typeof(long?) => long.TryParse(data, out _),
+			not null when type == typeof(short) || type == typeof(short?) => short.TryParse(data, out _),
+			not null when type == typeof(float) || type == typeof(float?) => float.TryParse(data, out _),
+			not null when type == typeof(decimal) || type == typeof(decimal?) => decimal.TryParse(data, out _),
+			not null when type == typeof(double) || type == typeof(double?) => double.TryParse(data, out _),
+			not null when type == typeof(bool) || type == typeof(bool?) => bool.TryParse(data, out _),
+			not null when type == typeof(Guid) || type == typeof(Guid?) => Guid.TryParse(data, out _),
+			not null when type == typeof(DateTime) || type == typeof(DateTime?) => DateTime.TryParse(data, out _),
+			not null when type == typeof(Enum) => Enum.TryParse(type, data, true, out _),
+			_ => type == typeof(string)
+		};
 	}
 }
