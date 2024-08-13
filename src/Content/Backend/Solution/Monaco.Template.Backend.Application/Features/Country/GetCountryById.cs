@@ -9,7 +9,10 @@ namespace Monaco.Template.Backend.Application.Features.Country;
 
 public sealed class GetCountryById
 {
-	public record Query(Guid Id) : QueryByIdBase<CountryDto?>(Id);
+	public record Query(Guid Id) : CachedQueryByIdBase<CountryDto?>(Id)
+	{
+		public override string CacheKey => $"get-country-by-id-{Id}";
+	}
 
 	internal sealed class Handler : IRequestHandler<Query, CountryDto?>
 	{
