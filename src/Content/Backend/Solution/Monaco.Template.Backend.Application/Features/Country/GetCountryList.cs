@@ -10,7 +10,7 @@ namespace Monaco.Template.Backend.Application.Features.Country;
 
 public sealed class GetCountryList
 {
-	public record Query(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryBase<List<CountryDto>>(QueryString);
+	public sealed record Query(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryBase<List<CountryDto>>(QueryString);
 
 	internal sealed class Handler : IRequestHandler<Query, List<CountryDto>>
 	{

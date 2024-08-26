@@ -3,13 +3,13 @@ using Serilog;
 
 namespace Monaco.Template.Backend.Application.Features.Product;
 
-public class LongRunningProcess
+public sealed class LongRunningProcess
 {
-	public record Command(Guid Id,
-						  string Title,
-						  string Description,
-						  string Price,
-						  Guid CompanyId) : IRequest;
+	public sealed record Command(Guid Id,
+								 string Title,
+								 string Description,
+								 decimal Price,
+								 Guid CompanyId) : IRequest;
 
 	internal sealed class Handler : IRequestHandler<Command>
 	{

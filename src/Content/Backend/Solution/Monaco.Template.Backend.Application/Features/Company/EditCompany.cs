@@ -11,15 +11,15 @@ namespace Monaco.Template.Backend.Application.Features.Company;
 
 public sealed class EditCompany
 {
-	public record Command(Guid Id,
-						  string Name,
-						  string Email,
-						  string WebSiteUrl,
-						  string? Street,
-						  string? City,
-						  string? County,
-						  string? PostCode,
-						  Guid? CountryId) : CommandBase(Id);
+	public sealed record Command(Guid Id,
+								 string Name,
+								 string Email,
+								 string WebSiteUrl,
+								 string? Street,
+								 string? City,
+								 string? County,
+								 string? PostCode,
+								 Guid? CountryId) : CommandBase(Id);
 
 	internal sealed class Validator : AbstractValidator<Command>
 	{

@@ -8,11 +8,11 @@ using Monaco.Template.Backend.Common.Application.Queries;
 
 namespace Monaco.Template.Backend.Application.Features.Product;
 
-public class DownloadProductPicture
+public sealed class DownloadProductPicture
 {
-	public record Query(Guid ProductId,
-						Guid PictureId,
-						IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryBase<FileDownloadDto?>(QueryString)
+	public sealed record Query(Guid ProductId,
+							   Guid PictureId,
+							   IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryBase<FileDownloadDto?>(QueryString)
 	{
 		public bool? IsThumbnail => GetValueBool("thumbnail");
 	};

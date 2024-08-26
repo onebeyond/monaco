@@ -2,7 +2,7 @@
 
 namespace Monaco.Template.Backend.Api.Endpoints.Extensions;
 
-public static class EndpointsExtensions
+internal static class EndpointsExtensions
 {
 	/// <summary>
 	/// Registers all Minimal API endpoints 

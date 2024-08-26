@@ -4,7 +4,7 @@ using Monaco.Template.Backend.Domain.Model;
 
 namespace Monaco.Template.Backend.Application.Infrastructure.EntityConfigurations;
 
-public class DocumentEntityConfiguration : IEntityTypeConfiguration<Document>
+internal sealed class DocumentEntityConfiguration : IEntityTypeConfiguration<Document>
 {
 	public void Configure(EntityTypeBuilder<Document> builder)
 	{

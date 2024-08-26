@@ -2,7 +2,7 @@
 
 namespace Monaco.Template.Backend.Api.DTOs.Extensions;
 
-public static class ProductExtensions
+internal static class ProductExtensions
 {
 	public static CreateProduct.Command Map(this ProductCreateEditDto value) =>
 		new(value.Title,

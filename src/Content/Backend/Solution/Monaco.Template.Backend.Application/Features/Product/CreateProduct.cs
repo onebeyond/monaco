@@ -16,14 +16,14 @@ using Monaco.Template.Backend.Messages.V1;
 
 namespace Monaco.Template.Backend.Application.Features.Product;
 
-public class CreateProduct
+public sealed class CreateProduct
 {
-	public record Command(string Title,
-						  string Description,
-						  decimal Price,
-						  Guid CompanyId,
-						  Guid[] Pictures,
-						  Guid DefaultPictureId) : CommandBase<Guid>;
+	public sealed record Command(string Title,
+								 string Description,
+								 decimal Price,
+								 Guid CompanyId,
+								 Guid[] Pictures,
+								 Guid DefaultPictureId) : CommandBase<Guid>;
 
 	internal sealed class Validator : AbstractValidator<Command>
 	{
