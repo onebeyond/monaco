@@ -143,20 +143,16 @@ public class ApplicationTests : BaseTest
 				 .Check(Architecture);
 
 	[Fact(DisplayName = "Features are free of cycles")]
-	public void FeaturesAreFreeOfCycles()
-	{
+	public void FeaturesAreFreeOfCycles() =>
 		Slices().Matching("Monaco.Template.Backend.Application.Features.(*)")
 				.Should()
 				.BeFreeOfCycles()
-				.Evaluate(Architecture);
-	}
+				.Check(Architecture);
 
 	[Fact(DisplayName = "Features do not depend on each other")]
-	public void FeaturesDontDependOnEachOther()
-	{
+	public void FeaturesDontDependOnEachOther() =>
 		Slices().Matching("Monaco.Template.Backend.Application.Features.(*)")
 				.Should()
 				.NotDependOnEachOther()
-				.Evaluate(Architecture);
-	}
+				.Check(Architecture);
 }
