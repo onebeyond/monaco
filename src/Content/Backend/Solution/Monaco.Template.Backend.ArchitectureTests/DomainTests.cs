@@ -1,9 +1,10 @@
 ﻿using ArchUnitNET.Domain;
+using ArchUnitNET.Domain.Extensions;
 using ArchUnitNET.Loader;
 using ArchUnitNET.xUnit;
+using Monaco.Template.Backend.ArchitectureTests.Extensions;
 using Monaco.Template.Backend.Common.Domain.Model;
 using System.Diagnostics.CodeAnalysis;
-using ArchUnitNET.Domain.Extensions;
 using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 namespace Monaco.Template.Backend.ArchitectureTests;
@@ -24,8 +25,8 @@ public class DomainTests : BaseTest
 	private static readonly Class Enumeration = Architecture.GetClassOfType(typeof(Enumeration));
 	private static readonly Class ValueObject = Architecture.GetClassOfType(typeof(ValueObject));
 
-	[Fact(DisplayName = "Entities exist only in Domain layer")]
-	public void EntitiesExistOnlyInDomainLayer() =>
+	[Fact(DisplayName = "Entities exist only in Domain layer and don't have public or internal property setters")]
+	public void EntitiesExistOnlyInDomainLayerAndHaveNoPublicOrInternalPropSetters() =>
 		Classes().That()
 				 .AreAssignableTo(Entity)
 				 .And()
@@ -35,6 +36,10 @@ public class DomainTests : BaseTest
 				 .Should()
 				 .Be(_domainLayer)
 				 .Because("Entities should only belong to the Domain layer and exist in there")
+				 .AndShould()
+				 .NotHavePropertySetterWithVisibility(Visibility.Public,
+													  Visibility.Internal,
+													  Visibility.ProtectedInternal)
 				 .Check(Architecture);
 
 	[Fact(DisplayName = "ValueObjects exist only in Domain layer and are immutable")]
