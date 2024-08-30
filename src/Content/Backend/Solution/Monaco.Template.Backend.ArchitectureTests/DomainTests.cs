@@ -1,11 +1,5 @@
-﻿using ArchUnitNET.Domain;
-using ArchUnitNET.Domain.Extensions;
-using ArchUnitNET.Loader;
-using ArchUnitNET.xUnit;
-using Monaco.Template.Backend.ArchitectureTests.Extensions;
+﻿using Monaco.Template.Backend.ArchitectureTests.Extensions;
 using Monaco.Template.Backend.Common.Domain.Model;
-using System.Diagnostics.CodeAnalysis;
-using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 namespace Monaco.Template.Backend.ArchitectureTests;
 
@@ -35,11 +29,11 @@ public class DomainTests : BaseTest
 				 .AreNotAssignableTo(Enumeration)
 				 .Should()
 				 .Be(_domainLayer)
-				 .Because("Entities should only belong to the Domain layer and exist in there")
 				 .AndShould()
 				 .NotHavePropertySetterWithVisibility(Visibility.Public,
 													  Visibility.Internal,
 													  Visibility.ProtectedInternal)
+				 .Because("entities should encapsulate their behavior to follow DDD principles and only exist in the Domain layer")
 				 .Check(Architecture);
 
 	[Fact(DisplayName = "ValueObjects exist only in Domain layer and are immutable")]
@@ -50,9 +44,9 @@ public class DomainTests : BaseTest
 				 .AreNot(ValueObject)
 				 .Should()
 				 .Be(_domainLayer)
-				 .Because("ValueObjects should only belong to the Domain layer and exist in there")
 				 .AndShould()
 				 .BeImmutable()
+				 .Because("ValueObjects should not be mutable by definition and only exist in the Domain layer")
 				 .Check(Architecture);
 
 	[Fact(DisplayName = "Enumerations exist only in Domain layer and are immutable")]
@@ -63,9 +57,9 @@ public class DomainTests : BaseTest
 				 .AreNot(Enumeration)
 				 .Should()
 				 .Be(_domainLayer)
-				 .Because("Enumerations should only belong to the Domain layer and exist in there")
 				 .AndShould()
 				 .BeImmutable()
+				 .Because("Enumerations are not meant to modify their state and should only exist in the Domain layer")
 				 .WithoutRequiringPositiveResults()		// It's recommended to remove this by the time the generated solution actually contains an entity implementing Enumeration
 				 .Check(Architecture);
 }

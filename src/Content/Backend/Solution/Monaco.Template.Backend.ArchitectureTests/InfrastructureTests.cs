@@ -1,13 +1,7 @@
-﻿using ArchUnitNET.Domain;
-using ArchUnitNET.Domain.Extensions;
-using ArchUnitNET.Fluent.Syntax.Elements.Types.Classes;
-using ArchUnitNET.Loader;
-using ArchUnitNET.xUnit;
+﻿using ArchUnitNET.Fluent.Syntax.Elements.Types.Classes;
 using Microsoft.EntityFrameworkCore;
 using Monaco.Template.Backend.Common.Domain.Model;
 using Monaco.Template.Backend.Common.Infrastructure.EntityConfigurations;
-using System.Diagnostics.CodeAnalysis;
-using static ArchUnitNET.Fluent.ArchRuleDefinition;
 
 namespace Monaco.Template.Backend.ArchitectureTests;
 

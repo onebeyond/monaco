@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
+﻿using Assembly = System.Reflection.Assembly;
 
 namespace Monaco.Template.Backend.ArchitectureTests;
 

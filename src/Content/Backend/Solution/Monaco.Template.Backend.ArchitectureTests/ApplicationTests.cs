@@ -1,14 +1,8 @@
-﻿using ArchUnitNET.Domain;
-using ArchUnitNET.Domain.Extensions;
-using ArchUnitNET.Fluent.Syntax.Elements.Types.Classes;
-using ArchUnitNET.Loader;
-using ArchUnitNET.xUnit;
+﻿using ArchUnitNET.Fluent.Syntax.Elements.Types.Classes;
 using FluentValidation;
 using MediatR;
 using Monaco.Template.Backend.ArchitectureTests.Extensions;
 using Monaco.Template.Backend.Common.Application.Commands;
-using System.Diagnostics.CodeAnalysis;
-using static ArchUnitNET.Fluent.ArchRuleDefinition;
 using static ArchUnitNET.Fluent.Slices.SliceRuleDefinition;
 
 namespace Monaco.Template.Backend.ArchitectureTests;
@@ -88,6 +82,18 @@ public class ApplicationTests : BaseTest
 																					.Any(g => g.Type.Equals(command)))),
 										"have a validator",
 										"does not have a validator")
+				 .Because("every command derived from CommandBase needs to have a validator")
+				 .Check(Architecture);
+
+	[Fact(DisplayName = "Commands do not invoke other commands")]
+	public void CommandsDontInvokeOtherCommands() =>
+		_handlers.Should()
+				 .NotDependOnAnyTypesThat()
+				 .Are(typeof(ISender))
+				 .AndShould()
+				 .NotDependOnAnyTypesThat()
+				 .ImplementInterface(typeof(ISender))
+				 .Because("it can be used to invoke other commands and it should not")
 				 .Check(Architecture);
 
 	[Fact(DisplayName = "Validators exist in Application layer and are sealed, internal and nested")]
@@ -140,6 +146,7 @@ public class ApplicationTests : BaseTest
 													  .Equals(c.NestType(Architecture)),
 										"be nested together with their handler",
 										"is not nested together with its handler")
+				 .Because("having each feature as a single file component reduces boilerplate and improves DX")
 				 .Check(Architecture);
 
 	[Fact(DisplayName = "Features are free of cycles")]
@@ -147,12 +154,5 @@ public class ApplicationTests : BaseTest
 		Slices().Matching("Monaco.Template.Backend.Application.Features.(*)")
 				.Should()
 				.BeFreeOfCycles()
-				.Check(Architecture);
-
-	[Fact(DisplayName = "Features do not depend on each other")]
-	public void FeaturesDontDependOnEachOther() =>
-		Slices().Matching("Monaco.Template.Backend.Application.Features.(*)")
-				.Should()
-				.NotDependOnEachOther()
 				.Check(Architecture);
 }
