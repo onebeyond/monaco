@@ -2,7 +2,7 @@
 
 namespace Monaco.Template.Backend.Api.DTOs.Extensions;
 
-public static class CompanyExtensions
+internal static class CompanyExtensions
 {
 	public static CreateCompany.Command MapCreateCommand(this CompanyCreateEditDto value) =>
 		new(value.Name!,

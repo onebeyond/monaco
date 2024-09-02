@@ -12,7 +12,7 @@ namespace Monaco.Template.Backend.Application.Features.Company;
 
 public sealed class GetCompanyPage
 {
-	public record Query(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryPagedBase<CompanyDto>(QueryString)
+	public sealed record Query(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryPagedBase<CompanyDto>(QueryString)
 	{
 		public bool ExpandCountry => Expand(nameof(CompanyDto.Country));
 	}

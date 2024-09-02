@@ -13,7 +13,7 @@ namespace Monaco.Template.Backend.Application.Features.Company;
 
 public sealed class DeleteCompany
 {
-	public record Command(Guid Id) : CommandBase(Id);
+	public sealed record Command(Guid Id) : CommandBase(Id);
 
 	internal sealed class Validator : AbstractValidator<Command>
 	{

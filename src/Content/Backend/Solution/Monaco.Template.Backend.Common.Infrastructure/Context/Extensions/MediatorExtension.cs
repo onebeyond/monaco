@@ -6,12 +6,15 @@ namespace Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
 public static class MediatorExtension
 {
-	public static async Task DispatchDomainEventsAsync(this IMediator mediator, DbContext ctx)
+	public static async Task DispatchDomainEventsAsync(this IPublisher publisher, DbContext ctx)
 	{
 		while (true)
 		{
-			var domainEntities = ctx.ChangeTracker.Entries<Entity>()
-									.Where(x => x.Entity.DomainEvents.Any())
+			var domainEntities = ctx.ChangeTracker
+									.Entries<Entity>()
+									.Where(x => x.Entity
+												 .DomainEvents
+												 .Any())
 									.ToList();
 
 			var domainEvents = domainEntities.SelectMany(x => x.Entity.DomainEvents).ToList();
@@ -19,10 +22,14 @@ public static class MediatorExtension
 			domainEntities.ForEach(entity => entity.Entity.ClearDomainEvents());
 
 			foreach (var domainEvent in domainEvents)
-				await mediator.Publish(domainEvent);
+				await publisher.Publish(domainEvent);
 
 			//If event handlers produced more domain events, keep processing them until there's no more
-			if (ctx.ChangeTracker.Entries<Entity>().Any(x => x.Entity.DomainEvents.Any()))
+			if (ctx.ChangeTracker
+				   .Entries<Entity>()
+				   .Any(x => x.Entity
+							  .DomainEvents
+							  .Any()))
 				continue;
 
 			break;

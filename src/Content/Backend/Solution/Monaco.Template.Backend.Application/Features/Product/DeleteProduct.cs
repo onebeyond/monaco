@@ -9,9 +9,9 @@ using Monaco.Template.Backend.Domain.Model;
 
 namespace Monaco.Template.Backend.Application.Features.Product;
 
-public class DeleteProduct
+public sealed class DeleteProduct
 {
-	public record Command(Guid Id) : CommandBase(Id);
+	public sealed record Command(Guid Id) : CommandBase(Id);
 
 	internal sealed class Validator : AbstractValidator<Command>
 	{

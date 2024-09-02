@@ -8,9 +8,9 @@ namespace Monaco.Template.Backend.Application.Features.File;
 
 public sealed class CreateFile
 {
-	public record Command(Stream Stream, string FileName, string ContentType) : CommandBase<Guid>;
+	public sealed record Command(Stream Stream, string FileName, string ContentType) : CommandBase<Guid>;
 
-	internal class Validator : AbstractValidator<Command>
+	internal sealed class Validator : AbstractValidator<Command>
 	{
 		public Validator()
 		{

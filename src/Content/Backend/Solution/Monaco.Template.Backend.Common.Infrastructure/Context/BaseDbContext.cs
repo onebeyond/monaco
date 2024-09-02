@@ -13,16 +13,16 @@ namespace Monaco.Template.Backend.Common.Infrastructure.Context;
 
 public abstract class BaseDbContext : DbContext, IUnitOfWork
 {
-	protected readonly IMediator Mediator;
+	protected readonly IPublisher Publisher;
 	protected readonly IHostEnvironment Env;
 
 	protected BaseDbContext()
 	{
 	}
 
-	protected BaseDbContext(DbContextOptions options, IMediator mediator, IHostEnvironment env) : base(options)
+	protected BaseDbContext(DbContextOptions options, IPublisher publisher, IHostEnvironment env) : base(options)
 	{
-		Mediator = mediator;
+		Publisher = publisher;
 		Env = env;
 	}
 
@@ -53,7 +53,7 @@ public abstract class BaseDbContext : DbContext, IUnitOfWork
 		// side effects from the domain event handlers which are using the same DbContext with "InstancePerLifetimeScope" or "scoped" lifetime
 		// B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
 		// You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
-		await Mediator.DispatchDomainEventsAsync(this);
+		await Publisher.DispatchDomainEventsAsync(this);
 
 		ResetReferentialEntitiesState();
 

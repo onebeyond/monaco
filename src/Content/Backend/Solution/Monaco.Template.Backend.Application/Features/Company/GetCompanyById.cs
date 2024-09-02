@@ -9,7 +9,7 @@ namespace Monaco.Template.Backend.Application.Features.Company;
 
 public sealed class GetCompanyById
 {
-	public record Query(Guid Id) : QueryByIdBase<CompanyDto?>(Id);
+	public sealed record Query(Guid Id) : QueryByIdBase<CompanyDto?>(Id);
 
 	internal sealed class Handler : IRequestHandler<Query, CompanyDto?>
 	{

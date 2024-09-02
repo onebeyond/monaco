@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace Monaco.Template.Backend.Application.DTOs.Extensions;
 
-public static class CompanyExtensions
+internal static class CompanyExtensions
 {
 	public static CompanyDto? Map(this Company? value, bool expandCountry = false) =>
 		value is null

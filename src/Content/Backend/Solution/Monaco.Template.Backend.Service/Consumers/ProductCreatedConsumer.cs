@@ -17,6 +17,12 @@ public class ProductCreatedConsumer : IConsumer<ProductCreated>
 	public async Task Consume(ConsumeContext<ProductCreated> context)
 	{
 		//Sample of launching a long-running process in response to the event
-		await _sender.Send(new LongRunningProcess(), context.CancellationToken);
+		var msg = context.Message;
+		await _sender.Send(new LongRunningProcess.Command(msg.Id,
+														  msg.Title,
+														  msg.Description,
+														  msg.Price,
+														  msg.CompanyId),
+						   context.CancellationToken);
 	}
 }

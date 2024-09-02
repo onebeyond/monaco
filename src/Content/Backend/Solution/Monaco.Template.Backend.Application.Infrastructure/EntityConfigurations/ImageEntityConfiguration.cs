@@ -4,7 +4,7 @@ using Monaco.Template.Backend.Domain.Model;
 
 namespace Monaco.Template.Backend.Application.Infrastructure.EntityConfigurations;
 
-public class ImageEntityConfiguration : IEntityTypeConfiguration<Image>
+internal sealed class ImageEntityConfiguration : IEntityTypeConfiguration<Image>
 {
 	public void Configure(EntityTypeBuilder<Image> builder)
 	{

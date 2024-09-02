@@ -7,7 +7,7 @@ using Monaco.Template.Backend.Domain.Model;
 
 namespace Monaco.Template.Backend.Application.Infrastructure.EntityConfigurations;
 
-public class CountryEntityConfiguration(IHostEnvironment env) : EntityTypeConfigurationBase<Country>(env)
+internal sealed class CountryEntityConfiguration(IHostEnvironment env) : EntityTypeConfigurationBase<Country>(env)
 {
 	public override void Configure(EntityTypeBuilder<Country> builder)
 	{

@@ -1,7 +1,7 @@
 ﻿#if (auth)
 namespace Monaco.Template.Backend.Api.Auth;
 
-public static class Scopes
+internal static class Scopes
 {
 	public const string CompaniesRead = "companies:read";
 	public const string CompaniesWrite = "companies:write";
