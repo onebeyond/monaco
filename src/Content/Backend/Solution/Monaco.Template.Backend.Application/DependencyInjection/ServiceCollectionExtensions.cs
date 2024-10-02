@@ -34,16 +34,19 @@ public static class ServiceCollectionExtensions
 				.AddMediatR(config => config.RegisterServicesFromAssemblies(GetApplicationAssembly()))
 				.RegisterCommandConcurrencyExceptionBehaviors(GetApplicationAssembly())
 				.RegisterCommandValidationBehaviors(GetApplicationAssembly())
-				.AddValidatorsFromAssembly(GetApplicationAssembly(), filter: filter => !filter.ValidatorType
-																							  .GetInterfaces()
-																							  .Contains(typeof(INonInjectable)) &&
-																					   !filter.ValidatorType.IsAbstract,
+				.AddValidatorsFromAssembly(GetApplicationAssembly(),
+										   filter: filter => !filter.ValidatorType
+																	.GetInterfaces()
+																	.Contains(typeof(INonInjectable)) &&
+															 !filter.ValidatorType.IsAbstract,
 										   includeInternalTypes: true)
 				.AddDbContext<AppDbContext>(opts => opts.UseSqlServer(optionsValue.EntityFramework.ConnectionString,
 																	  sqlOptions =>
 																	  {
 																		  sqlOptions.MigrationsAssembly("Monaco.Template.Backend.Application.Infrastructure.Migrations");
-																		  sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(3), null);
+																		  sqlOptions.EnableRetryOnFailure(5,
+																										  TimeSpan.FromSeconds(3),
+																										  null);
 																	  })
 														.UseLazyLoadingProxies()
 														.EnableSensitiveDataLogging(optionsValue.EntityFramework.EnableEfSensitiveLogging))

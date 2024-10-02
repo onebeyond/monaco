@@ -6,7 +6,7 @@ using File = Monaco.Template.Backend.Domain.Model.File;
 
 namespace Monaco.Template.Backend.Application.Infrastructure.EntityConfigurations;
 
-public class FileEntityConfiguration : IEntityTypeConfiguration<File>
+internal sealed class FileEntityConfiguration : IEntityTypeConfiguration<File>
 {
 	public void Configure(EntityTypeBuilder<File> builder)
 	{

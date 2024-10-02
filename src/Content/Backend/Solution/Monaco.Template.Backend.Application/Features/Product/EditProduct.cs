@@ -11,15 +11,15 @@ using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
 namespace Monaco.Template.Backend.Application.Features.Product;
 
-public class EditProduct
+public sealed class EditProduct
 {
-	public record Command(Guid Id,
-						  string Title,
-						  string Description,
-						  decimal Price,
-						  Guid CompanyId,
-						  Guid[] Pictures,
-						  Guid DefaultPictureId) : CommandBase(Id);
+	public sealed record Command(Guid Id,
+								 string Title,
+								 string Description,
+								 decimal Price,
+								 Guid CompanyId,
+								 Guid[] Pictures,
+								 Guid DefaultPictureId) : CommandBase(Id);
 
 	internal sealed class Validator : AbstractValidator<Command>
 	{

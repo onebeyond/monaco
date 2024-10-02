@@ -5,7 +5,7 @@ using Monaco.Template.Backend.Domain.Model;
 
 namespace Monaco.Template.Backend.Application.Infrastructure.EntityConfigurations;
 
-public class ProductEntityConfiguration : IEntityTypeConfiguration<Product>
+internal sealed class ProductEntityConfiguration : IEntityTypeConfiguration<Product>
 {
 	public void Configure(EntityTypeBuilder<Product> builder)
 	{

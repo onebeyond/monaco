@@ -6,7 +6,7 @@ using Monaco.Template.Backend.Messages.V1;
 
 namespace Monaco.Template.Backend.Application.Features.Product.Extensions;
 
-public static class ProductDataExtensions
+internal static class ProductDataExtensions
 {
 	internal static async Task<(Domain.Model.Company, Domain.Model.Image[])> GetProductData(this AppDbContext dbContext,
 																							Guid companyId,

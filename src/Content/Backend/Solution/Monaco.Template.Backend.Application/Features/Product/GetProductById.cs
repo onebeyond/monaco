@@ -8,9 +8,9 @@ using Monaco.Template.Backend.Common.Application.Queries;
 namespace Monaco.Template.Backend.Application.Features.Product;
 
 
-public class GetProductById
+public sealed class GetProductById
 {
-	public record Query(Guid Id) : QueryByIdBase<ProductDto?>(Id);
+	public sealed record Query(Guid Id) : QueryByIdBase<ProductDto?>(Id);
 
 	internal sealed class Handler : IRequestHandler<Query, ProductDto?>
 	{

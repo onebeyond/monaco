@@ -1,6 +1,6 @@
 ﻿namespace Monaco.Template.Backend.Application.Infrastructure.EntityConfigurations.Seeds;
 
-public class CountrySeed
+internal sealed class CountrySeed
 {
 	public static List<object> GetCountries() =>
 	[

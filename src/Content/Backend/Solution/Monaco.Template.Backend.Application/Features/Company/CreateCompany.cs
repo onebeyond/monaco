@@ -10,14 +10,14 @@ namespace Monaco.Template.Backend.Application.Features.Company;
 
 public sealed class CreateCompany
 {
-	public record Command(string Name,
-					      string Email,
-					      string WebSiteUrl,
-					      string? Street,
-					      string? City,
-					      string? County,
-					      string? PostCode,
-					      Guid? CountryId) : CommandBase<Guid>;
+	public sealed record Command(string Name,
+								 string Email,
+								 string WebSiteUrl,
+								 string? Street,
+								 string? City,
+								 string? County,
+								 string? PostCode,
+								 Guid? CountryId) : CommandBase<Guid>;
 
 	internal sealed class Validator : AbstractValidator<Command>
 	{

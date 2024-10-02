@@ -13,8 +13,8 @@ public class AppDbContext : BaseDbContext
 	}
 
 	public AppDbContext(DbContextOptions<AppDbContext> options,
-						IMediator mediator,
-						IHostEnvironment env) : base(options, mediator, env)
+						IPublisher publisher,
+						IHostEnvironment env) : base(options, publisher, env)
 	{
 	}
 

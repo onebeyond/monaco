@@ -10,9 +10,9 @@ using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
 namespace Monaco.Template.Backend.Application.Features.Product;
 
-public class GetProductPage
+public sealed class GetProductPage
 {
-	public record Query(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryPagedBase<ProductDto>(QueryString)
+	public sealed record Query(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryPagedBase<ProductDto>(QueryString)
 	{
 		public bool ExpandCompany => Expand(nameof(ProductDto.Company));
 
