@@ -20,14 +20,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration)
 												   .WriteTo.Logger(l => l.WriteTo.Conditional(_ => context.HostingEnvironment.IsDevelopment(),	// Only for dev
-																							  cfg => cfg.Debug()
-																										.WriteTo.File("logs/log.txt",
-																													  rollingInterval: RollingInterval.Day,
-																													  outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"))
-																		 .WriteTo.Console()
-																		 .WriteTo.ApplicationInsights(context.Configuration["ApplicationInsights:InstrumentationKey"],
-																									  new OperationTelemetryConverter())
-																		 .Filter.ByExcluding(x => x.Properties.ContainsKey("AuditEntries")))
+																										cfg => cfg.Debug()
+																												  .WriteTo.File("logs/log.txt",
+																																rollingInterval: RollingInterval.Day,
+																																outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"))
+																				   .WriteTo.Console()
+																				   .WriteTo.ApplicationInsights(context.Configuration["ApplicationInsights:InstrumentationKey"],
+																											 new OperationTelemetryConverter())
+																				   .Filter.ByExcluding(x => x.Properties.ContainsKey("AuditEntries")))
 												   .WriteTo.Logger(l => l.WriteTo.ApplicationInsights(context.Configuration["ApplicationInsights:InstrumentationKey"],
 																									  new AuditEventTelemetryConverter())
 																		 .Filter.ByIncludingOnly(x => x.Properties.ContainsKey("AuditEntries")))
@@ -121,3 +121,8 @@ app.UseCors()
 app.MapHealthChecks("/health", new HealthCheckOptions { Predicate = _ => true });
 
 app.Run();
+
+namespace Monaco.Template.Backend.Api
+{
+	public partial class Program;
+}

@@ -14,17 +14,42 @@ public record Page<T>
 		Pager = new Pager(offset, limit, count);
 	}
 
+	public Page(IEnumerable<T> items, Pager pager)
+	{
+		Items = items.ToList();
+		Pager = pager;
+	}
+
+	public Page() { }
+
 	/// <summary>
 	/// Page metadata
 	/// </summary>
-	public Pager Pager { get; }
+	public Pager Pager { get; init; }
 	/// <summary>
 	/// Paged items
 	/// </summary>
-	public IReadOnlyList<T> Items { get; }
+	public IReadOnlyList<T> Items { get; init; }
 }
 
 /// <summary>
 /// Pagination metadata
 /// </summary>
-public record Pager(int Offset, int Limit, long Count);
+public record Pager
+{
+	public Pager() {}
+
+	/// <summary>
+	/// Pagination metadata
+	/// </summary>
+	public Pager(int offset, int limit, long count)
+	{
+		Offset = offset;
+		Limit = limit;
+		Count = count;
+	}
+
+	public int Offset { get; init; }
+	public int Limit { get; init; }
+	public long Count { get; init; }
+}

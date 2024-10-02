@@ -37,7 +37,8 @@ public static class ServiceCollectionExtensions
 				.AddValidatorsFromAssembly(GetApplicationAssembly(), filter: filter => !filter.ValidatorType
 																							  .GetInterfaces()
 																							  .Contains(typeof(INonInjectable)) &&
-																					   !filter.ValidatorType.IsAbstract)
+																					   !filter.ValidatorType.IsAbstract,
+										   includeInternalTypes: true)
 				.AddDbContext<AppDbContext>(opts => opts.UseSqlServer(optionsValue.EntityFramework.ConnectionString,
 																	  sqlOptions =>
 																	  {
