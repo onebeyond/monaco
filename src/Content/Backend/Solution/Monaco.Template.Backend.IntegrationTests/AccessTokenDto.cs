@@ -2,13 +2,4 @@
 
 namespace Monaco.Template.Backend.IntegrationTests;
 
-public record AccessTokenDto
-{
-	public AccessTokenDto(string accessToken, int expiresIn)
-	{
-		AccessToken = accessToken;
-	}
-
-	[JsonPropertyName("access_token")]
-	public string AccessToken { get; init; }
-}
+public record AccessTokenDto([property: JsonPropertyName("access_token")] string AccessToken);

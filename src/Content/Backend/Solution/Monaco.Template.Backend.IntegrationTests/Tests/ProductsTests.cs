@@ -201,7 +201,7 @@ public class ProductsTests : IntegrationTest
 		var productId = Guid.Parse("FA934D1C-1E6D-4DD4-ADC2-08DC18C8810C");
 		var pictureId = Guid.Parse("7D5C57BA-05F4-44FD-832E-5145C5AB0486");
 
-		await DownloadProductPictureTest(productId, pictureId, false);
+		await DownloadProductPictureTest(productId, pictureId);
 	}
 
 	[Fact(DisplayName = "Download Product's Picture Thumbnail succeeds")]

@@ -27,6 +27,7 @@ internal static class ApiRoutes
 			? url.SetQueryParam(LimitParamName, limit.Value)
 			: url;
 
+
 	public static class Companies
 	{
 		private static Url Controller => ApiVersion.Clone()
@@ -77,13 +78,9 @@ internal static class ApiRoutes
 
 		public static Url Get(Guid id) => Controller.AppendPathSegment(id);
 
-		public static Url DownloadPicture(Guid productId, Guid pictureId, bool? isThumbnail = null)
-		{
-			var url = Controller.AppendPathSegments(productId, "Pictures", pictureId);
-			return isThumbnail.HasValue
-					   ? url.SetQueryParam("thumbnail", isThumbnail.Value.ToString().ToLower())
-					   : url;
-		}
+		public static Url DownloadPicture(Guid productId, Guid pictureId, bool? isThumbnail = null) =>
+			Controller.AppendPathSegments(productId, "Pictures", pictureId)
+					  .SetQueryParam("thumbnail", isThumbnail);
 
 		public static string Post() => Query();
 		public static string Put(Guid id) => Get(id);
