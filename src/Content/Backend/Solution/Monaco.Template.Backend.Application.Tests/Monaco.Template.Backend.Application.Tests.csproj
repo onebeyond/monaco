@@ -9,7 +9,7 @@
 
   <!--#if (templateDebug)-->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>$(DefineConstants);auth;commonLibraries;filesSupport</DefineConstants>
+    <DefineConstants>$(DefineConstants);auth;commonLibraries;filesSupport;massTransitIntegration</DefineConstants>
   </PropertyGroup>
 
   <!--#endif-->

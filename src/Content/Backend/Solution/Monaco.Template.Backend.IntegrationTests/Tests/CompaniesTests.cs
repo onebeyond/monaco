@@ -23,8 +23,10 @@ public class CompaniesTests : IntegrationTest
 	{
 		await base.InitializeAsync();
 		await RunScriptAsync(@"Scripts\Companies.sql");
+#if (auth)
 
 		await SetupAccessToken([Auth.Roles.Administrator]);
+#endif
 	}
 
 	[Theory(DisplayName = "Get Companies page succeeds")]

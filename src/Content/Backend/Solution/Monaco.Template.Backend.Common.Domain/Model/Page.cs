@@ -8,11 +8,15 @@ public record Page<T>
 	/// <param name="offset">Record from where to start paging</param>
 	/// <param name="limit">Amount of items to page</param>
 	/// <param name="count">Total amount of items</param>
-	public Page(IEnumerable<T> items, int offset, int limit, long count)
-	{
-		Items = items.ToList();
-		Pager = new Pager(offset, limit, count);
-	}
+	public Page(IEnumerable<T> items,
+				int offset,
+				int limit,
+				long count)
+		: this(items,
+			   new Pager(offset,
+						 limit,
+						 count))
+	{ }
 
 	public Page(IEnumerable<T> items, Pager pager)
 	{

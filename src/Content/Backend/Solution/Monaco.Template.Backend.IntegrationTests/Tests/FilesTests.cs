@@ -18,8 +18,10 @@ public class FilesTests : IntegrationTest
 	public override async Task InitializeAsync()
 	{
 		await base.InitializeAsync();
-	
+#if (auth)
+
 		await SetupAccessToken([Auth.Roles.Administrator]);
+#endif
 	}
 
 	[Fact(DisplayName = "Upload File succeeds")]

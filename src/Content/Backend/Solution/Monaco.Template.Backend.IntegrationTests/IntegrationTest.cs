@@ -16,9 +16,11 @@ public abstract class IntegrationTest : IClassFixture<AppFixture>, IAsyncLifetim
 	protected readonly AppFixture Fixture;
 	protected ApiWebApplicationFactory WebAppFactory;
 	protected IFlurlClient Client;
+#if (auth)
 	protected readonly bool RequiresAuthentication;
 	protected KeycloakService KeycloakService;
 	protected AccessTokenDto? AccessToken;
+#endif
 	
 	protected IntegrationTest(AppFixture fixture, bool requiresAuthentication)
 	{
@@ -30,6 +32,7 @@ public abstract class IntegrationTest : IClassFixture<AppFixture>, IAsyncLifetim
 								AllowAutoRedirect = false
 							};
 
+#if (auth)
 		Client = new FlurlClient(WebAppFactory.CreateClient(clientOptions)).AllowAnyHttpStatus()
 																		   .BeforeCall(call =>
 																					   {
@@ -42,6 +45,9 @@ public abstract class IntegrationTest : IClassFixture<AppFixture>, IAsyncLifetim
 												  AppFixture.KeycloakRealm,
 												  AppFixture.KeycloakRealmUsername,
 												  AppFixture.KeycloakRealmPassword);
+#else
+		Client = new FlurlClient(WebAppFactory.CreateClient(clientOptions)).AllowAnyHttpStatus();
+#endif
 	}
 
 	protected IFlurlRequest CreateRequest(string endpoint) => Client.Request(endpoint);
@@ -51,6 +57,7 @@ public abstract class IntegrationTest : IClassFixture<AppFixture>, IAsyncLifetim
 		await ApplyDbMigrations();
 	}
 
+#if (auth)
 	protected virtual async Task SetupAccessToken(string audienceClientId,
 												  string[] roles,
 												  string[] scopes) 
@@ -67,6 +74,7 @@ public abstract class IntegrationTest : IClassFixture<AppFixture>, IAsyncLifetim
 						 roles,
 						 Auth.Scopes);
 
+#endif
 	protected virtual AppDbContext GetDbContext() =>
 		WebAppFactory.Services
 					 .CreateScope()

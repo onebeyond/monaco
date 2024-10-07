@@ -5,11 +5,11 @@ using Monaco.Template.Backend.Messages.V1;
 
 namespace Monaco.Template.Backend.Service.Consumers;
 
-public class ProductCreatedConsumer : IConsumer<ProductCreated>
+public class OnProductCreatedThenLongRunningProcess : IConsumer<ProductCreated>
 {
 	private readonly ISender _sender;
 
-	public ProductCreatedConsumer(ISender sender)
+	public OnProductCreatedThenLongRunningProcess(ISender sender)
 	{
 		_sender = sender;
 	}

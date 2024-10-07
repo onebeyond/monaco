@@ -18,14 +18,10 @@ internal static class ApiRoutes
 			: url;
 
 	private static Url Offset(this Url url, int? offset = null) =>
-		offset.HasValue
-			? url.SetQueryParam(OffsetParamName, offset.Value)
-			: url;
+		url.SetQueryParam(OffsetParamName, offset);
 
 	private static Url Limit(this Url url, int? limit = null) =>
-		limit.HasValue
-			? url.SetQueryParam(LimitParamName, limit.Value)
-			: url;
+		url.SetQueryParam(LimitParamName, limit);
 
 
 	public static class Companies
@@ -51,6 +47,7 @@ internal static class ApiRoutes
 		public static Url Query() => Controller;
 		public static Url Get(Guid id) => Controller.AppendPathSegment(id);
 	}
+#if (filesSupport)
 
 	public static class Files
 	{
@@ -86,4 +83,5 @@ internal static class ApiRoutes
 		public static string Put(Guid id) => Get(id);
 		public static string Delete(Guid id) => Get(id);
 	}
+#endif
 }

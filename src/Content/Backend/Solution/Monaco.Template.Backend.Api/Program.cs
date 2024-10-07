@@ -71,18 +71,16 @@ builder.Services
 #if (massTransitIntegration)
 	   .AddMassTransit(cfg =>
 					   {
-						   if (builder.Environment.IsDevelopment())
-							   cfg.UsingRabbitMq((_, busCfg) =>
-												 {
-													 var rabbitMqConfig = configuration.GetSection("MessageBus:RabbitMQ");
-													 busCfg.Host(rabbitMqConfig["Host"],
-																 rabbitMqConfig["VHost"],
-																 h =>
-																 {
-																	 h.Username(rabbitMqConfig["Username"]);
-																	 h.Password(rabbitMqConfig["Password"]);
-																 });
-												 });
+						   var rabbitMqConfig = configuration.GetSection("MessageBus:RabbitMQ");
+						   if (rabbitMqConfig.Exists())
+							   cfg.UsingRabbitMq((_, busCfg) => busCfg.Host(rabbitMqConfig["Host"],
+																			ushort.Parse(rabbitMqConfig["Port"] ?? "5672"),
+																			rabbitMqConfig["VHost"],
+																			h =>
+																			{
+																				h.Username(rabbitMqConfig["Username"]!);
+																				h.Password(rabbitMqConfig["Password"]!);
+																			}));
 						   else
 							   cfg.UsingAzureServiceBus((_, busCfg) => busCfg.Host(configuration["MessageBus:ASBConnectionString"]));
 					   })

@@ -191,7 +191,11 @@
 				{
 					"condition": "(!auth)",
 					"exclude": [
-						"Monaco.Template.Backend.Api/Auth/**/*"
+						"Monaco.Template.Backend.Api/Auth/**/*",
+						"Monaco.Template.Backend.IntegrationTests/Imports/Keycloak/**/*",
+						"Monaco.Template.Backend.IntegrationTests/AccessTokenDto.cs",
+						"Monaco.Template.Backend.IntegrationTests/Auth.cs",
+						"Monaco.Template.Backend.IntegrationTests/KeycloakService.cs"
 					]
 				},
 				{
@@ -240,6 +244,10 @@
 						"Monaco.Template.Backend.Domain.Tests/ImageDimensionsTests.cs",
 						"Monaco.Template.Backend.Domain.Tests/ImageTests.cs",
 						"Monaco.Template.Backend.Domain.Tests/ProductTests.cs",
+						"Monaco.Template.Backend.IntegrationTests/Imports/Pictures/**/*",
+						"Monaco.Template.Backend.IntegrationTests/Scripts/Products.sql",
+						"Monaco.Template.Backend.IntegrationTests/Tests/FilesTests.cs",
+						"Monaco.Template.Backend.IntegrationTests/Tests/ProductsTests.cs",
 						"Monaco.Template.Backend.Messages/V1/ProductCreated.cs",
 						"Monaco.Template.Backend.Service/Consumers/ProductCreatedConsumer.cs"
 					]
@@ -260,13 +268,14 @@
 				{
 					"condition": "(!massTransitIntegration || !workerService)",
 					"exclude": [
-						"Monaco.Template.Backend.Application/Features/Product/LongRunningProcessCommand.cs"
+						"Monaco.Template.Backend.Application/Features/Product/LongRunningProcess.cs"
 					]
 				},
 				{
 					"condition": "(!tests)",
 					"exclude": [
-						"Monaco.Template.Backend.*.Tests/**/*"
+						"Monaco.Template.Backend.*.Tests/**/*",
+						"Monaco.Template.Backend.*Tests/**/*"
 					]
 				},
 				{

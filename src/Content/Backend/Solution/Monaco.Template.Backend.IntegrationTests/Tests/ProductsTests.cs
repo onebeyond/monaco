@@ -36,9 +36,11 @@ public class ProductsTests : IntegrationTest
 			await blobClient.UploadAsync(File.OpenRead(@$"Imports\Pictures\{image.Name}{image.Extension}"));
 		}
 	}
+#if (auth)
 
 	private Task SetupAccessToken() =>
 		SetupAccessToken([Auth.Roles.Administrator]);
+#endif
 
 	private BlobContainerClient GetBlobContainerClient() =>
 		new(WebAppFactory.StorageConnectionString,
@@ -247,7 +249,9 @@ public class ProductsTests : IntegrationTest
 											   string description,
 											   decimal price)
 	{
+#if (auth)
 		await SetupAccessToken();
+#endif
 		var dbContext = GetDbContext();
 		var tempImages = await dbContext.Set<Image>()
 										.Where(i => i.IsTemp && i.ThumbnailId.HasValue)
@@ -327,7 +331,9 @@ public class ProductsTests : IntegrationTest
 												  string description,
 												  decimal price)
 	{
+#if (auth)
 		await SetupAccessToken();
+#endif
 		var dbContext = GetDbContext();
 		var productId = Guid.Parse("FA934D1C-1E6D-4DD4-ADC2-08DC18C8810C");
 		var productPictures = await dbContext.Set<Product>()
@@ -416,7 +422,9 @@ public class ProductsTests : IntegrationTest
 	[Fact(DisplayName = "Delete existing Product succeeds")]
 	public async Task DeleteExistingProductSucceeds()
 	{
+#if (auth)
 		await SetupAccessToken();
+#endif
 		var productId = Guid.Parse("FA934D1C-1E6D-4DD4-ADC2-08DC18C8810C");
 		var response = await CreateRequest(ApiRoutes.Products.Delete(productId)).DeleteAsync();
 
