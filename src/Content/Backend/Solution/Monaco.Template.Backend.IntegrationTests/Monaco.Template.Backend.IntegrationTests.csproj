@@ -46,17 +46,23 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!--#if (apiService)-->
     <ProjectReference Include="..\Monaco.Template.Backend.Api\Monaco.Template.Backend.Api.csproj" />
+    <!--#endif-->
+    <!--#if (workerService)-->
     <ProjectReference Include="..\Monaco.Template.Backend.Service\Monaco.Template.Backend.Service.csproj" />
+    <!--#endif-->
   </ItemGroup>
 
   <ItemGroup>
     <None Update="Imports\**\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <!--#if (apiService)-->
     <None Update="Scripts\*.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <!--#endif-->
   </ItemGroup>
 
 </Project>
