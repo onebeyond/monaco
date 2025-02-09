@@ -57,7 +57,7 @@
 		"keycloakConfig": {
 			"type": "parameter",
 			"datatype": "bool",
-			"defaultValue": "false",
+			"defaultValue": "true",
 			"displayName": "Include Keycloak realm configuration",
 			"description": "Include Keycloak JSON configuration file for generating new realm"
 		},
@@ -73,7 +73,7 @@
 		"massTransitIntegration": {
 			"type": "parameter",
 			"datatype": "bool",
-			"defaultValue": "false",
+			"defaultValue": "true",
 			"displayName": "Include MassTransit integration",
 			"description": "Includes MassTransit for integration events"
 		},
@@ -87,7 +87,7 @@
 		"workerService": {
 			"type": "parameter",
 			"datatype": "bool",
-			"defaultValue": "false",
+			"defaultValue": "true",
 			"displayName": "Include Worker Service",
 			"description": "Include Worker Service project for background service implementation"
 		},
@@ -185,17 +185,26 @@
 					"condition": "(!apiService)",
 					"exclude": [
 						"Monaco.Template.Backend.Api/**/*",
-						"Monaco.Template.Backend.*.Api*/**/*"
+						"Monaco.Template.Backend.*.Api*/**/*",
+						"Monaco.Template.Backend.IntegrationTests/ApiRoutes.cs",
+						"Monaco.Template.Backend.IntegrationTests/Factories/ApiWebApplicationFactory.cs",
+						"Monaco.Template.Backend.IntegrationTests/Tests/CompaniesTests.cs",
+						"Monaco.Template.Backend.IntegrationTests/Tests/CountriesTests.cs",
+						"Monaco.Template.Backend.IntegrationTests/Tests/FilesTests.cs",
+						"Monaco.Template.Backend.IntegrationTests/Tests/ProductsTests.cs",
+						"Monaco.Template.Backend.IntegrationTests/Scripts/Companies.sql",
+						"Monaco.Template.Backend.IntegrationTests/Scripts/Products.sql",
+						"Monaco.Template.Backend.IntegrationTests/Imports/Pictures/**/*"
 					]
 				},
 				{
-					"condition": "(!auth)",
+					"condition": "(!apiService || !auth)",
 					"exclude": [
 						"Monaco.Template.Backend.Api/Auth/**/*",
-						"Monaco.Template.Backend.IntegrationTests/Imports/Keycloak/**/*",
-						"Monaco.Template.Backend.IntegrationTests/AccessTokenDto.cs",
-						"Monaco.Template.Backend.IntegrationTests/Auth.cs",
-						"Monaco.Template.Backend.IntegrationTests/KeycloakService.cs"
+						"Monaco.Template.Backend.IntegrationTests/Auth/AccessTokenDto.cs",
+						"Monaco.Template.Backend.IntegrationTests/Auth/Auth.cs",
+						"Monaco.Template.Backend.IntegrationTests/Auth/KeycloakService.cs",
+						"Monaco.Template.Backend.IntegrationTests/Imports/Keycloak/**/*"
 					]
 				},
 				{
@@ -249,7 +258,7 @@
 						"Monaco.Template.Backend.IntegrationTests/Tests/FilesTests.cs",
 						"Monaco.Template.Backend.IntegrationTests/Tests/ProductsTests.cs",
 						"Monaco.Template.Backend.Messages/V1/ProductCreated.cs",
-						"Monaco.Template.Backend.Service/Consumers/ProductCreatedConsumer.cs"
+						"Monaco.Template.Backend.Service/Consumers/OnProductCreatedThenLongRunningProcess.cs"
 					]
 				},
 				{
@@ -281,7 +290,14 @@
 				{
 					"condition": "(!workerService)",
 					"exclude": [
-						"Monaco.Template.Backend.Service/**/*"
+						"Monaco.Template.Backend.Service/**/*",
+						"Monaco.Template.Backend.IntegrationTests/Factories/WorkerServiceFactory.cs"
+					]
+				},
+				{
+					"condition": "(!apiService && !workerService)",
+					"exclude": [
+						"Monaco.Template.Backend.Backend.IntegrationTests/**/*"
 					]
 				}
 			]

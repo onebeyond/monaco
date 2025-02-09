@@ -10,6 +10,8 @@ using Monaco.Template.Backend.Common.Domain.Model;
 using Monaco.Template.Backend.Domain.Model;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using Monaco.Template.Backend.Messages.V1;
+using Monaco.Template.Backend.Service.Consumers;
 using File = System.IO.File;
 
 namespace Monaco.Template.Backend.IntegrationTests.Tests;
@@ -18,8 +20,14 @@ namespace Monaco.Template.Backend.IntegrationTests.Tests;
 [Trait("Integration Tests", "Products")]
 public class ProductsTests : IntegrationTest
 {
-	public ProductsTests(AppFixture fixture) : base(fixture, true)
+	public ProductsTests(AppFixture fixture) : base(fixture)
 	{ }
+
+#if (auth)
+	protected override bool RequiresAuthentication => true;
+#else
+	protected override bool RequiresAuthentication => false;
+#endif
 
 	public override async Task InitializeAsync()
 	{
@@ -39,11 +47,11 @@ public class ProductsTests : IntegrationTest
 #if (auth)
 
 	private Task SetupAccessToken() =>
-		SetupAccessToken([Auth.Roles.Administrator]);
+		SetupAccessToken([Auth.Auth.Roles.Administrator]);
 #endif
 
 	private BlobContainerClient GetBlobContainerClient() =>
-		new(WebAppFactory.StorageConnectionString,
+		new(Fixture.StorageConnectionString,
 			AppFixture.StorageContainer);
 
 	[Theory(DisplayName = "Get Products page succeeds")]
@@ -94,12 +102,9 @@ public class ProductsTests : IntegrationTest
 
 								  p.Pictures
 								   .Should()
-								   .AllSatisfy(pic =>
-											   {
-												   pic.Thumbnail
-													  .Should()
-													  .NotBeNull();
-											   });
+								   .AllSatisfy(pic => pic.Thumbnail
+														 .Should()
+														 .NotBeNull());
 							  }
 							  else
 								  p.Pictures
@@ -245,13 +250,17 @@ public class ProductsTests : IntegrationTest
 
 	[Theory(DisplayName = "Create new Product succeeds")]
 	[AutoData]
-	public async Task CreateNewCompanySucceeds(string title,
+	public async Task CreateNewProductSucceeds(string title,
 											   string description,
 											   decimal price)
 	{
 #if (auth)
 		await SetupAccessToken();
 #endif
+		var apiTestHarness = GetApiTestHarness();
+		//await apiTestHarness.Start();
+		var serviceTestHarness = GetServiceTestHarness();
+		//await serviceTestHarness.Start();
 		var dbContext = GetDbContext();
 		var tempImages = await dbContext.Set<Image>()
 										.Where(i => i.IsTemp && i.ThumbnailId.HasValue)
@@ -262,7 +271,7 @@ public class ProductsTests : IntegrationTest
 										   description,
 										   price,
 										   companyId,
-										   tempImages.Select(i => i.Id).ToArray(),
+										   [.. tempImages.Select(i => i.Id)],
 										   tempImages.Last().Id);
 
 		var response = await CreateRequest(ApiRoutes.Products.Post()).PostJsonAsync(dto);
@@ -323,6 +332,19 @@ public class ProductsTests : IntegrationTest
 								   .Should()
 								   .NotBeNull();
 							  });
+
+		(await apiTestHarness.Published.Any<ProductCreated>())
+			.Should()
+			.BeTrue();
+
+		(await serviceTestHarness.Consumed.Any<ProductCreated>())
+			.Should()
+			.BeTrue();
+
+		var consumerHarness = serviceTestHarness.GetConsumerHarness<OnProductCreatedThenLongRunningProcess>();
+		(await consumerHarness.Consumed.Any<ProductCreated>())
+			.Should()
+			.BeTrue();
 	}
 
 	[Theory(DisplayName = "Edit existing Product succeeds")]

@@ -3,7 +3,7 @@ using Flurl.Http;
 using Keycloak.Net;
 using Keycloak.Net.Models.Clients;
 
-namespace Monaco.Template.Backend.IntegrationTests;
+namespace Monaco.Template.Backend.IntegrationTests.Auth;
 
 public class KeycloakService
 {
@@ -30,15 +30,15 @@ public class KeycloakService
 											   string[] scopes)
 	{
 		var client = new Client
-					 {
-						 Name = "Test Client",
-						 ClientId = Guid.NewGuid().ToString(),
-						 Secret = Guid.NewGuid().ToString(),
-						 ServiceAccountsEnabled = true,
-						 StandardFlowEnabled = false,
-						 AuthorizationServicesEnabled = false,
-						 DefaultClientScopes = [audienceClientId, ..scopes]
-					 };
+		{
+			Name = "Test Client",
+			ClientId = Guid.NewGuid().ToString(),
+			Secret = Guid.NewGuid().ToString(),
+			ServiceAccountsEnabled = true,
+			StandardFlowEnabled = false,
+			AuthorizationServicesEnabled = false,
+			DefaultClientScopes = [audienceClientId, .. scopes]
+		};
 		await _kcClient.CreateClientAsync(_realm, client);
 		client = (await GetClientByClientId(client.ClientId))!;
 
@@ -50,8 +50,7 @@ public class KeycloakService
 		await _kcClient.AddClientRoleMappingsToUserAsync(_realm,
 														 clientUser.Id,
 														 audienceClient.Id,
-														 clientRoles.Where(r => roles.Contains(r.Name))
-																	.ToArray());
+														 [.. clientRoles.Where(r => roles.Contains(r.Name))]);
 		return client;
 	}
 

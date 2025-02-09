@@ -10,36 +10,36 @@
 
   <!--#if (templateDebug)-->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>$(DefineConstants);auth;commonLibraries;filesSupport;massTransitIntegration</DefineConstants>
+    <DefineConstants>$(DefineConstants);apiService;auth;commonLibraries;filesSupport;massTransitIntegration;workerService</DefineConstants>
   </PropertyGroup>
 
   <!--#endif-->
   <ItemGroup>
     <PackageReference Include="AutoFixture.Xunit2" Version="4.18.1" />
-    <PackageReference Include="FluentAssertions" Version="6.12.1" />
+    <PackageReference Include="FluentAssertions" Version="[7,8)" />
     <PackageReference Include="Flurl.Http" Version="4.0.2" />
 	<!--#if (auth)-->
-    <PackageReference Include="Keycloak.Net.Core" Version="1.0.29" />
+    <PackageReference Include="Keycloak.Net.Core" Version="1.0.33" />
 	<!--#endif-->
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.8" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
-    <PackageReference Include="Testcontainers" Version="3.10.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="Testcontainers" Version="4.1.0" />
     <!--#if (filesSupport)-->
-    <PackageReference Include="Testcontainers.Azurite" Version="3.10.0" />
+    <PackageReference Include="Testcontainers.Azurite" Version="4.1.0" />
 	<!--#endif-->
     <!--#if (auth)-->
-    <PackageReference Include="Testcontainers.Keycloak" Version="3.10.0" />
+    <PackageReference Include="Testcontainers.Keycloak" Version="4.1.0" />
 	<!--#endif-->
-    <PackageReference Include="Testcontainers.MsSql" Version="3.10.0" />
+    <PackageReference Include="Testcontainers.MsSql" Version="4.1.0" />
     <!--#if (massTransitIntegration)-->
-    <PackageReference Include="Testcontainers.RabbitMq" Version="3.10.0" />
+    <PackageReference Include="Testcontainers.RabbitMq" Version="4.1.0" />
 	<!--#endif-->
-    <PackageReference Include="xunit" Version="2.9.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="coverlet.collector" Version="6.0.2">
+    <PackageReference Include="coverlet.collector" Version="6.0.4">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

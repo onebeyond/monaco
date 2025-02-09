@@ -16,8 +16,14 @@ namespace Monaco.Template.Backend.IntegrationTests.Tests;
 [Trait("Integration Tests", "Companies")]
 public class CompaniesTests : IntegrationTest
 {
-	public CompaniesTests(AppFixture fixture) : base(fixture, true)
+	public CompaniesTests(AppFixture fixture) : base(fixture)
 	{ }
+
+#if (auth)
+	protected override bool RequiresAuthentication => true;
+#else
+	protected override bool RequiresAuthentication => false;
+#endif
 
 	public override async Task InitializeAsync()
 	{
@@ -25,7 +31,7 @@ public class CompaniesTests : IntegrationTest
 		await RunScriptAsync(@"Scripts\Companies.sql");
 #if (auth)
 
-		await SetupAccessToken([Auth.Roles.Administrator]);
+		await SetupAccessToken([Auth.Auth.Roles.Administrator]);
 #endif
 	}
 

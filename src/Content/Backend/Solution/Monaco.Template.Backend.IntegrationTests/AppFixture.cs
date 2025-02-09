@@ -5,6 +5,7 @@ using Testcontainers.Azurite;
 #if (auth)
 using Testcontainers.Keycloak;
 #endif
+using Flurl;
 using Testcontainers.MsSql;
 #if (massTransitIntegration)
 using Testcontainers.RabbitMq;
@@ -58,7 +59,42 @@ public class AppFixture : IAsyncLifetime
 		await InitStorage();
 #endif
 	}
+
+	public string SqlConnectionString =>
+		SqlContainer.GetConnectionString();
+#if (massTransitIntegration)
+
+	public Url RabbitMqConnectionString =>
+		RabbitMqContainer.GetConnectionString();
+
+	public string RabbitMqHost =>
+		RabbitMqConnectionString.Host;
 	
+	public int RabbitMqPort =>
+		RabbitMqConnectionString.Port!.Value;
+	
+	public string RabbitMqUsername =>
+		RabbitMqConnectionString.UserInfo
+								.Split(':')
+								.First();
+	
+	public string RabbitMqPassword =>
+		RabbitMqConnectionString.UserInfo
+								.Split(':')
+								.Last();
+#endif
+#if (filesSupport)
+
+	public Url StorageConnectionString =>
+		AzuriteContainer.GetConnectionString();
+#endif
+#if (auth)
+
+	public Url KeycloakRealmUrl =>
+		KeycloakContainer.GetBaseAddress()
+						 .AppendPathSegments("realms", KeycloakRealm);
+#endif
+
 	public async Task DisposeAsync()
 	{
 		await SqlContainer.StopAsync();

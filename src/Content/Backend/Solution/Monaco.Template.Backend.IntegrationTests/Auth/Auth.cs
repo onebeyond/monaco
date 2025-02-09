@@ -1,4 +1,4 @@
-﻿namespace Monaco.Template.Backend.IntegrationTests;
+﻿namespace Monaco.Template.Backend.IntegrationTests.Auth;
 
 internal static class Auth
 {

@@ -12,15 +12,21 @@ namespace Monaco.Template.Backend.IntegrationTests.Tests;
 [Trait("Integration Tests", "Files")]
 public class FilesTests : IntegrationTest
 {
-	public FilesTests(AppFixture fixture) : base(fixture, true)
+	public FilesTests(AppFixture fixture) : base(fixture)
 	{ }
+
+#if (auth)
+	protected override bool RequiresAuthentication => true;
+#else
+	protected override bool RequiresAuthentication => false;
+#endif
 
 	public override async Task InitializeAsync()
 	{
 		await base.InitializeAsync();
 #if (auth)
 
-		await SetupAccessToken([Auth.Roles.Administrator]);
+		await SetupAccessToken([Auth.Auth.Roles.Administrator]);
 #endif
 	}
 

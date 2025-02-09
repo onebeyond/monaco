@@ -38,7 +38,6 @@ builder.Logging
 																	 h.Username(rabbitMqConfig["Username"]!);
 																	 h.Password(rabbitMqConfig["Password"]!);
 																 });
-
 													 busCfg.ConfigureEndpoints(ctx, new DefaultEndpointNameFormatter(true));
 												 });
 						   else //For all other environments, use Azure Service Bus
@@ -53,3 +52,8 @@ builder.Logging
 
 var host = builder.Build();
 host.Run();
+
+namespace Monaco.Template.Backend.Service
+{
+	public partial class Program;
+}

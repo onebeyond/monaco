@@ -24,8 +24,8 @@
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="8.0.1" />
     <!--#if (massTransitIntegration)-->
-    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.2.5" />
-    <PackageReference Include="MassTransit.RabbitMQ" Version="8.2.5" />
+    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.3.6" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.6" />
     <!--#endif-->
 	<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
       <PrivateAssets>all</PrivateAssets>

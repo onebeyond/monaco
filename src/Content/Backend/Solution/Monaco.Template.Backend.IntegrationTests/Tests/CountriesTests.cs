@@ -12,8 +12,14 @@ namespace Monaco.Template.Backend.IntegrationTests.Tests;
 [Trait("Integration Tests", "Countries")]
 public class CountriesTests : IntegrationTest
 {
-	public CountriesTests(AppFixture fixture) : base(fixture, true)
+	public CountriesTests(AppFixture fixture) : base(fixture)
 	{ }
+
+#if (auth)
+	protected override bool RequiresAuthentication => true;
+#else
+	protected override bool RequiresAuthentication => false;
+#endif
 
 	public override async Task InitializeAsync()
 	{
