@@ -9,7 +9,9 @@ using Microsoft.Extensions.Hosting;
 #endif
 using Monaco.Template.Backend.Application.Infrastructure.Context;
 using System.Diagnostics.CodeAnalysis;
+#if (massTransitIntegration)
 using MassTransit.Testing;
+#endif
 using Monaco.Template.Backend.IntegrationTests.Factories;
 #if (apiService && auth)
 using Monaco.Template.Backend.IntegrationTests.Auth;
@@ -128,13 +130,13 @@ public abstract class IntegrationTest : IClassFixture<AppFixture>, IAsyncLifetim
 							.ExecuteSqlRawAsync(script);
 	}
 
-#if (apiService)
+#if (apiService && massTransitIntegration)
 	protected virtual ITestHarness GetApiTestHarness() =>
 		WebAppFactory.Services
 					 .GetTestHarness();
 
 #endif
-#if (workerService)
+#if (workerService && massTransitIntegration)
 	protected virtual ITestHarness GetServiceTestHarness() =>
 		WorkerServiceInstance.Services
 							 .GetTestHarness();

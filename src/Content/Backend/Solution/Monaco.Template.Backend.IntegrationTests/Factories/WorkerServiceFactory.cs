@@ -1,4 +1,6 @@
-﻿using MassTransit;
+﻿#if (massTransitIntegration)
+using MassTransit;
+#endif
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
@@ -18,18 +20,19 @@ public class WorkerServiceFactory : WebApplicationFactory<Service.Program>
 
 	protected override void ConfigureWebHost(IWebHostBuilder builder) =>
 		builder.UseConfiguration(new ConfigurationManager
-		{
-			["ConnectionStrings:AppDbContext"] = _fixture.SqlConnectionString,
+								 {
+									 ["ConnectionStrings:AppDbContext"] = _fixture.SqlConnectionString,
 #if (filesSupport)
-			["BlobStorage:ConnectionString"] = _fixture.StorageConnectionString,
+									 ["BlobStorage:ConnectionString"] = _fixture.StorageConnectionString,
 #endif
 #if (massTransitIntegration)
-			["MessageBus:RabbitMQ:Host"] = _fixture.RabbitMqHost,
-			["MessageBus:RabbitMQ:Port"] = _fixture.RabbitMqPort.ToString(),
-			["MessageBus:RabbitMQ:Username"] = _fixture.RabbitMqUsername,
-			["MessageBus:RabbitMQ:Password"] = _fixture.RabbitMqPassword
+									 ["MessageBus:RabbitMQ:Host"] = _fixture.RabbitMqHost,
+									 ["MessageBus:RabbitMQ:Port"] = _fixture.RabbitMqPort.ToString(),
+									 ["MessageBus:RabbitMQ:Username"] = _fixture.RabbitMqUsername,
+									 ["MessageBus:RabbitMQ:Password"] = _fixture.RabbitMqPassword
 #endif
-		})
+								 })
+#if (massTransitIntegration)
 			   .ConfigureServices((context, services) =>
 								  {
 									  var configuration = context.Configuration;
@@ -52,6 +55,7 @@ public class WorkerServiceFactory : WebApplicationFactory<Service.Program>
 																								   });
 																		 });
 								  })
+#endif
 			   .Configure(_ => { });
 
 	public IHost GetHostInstance() =>

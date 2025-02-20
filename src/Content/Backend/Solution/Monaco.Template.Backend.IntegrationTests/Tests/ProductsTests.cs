@@ -11,7 +11,9 @@ using Monaco.Template.Backend.Domain.Model;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using Monaco.Template.Backend.Messages.V1;
+#if (workerService && massTransitIntegration)
 using Monaco.Template.Backend.Service.Consumers;
+#endif
 using File = System.IO.File;
 
 namespace Monaco.Template.Backend.IntegrationTests.Tests;
@@ -257,10 +259,13 @@ public class ProductsTests : IntegrationTest
 #if (auth)
 		await SetupAccessToken();
 #endif
+#if (apiService && massTransitIntegration)
 		var apiTestHarness = GetApiTestHarness();
-		//await apiTestHarness.Start();
+#endif
+#if (workerService && massTransitIntegration)
 		var serviceTestHarness = GetServiceTestHarness();
-		//await serviceTestHarness.Start();
+#endif
+
 		var dbContext = GetDbContext();
 		var tempImages = await dbContext.Set<Image>()
 										.Where(i => i.IsTemp && i.ThumbnailId.HasValue)
@@ -332,10 +337,14 @@ public class ProductsTests : IntegrationTest
 								   .Should()
 								   .NotBeNull();
 							  });
+#if (massTransitIntegration)
+#if (apiService)
 
 		(await apiTestHarness.Published.Any<ProductCreated>())
 			.Should()
 			.BeTrue();
+#endif
+#if (workerService)
 
 		(await serviceTestHarness.Consumed.Any<ProductCreated>())
 			.Should()
@@ -345,6 +354,8 @@ public class ProductsTests : IntegrationTest
 		(await consumerHarness.Consumed.Any<ProductCreated>())
 			.Should()
 			.BeTrue();
+#endif
+#endif
 	}
 
 	[Theory(DisplayName = "Edit existing Product succeeds")]
