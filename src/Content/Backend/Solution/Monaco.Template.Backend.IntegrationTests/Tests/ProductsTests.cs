@@ -10,8 +10,8 @@ using Monaco.Template.Backend.Common.Domain.Model;
 using Monaco.Template.Backend.Domain.Model;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using Monaco.Template.Backend.Messages.V1;
 #if (workerService && massTransitIntegration)
+using Monaco.Template.Backend.Messages.V1;
 using Monaco.Template.Backend.Service.Consumers;
 #endif
 using File = System.IO.File;
