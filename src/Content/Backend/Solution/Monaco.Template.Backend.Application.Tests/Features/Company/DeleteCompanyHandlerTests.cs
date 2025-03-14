@@ -1,6 +1,4 @@
-﻿#if (filesSupport)
-using AutoFixture;
-#endif
+﻿using AutoFixture;
 using FluentAssertions;
 using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Infrastructure.Context;
