@@ -297,7 +297,9 @@
 				{
 					"condition": "(!apiService && !workerService)",
 					"exclude": [
-						"Monaco.Template.Backend.Backend.IntegrationTests/**/*"
+						"Monaco.Template.Backend.IntegrationTests/**/*",
+						"Monaco.Template.Backend.Service/**/*",
+						"Monaco.Template.Backend.Api/**/*"
 					]
 				}
 			]
