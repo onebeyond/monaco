@@ -240,6 +240,7 @@
 						"Monaco.Template.Backend.Application.Tests/Features/File/**/*",
 						"Monaco.Template.Backend.Application.Tests/Features/Product/**/*",
 						"Monaco.Template.Backend.Domain.Tests/Factories/Entities/DocumentFactory.cs",
+						"Monaco.Template.Backend.Domain.Tests/Factories/Entities/FileFactory.cs",
 						"Monaco.Template.Backend.Domain.Tests/Factories/Entities/ImageFactory.cs",
 						"Monaco.Template.Backend.Domain.Tests/Factories/Entities/ProductFactory.cs",
 						"Monaco.Template.Backend.Domain/Model/Document.cs",
