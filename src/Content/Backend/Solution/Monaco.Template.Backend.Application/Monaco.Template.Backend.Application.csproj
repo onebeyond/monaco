@@ -12,7 +12,7 @@
 
   <!--#if (templateDebug)-->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>$(DefineConstants);auth;commonLibraries;filesSupport</DefineConstants>
+    <DefineConstants>$(DefineConstants);auth;commonLibraries;filesSupport;massTransitIntegration</DefineConstants>
   </PropertyGroup>
 
   <!--#endif-->
@@ -29,13 +29,13 @@
     <PackageReference Include="AsyncEnumerator" Version="4.0.2" />
     <PackageReference Include="ExifLibNet" Version="2.1.4" />
 	<!--#endif-->
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.2" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <!--#if (massTransitIntegration)-->
-    <PackageReference Include="MassTransit" Version="8.2.5" />
+    <PackageReference Include="MassTransit" Version="8.3.6" />
     <!--#endif-->
 	<!--#if (filesSupport)-->
-    <PackageReference Include="SkiaSharp" Version="2.88.8" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.8" />
+    <PackageReference Include="SkiaSharp" Version="3.116.1" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.116.1" />
 	<!--#endif-->
   </ItemGroup>
 </Project>

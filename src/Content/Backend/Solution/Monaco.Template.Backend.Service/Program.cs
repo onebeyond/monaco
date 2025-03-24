@@ -25,19 +25,19 @@ builder.Logging
 					   {
 						   cfg.AddConsumersFromNamespaceContaining<Worker>();
 						   cfg.AddActivitiesFromNamespaceContaining<Worker>();
-
-						   if (builder.Environment.IsDevelopment()) //Only configure RabbitMQ connection if it's running in Development (local) env
+						   
+						   var rabbitMqConfig = configuration.GetSection("MessageBus:RabbitMQ");
+						   if (rabbitMqConfig.Exists())
 							   cfg.UsingRabbitMq((ctx, busCfg) =>
 												 {
-													 var rabbitMqConfig = configuration.GetSection("MessageBus:RabbitMQ");
 													 busCfg.Host(rabbitMqConfig["Host"],
+																 ushort.Parse(rabbitMqConfig["Port"] ?? "5672"),
 																 rabbitMqConfig["VHost"],
 																 h =>
 																 {
-																	 h.Username(rabbitMqConfig["Username"]);
-																	 h.Password(rabbitMqConfig["Password"]);
+																	 h.Username(rabbitMqConfig["Username"]!);
+																	 h.Password(rabbitMqConfig["Password"]!);
 																 });
-
 													 busCfg.ConfigureEndpoints(ctx, new DefaultEndpointNameFormatter(true));
 												 });
 						   else //For all other environments, use Azure Service Bus
@@ -52,3 +52,8 @@ builder.Logging
 
 var host = builder.Build();
 host.Run();
+
+namespace Monaco.Template.Backend.Service
+{
+	public partial class Program;
+}

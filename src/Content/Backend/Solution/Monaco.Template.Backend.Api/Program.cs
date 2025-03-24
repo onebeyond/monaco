@@ -19,7 +19,7 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration)
-												   .WriteTo.Logger(l => l.WriteTo.Conditional(_ => context.HostingEnvironment.IsDevelopment(),	// Only for dev
+												   .WriteTo.Logger(l => l.WriteTo.Conditional(_ => context.HostingEnvironment.IsDevelopment(), // Only for dev
 																							  cfg => cfg.Debug()
 																										.WriteTo.File("logs/log.txt",
 																													  rollingInterval: RollingInterval.Day,
@@ -71,18 +71,16 @@ builder.Services
 #if (massTransitIntegration)
 	   .AddMassTransit(cfg =>
 					   {
-						   if (builder.Environment.IsDevelopment())
-							   cfg.UsingRabbitMq((_, busCfg) =>
-												 {
-													 var rabbitMqConfig = configuration.GetSection("MessageBus:RabbitMQ");
-													 busCfg.Host(rabbitMqConfig["Host"],
-																 rabbitMqConfig["VHost"],
-																 h =>
-																 {
-																	 h.Username(rabbitMqConfig["Username"]);
-																	 h.Password(rabbitMqConfig["Password"]);
-																 });
-												 });
+						   var rabbitMqConfig = configuration.GetSection("MessageBus:RabbitMQ");
+						   if (rabbitMqConfig.Exists())
+							   cfg.UsingRabbitMq((_, busCfg) => busCfg.Host(rabbitMqConfig["Host"],
+																			ushort.Parse(rabbitMqConfig["Port"] ?? "5672"),
+																			rabbitMqConfig["VHost"],
+																			h =>
+																			{
+																				h.Username(rabbitMqConfig["Username"]!);
+																				h.Password(rabbitMqConfig["Password"]!);
+																			}));
 						   else
 							   cfg.UsingAzureServiceBus((_, busCfg) => busCfg.Host(configuration["MessageBus:ASBConnectionString"]));
 					   })
@@ -121,3 +119,8 @@ app.UseCors()
 app.MapHealthChecks("/health", new HealthCheckOptions { Predicate = _ => true });
 
 app.Run();
+
+namespace Monaco.Template.Backend.Api
+{
+	public partial class Program;
+}

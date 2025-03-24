@@ -12,14 +12,14 @@
 
   <!--#if (templateDebug)-->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>$(DefineConstants);auth;commonLibraries;filesSupport</DefineConstants>
+    <DefineConstants>$(DefineConstants);auth;commonLibraries;filesSupport;massTransitIntegration</DefineConstants>
   </PropertyGroup>
 
   <!--#endif-->
   <ItemGroup>
     <!--#if (massTransitIntegration)-->
-    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.2.5" />
-    <PackageReference Include="MassTransit.RabbitMQ" Version="8.2.5" />
+    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.3.6" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.6" />
     <!--#endif-->
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
