@@ -20,7 +20,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="4.0.0" />
+    <PackageReference Include="Serilog.Sinks.ApplicationInsights" />
   </ItemGroup>
 
 </Project>
