@@ -19,9 +19,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="11.11.0" />
-    <PackageReference Include="Polly.Core" Version="8.5.2" />
-    <PackageReference Include="Polly.Extensions" Version="8.5.2" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="Polly.Core" />
+    <PackageReference Include="Polly.Extensions" />
   </ItemGroup>
 
   <ItemGroup>

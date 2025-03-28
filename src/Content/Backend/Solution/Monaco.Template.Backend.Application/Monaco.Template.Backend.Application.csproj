@@ -26,16 +26,16 @@
 
   <ItemGroup>
 	<!--#if (filesSupport)-->
-    <PackageReference Include="AsyncEnumerator" Version="4.0.2" />
-    <PackageReference Include="ExifLibNet" Version="2.1.4" />
+    <PackageReference Include="AsyncEnumerator" />
+    <PackageReference Include="ExifLibNet" />
 	<!--#endif-->
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <!--#if (massTransitIntegration)-->
-    <PackageReference Include="MassTransit" Version="8.3.6" />
+    <PackageReference Include="MassTransit" />
     <!--#endif-->
 	<!--#if (filesSupport)-->
-    <PackageReference Include="SkiaSharp" Version="3.116.1" />
-    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.116.1" />
+    <PackageReference Include="SkiaSharp" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
 	<!--#endif-->
   </ItemGroup>
 </Project>
