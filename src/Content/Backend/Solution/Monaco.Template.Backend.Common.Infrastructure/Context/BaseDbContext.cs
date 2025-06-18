@@ -8,6 +8,7 @@ using Monaco.Template.Backend.Common.Infrastructure.Context.Contracts;
 using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 using Monaco.Template.Backend.Common.Infrastructure.EntityConfigurations;
 using System.Reflection;
+using Serilog;
 
 namespace Monaco.Template.Backend.Common.Infrastructure.Context;
 

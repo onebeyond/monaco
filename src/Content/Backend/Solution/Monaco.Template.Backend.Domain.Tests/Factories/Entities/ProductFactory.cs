@@ -1,6 +1,6 @@
 ﻿using AutoFixture;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Model.Entities;
 using Moq;
 
 namespace Monaco.Template.Backend.Domain.Tests.Factories.Entities;
@@ -17,7 +17,7 @@ public static class ProductFactory
 	public static IEnumerable<Product> CreateMany() =>
 		FixtureFactory.Create(f => f.RegisterImage()
 									.RegisterAddress()
-									.RegisterCompany()
+									.RegisterCompanyMock()
 									.RegisterProductMock())
 					  .CreateMany<Product>();
 }
@@ -28,12 +28,13 @@ public static class ProductFactoryExtension
 	{
 		fixture.Register(() =>
 						 {
+							 var images = fixture.CreateMany<Image>().ToList();
 							 var product = new Product(fixture.Create<string>(),
 													   fixture.Create<string>(),
-													   fixture.Create<decimal>());
-							 var images = fixture.CreateMany<Image>();
-							 foreach (var image in images)
-								 product.AddPicture(image);
+													   fixture.Create<decimal>(),
+													   fixture.Create<Company>(),
+													   images,
+													   images.First());
 
 							 return product;
 						 });
@@ -44,17 +45,21 @@ public static class ProductFactoryExtension
 	{
 		fixture.Register(() =>
 						 {
+							 var images = fixture.CreateMany<Image>().ToList();
 							 var mock = new Mock<Product>(fixture.Create<string>(),
 														  fixture.Create<string>(),
-														  fixture.Create<decimal>());
+														  fixture.Create<decimal>(),
+														  fixture.Create<Company>(),
+														  images,
+														  images.First());
 							 mock.SetupGet(x => x.Id)
 								 .Returns(Guid.NewGuid());
 							 mock.SetupGet(x => x.Company)
 								 .Returns(fixture.Create<Company>());
-
-							 var images = fixture.CreateMany<Image>();
 							 mock.SetupGet(x => x.Pictures)
-								 .Returns(images.ToArray());
+								 .Returns([.. images]);
+							 mock.SetupGet(x => x.DefaultPicture)
+								 .Returns(images.First());
 
 							 return mock.Object;
 						 });

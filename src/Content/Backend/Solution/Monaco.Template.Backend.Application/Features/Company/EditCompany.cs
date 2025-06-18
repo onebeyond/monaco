@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Monaco.Template.Backend.Application.DTOs.Extensions;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Application.Features.Company.Extensions;
+using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Common.Application.Commands;
 using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
@@ -14,7 +14,7 @@ public sealed class EditCompany
 	public sealed record Command(Guid Id,
 								 string Name,
 								 string Email,
-								 string WebSiteUrl,
+								 string? WebSiteUrl,
 								 string? Street,
 								 string? City,
 								 string? County,
@@ -27,12 +27,12 @@ public sealed class EditCompany
 		{
 			RuleLevelCascadeMode = CascadeMode.Stop;
 
-			this.CheckIfExists<Command, Domain.Model.Company>(dbContext);
+			this.CheckIfExists<Command, Domain.Model.Entities.Company>(dbContext);
 
 			RuleFor(x => x.Name)
 				.NotEmpty()
 				.MaximumLength(100)
-				.MustAsync(async (cmd, name, ct) => !await dbContext.ExistsAsync<Domain.Model.Company>(x => x.Id != cmd.Id &&
+				.MustAsync(async (cmd, name, ct) => !await dbContext.ExistsAsync<Domain.Model.Entities.Company>(x => x.Id != cmd.Id &&
 																											x.Name == name,
 																									   ct))
 				.WithMessage("Another company with the name {PropertyValue} already exists");
@@ -60,7 +60,7 @@ public sealed class EditCompany
 			RuleFor(x => x.CountryId)
 				.NotNull()
 				.When(x => x.Street is not null || x.City is not null || x.County is not null || x.PostCode is not null, ApplyConditionTo.CurrentValidator)
-				.MustExistAsync<Command, Domain.Model.Country>(dbContext)
+				.MustExistAsync<Command, Domain.Model.Entities.Country>(dbContext)
 				.When(x => x.CountryId.HasValue, ApplyConditionTo.CurrentValidator);
 		}
 	}
@@ -76,8 +76,8 @@ public sealed class EditCompany
 
 		public async Task<CommandResult> Handle(Command request, CancellationToken cancellationToken)
 		{
-			var item = await _dbContext.Set<Domain.Model.Company>().SingleAsync(x => x.Id == request.Id, cancellationToken);
-			var country = await _dbContext.GetAsync<Domain.Model.Country>(request.CountryId, cancellationToken);
+			var item = await _dbContext.Set<Domain.Model.Entities.Company>().SingleAsync(x => x.Id == request.Id, cancellationToken);
+			var country = await _dbContext.GetAsync<Domain.Model.Entities.Country>(request.CountryId, cancellationToken);
 
 			request.Map(item, country);
 

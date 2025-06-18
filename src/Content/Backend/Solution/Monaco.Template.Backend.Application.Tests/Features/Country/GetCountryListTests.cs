@@ -1,13 +1,13 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Primitives;
-using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Application.Features.Country;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Application.Persistence;
 using Xunit;
+using Monaco.Template.Backend.Application.Features.Country.DTOs;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Country;
 
@@ -19,7 +19,7 @@ public class GetCountryListTests
 
 	[Theory(DisplayName = "Get country list without params succeeds")]
 	[AutoDomainData]
-	public async Task GetCountryListWithoutParamsSucceeds(List<Domain.Model.Country> countries)
+	public async Task GetCountryListWithoutParamsSucceeds(List<Domain.Model.Entities.Country> countries)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(countries);
 
@@ -36,7 +36,7 @@ public class GetCountryListTests
 
 	[Theory(DisplayName = "Get country list with params succeeds")]
 	[AutoDomainData]
-	public async Task GetCountryListWithParamsSucceeds(List<Domain.Model.Country> countries)
+	public async Task GetCountryListWithParamsSucceeds(List<Domain.Model.Entities.Country> countries)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(countries);
 		var countriesSet = countries.GetRange(0, 2);

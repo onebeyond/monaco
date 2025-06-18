@@ -1,6 +1,6 @@
 ﻿using AutoFixture;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Model.Entities;
 
 namespace Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 
@@ -32,19 +32,14 @@ public static class ImageFactoryExtension
 											  size,
 											  contentType,
 											  false,
-											  fixture.Create<int>(),
-											  fixture.Create<int>(),
+											  (fixture.Create<int>(),
+											   fixture.Create<int>()),
 											  fixture.Create<DateTime>(),
 											  null,
-											  null,
-											  new Image(fixture.Create<Guid>(),
-														name,
-														extension,
-														size,
-														contentType,
-														false,
-														fixture.Create<int>(),
-														fixture.Create<int>()));
+											  (fixture.Create<Guid>(),
+											   size,
+											   (fixture.Create<int>(),
+												fixture.Create<int>())));
 						 });
 		return fixture;
 	}

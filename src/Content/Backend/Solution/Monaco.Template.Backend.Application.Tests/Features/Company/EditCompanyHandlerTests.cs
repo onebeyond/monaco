@@ -1,12 +1,13 @@
 ﻿using AutoFixture;
 using FluentAssertions;
 using Monaco.Template.Backend.Application.Features.Company;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Model;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Application.Persistence;
+using Monaco.Template.Backend.Domain.Model.ValueObjects;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
@@ -35,9 +36,9 @@ public class EditCompanyHandlerTests
 
 	[Theory(DisplayName = "Edit company succeeds")]
 	[AutoDomainData]
-	public async Task EditCompanySucceeds(Domain.Model.Country country)
+	public async Task EditCompanySucceeds(Domain.Model.Entities.Country country)
 	{
-		_dbContextMock.CreateEntityMockAndSetupDbSetMock<AppDbContext, Domain.Model.Company>(out var companyMock)
+		_dbContextMock.CreateEntityMockAndSetupDbSetMock<AppDbContext, Domain.Model.Entities.Company>(out var companyMock)
 					  .CreateAndSetupDbSetMock(country);
 
 		var command = Command with { Id = companyMock.Object.Id };

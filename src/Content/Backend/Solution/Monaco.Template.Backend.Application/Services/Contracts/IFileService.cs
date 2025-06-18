@@ -1,8 +1,8 @@
 ﻿using ExifLibrary;
 using Monaco.Template.Backend.Common.Application.DTOs;
-using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Model.Entities;
 using SkiaSharp;
-using File = Monaco.Template.Backend.Domain.Model.File;
+using File = Monaco.Template.Backend.Domain.Model.Entities.File;
 
 namespace Monaco.Template.Backend.Application.Services.Contracts;
 
@@ -11,12 +11,12 @@ public interface IFileService
 	Task<File> UploadAsync(Stream stream, string fileName, string contentType, CancellationToken cancellationToken);
 	Task<Document> UploadDocumentAsync(Stream stream, string fileName, string contentType, CancellationToken cancellationToken);
 	Task<Image> UploadImageAsync(Stream stream, string fileName, string contentType, CancellationToken cancellationToken);
-	Task MakePermanentFileAsync(File file, CancellationToken cancellationToken);
-	Task MakePermanentFilesAsync(File[] files, CancellationToken cancellationToken);
-	Task MakePermanentImageAsync(Image image, CancellationToken cancellationToken);
-	Task MakePermanentImagesAsync(Image[] images, CancellationToken cancellationToken);
-	Task MakePermanentDocumentAsync(Document document, CancellationToken cancellationToken);
-	Task MakePermanentDocumentsAsync(Document[] documents, CancellationToken cancellationToken);
+	//Task MakePermanentFileAsync(File file, CancellationToken cancellationToken);
+	//Task MakePermanentFilesAsync(File[] files, CancellationToken cancellationToken);
+	//Task MakePermanentImageAsync(Image image, CancellationToken cancellationToken);
+	//Task MakePermanentImagesAsync(Image[] images, CancellationToken cancellationToken);
+	//Task MakePermanentDocumentAsync(Document document, CancellationToken cancellationToken);
+	//Task MakePermanentDocumentsAsync(Document[] documents, CancellationToken cancellationToken);
 	Task<FileDownloadDto> DownloadFileAsync(File item, CancellationToken cancellationToken);
 	Task DeleteFileAsync(File file, CancellationToken cancellationToken);
 	Task DeleteFilesAsync(File[] files, CancellationToken cancellationToken);

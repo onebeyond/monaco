@@ -3,12 +3,14 @@ using FluentAssertions;
 using Flurl.Http;
 using Microsoft.EntityFrameworkCore;
 using Monaco.Template.Backend.Api.DTOs;
-using Monaco.Template.Backend.Application.DTOs;
+using Monaco.Template.Backend.Application.Features.Company.DTOs;
 using Monaco.Template.Backend.Common.Domain.Model;
 using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Model.Entities;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Mail;
+using Monaco.Template.Backend.Domain.Model.ValueObjects;
 
 namespace Monaco.Template.Backend.IntegrationTests.Tests;
 

@@ -15,6 +15,7 @@ public class DomainTests : BaseTest
 																  .ResideInAssembly(DomainAssembly)
 																  .As("Domain Layer");
 
+	private static readonly Class AggregateRoot = Architecture.GetClassOfType(typeof(AggregateRoot));
 	private static readonly Class Entity = Architecture.GetClassOfType(typeof(Entity));
 	private static readonly Class Enumeration = Architecture.GetClassOfType(typeof(Enumeration));
 	private static readonly Class ValueObject = Architecture.GetClassOfType(typeof(ValueObject));
@@ -23,6 +24,8 @@ public class DomainTests : BaseTest
 	public void EntitiesExistOnlyInDomainLayerAndHaveNoPublicOrInternalPropSetters() =>
 		Classes().That()
 				 .AreAssignableTo(Entity)
+				 .And()
+				 .AreNot(AggregateRoot)
 				 .And()
 				 .AreNot(Entity)
 				 .And()
@@ -34,6 +37,7 @@ public class DomainTests : BaseTest
 													  Visibility.Internal,
 													  Visibility.ProtectedInternal)
 				 .Because("entities should encapsulate their behavior to follow DDD principles and only exist in the Domain layer")
+				 .WithoutRequiringPositiveResults()
 				 .Check(Architecture);
 
 	[Fact(DisplayName = "ValueObjects exist only in Domain layer and are immutable")]

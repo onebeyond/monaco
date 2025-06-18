@@ -1,12 +1,13 @@
 ﻿using AutoFixture;
 using FluentAssertions;
 using Monaco.Template.Backend.Application.Features.File;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Tests;
+using Monaco.Template.Backend.Domain.Model.Entities;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Application.Persistence;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.File;
@@ -29,9 +30,9 @@ public class CreateFileHandlerTests
 
 	[Theory(DisplayName = "Create new File succeeds")]
 	[AutoDomainData]
-	public async Task CreateNewFileSucceeds(Domain.Model.Document file)
+	public async Task CreateNewFileSucceeds(Document file)
 	{
-		_dbContextMock.CreateAndSetupDbSetMock(Array.Empty<Domain.Model.File>(), out var fileDbSetMock);
+		_dbContextMock.CreateAndSetupDbSetMock(Array.Empty<Domain.Model.Entities.File>(), out var fileDbSetMock);
 		_fileServiceMock.Setup(x => x.UploadAsync(It.IsAny<Stream>(),
 												  It.IsAny<string>(),
 												  It.IsAny<string>(),
@@ -46,7 +47,7 @@ public class CreateFileHandlerTests
 												   It.IsAny<string>(),
 												   It.IsAny<CancellationToken>()),
 								Times.Once);
-		fileDbSetMock.Verify(x => x.AddAsync(It.IsAny<Domain.Model.File>(), It.IsAny<CancellationToken>()),
+		fileDbSetMock.Verify(x => x.AddAsync(It.IsAny<Domain.Model.Entities.File>(), It.IsAny<CancellationToken>()),
 							 Times.Once);
 		_dbContextMock.Verify(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()),
 							  Times.Once);
@@ -65,9 +66,9 @@ public class CreateFileHandlerTests
 
 	[Theory(DisplayName = "Create new File error deletes uploaded file from store")]
 	[AutoDomainData]
-	public async Task CreateNewFileErrorDeletesFile(Domain.Model.Document file)
+	public async Task CreateNewFileErrorDeletesFile(Document file)
 	{
-		_dbContextMock.CreateAndSetupDbSetMock(Array.Empty<Domain.Model.File>(), out var fileDbSetMock)
+		_dbContextMock.CreateAndSetupDbSetMock(Array.Empty<Domain.Model.Entities.File>(), out var fileDbSetMock)
 					  .Setup(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()))
 					  .Throws<Exception>();
 		_fileServiceMock.Setup(x => x.UploadAsync(It.IsAny<Stream>(),
@@ -77,7 +78,7 @@ public class CreateFileHandlerTests
 						.ReturnsAsync(file);
 
 		var sut = new CreateFile.Handler(_dbContextMock.Object, _fileServiceMock.Object);
-		var action = () => sut.Handle(Command, new CancellationToken());
+		var action = () => sut.Handle(Command, CancellationToken.None);
 
 		await action.Should()
 					.ThrowAsync<Exception>();
@@ -87,7 +88,7 @@ public class CreateFileHandlerTests
 												   It.IsAny<string>(),
 												   It.IsAny<CancellationToken>()),
 								Times.Once);
-		fileDbSetMock.Verify(x => x.AddAsync(It.IsAny<Domain.Model.File>(), It.IsAny<CancellationToken>()),
+		fileDbSetMock.Verify(x => x.AddAsync(It.IsAny<Domain.Model.Entities.File>(), It.IsAny<CancellationToken>()),
 							 Times.Once);
 	}
 }

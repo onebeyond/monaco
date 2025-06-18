@@ -3,13 +3,13 @@ using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Monaco.Template.Backend.Application.Features.Product;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Domain.Model;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Xunit;
+using Monaco.Template.Backend.Domain.Model.Entities;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Product;
 
@@ -44,7 +44,7 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "Title being valid does not generate validation error")]
 	public async Task TitleDoesNotGenerateErrorWhenValid()
 	{
-		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Product>());
+		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Entities.Product>());
 
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(Command, strategy => strategy.IncludeProperties(cmd => cmd.Title));
@@ -69,21 +69,21 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "Title with long value generates validation error")]
 	public async Task TitleWithLongValueGeneratesError()
 	{
-		var command = Command with { Title = new string(It.IsAny<char>(), Domain.Model.Product.TitleLength + 1) };
+		var command = Command with { Title = new string(It.IsAny<char>(), Domain.Model.Entities.Product.TitleLength + 1) };
 
 		var sut = new CreateProduct.Validator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Title));
 
 		validationResult.ShouldHaveValidationErrorFor(cmd => cmd.Title)
 						.WithErrorCode("MaximumLengthValidator")
-						.WithMessageArgument("MaxLength", Domain.Model.Product.TitleLength)
+						.WithMessageArgument("MaxLength", Domain.Model.Entities.Product.TitleLength)
 						.Should()
 						.HaveCount(1);
 	}
 
 	[Theory(DisplayName = "Title which already exists generates validation error")]
 	[AutoDomainData]
-	public async Task TitleAlreadyExistsGeneratesError(Domain.Model.Product product)
+	public async Task TitleAlreadyExistsGeneratesError(Domain.Model.Entities.Product product)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(product);
 
@@ -101,7 +101,7 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "Description being valid does not generate validation error")]
 	public async Task DescriptionDoesNotGenerateErrorWhenValid()
 	{
-		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Product>());
+		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Entities.Product>());
 
 		var sut = new CreateProduct.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(Command, strategy => strategy.IncludeProperties(cmd => cmd.Description));
@@ -126,14 +126,14 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "Description with long value generates validation error")]
 	public async Task DescriptionWithLongValueGeneratesError()
 	{
-		var command = Command with { Description = new string(It.IsAny<char>(), Domain.Model.Product.DescriptionLength + 1) };
+		var command = Command with { Description = new string(It.IsAny<char>(), Domain.Model.Entities.Product.DescriptionLength + 1) };
 
 		var sut = new CreateProduct.Validator(new Mock<AppDbContext>().Object);
 		var validationResult = await sut.TestValidateAsync(command, strategy => strategy.IncludeProperties(cmd => cmd.Description));
 
 		validationResult.ShouldHaveValidationErrorFor(cmd => cmd.Description)
 						.WithErrorCode("MaximumLengthValidator")
-						.WithMessageArgument("MaxLength", Domain.Model.Product.DescriptionLength)
+						.WithMessageArgument("MaxLength", Domain.Model.Entities.Product.DescriptionLength)
 						.Should()
 						.HaveCount(1);
 	}
@@ -141,7 +141,7 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "Price being valid does not generate validation error")]
 	public async Task PriceDoesNotGenerateErrorWhenValid()
 	{
-		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Product>());
+		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Entities.Product>());
 
 		var command = Command with { Price = 1m };
 
@@ -167,7 +167,7 @@ public class CreateProductValidatorTests
 
 	[Theory(DisplayName = "CompanyId being valid does not generate validation error")]
 	[AutoDomainData(true)]
-	public async Task CompanyIdDoesNotGenerateErrorWhenValid(Domain.Model.Company[] companies)
+	public async Task CompanyIdDoesNotGenerateErrorWhenValid(Domain.Model.Entities.Company[] companies)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(companies);
 
@@ -196,7 +196,7 @@ public class CreateProductValidatorTests
 	[Fact(DisplayName = "CompanyId with non-existing value generates validation error")]
 	public async Task CompanyIdNotExistsGeneratesError()
 	{
-		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Company>());
+		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Entities.Company>());
 
 		var command = Command with { CompanyId = Guid.NewGuid() };
 
@@ -211,7 +211,7 @@ public class CreateProductValidatorTests
 
 	[Theory(DisplayName = "Pictures being valid does not generate validation error")]
 	[AutoDomainData(true)]
-	public async Task PicturesDoesNotGenerateErrorWhenValid(Domain.Model.Product[] products, Image[] newPictures)
+	public async Task PicturesDoesNotGenerateErrorWhenValid(Domain.Model.Entities.Product[] products, Image[] newPictures)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(products);
 		_dbContextMock.CreateAndSetupDbSetMock(newPictures);

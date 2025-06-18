@@ -1,13 +1,13 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Primitives;
 using Monaco.Template.Backend.Application.Features.Product;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Application.DTOs;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Application.Persistence;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Product;
@@ -21,7 +21,7 @@ public class DownloadProductPictureTests
 
 	[Theory(DisplayName = "Get existing product picture succeeds")]
 	[AutoDomainData(true)]
-	public async Task GetExistingProductPictureSucceeds(List<Domain.Model.Product> products, string contentType)
+	public async Task GetExistingProductPictureSucceeds(List<Domain.Model.Entities.Product> products, string contentType)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(products);
 
@@ -29,7 +29,7 @@ public class DownloadProductPictureTests
 		var picture = product.Pictures.First();
 		var pictureFileName = $"{picture.Name}{picture.Extension}";
 
-		_fileServiceMock.Setup(x => x.DownloadFileAsync(It.IsAny<Domain.Model.File>(), 
+		_fileServiceMock.Setup(x => x.DownloadFileAsync(It.IsAny<Domain.Model.Entities.File>(), 
 														It.IsAny<CancellationToken>()))
 						.ReturnsAsync(new FileDownloadDto(new MemoryStream(),
 														  pictureFileName,
@@ -51,7 +51,7 @@ public class DownloadProductPictureTests
 
 	[Theory(DisplayName = "Get existing product picture thumbnail succeeds")]
 	[AutoDomainData(true)]
-	public async Task GetExistingProductPictureThumbnailSucceeds(Domain.Model.Product[] products, string contentType)
+	public async Task GetExistingProductPictureThumbnailSucceeds(Domain.Model.Entities.Product[] products, string contentType)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(products);
 
@@ -59,7 +59,7 @@ public class DownloadProductPictureTests
 		var picture = product.Pictures.First();
 		var pictureFileName = $"{picture.Name}{picture.Extension}";
 
-		_fileServiceMock.Setup(x => x.DownloadFileAsync(It.IsAny<Domain.Model.File>(), It.IsAny<CancellationToken>()))
+		_fileServiceMock.Setup(x => x.DownloadFileAsync(It.IsAny<Domain.Model.Entities.File>(), It.IsAny<CancellationToken>()))
 						.ReturnsAsync(new FileDownloadDto(new MemoryStream(),
 														  pictureFileName,
 														  contentType));
@@ -80,7 +80,7 @@ public class DownloadProductPictureTests
 
 	[Theory(DisplayName = "Get non-existing product picture fails")]
 	[AutoDomainData(true)]
-	public async Task GetNonExistingProductByIdFails(List<Domain.Model.Product> products)
+	public async Task GetNonExistingProductByIdFails(List<Domain.Model.Entities.Product> products)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(products);
 		var query = new DownloadProductPicture.Query(Guid.NewGuid(),

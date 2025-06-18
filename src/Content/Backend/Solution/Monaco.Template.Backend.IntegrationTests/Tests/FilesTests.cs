@@ -1,10 +1,11 @@
 ﻿using FluentAssertions;
 using Flurl.Http;
 using Microsoft.EntityFrameworkCore;
-using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Model.Entities;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using File = Monaco.Template.Backend.Domain.Model.File;
+using File = Monaco.Template.Backend.Domain.Model.Entities.File;
+
 
 namespace Monaco.Template.Backend.IntegrationTests.Tests;
 

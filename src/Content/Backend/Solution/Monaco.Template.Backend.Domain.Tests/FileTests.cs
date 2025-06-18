@@ -4,7 +4,7 @@ using Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 using System.Diagnostics.CodeAnalysis;
 using Moq;
 using Xunit;
-using File = Monaco.Template.Backend.Domain.Model.File;
+using File = Monaco.Template.Backend.Domain.Model.Entities.File;
 
 namespace Monaco.Template.Backend.Domain.Tests;
 

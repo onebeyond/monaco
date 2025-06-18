@@ -2,14 +2,14 @@
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Application.Features.Country;
+using Monaco.Template.Backend.Application.Features.Country.DTOs;
 using Monaco.Template.Backend.Common.Api.Application;
 using Monaco.Template.Backend.Common.Api.MinimalApi;
 
 namespace Monaco.Template.Backend.Api.Endpoints;
 
-public static class Countries
+internal static class Countries
 {
 	public static IEndpointRouteBuilder AddCountries(this IEndpointRouteBuilder builder, ApiVersionSet versionSet)
 	{

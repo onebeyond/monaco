@@ -3,7 +3,6 @@ using MassTransit;
 #endif
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Monaco.Template.Backend.Application.DependencyInjection;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
 #if (auth)
 using Monaco.Template.Backend.Api.Auth;
 using Monaco.Template.Backend.Common.Api.Auth;
@@ -14,6 +13,7 @@ using Monaco.Template.Backend.Common.Api.Swagger;
 using Monaco.Template.Backend.Common.Serilog;
 using Monaco.Template.Backend.Common.Serilog.ApplicationInsights.TelemetryConverters;
 using Monaco.Template.Backend.Api.Endpoints.Extensions;
+using Monaco.Template.Backend.Application.Persistence;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);

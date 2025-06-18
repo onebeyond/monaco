@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Application.Commands;
 
@@ -21,12 +21,12 @@ public sealed class CreateFile
 				.WithMessage("File uploaded cannot be empty")
 				.Must(x => Path.GetFileNameWithoutExtension(x.FileName).Length > 0)
 				.WithMessage("File name without extension cannot be empty")
-				.Must(x => Path.GetFileNameWithoutExtension(x.FileName).Length <= Domain.Model.File.NameLength)
-				.WithMessage($"File name without extension cannot be longer than {Domain.Model.File.NameLength} characters")
-				.Must(x => Path.GetExtension(x.FileName).Length <= Domain.Model.File.ExtensionLength)
-				.WithMessage($"File extension cannot be longer than {Domain.Model.File.ExtensionLength} characters")
-				.Must(x => x.ContentType.Length <= Domain.Model.File.ContentTypeLength)
-				.WithMessage($"ContentType cannot be longer than {Domain.Model.File.ContentTypeLength} characters");
+				.Must(x => Path.GetFileNameWithoutExtension(x.FileName).Length <= Domain.Model.Entities.File.NameLength)
+				.WithMessage($"File name without extension cannot be longer than {Domain.Model.Entities.File.NameLength} characters")
+				.Must(x => Path.GetExtension(x.FileName).Length <= Domain.Model.Entities.File.ExtensionLength)
+				.WithMessage($"File extension cannot be longer than {Domain.Model.Entities.File.ExtensionLength} characters")
+				.Must(x => x.ContentType.Length <= Domain.Model.Entities.File.ContentTypeLength)
+				.WithMessage($"ContentType cannot be longer than {Domain.Model.Entities.File.ContentTypeLength} characters");
 		}
 	}
 
@@ -48,7 +48,7 @@ public sealed class CreateFile
 
 			try
 			{
-				await _dbContext.Set<Domain.Model.File>()
+				await _dbContext.Set<Domain.Model.Entities.File>()
 								.AddAsync(file, cancellationToken);
 				await _dbContext.SaveEntitiesAsync(cancellationToken);
 			}

@@ -2,6 +2,7 @@
 using Monaco.Template.Backend.Domain.Model;
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
+using Monaco.Template.Backend.Domain.Model.ValueObjects;
 using Xunit;
 
 namespace Monaco.Template.Backend.Domain.Tests;
