@@ -1,13 +1,13 @@
 ﻿using AutoFixture;
 using FluentAssertions;
 using Monaco.Template.Backend.Application.Features.Product;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
-using Monaco.Template.Backend.Application.Services.Contracts;
+using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Model.Entities;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Common.Application.Commands;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Product;
@@ -17,7 +17,6 @@ namespace Monaco.Template.Backend.Application.Tests.Features.Product;
 public class EditProductHandlerTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
-	private readonly Mock<IFileService> _fileServiceMock = new();
 	private static readonly EditProduct.Command Command;
 
 	static EditProductHandlerTests()
@@ -34,53 +33,61 @@ public class EditProductHandlerTests
 	
 	[Theory(DisplayName = "Edit existing Product succeeds")]
 	[AutoDomainData(true)]
-	public async Task CreateNewProductSucceeds(Domain.Model.Company company,
-											   Image[] pictures)
+	public async Task EditexistingProductSucceeds(string existingTitle,
+												  string newTitle,
+												  string existingDescription,
+												  string newDescription,
+												  decimal existingPrice,
+												  decimal newPrice,
+												  Domain.Model.Entities.Company existingCompany,
+												  Domain.Model.Entities.Company newCompany,
+												  List<Image> existingPictures,
+												  List<Image> newPictures)
 	{
-		_dbContextMock.CreateEntityMockAndSetupDbSetMock<AppDbContext, Domain.Model.Product>(out var productMock)
-					  .CreateAndSetupDbSetMock(company, out var companyDbSetMock)
-					  .CreateAndSetupDbSetMock(pictures);
-		companyDbSetMock.Setup(x => x.FindAsync(It.IsAny<object?[]?>(),
-												It.IsAny<CancellationToken>()))
-						.ReturnsAsync(company);
-		productMock.SetupGet(x => x.Pictures)
-				   .Returns(pictures);
-		productMock.SetupGet(x => x.Company)
-				   .Returns(company);
-
+		var productMock = new Mock<Domain.Model.Entities.Product>(existingTitle,
+																  existingDescription,
+																  existingPrice,
+																  existingCompany,
+																  existingPictures,
+																  existingPictures.First())
+						  {
+							  CallBase = true
+						  };
+		productMock.SetupGet(x => x.Id)
+				   .Returns(Guid.NewGuid());
+		
 		var product = productMock.Object;
+
+		_dbContextMock.CreateAndSetupDbSetMock(product)
+					  .CreateAndSetupDbSetMock([existingCompany, newCompany])
+					  .CreateAndSetupDbSetMock([..existingPictures, ..newPictures]);
 
 		var command = Command with
 					  {
 						  Id = product.Id,
-						  CompanyId = product.Company.Id,
-						  Pictures = pictures.Select(x => x.Id)
-											 .ToArray(),
-						  DefaultPictureId = pictures.First()
-													 .Id
+						  Title = newTitle,
+						  Description = newDescription,
+						  Price = newPrice,
+						  CompanyId = newCompany.Id,
+						  Pictures = [..newPictures.Select(x => x.Id)],
+						  DefaultPictureId = newPictures.First().Id
 					  };
 
-		var sut = new EditProduct.Handler(_dbContextMock.Object, _fileServiceMock.Object);
-		var result = await sut.Handle(command, new CancellationToken());
+		var sut = new EditProduct.Handler(_dbContextMock.Object);
+		var result = await sut.Handle(command, CancellationToken.None);
 
 		productMock.Verify(x => x.Update(It.IsAny<string>(),
 										 It.IsAny<string>(),
-										 It.IsAny<decimal>()));
+										 It.IsAny<decimal>(),
+										 It.IsAny<Domain.Model.Entities.Company>()));
+		productMock.Verify(x => x.AddPicture(It.IsAny<Image>()), Times.Exactly(6));
+		productMock.Verify(x => x.RemovePicture(It.IsAny<Image>()), Times.Exactly(3));
+		productMock.Verify(x => x.SetDefaultPicture(It.IsAny<Image>()), Times.Exactly(2));
+
 		_dbContextMock.Verify(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()),
 							  Times.Once);
-		_fileServiceMock.Verify(x => x.DeleteImagesAsync(It.IsAny<Image[]>(),
-														 It.IsAny<CancellationToken>()),
-								Times.Once);
-		_fileServiceMock.Verify(x => x.MakePermanentImagesAsync(It.IsAny<Image[]>(), 
-																It.IsAny<CancellationToken>()),
-								Times.Once);
-
-		result.ValidationResult
-			  .IsValid
-			  .Should()
-			  .BeTrue();
-		result.ItemNotFound
-			  .Should()
-			  .BeFalse();
+		
+		result.Should()
+			  .BeEquivalentTo(CommandResult.Success());
 	}
 }

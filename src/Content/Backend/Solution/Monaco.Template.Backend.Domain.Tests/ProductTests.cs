@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Model.Entities;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
@@ -15,12 +15,17 @@ public class ProductTests
 	[AutoDomainData]
 	public void NewProductSucceeds(string title,
 								   string description,
-								   decimal price)
+								   decimal price,
+								   Company company,
+								   List<Image> pictures)
 	{
 		price = Math.Abs(price);	//positive always
 		var sut = new Product(title,
 							  description,
-							  price);
+							  price,
+							  company,
+							  pictures,
+							  pictures.First());
 
 		sut.Title
 		   .Should()
@@ -31,17 +36,31 @@ public class ProductTests
 		sut.Price
 		   .Should()
 		   .Be(price);
+		sut.Company
+		   .Should()
+		   .Be(company);
+		sut.Pictures
+		   .Should()
+		   .Contain(pictures);
+		sut.DefaultPicture
+		   .Should()
+		   .Be(pictures.First());
 	}
 
 	[Theory(DisplayName = "New product with empty title throws")]
 	[AutoDomainData]
 	public void NewProductWithEmptyTitleThrows(string description,
-											  decimal price)
+											   decimal price,
+											   Company company,
+											   List<Image> pictures)
 	{
 		price = Math.Abs(price); //positive always
 		var sut = () => new Product(string.Empty,
 									description,
-									price);
+									price,
+									company,
+									pictures,
+									pictures.First());
 
 		sut.Should()
 		   .ThrowExactly<ArgumentException>();
@@ -50,12 +69,17 @@ public class ProductTests
 	[Theory(DisplayName = "New product with title too long throws")]
 	[AutoDomainData]
 	public void NewProductWithTitleToLongThrows(string description,
-											  decimal price)
+												decimal price,
+												Company company,
+												List<Image> pictures)
 	{
 		price = Math.Abs(price); //positive always
 		var sut = () => new Product(new string(It.IsAny<char>(), Product.TitleLength + 1),
 									description,
-									price);
+									price,
+									company,
+									pictures,
+									pictures.First());
 
 		sut.Should()
 		   .ThrowExactly<ArgumentException>();
@@ -64,12 +88,17 @@ public class ProductTests
 	[Theory(DisplayName = "New product with empty description throws")]
 	[AutoDomainData]
 	public void NewProductWithEmptyDescriptionThrows(string name,
-													 decimal price)
+													 decimal price,
+													 Company company,
+													 List<Image> pictures)
 	{
 		price = Math.Abs(price); //positive always
 		var sut = () => new Product(name,
 									string.Empty,
-									price);
+									price,
+									company,
+									pictures,
+									pictures.First());
 
 		sut.Should()
 		   .ThrowExactly<ArgumentException>();
@@ -78,12 +107,17 @@ public class ProductTests
 	[Theory(DisplayName = "New product with description too long throws")]
 	[AutoDomainData]
 	public void NewProductWithDescriptionToLongThrows(string name,
-													  decimal price)
+													  decimal price,
+													  Company company,
+													  List<Image> pictures)
 	{
 		price = Math.Abs(price); //positive always
 		var sut = () => new Product(name,
 									new string(It.IsAny<char>(), Product.DescriptionLength + 1),
-									price);
+									price,
+									company,
+									pictures,
+									pictures.First());
 
 		sut.Should()
 		   .ThrowExactly<ArgumentException>();
@@ -93,12 +127,17 @@ public class ProductTests
 	[AutoDomainData]
 	public void NewProductWithNegativePriceThrows(string name,
 												  string description,
-												  decimal price)
+												  decimal price,
+												  Company company,
+												  List<Image> pictures)
 	{
 		price = -Math.Abs(price); //negative always
 		var sut = () => new Product(name,
 									description,
-									price);
+									price,
+									company,
+									pictures,
+									pictures.First());
 
 		sut.Should()
 		   .ThrowExactly<ArgumentOutOfRangeException>();
@@ -109,12 +148,14 @@ public class ProductTests
 	public void UpdateProductSucceeds(Product sut,
 									  string title,
 									  string description,
-									  decimal price)
+									  decimal price,
+									  Company company)
 	{
 		price = Math.Abs(price); //positive always
 		sut.Update(title,
 				   description,
-				   price);
+				   price,
+				   company);
 
 		sut.Title
 		   .Should()
@@ -131,12 +172,14 @@ public class ProductTests
 	[AutoDomainData]
 	public void UpdateProductWithEmptyNameFails(Product sut,
 												string description,
-												decimal price)
+												decimal price,
+												Company company)
 	{
 		price = Math.Abs(price); //positive always
 		var call = () => sut.Update(string.Empty,
 									description,
-									price);
+									price,
+									company);
 
 		call.Should()
 			.ThrowExactly<ArgumentException>();
@@ -157,19 +200,42 @@ public class ProductTests
 		   .Contain(picture);
 	}
 
+	[Theory(DisplayName = "Add existing picture does nothing")]
+	[AutoDomainData]
+	public void AddExistingPictureDoesNothing(Product sut)
+	{
+		var action = () => sut.AddPicture(sut.Pictures.First());
+		action.Should()
+			  .NotThrow();
+		sut.Pictures
+		   .Should()
+		   .HaveCount(3);
+	}
+
 	[Theory(DisplayName = "Set new picture as default succeeds")]
 	[AutoDomainData]
-	public void AddNewDefaultPictureSucceeds(Product sut, Image picture)
+	public void SetNewDefaultPictureSucceeds(Product sut)
 	{
 		var originalDefaultPicture = sut.DefaultPicture;
+		var newDefaultPicture = sut.Pictures.Last();
 
-		sut.AddPicture(picture, true);
+		sut.SetDefaultPicture(newDefaultPicture);
 
 		sut.DefaultPicture
 		   .Should()
-		   .Be(picture)
+		   .Be(newDefaultPicture)
 		   .And
 		   .NotBe(originalDefaultPicture);
+	}
+
+	[Theory(DisplayName = "Set non-existing default picture throws")]
+	[AutoDomainData]
+	public void SetNonExistingDefaultPictureThrows(Product sut, Image picture)
+	{
+		var action = () => sut.SetDefaultPicture(picture);
+
+		action.Should()
+			  .ThrowExactly<ArgumentOutOfRangeException>();
 	}
 
 	[Theory(DisplayName = "Remove picture succeeds")]
@@ -183,6 +249,30 @@ public class ProductTests
 		sut.Pictures
 		   .Should()
 		   .HaveCount(picturesCount - 1);
+	}
+
+	[Theory(DisplayName = "Remove last picture throws")]
+	[AutoDomainData]
+	public void RemoveLastPictureThrows(Product sut)
+	{
+		sut.RemovePicture(sut.Pictures.First());
+		sut.RemovePicture(sut.Pictures.First());
+
+		var action = () => sut.RemovePicture(sut.Pictures.First());
+		action.Should()
+			  .ThrowExactly<InvalidOperationException>();
+	}
+
+	[Theory(DisplayName = "Remove non-existing picture does nothing")]
+	[AutoDomainData]
+	public void RemoveNonExistingPictureDoesNothing(Product sut, Image picture)
+	{
+		var action = () => sut.RemovePicture(picture);
+		action.Should()
+			  .NotThrow("because it should ignore removing a non-existing picture.");
+		sut.Pictures
+		   .Should()
+		   .HaveCount(3);
 	}
 
 	[Theory(DisplayName = "Remove default picture succeeds")]

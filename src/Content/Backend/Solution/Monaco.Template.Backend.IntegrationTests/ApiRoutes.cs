@@ -1,5 +1,6 @@
 ﻿using Flurl;
-using Monaco.Template.Backend.Application.DTOs;
+using Monaco.Template.Backend.Application.Features.Company.DTOs;
+using Monaco.Template.Backend.Application.Features.Product.DTOs;
 
 namespace Monaco.Template.Backend.IntegrationTests;
 

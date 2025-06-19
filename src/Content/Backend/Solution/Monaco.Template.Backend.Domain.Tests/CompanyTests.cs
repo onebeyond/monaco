@@ -1,8 +1,10 @@
 ﻿using FluentAssertions;
 using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Model.Entities;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Domain.Model.ValueObjects;
 using Xunit;
 
 namespace Monaco.Template.Backend.Domain.Tests;

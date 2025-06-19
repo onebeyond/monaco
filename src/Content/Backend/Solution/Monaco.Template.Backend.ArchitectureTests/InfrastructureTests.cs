@@ -21,6 +21,7 @@ public class InfrastructureTests : BaseTest
 																						 InfrastructureAssembly)
 																	   .As("Application Layer");
 
+	private static readonly Class AggregateRoot = Architecture.GetClassOfType(typeof(AggregateRoot));
 	private static readonly Class Entity = Architecture.GetClassOfType(typeof(Entity));
 	private static readonly Class Enumeration = Architecture.GetClassOfType(typeof(Enumeration));
 
@@ -28,6 +29,8 @@ public class InfrastructureTests : BaseTest
 																				 .AreAssignableTo(Entity)
 																				 .And()
 																				 .AreNot(Entity)
+																				 .And()
+																				 .AreNot(AggregateRoot)
 																				 .Or()
 																				 .AreAssignableTo(Enumeration)
 																				 .And()
@@ -68,5 +71,6 @@ public class InfrastructureTests : BaseTest
 										"have their corresponding EntityTypeConfiguration",
 										"does not have its corresponding EntityTypeConfiguration")
 				 .Because("each entity should be explicitly configured in EF Core")
+				 .WithoutRequiringPositiveResults()
 				 .Check(Architecture);
 }

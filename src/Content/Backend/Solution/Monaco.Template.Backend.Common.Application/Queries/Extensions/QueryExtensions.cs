@@ -18,7 +18,7 @@ public static class QueryExtensions
 	{
 		var result = await dbContext.Set<T>()
 									.AsNoTracking()
-									.ApplyFilter(request.QueryString, mappedFieldsFilter)
+									.ApplyFilter(request.QueryParams, mappedFieldsFilter)
 									.ApplySort(request.Sort, defaultSortField, mappedFieldsSort)
 									.ToListAsync(cancellationToken);
 		return result.Select(selector)
@@ -50,7 +50,7 @@ public static class QueryExtensions
 		var query = dbContext.Set<T>().AsQueryable();
 		query = queryFunc.Invoke(query);
 
-		var result = await query.ApplyFilter(request.QueryString, mappedFieldsFilter)
+		var result = await query.ApplyFilter(request.QueryParams, mappedFieldsFilter)
 								.ApplySort(request.Sort, defaultSortField, mappedFieldsSort)
 								.ToListAsync(cancellationToken);
 		return result.Select(selector).ToList();
@@ -84,7 +84,7 @@ public static class QueryExtensions
 		var result = await dbContext.Set<T>()
 									.AsNoTracking()
 									.Where(expression.Invoke(request))
-									.ApplyFilter(request.QueryString, mappedFieldsFilter)
+									.ApplyFilter(request.QueryParams, mappedFieldsFilter)
 									.ApplySort(request.Sort, defaultSortField, mappedFieldsSort)
 									.ToListAsync(cancellationToken);
 		return result.Select(selector)
@@ -119,7 +119,7 @@ public static class QueryExtensions
 		var result = await dbContext.Set<T>()
 									.AsNoTracking()
 									.Where(expression.Invoke(request))
-									.ApplyFilter(request.QueryString, mappedFieldsFilter)
+									.ApplyFilter(request.QueryParams, mappedFieldsFilter)
 									.ApplySort(request.Sort, defaultSortField, mappedFieldsSort)
 									.ToListAsync(cancellationToken);
 		return result.Select(selector).ToList();
@@ -149,7 +149,7 @@ public static class QueryExtensions
 																	CancellationToken cancellationToken) where T : Entity =>
 		dbContext.Set<T>()
 				 .AsNoTracking()
-				 .ApplyFilter(request.QueryString, mappedFieldsFilter)
+				 .ApplyFilter(request.QueryParams, mappedFieldsFilter)
 				 .ApplySort(request.Sort, defaultSortField, mappedFieldsSort)
 				 .ToPageAsync(request.Offset, request.Limit, selector, cancellationToken);
 
@@ -177,7 +177,7 @@ public static class QueryExtensions
 		dbContext.Set<T>()
 				 .AsNoTracking()
 				 .Where(expression.Invoke(request))
-				 .ApplyFilter(request.QueryString, mappedFieldsFilter)
+				 .ApplyFilter(request.QueryParams, mappedFieldsFilter)
 				 .ApplySort(request.Sort, defaultSortField, mappedFieldsSort)
 				 .ToPageAsync(request.Offset, request.Limit, selector, cancellationToken);
 

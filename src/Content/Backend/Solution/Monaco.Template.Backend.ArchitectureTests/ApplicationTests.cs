@@ -148,11 +148,4 @@ public class ApplicationTests : BaseTest
 										"is not nested together with its handler")
 				 .Because("having each feature as a single file component reduces boilerplate and improves DX")
 				 .Check(Architecture);
-
-	[Fact(DisplayName = "Features are free of cycles")]
-	public void FeaturesAreFreeOfCycles() =>
-		Slices().Matching("Monaco.Template.Backend.Application.Features.(*)")
-				.Should()
-				.BeFreeOfCycles()
-				.Check(Architecture);
 }

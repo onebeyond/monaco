@@ -2,6 +2,14 @@
 
 namespace Monaco.Template.Backend.Common.Domain.Model;
 
+/// <summary>
+/// Represents a base class for strongly-typed enumerations, providing functionality for defining and working with named
+/// constants.
+/// </summary>
+/// <remarks>The <see cref="Enumeration"/> class is designed to serve as a base class for creating strongly-typed
+/// enumerations that are more flexible than traditional enums. It provides support for defining named constants with
+/// associated unique identifiers and enables operations such as comparison, parsing, and retrieval of all defined
+/// values.</remarks>
 public abstract class Enumeration : Entity, IComparable
 {
 	protected Enumeration(Guid id, string name) : base(id)
@@ -9,6 +17,9 @@ public abstract class Enumeration : Entity, IComparable
 		Name = name;
 	}
 
+	/// <summary>
+	/// Gets the name associated with the current instance.
+	/// </summary>
 	public string Name { get; protected set; }
 
 	public override string ToString() =>

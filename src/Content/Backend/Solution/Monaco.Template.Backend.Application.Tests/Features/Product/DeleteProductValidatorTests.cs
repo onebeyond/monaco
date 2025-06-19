@@ -3,12 +3,12 @@ using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Monaco.Template.Backend.Application.Features.Product;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Application.Persistence;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Product;
@@ -32,7 +32,7 @@ public class DeleteProductValidatorTests
 
 	[Theory(DisplayName = "Existing Product passes validation correctly")]
 	[AutoDomainData]
-	public async Task ExistingProductPassesValidationCorrectly(Domain.Model.Product product)
+	public async Task ExistingProductPassesValidationCorrectly(Domain.Model.Entities.Product product)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(product);
 
@@ -49,7 +49,7 @@ public class DeleteProductValidatorTests
 
 	[Theory(DisplayName = "Non existing Product generates validation error")]
 	[AutoDomainData]
-	public async Task NonExistingProductGeneratesError(Domain.Model.Product product, Guid id)
+	public async Task NonExistingProductGeneratesError(Domain.Model.Entities.Product product, Guid id)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(product);
 

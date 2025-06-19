@@ -232,10 +232,10 @@
 						"Monaco.Template.Backend.Application/DTOs/ImageDto.cs",
 						"Monaco.Template.Backend.Application/DTOs/ProductDto.cs",
 						"Monaco.Template.Backend.Application/Services/**/*FileService.*",
-						"Monaco.Template.Backend.Application.Infrastructure/EntityConfigurations/DocumentEntityConfiguration.cs",
-						"Monaco.Template.Backend.Application.Infrastructure/EntityConfigurations/FileEntityConfiguration.cs",
-						"Monaco.Template.Backend.Application.Infrastructure/EntityConfigurations/ImageEntityConfiguration.cs",
-						"Monaco.Template.Backend.Application.Infrastructure/EntityConfigurations/ProductEntityConfiguration.cs",
+						"Monaco.Template.Backend.Application/Persistence/EntityConfigurations/DocumentEntityConfiguration.cs",
+						"Monaco.Template.Backend.Application/Persistence/EntityConfigurations/FileEntityConfiguration.cs",
+						"Monaco.Template.Backend.Application/Persistence/EntityConfigurations/ImageEntityConfiguration.cs",
+						"Monaco.Template.Backend.Application/Persistence/EntityConfigurations/ProductEntityConfiguration.cs",
 						"Monaco.Template.Backend.Application.Tests/Services/FileServiceTests.cs",
 						"Monaco.Template.Backend.Application.Tests/Features/File/**/*",
 						"Monaco.Template.Backend.Application.Tests/Features/Product/**/*",
@@ -243,12 +243,12 @@
 						"Monaco.Template.Backend.Domain.Tests/Factories/Entities/FileFactory.cs",
 						"Monaco.Template.Backend.Domain.Tests/Factories/Entities/ImageFactory.cs",
 						"Monaco.Template.Backend.Domain.Tests/Factories/Entities/ProductFactory.cs",
-						"Monaco.Template.Backend.Domain/Model/Document.cs",
-						"Monaco.Template.Backend.Domain/Model/File.cs",
-						"Monaco.Template.Backend.Domain/Model/GpsPosition.cs",
-						"Monaco.Template.Backend.Domain/Model/Image.cs",
-						"Monaco.Template.Backend.Domain/Model/ImageDimensions.cs",
-						"Monaco.Template.Backend.Domain/Model/Product.cs",
+						"Monaco.Template.Backend.Domain/Model/Entities/Document.cs",
+						"Monaco.Template.Backend.Domain/Model/Entities/File.cs",
+						"Monaco.Template.Backend.Domain/Model/Entities/Image.cs",
+						"Monaco.Template.Backend.Domain/Model/Entities/Product.cs",
+						"Monaco.Template.Backend.Domain/Model/ValueObjects/GpsPosition.cs",
+						"Monaco.Template.Backend.Domain/Model/ValueObjects/ImageDimensions.cs",
 						"Monaco.Template.Backend.Domain.Tests/DocumentTests.cs",
 						"Monaco.Template.Backend.Domain.Tests/FileTests.cs",
 						"Monaco.Template.Backend.Domain.Tests/GpsPositionTests.cs",
@@ -260,7 +260,7 @@
 						"Monaco.Template.Backend.IntegrationTests/Tests/FilesTests.cs",
 						"Monaco.Template.Backend.IntegrationTests/Tests/ProductsTests.cs",
 						"Monaco.Template.Backend.Messages/V1/ProductCreated.cs",
-						"Monaco.Template.Backend.Service/Consumers/OnProductCreatedThenLongRunningProcess.cs"
+						"Monaco.Template.Backend.Worker/Consumers/OnProductCreatedThenLongRunningProcess.cs"
 					]
 				},
 				{
@@ -273,7 +273,7 @@
 					"condition": "(!massTransitIntegration)",
 					"exclude": [
 						"Monaco.Template.Backend.Messages/**/*",
-						"Monaco.Template.Backend.Service/Consumers/**/*"
+						"Monaco.Template.Backend.Worker/Consumers/**/*"
 					]
 				},
 				{
@@ -292,7 +292,7 @@
 				{
 					"condition": "(!workerService)",
 					"exclude": [
-						"Monaco.Template.Backend.Service/**/*",
+						"Monaco.Template.Backend.Worker/**/*",
 						"Monaco.Template.Backend.IntegrationTests/Factories/WorkerServiceFactory.cs"
 					]
 				},
@@ -300,7 +300,7 @@
 					"condition": "(!apiService && !workerService)",
 					"exclude": [
 						"Monaco.Template.Backend.IntegrationTests/**/*",
-						"Monaco.Template.Backend.Service/**/*",
+						"Monaco.Template.Backend.Worker/**/*",
 						"Monaco.Template.Backend.Api/**/*"
 					]
 				}
@@ -329,8 +329,6 @@
 		"d43a4bf3-8d08-4ec2-8a99-5c3b92ec71a2",
 		"895c8ddb-dd81-4ced-be86-efed36dd3732",
 		"6b21dd04-2484-490c-b108-cc01148b9fc4",
-		"71313461-6a79-47b3-aeb9-5668a88935f2",
-		"1b80e15b-fc20-4b57-a3e5-3b6b3ebda92f",
 		"42e51d47-b82f-4a92-b1e5-cd8be44de6f0",
 		"d8623b90-59c1-4753-a0e6-f2dbd4305c9b",
 		"42c5f44e-1221-43df-a6f5-4cb2cbef8d72",

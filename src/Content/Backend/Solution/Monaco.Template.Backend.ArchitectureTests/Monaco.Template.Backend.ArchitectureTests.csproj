@@ -36,7 +36,7 @@
     <ProjectReference Include="..\Monaco.Template.Backend.Messages\Monaco.Template.Backend.Messages.csproj" />
 	<!--#endif-->
 	<!--#if (workerService)-->
-    <ProjectReference Include="..\Monaco.Template.Backend.Service\Monaco.Template.Backend.Service.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Backend.Worker\Monaco.Template.Backend.Worker.csproj" />
 	<!--#endif-->
   </ItemGroup>
 

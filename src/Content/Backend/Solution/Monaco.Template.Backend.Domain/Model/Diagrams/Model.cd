@@ -1,41 +1,119 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
-  <Class Name="Monaco.Template.Domain.Model.Company">
-    <Position X="3" Y="1" Width="2.25" />
+  <Class Name="Monaco.Template.Backend.Domain.Model.Entities.Company">
+    <Position X="1.75" Y="0.75" Width="2.75" />
     <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
       <Compartment Name="Methods" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AAQAAAAAACAAAAAAABAAAAQAAAAAAAACAAAAAAAAAAA=</HashCode>
-      <FileName>Model\Company.cs</FileName>
+      <HashCode>IgQAAAAAACCAAAAAABAIQAQAAEAAAAgCAIAAAAAAAAQ=</HashCode>
+      <FileName>Model\Entities\Company.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Property Name="Address" />
     </ShowAsAssociation>
   </Class>
-  <Class Name="Monaco.Template.Domain.Model.Country">
-    <Position X="9.5" Y="1" Width="2" />
+  <Class Name="Monaco.Template.Backend.Domain.Model.Entities.Country" BaseTypeListCollapsed="true">
+    <Position X="9" Y="0.75" Width="1.5" />
     <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
       <Compartment Name="Methods" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Model\Country.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAgAAAAAAAAAAAA=</HashCode>
+      <FileName>Model\Entities\Country.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="Monaco.Template.Domain.Model.Address">
-    <Position X="6.5" Y="1" Width="1.75" />
+  <Class Name="Monaco.Template.Backend.Domain.Model.Entities.Document">
+    <Position X="9.5" Y="7.5" Width="1.5" />
     <Compartments>
       <Compartment Name="Methods" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAIIAAAAAQAAAIQAAAAAAIAgAAAAAA=</HashCode>
-      <FileName>Model\Address.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Model\Entities\Document.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Monaco.Template.Backend.Domain.Model.Entities.File">
+    <Position X="12" Y="6.25" Width="2" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAAAAAgAAAAAAAAAQAAAAQAQgAAAAQABABAwA=</HashCode>
+      <FileName>Model\Entities\File.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Monaco.Template.Backend.Domain.Model.Entities.Image">
+    <Position X="9" Y="5" Width="2" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAAAAAAAgAAAACAIAAAAQAAABAAAAAAAAAgA=</HashCode>
+      <FileName>Model\Entities\Image.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Dimensions" />
+      <Property Name="Position" />
+      <Property Name="Thumbnail" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Monaco.Template.Backend.Domain.Model.Entities.Product">
+    <Position X="3.25" Y="4.5" Width="2" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAQKgAEAAAAAECAAEAAAAACAAAACAhAAIgAA=</HashCode>
+      <FileName>Model\Entities\Product.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Company" />
+      <Property Name="DefaultPicture" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Pictures" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Monaco.Template.Backend.Domain.Model.ValueObjects.Address">
+    <Position X="6.25" Y="0.75" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAABAAAAAIIAAAAAQAAgIQAAAEAAIAgAAAAAA=</HashCode>
+      <FileName>Model\ValueObjects\Address.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Property Name="Country" />
     </ShowAsAssociation>
+  </Class>
+  <Class Name="Monaco.Template.Backend.Domain.Model.ValueObjects.GpsPosition">
+    <Position X="14.75" Y="4.75" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAEAAAAAAIAAIBAAAAAAAABAAAAAAEAAQAAA=</HashCode>
+      <FileName>Model\ValueObjects\GpsPosition.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Monaco.Template.Backend.Domain.Model.ValueObjects.ImageDimensions">
+    <Position X="12.25" Y="3.75" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAIAAAAEAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Model\ValueObjects\ImageDimensions.cs</FileName>
+    </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>

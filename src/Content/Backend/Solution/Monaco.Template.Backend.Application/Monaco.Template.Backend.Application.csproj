@@ -18,10 +18,14 @@
   <!--#endif-->
   <ItemGroup>
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Application\Monaco.Template.Backend.Common.Application.csproj" />
-    <ProjectReference Include="..\Monaco.Template.Backend.Application.Infrastructure\Monaco.Template.Backend.Application.Infrastructure.csproj" />
     <!--#if (massTransitIntegration)-->
     <ProjectReference Include="..\Monaco.Template.Backend.Messages\Monaco.Template.Backend.Messages.csproj" />
     <!--#endif-->
+    <!--#if (filesSupport)-->
+    <ProjectReference Include="..\Monaco.Template.Backend.Common.BlobStorage\Monaco.Template.Backend.Common.BlobStorage.csproj" />
+    <!--#endif-->
+    <ProjectReference Include="..\Monaco.Template.Backend.Common.Infrastructure\Monaco.Template.Backend.Common.Infrastructure.csproj" />
+    <ProjectReference Include="..\Monaco.Template.Backend.Domain\Monaco.Template.Backend.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,5 +41,9 @@
     <PackageReference Include="SkiaSharp" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
 	<!--#endif-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Persistence\Migrations\" />
   </ItemGroup>
 </Project>

@@ -4,16 +4,16 @@ using FluentAssertions;
 using MassTransit;
 #endif
 using Monaco.Template.Backend.Application.Features.Product;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Model.Entities;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 #if (massTransitIntegration)
 using Monaco.Template.Backend.Messages.V1;
 #endif
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Application.Persistence;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Product;
@@ -43,9 +43,9 @@ public class CreateProductHandlerTests
 
 	[Theory(DisplayName = "Create new Product succeeds")]
 	[AutoDomainData]
-	public async Task CreateNewProductSucceeds(Domain.Model.Company company, Image[] pictures)
+	public async Task CreateNewProductSucceeds(Domain.Model.Entities.Company company, Image[] pictures)
 	{
-		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Product>(), out var productDbSetMock)
+		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Entities.Product>(), out var productDbSetMock)
 					  .CreateAndSetupDbSetMock(company)
 					  .CreateAndSetupDbSetMock(pictures);
 
@@ -58,19 +58,20 @@ public class CreateProductHandlerTests
 													 .Id
 					  };
 
-		var sut = new CreateProduct.Handler(_dbContextMock.Object,
+		//var sut = new CreateProduct.Handler(_dbContextMock.Object,
 #if (massTransitIntegration)
-											_publishEndpointMock.Object,
+		var sut = new CreateProduct.Handler(_dbContextMock.Object, _publishEndpointMock.Object);
+#else
+		var sut = new CreateProduct.Handler(_dbContextMock.Object);
 #endif
-											_fileServiceMock.Object);
-		var result = await sut.Handle(command, new CancellationToken());
 
-		productDbSetMock.Verify(x => x.Attach(It.IsAny<Domain.Model.Product>()), Times.Once);
+		var result = await sut.Handle(command, CancellationToken.None);
+
+		productDbSetMock.Verify(x => x.Attach(It.IsAny<Domain.Model.Entities.Product>()), Times.Once);
 		_dbContextMock.Verify(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()), Times.Once);
 #if (massTransitIntegration)
 		_publishEndpointMock.Verify(x => x.Publish(It.IsAny<ProductCreated>(), It.IsAny<CancellationToken>()), Times.Once);
 #endif
-		_fileServiceMock.Verify(x => x.MakePermanentImagesAsync(It.IsAny<Image[]>(), It.IsAny<CancellationToken>()), Times.Once);
 
 		result.ValidationResult
 			  .IsValid
