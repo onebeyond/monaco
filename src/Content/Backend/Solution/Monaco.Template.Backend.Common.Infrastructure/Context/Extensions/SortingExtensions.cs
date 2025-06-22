@@ -9,7 +9,6 @@ public static class SortingExtensions
 											 string defaultSortField,
 											 Dictionary<string, Expression<Func<T, object>>> sortMap)
 	{
-		ArgumentNullException.ThrowIfNull(nameof(source));
 		ArgumentException.ThrowIfNullOrEmpty(nameof(defaultSortField));
 
 		var (sortMapLower, lstSort) = GetData(sortFields, defaultSortField, sortMap);
@@ -25,7 +24,6 @@ public static class SortingExtensions
 											  string defaultSortField,
 											  Dictionary<string, Expression<Func<T, object>>> sortMap)
 	{
-		ArgumentNullException.ThrowIfNull(nameof(source));
 		ArgumentException.ThrowIfNullOrEmpty(nameof(defaultSortField));
 
 		var (sortMapLower, lstSort) = GetData(sortFields, defaultSortField, sortMap);
@@ -41,10 +39,10 @@ public static class SortingExtensions
 	{
 		//convert a Dictionary with Keys into lowercase to ease searching
 		var sortMapLower = sortMap.ToDictionary(x => x.Key.ToLower(), x => x.Value);
-		//convert the list of fields to sort into a dictionary field/direction and filter out the non existing ones
+		//convert the list of fields to sort into a dictionary field/direction and filter out the non-existing ones
 		var lstSort = ProcessSortParam(sortFields, sortMapLower);
-		if (!lstSort.Any()) //if there's none remaining, load the default ones
-			lstSort = ProcessSortParam(new[] { defaultSortField }, sortMapLower);
+		if (lstSort.Count == 0) //if there's none remaining, load the default ones
+			lstSort = ProcessSortParam([defaultSortField], sortMapLower);
 
 		return (sortMapLower, lstSort);
 	}
@@ -87,7 +85,7 @@ public static class SortingExtensions
 	}
 
 	private static Dictionary<string, bool> ProcessSortParam<T>(IEnumerable<string?> sortFields,
-																IReadOnlyDictionary<string, Expression<Func<T, object>>> sortMap) =>
+																Dictionary<string, Expression<Func<T, object>>> sortMap) =>
 		sortFields.Where(x => x is not null)
 				  .ToDictionary(x => (x is ['-', .. var param] ? param : x!).ToLower(),
 								x => x is not ['-', ..])
