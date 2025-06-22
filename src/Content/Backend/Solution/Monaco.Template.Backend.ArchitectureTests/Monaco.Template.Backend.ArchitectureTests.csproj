@@ -28,8 +28,6 @@
 	<!--#if (apiService)-->
     <ProjectReference Include="..\Monaco.Template.Backend.Api\Monaco.Template.Backend.Api.csproj" />
 	<!--#endif-->
-    <ProjectReference Include="..\Monaco.Template.Backend.Application.Infrastructure.Migrations\Monaco.Template.Backend.Application.Infrastructure.Migrations.csproj" />
-    <ProjectReference Include="..\Monaco.Template.Backend.Application.Infrastructure\Monaco.Template.Backend.Application.Infrastructure.csproj" />
     <ProjectReference Include="..\Monaco.Template.Backend.Application\Monaco.Template.Backend.Application.csproj" />
     <ProjectReference Include="..\Monaco.Template.Backend.Domain\Monaco.Template.Backend.Domain.csproj" />
 	<!--#if (massTransitIntegration)-->

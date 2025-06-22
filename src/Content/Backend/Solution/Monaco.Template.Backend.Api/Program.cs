@@ -122,5 +122,7 @@ app.Run();
 
 namespace Monaco.Template.Backend.Api
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 	public partial class Program;
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }
