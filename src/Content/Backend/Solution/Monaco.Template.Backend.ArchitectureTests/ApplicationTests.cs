@@ -1,9 +1,11 @@
 ﻿using ArchUnitNET.Fluent.Syntax.Elements.Types.Classes;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Monaco.Template.Backend.ArchitectureTests.Extensions;
 using Monaco.Template.Backend.Common.Application.Commands;
-using static ArchUnitNET.Fluent.Slices.SliceRuleDefinition;
+using Monaco.Template.Backend.Common.Domain.Model;
+using Monaco.Template.Backend.Common.Infrastructure.EntityConfigurations;
 
 namespace Monaco.Template.Backend.ArchitectureTests;
 
@@ -12,7 +14,9 @@ namespace Monaco.Template.Backend.ArchitectureTests;
 public class ApplicationTests : BaseTest
 {
 	private static readonly Architecture Architecture = new ArchLoader().LoadAssemblies(ApplicationAssembly,
-																						CommonApplicationAssembly)
+																						CommonApplicationAssembly,
+																						DomainAssembly,
+																						CommonDomainAssembly)
 																		.Build();
 
 	private readonly IObjectProvider<IType> _applicationLayer = Types().That()
@@ -52,6 +56,31 @@ public class ApplicationTests : BaseTest
 																	.AreAssignableTo(Validator)
 																	.And()
 																	.AreNotAbstract();
+
+	private static readonly Class AggregateRoot = Architecture.GetClassOfType(typeof(AggregateRoot));
+	private static readonly Class Entity = Architecture.GetClassOfType(typeof(Entity));
+	private static readonly Class Enumeration = Architecture.GetClassOfType(typeof(Enumeration));
+
+	private readonly GivenClassesConjunctionWithDescription _entities = Classes().That()
+																				 .AreAssignableTo(Entity)
+																				 .And()
+																				 .AreNot(Entity)
+																				 .And()
+																				 .AreNot(AggregateRoot)
+																				 .Or()
+																				 .AreAssignableTo(Enumeration)
+																				 .And()
+																				 .AreNot(Enumeration)
+																				 .As("Entities");
+
+	private static readonly Interface EntityTypeConfiguration = Architecture.GetInterfaceOfType(typeof(IEntityTypeConfiguration<>));
+	private static readonly Class EntityTypeConfigurationBase = Architecture.GetClassOfType(typeof(EntityTypeConfigurationBase<>));
+
+	private readonly GivenClassesConjunctionWithDescription _entityConfiguration = Classes().That()
+																							.AreAssignableTo(EntityTypeConfiguration)
+																							.And()
+																							.AreNotAbstract()
+																							.As("Entity Configurations");
 
 
 	[Fact(DisplayName = "Commands and Queries exist in Application layer and are records, public, nested, sealed and have name Command or Query")]
@@ -147,5 +176,33 @@ public class ApplicationTests : BaseTest
 										"be nested together with their handler",
 										"is not nested together with its handler")
 				 .Because("having each feature as a single file component reduces boilerplate and improves DX")
+				 .Check(Architecture);
+
+	[Fact(DisplayName = "EntityConfigurations should exist in Application layer and be internal and sealed")]
+	public void EntityConfigurationsExistInApplicationLayerAndBeInternalAndSealed() =>
+		_entityConfiguration.Should()
+							.Be(_applicationLayer)
+							.AndShould()
+							.BeInternal()
+							.AndShould()
+							.BeSealed()
+							.Check(Architecture);
+
+	[Fact(DisplayName = "Entities have EntityConfiguration")]
+	public void EntitiesHaveEntityConfiguration() =>
+		_entities.Should()
+				 .FollowCustomCondition(c => _entityConfiguration.GetObjects(Architecture)
+																 .Any(etc => etc.GetImplementsInterfaceDependencies()
+																				.Any(i => i.Target.Equals(EntityTypeConfiguration) &&
+																						  i.TargetGenericArguments
+																						   .Any(g => g.Type.Equals(c))) ||
+																			 etc.GetInheritsBaseClassDependencies()
+																				.Any(b => b.Target.Equals(EntityTypeConfigurationBase) &&
+																						  b.TargetGenericArguments
+																						   .Any(g => g.Type.Equals(c)))),
+										"have their corresponding EntityTypeConfiguration",
+										"does not have its corresponding EntityTypeConfiguration")
+				 .Because("each entity should be explicitly configured in EF Core")
+				 .WithoutRequiringPositiveResults()
 				 .Check(Architecture);
 }
