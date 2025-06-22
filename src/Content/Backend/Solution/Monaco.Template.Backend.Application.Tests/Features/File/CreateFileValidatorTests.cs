@@ -21,7 +21,7 @@ public class CreateFileValidatorTests
 	{
 		var fixture = new Fixture();
 		Command = new(new MemoryStream([..Encoding.UTF8.GetBytes(fixture.Create<string>())]),									// Stream
-					  $"{fixture.Create<string>()}.{fixture.Create<string>()[..(Domain.Model.File.ExtensionLength - 1)]}",		// FileName
+					  $"{fixture.Create<string>()}.{fixture.Create<string>()[..(Domain.Model.Entities.File.ExtensionLength - 1)]}",		// FileName
 					  fixture.Create<string>());																				// ContentType
 	}
 
@@ -75,7 +75,7 @@ public class CreateFileValidatorTests
 	[Fact(DisplayName = "File Name too long generates validation error")]
 	public async Task FileNameTooLongGeneratesError()
 	{
-		var command = Command with { FileName = new string(It.IsAny<char>(), Domain.Model.File.NameLength + 1) };
+		var command = Command with { FileName = new string(It.IsAny<char>(), Domain.Model.Entities.File.NameLength + 1) };
 
 		var sut = new CreateFile.Validator();
 		var validationResult = await sut.TestValidateAsync(command);
@@ -104,7 +104,7 @@ public class CreateFileValidatorTests
 	[Fact(DisplayName = "Content Type too long generates validation error")]
 	public async Task ContentTypeTooLongGeneratesError()
 	{
-		var command = Command with { ContentType = new string(It.IsAny<char>(), Domain.Model.File.ContentTypeLength + 1) };
+		var command = Command with { ContentType = new string(It.IsAny<char>(), Domain.Model.Entities.File.ContentTypeLength + 1) };
 
 		var sut = new CreateFile.Validator();
 		var validationResult = await sut.TestValidateAsync(command);

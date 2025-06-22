@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using MediatR;
-using Monaco.Template.Backend.Application.DTOs.Extensions;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Application.Features.Company.Extensions;
+using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Common.Application.Commands;
 using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
@@ -12,7 +12,7 @@ public sealed class CreateCompany
 {
 	public sealed record Command(string Name,
 								 string Email,
-								 string WebSiteUrl,
+								 string? WebSiteUrl,
 								 string? Street,
 								 string? City,
 								 string? County,
@@ -28,7 +28,7 @@ public sealed class CreateCompany
 			RuleFor(x => x.Name)
 				.NotEmpty()
 				.MaximumLength(100)
-				.MustAsync(async (name, ct) => !await dbContext.ExistsAsync<Domain.Model.Company>(x => x.Name == name, ct))
+				.MustAsync(async (name, ct) => !await dbContext.ExistsAsync<Domain.Model.Entities.Company>(x => x.Name == name, ct))
 				.WithMessage("A company with the name {PropertyValue} already exists");
 
 			RuleFor(x => x.Email)
@@ -54,7 +54,7 @@ public sealed class CreateCompany
 			RuleFor(x => x.CountryId)
 				.NotNull()
 				.When(x => x.Street is not null || x.City is not null || x.County is not null || x.PostCode is not null, ApplyConditionTo.CurrentValidator)
-				.MustExistAsync<Command, Domain.Model.Country, Guid>(dbContext)
+				.MustExistAsync<Command, Domain.Model.Entities.Country, Guid>(dbContext)
 				.When(x => x.CountryId.HasValue, ApplyConditionTo.CurrentValidator);
 		}
 	}
@@ -70,10 +70,10 @@ public sealed class CreateCompany
 
 		public async Task<CommandResult<Guid>> Handle(Command request, CancellationToken cancellationToken)
 		{
-			var country = await _dbContext.GetAsync<Domain.Model.Country>(request.CountryId, cancellationToken);
+			var country = await _dbContext.GetAsync<Domain.Model.Entities.Country>(request.CountryId, cancellationToken);
 			var item = request.Map(country);
 
-			_dbContext.Set<Domain.Model.Company>().Attach(item);
+			_dbContext.Set<Domain.Model.Entities.Company>().Attach(item);
 			await _dbContext.SaveEntitiesAsync(cancellationToken);
 
 			return CommandResult<Guid>.Success(item.Id);

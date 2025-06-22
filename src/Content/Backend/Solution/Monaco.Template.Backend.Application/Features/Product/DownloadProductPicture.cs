@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Application.DTOs;
 using Monaco.Template.Backend.Common.Application.Queries;
@@ -12,7 +12,7 @@ public sealed class DownloadProductPicture
 {
 	public sealed record Query(Guid ProductId,
 							   Guid PictureId,
-							   IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryBase<FileDownloadDto?>(QueryString)
+							   IEnumerable<KeyValuePair<string, StringValues>> QueryParams) : QueryBase<FileDownloadDto?>(QueryParams)
 	{
 		public bool? IsThumbnail => GetValueBool("thumbnail");
 	};
@@ -30,7 +30,7 @@ public sealed class DownloadProductPicture
 
 		public async Task<FileDownloadDto?> Handle(Query request, CancellationToken cancellationToken)
 		{
-			var query = _dbContext.Set<Domain.Model.Product>()
+			var query = _dbContext.Set<Domain.Model.Entities.Product>()
 								  .AsNoTracking()
 								  .Where(x => x.Id == request.ProductId)
 								  .Select(x => x.Pictures
@@ -43,8 +43,7 @@ public sealed class DownloadProductPicture
 
 			return item is null
 					   ? null
-					   : await _fileService.DownloadFileAsync(item,
-															  cancellationToken);
+					   : await _fileService.DownloadFileAsync(item, cancellationToken);
 		}
 	}
 }

@@ -1,7 +1,7 @@
 ﻿using AutoFixture;
 using Monaco.Template.Backend.Common.Tests;
 using Moq;
-using File = Monaco.Template.Backend.Domain.Model.File;
+using File = Monaco.Template.Backend.Domain.Model.Entities.File;
 
 namespace Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 

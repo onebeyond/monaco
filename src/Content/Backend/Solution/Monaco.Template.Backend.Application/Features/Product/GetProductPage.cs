@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
-using Monaco.Template.Backend.Application.DTOs;
-using Monaco.Template.Backend.Application.DTOs.Extensions;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Application.Features.Product.DTOs;
+using Monaco.Template.Backend.Application.Features.Product.Extensions;
+using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Common.Application.Queries;
 using Monaco.Template.Backend.Common.Domain.Model;
 using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
@@ -12,7 +12,7 @@ namespace Monaco.Template.Backend.Application.Features.Product;
 
 public sealed class GetProductPage
 {
-	public sealed record Query(IEnumerable<KeyValuePair<string, StringValues>> QueryString) : QueryPagedBase<ProductDto>(QueryString)
+	public sealed record Query(IEnumerable<KeyValuePair<string, StringValues>> QueryParams) : QueryPagedBase<ProductDto>(QueryParams)
 	{
 		public bool ExpandCompany => Expand(nameof(ProductDto.Company));
 
@@ -32,7 +32,7 @@ public sealed class GetProductPage
 
 		public async Task<Page<ProductDto>?> Handle(Query request, CancellationToken cancellationToken)
 		{
-			var query = _dbContext.Set<Domain.Model.Product>()
+			var query = _dbContext.Set<Domain.Model.Entities.Product>()
 								  .AsNoTracking();
 
 			if (request.ExpandCompany)
@@ -43,7 +43,7 @@ public sealed class GetProductPage
 			if (request.ExpandDefaultPicture)
 				query = query.Include(x => x.DefaultPicture);
 
-			var page = await query.ApplyFilter(request.QueryString, ProductExtensions.GetMappedFields())
+			var page = await query.ApplyFilter(request.QueryParams, ProductExtensions.GetMappedFields())
 								  .ApplySort(request.Sort, nameof(ProductDto.Title), ProductExtensions.GetMappedFields())
 								  .ToPageAsync(request.Offset,
 											   request.Limit,

@@ -1,11 +1,11 @@
 ﻿using AutoFixture;
 using FluentAssertions;
 using Monaco.Template.Backend.Application.Features.Company;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Application.Persistence;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
@@ -32,15 +32,15 @@ public class CreateCompanyHandlerTests
 
 	[Theory(DisplayName = "Create new company succeeds")]
 	[AutoDomainData]
-	public async Task CreateNewCompanySucceeds(Domain.Model.Country country)
+	public async Task CreateNewCompanySucceeds(Domain.Model.Entities.Country country)
 	{
-		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Company>(), out var companyDbSetMock)
+		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Entities.Company>(), out var companyDbSetMock)
 					  .CreateAndSetupDbSetMock([country]);
 
 		var sut = new CreateCompany.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(Command, new CancellationToken());
 
-		companyDbSetMock.Verify(x => x.Attach(It.IsAny<Domain.Model.Company>()), Times.Once);
+		companyDbSetMock.Verify(x => x.Attach(It.IsAny<Domain.Model.Entities.Company>()), Times.Once);
 		_dbContextMock.Verify(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()), Times.Once);
 		result.ValidationResult
 			  .IsValid

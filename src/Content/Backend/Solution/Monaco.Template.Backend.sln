@@ -67,10 +67,6 @@ EndProject
 #endif
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Domain", "Monaco.Template.Backend.Domain\Monaco.Template.Backend.Domain.csproj", "{6B21DD04-2484-490C-B108-CC01148B9FC4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Application.Infrastructure", "Monaco.Template.Backend.Application.Infrastructure\Monaco.Template.Backend.Application.Infrastructure.csproj", "{71313461-6A79-47B3-AEB9-5668A88935F2}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Application.Infrastructure.Migrations", "Monaco.Template.Backend.Application.Infrastructure.Migrations\Monaco.Template.Backend.Application.Infrastructure.Migrations.csproj", "{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}"
-EndProject
 #if (filesSupport)
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Common.BlobStorage", "Monaco.Template.Backend.Common.BlobStorage\Monaco.Template.Backend.Common.BlobStorage.csproj", "{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}"
 EndProject
@@ -80,7 +76,7 @@ EndProject
 #endif
 #endif
 #if (workerService)
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Service", "Monaco.Template.Backend.Service\Monaco.Template.Backend.Service.csproj", "{BAF0203F-B036-46B3-AC04-E3847315B616}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monaco.Template.Backend.Worker", "Monaco.Template.Backend.Worker\Monaco.Template.Backend.Worker.csproj", "{BAF0203F-B036-46B3-AC04-E3847315B616}"
 EndProject
 #endif
 #if (massTransitIntegration)
@@ -179,14 +175,6 @@ Global
 		{6B21DD04-2484-490C-B108-CC01148B9FC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B21DD04-2484-490C-B108-CC01148B9FC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B21DD04-2484-490C-B108-CC01148B9FC4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{71313461-6A79-47B3-AEB9-5668A88935F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{71313461-6A79-47B3-AEB9-5668A88935F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{71313461-6A79-47B3-AEB9-5668A88935F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{71313461-6A79-47B3-AEB9-5668A88935F2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1B80E15B-FC20-4B57-A3E5-3B6B3EBDA92F}.Release|Any CPU.Build.0 = Release|Any CPU
 		#if (filesSupport)
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{42E51D47-B82F-4A92-B1E5-CD8BE44DE6F0}.Debug|Any CPU.Build.0 = Debug|Any CPU

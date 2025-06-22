@@ -1,0 +1,15 @@
+﻿{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+	"profiles": {
+		"Monaco.Template.Backend.Worker": {
+			"commandName": "Project",
+			"dotnetRunMessages": true,
+			"environmentVariables": {
+				"DOTNET_ENVIRONMENT": "Development"
+			}
+		},
+		"Container (.Net Sdk)": {
+			"commandName": "SdkContainer"
+		}
+	}
+}

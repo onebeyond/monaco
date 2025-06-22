@@ -11,7 +11,7 @@ using Monaco.Template.Backend.Common.Api.MinimalApi;
 
 namespace Monaco.Template.Backend.Api.Endpoints;
 
-public static class Files
+internal static class Files
 {
 	public static IEndpointRouteBuilder AddFiles(this IEndpointRouteBuilder builder, ApiVersionSet versionSet)
 	{
