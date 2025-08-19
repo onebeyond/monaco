@@ -183,7 +183,7 @@ internal class FileService : IFileService
 		var sourceBitmap = SKBitmap.FromImage(image);
 		using var scaledBitmap = sourceBitmap.Resize(new SKImageInfo((int)(image.Width * scale),
 																	 (int)(image.Height * scale)),
-													 new SKSamplingOptions());
+													 SKSamplingOptions.Default);
 		return SKImage.FromBitmap(scaledBitmap);
 	}
 
