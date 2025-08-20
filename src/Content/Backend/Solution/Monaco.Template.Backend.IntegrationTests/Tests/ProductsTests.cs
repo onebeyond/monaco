@@ -13,7 +13,7 @@ using Monaco.Template.Backend.Domain.Model.Entities;
 #if (massTransitIntegration && (apiService || workerService))
 using Monaco.Template.Backend.Messages.V1;
 #endif
-#if (workerService)
+#if (massTransitIntegration || workerService)
 using Monaco.Template.Backend.Worker.Consumers;
 #endif
 using File = System.IO.File;
