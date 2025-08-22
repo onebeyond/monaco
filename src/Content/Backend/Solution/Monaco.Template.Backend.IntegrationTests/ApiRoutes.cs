@@ -1,6 +1,8 @@
 ﻿using Flurl;
 using Monaco.Template.Backend.Application.Features.Company.DTOs;
+#if filesSupport
 using Monaco.Template.Backend.Application.Features.Product.DTOs;
+#endif
 
 namespace Monaco.Template.Backend.IntegrationTests;
 

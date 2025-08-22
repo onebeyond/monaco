@@ -18,11 +18,13 @@ public sealed class DeleteCompany
 			RuleLevelCascadeMode = CascadeMode.Stop;
 
 			this.CheckIfExists<Command, Domain.Model.Entities.Company>(dbContext);
-
+			#if filesSupport
+			
 			RuleFor(x => x)
 				.MustAsync(async (cmd, ct) => await dbContext.Set<Domain.Model.Entities.Product>()
 															 .AllAsync(p => p.CompanyId != cmd.Id, ct))
 				.WithMessage("The Company cannot be deleted while it is still assigned to a Product");
+			#endif
 		}
 	}
 

@@ -63,6 +63,7 @@ public class DeleteCompanyValidatorTests
 						.Contain(ValidatorsExtensions.ExistsRulesetName);
 		validationResult.ShouldHaveValidationErrorFor(x => x.Id);
 	}
+#if filesSupport
 
 	[Theory(DisplayName = "Company assigned to Product generates error")]
 	[AutoDomainData]
@@ -83,4 +84,5 @@ public class DeleteCompanyValidatorTests
 
 		validationResult.ShouldHaveValidationErrorFor(x => x);
 	}
+#endif
 }

@@ -58,7 +58,6 @@ public class CreateProductHandlerTests
 													 .Id
 					  };
 
-		//var sut = new CreateProduct.Handler(_dbContextMock.Object,
 #if (massTransitIntegration)
 		var sut = new CreateProduct.Handler(_dbContextMock.Object, _publishEndpointMock.Object);
 #else

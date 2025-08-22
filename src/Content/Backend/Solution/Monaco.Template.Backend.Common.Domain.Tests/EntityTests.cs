@@ -101,7 +101,7 @@ public class EntityTests
 	[AutoDomainData]
 	public void EntityGetHashCodeSucceeds(Entity sut)
 	{
-		var hashCode = $"{typeof(Entity).FullName}{sut.Id}".GetHashCode();
+		var hashCode = HashCode.Combine(typeof(Entity), sut.Id);
 
 		sut.GetHashCode()
 		   .Should()

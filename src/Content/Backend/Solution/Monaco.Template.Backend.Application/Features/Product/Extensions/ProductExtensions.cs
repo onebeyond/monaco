@@ -5,7 +5,9 @@ using Monaco.Template.Backend.Application.Features.File.Extensions;
 using Monaco.Template.Backend.Application.Features.Product.DTOs;
 using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Domain.Model.Entities;
+#if massTransitIntegration
 using Monaco.Template.Backend.Messages.V1;
+#endif
 using System.Linq.Expressions;
 
 namespace Monaco.Template.Backend.Application.Features.Product.Extensions;
