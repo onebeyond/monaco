@@ -1,13 +1,13 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Primitives;
-using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Application.Features.Company;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Xunit;
+using Monaco.Template.Backend.Application.Features.Company.DTOs;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
 
@@ -19,7 +19,7 @@ public class GetCompanyPageTests
 
 	[Theory(DisplayName = "Get company page without params succeeds")]
 	[AutoDomainData]
-	public async Task GetCompanyPageWithoutParamsSucceeds(List<Domain.Model.Company> companies)
+	public async Task GetCompanyPageWithoutParamsSucceeds(List<Domain.Model.Entities.Company> companies)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(companies);
 
@@ -43,7 +43,7 @@ public class GetCompanyPageTests
 
 	[Theory(DisplayName = "Get company page with params succeeds")]
 	[AutoDomainData]
-	public async Task GetCompanyPageWithParamsSucceeds(List<Domain.Model.Company> companies)
+	public async Task GetCompanyPageWithParamsSucceeds(List<Domain.Model.Entities.Company> companies)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(companies);
 		var companiesSet = companies.GetRange(0, 2);

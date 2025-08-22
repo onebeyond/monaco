@@ -13,8 +13,8 @@ namespace Monaco.Template.Backend.Common.Infrastructure.Context;
 
 public abstract class BaseDbContext : DbContext, IUnitOfWork
 {
-	protected readonly IPublisher Publisher;
-	protected readonly IHostEnvironment Env;
+	protected readonly IPublisher Publisher = null!;
+	protected readonly IHostEnvironment Env = null!;
 
 	protected BaseDbContext()
 	{
@@ -61,7 +61,7 @@ public abstract class BaseDbContext : DbContext, IUnitOfWork
 
 		// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
 		// performed through the DbContext will be committed
-		var result = await base.SaveChangesAsync(cancellationToken);
+		await base.SaveChangesAsync(cancellationToken);
 
 		AuditLog.Audit(entries).Information("Audit Trail");
 
@@ -75,14 +75,15 @@ public abstract class BaseDbContext : DbContext, IUnitOfWork
 	}
 
 	protected virtual List<AuditEntry> GetEntriesForAudit() =>
-		ChangeTracker.Entries()
-					 .Where(x => new[]
-								 {
-									 EntityState.Added,
-									 EntityState.Modified,
-									 EntityState.Deleted
-								 }.Contains(x.State) &&
-								 x.Entity is not INonAuditable)
-					 .Select(x => new AuditEntry(x))
-					 .ToList();
+	[
+		.. ChangeTracker.Entries()
+						.Where(x => new[]
+									{
+										EntityState.Added,
+										EntityState.Modified,
+										EntityState.Deleted
+									}.Contains(x.State) &&
+									x.Entity is not INonAuditable)
+						.Select(x => new AuditEntry(x))
+	];
 }

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Monaco.Template.Backend.IntegrationTests.Factories;
 
-public class WorkerServiceFactory : WebApplicationFactory<Service.Program>
+public class WorkerServiceFactory : WebApplicationFactory<Worker.Program>
 {
 	private readonly AppFixture _fixture;
 

@@ -3,13 +3,14 @@ using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Monaco.Template.Backend.Application.Features.Company;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Model;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Application.Persistence;
+using Monaco.Template.Backend.Domain.Model.ValueObjects;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
@@ -47,7 +48,7 @@ public class EditCompanyValidatorTests
 
 	[Theory(DisplayName = "Existing company passes validation correctly")]
 	[AutoDomainData]
-	public async Task ExistingCompanyPassesValidationCorrectly(Domain.Model.Company company)
+	public async Task ExistingCompanyPassesValidationCorrectly(Domain.Model.Entities.Company company)
 	{
 		var command = Command with { Id = company.Id, CountryId = Guid.NewGuid() };
 
@@ -64,7 +65,7 @@ public class EditCompanyValidatorTests
 
 	[Theory(DisplayName = "Non existing company generates validation error")]
 	[AutoDomainData]
-	public async Task NonExistingCompanyGeneratesError(Domain.Model.Company company, Guid id)
+	public async Task NonExistingCompanyGeneratesError(Domain.Model.Entities.Company company, Guid id)
 	{
 		var command = Command with { Id = id, CountryId = Guid.NewGuid() };
 
@@ -82,7 +83,7 @@ public class EditCompanyValidatorTests
 	[Fact(DisplayName = "Name being valid does not generate validation error")]
 	public async Task NameValidDoesNotGenerateErrorWhen()
 	{
-		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Company>());
+		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Entities.Company>());
 
 		var sut = new EditCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(Command, s => s.IncludeProperties(x => x.Name));
@@ -107,21 +108,21 @@ public class EditCompanyValidatorTests
 	[Fact(DisplayName = "Name with long value generates validation error")]
 	public async Task NameWithLongValueGeneratesError()
 	{
-		var command = Command with { Name = new string(It.IsAny<char>(), Domain.Model.Company.NameLength + 1) };
+		var command = Command with { Name = new string(It.IsAny<char>(), Domain.Model.Entities.Company.NameLength + 1) };
 
 		var sut = new EditCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.Name));
 
 		validationResult.ShouldHaveValidationErrorFor(x => x.Name)
 						.WithErrorCode("MaximumLengthValidator")
-						.WithMessageArgument("MaxLength", Domain.Model.Company.NameLength)
+						.WithMessageArgument("MaxLength", Domain.Model.Entities.Company.NameLength)
 						.Should()
 						.HaveCount(1);
 	}
 
 	[Theory(DisplayName = "Name which already exists generates validation error")]
 	[AutoDomainData]
-	public async Task NameAlreadyExistsGeneratesError(Domain.Model.Company company, Guid id)
+	public async Task NameAlreadyExistsGeneratesError(Domain.Model.Entities.Company company, Guid id)
 	{
 		var command = Command with { Id = id, Name = company.Name };
 
@@ -141,7 +142,7 @@ public class EditCompanyValidatorTests
 	{
 		var command = Command with { Email = "valid@email.com" };
 
-		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Company>());
+		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Entities.Company>());
 
 		var sut = new EditCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.Email));
@@ -186,7 +187,7 @@ public class EditCompanyValidatorTests
 					  {
 						  Email = string.Join("@",
 											  new string(It.IsAny<char>(),
-														 Domain.Model.Company.EmailLength),
+														 Domain.Model.Entities.Company.EmailLength),
 											  emailDomain)
 					  };
 
@@ -195,7 +196,7 @@ public class EditCompanyValidatorTests
 
 		validationResult.ShouldHaveValidationErrorFor(x => x.Email)
 						.WithErrorCode("MaximumLengthValidator")
-						.WithMessageArgument("MaxLength", Domain.Model.Company.EmailLength)
+						.WithMessageArgument("MaxLength", Domain.Model.Entities.Company.EmailLength)
 						.Should()
 						.HaveCount(1);
 	}
@@ -203,14 +204,14 @@ public class EditCompanyValidatorTests
 	[Fact(DisplayName = "Website URL with long value generates validation error")]
 	public async Task WebsiteUrlWithLongValueGeneratesError()
 	{
-		var command = Command with { WebSiteUrl = new string(It.IsAny<char>(), Domain.Model.Company.WebSiteUrlLength + 1) };
+		var command = Command with { WebSiteUrl = new string(It.IsAny<char>(), Domain.Model.Entities.Company.WebSiteUrlLength + 1) };
 
 		var sut = new EditCompany.Validator(_dbContextMock.Object);
 		var validationResult = await sut.TestValidateAsync(command, s => s.IncludeProperties(x => x.WebSiteUrl));
 
 		validationResult.ShouldHaveValidationErrorFor(x => x.WebSiteUrl)
 						.WithErrorCode("MaximumLengthValidator")
-						.WithMessageArgument("MaxLength", Domain.Model.Company.WebSiteUrlLength)
+						.WithMessageArgument("MaxLength", Domain.Model.Entities.Company.WebSiteUrlLength)
 						.Should()
 						.HaveCount(1);
 	}
@@ -332,11 +333,11 @@ public class EditCompanyValidatorTests
 
 	[Theory(DisplayName = "Country being valid does not generate validation error")]
 	[AutoDomainData(true)]
-	public async Task CountryIsValidDoesNotGenerateError(Domain.Model.Country country)
+	public async Task CountryIsValidDoesNotGenerateError(Domain.Model.Entities.Country country)
 	{
 		var command = Command with { CountryId = country.Id };
 
-		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Company>())
+		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Entities.Company>())
 					  .CreateAndSetupDbSetMock([country]);
 
 		var sut = new EditCompany.Validator(_dbContextMock.Object);
@@ -376,11 +377,11 @@ public class EditCompanyValidatorTests
 
 	[Theory(DisplayName = "Country that doesn't exist generates validation error")]
 	[AutoDomainData]
-	public async Task CountryMustExistValidation(Domain.Model.Country country)
+	public async Task CountryMustExistValidation(Domain.Model.Entities.Country country)
 	{
 		var command = Command with { CountryId = Guid.NewGuid() };
 
-		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Company>())
+		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Entities.Company>())
 					  .CreateAndSetupDbSetMock([country]);
 
 		var sut = new EditCompany.Validator(_dbContextMock.Object);

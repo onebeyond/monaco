@@ -10,23 +10,23 @@ public static class MediatorExtension
 	{
 		while (true)
 		{
-			var domainEntities = ctx.ChangeTracker
-									.Entries<Entity>()
+			var aggregateRoots = ctx.ChangeTracker
+									.Entries<AggregateRoot>()
 									.Where(x => x.Entity
 												 .DomainEvents
 												 .Any())
 									.ToList();
 
-			var domainEvents = domainEntities.SelectMany(x => x.Entity.DomainEvents).ToList();
+			var domainEvents = aggregateRoots.SelectMany(x => x.Entity.DomainEvents).ToList();
 
-			domainEntities.ForEach(entity => entity.Entity.ClearDomainEvents());
+			aggregateRoots.ForEach(entity => entity.Entity.ClearDomainEvents());
 
 			foreach (var domainEvent in domainEvents)
 				await publisher.Publish(domainEvent);
 
 			//If event handlers produced more domain events, keep processing them until there's no more
 			if (ctx.ChangeTracker
-				   .Entries<Entity>()
+				   .Entries<AggregateRoot>()
 				   .Any(x => x.Entity
 							  .DomainEvents
 							  .Any()))

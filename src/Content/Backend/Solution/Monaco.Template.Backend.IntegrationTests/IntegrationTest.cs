@@ -7,8 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 #if (workerService)
 using Microsoft.Extensions.Hosting;
 #endif
-using Monaco.Template.Backend.Application.Infrastructure.Context;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Application.Persistence;
 #if (massTransitIntegration)
 using MassTransit.Testing;
 #endif

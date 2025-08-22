@@ -5,14 +5,16 @@ using FluentAssertions;
 using Flurl.Http;
 using Microsoft.EntityFrameworkCore;
 using Monaco.Template.Backend.Api.DTOs;
-using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Common.Domain.Model;
-using Monaco.Template.Backend.Domain.Model;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
-#if (workerService && massTransitIntegration)
+using Monaco.Template.Backend.Application.Features.Product.DTOs;
+using Monaco.Template.Backend.Domain.Model.Entities;
+#if (massTransitIntegration && (apiService || workerService))
 using Monaco.Template.Backend.Messages.V1;
-using Monaco.Template.Backend.Service.Consumers;
+#endif
+#if (massTransitIntegration || workerService)
+using Monaco.Template.Backend.Worker.Consumers;
 #endif
 using File = System.IO.File;
 

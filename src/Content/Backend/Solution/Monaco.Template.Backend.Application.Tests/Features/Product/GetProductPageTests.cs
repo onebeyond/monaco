@@ -1,12 +1,12 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Primitives;
-using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Application.Features.Product;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Application.Features.Product.DTOs;
+using Monaco.Template.Backend.Application.Persistence;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Product;
@@ -19,7 +19,7 @@ public class GetProductPageTests
 
 	[Theory(DisplayName = "Get product page without params succeeds")]
 	[AutoDomainData]
-	public async Task GetProductPageWithoutParamsSucceeds(List<Domain.Model.Product> products)
+	public async Task GetProductPageWithoutParamsSucceeds(List<Domain.Model.Entities.Product> products)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(products);
 		var query = new GetProductPage.Query([]);
@@ -42,7 +42,7 @@ public class GetProductPageTests
 
 	[Theory(DisplayName = "Get product page with params succeeds")]
 	[AutoDomainData(true)]
-	public async Task GetProductPageWithParamsSucceeds(List<Domain.Model.Product> products)
+	public async Task GetProductPageWithParamsSucceeds(List<Domain.Model.Entities.Product> products)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(products);
 		var productsSet = products.GetRange(0, 2);

@@ -7,15 +7,15 @@ using Monaco.Template.Backend.Api.Auth;
 #endif
 using Monaco.Template.Backend.Api.DTOs;
 using Monaco.Template.Backend.Api.DTOs.Extensions;
-using Monaco.Template.Backend.Application.DTOs;
 using Monaco.Template.Backend.Application.Features.Company;
+using Monaco.Template.Backend.Application.Features.Company.DTOs;
 using Monaco.Template.Backend.Common.Api.Application;
 using Monaco.Template.Backend.Common.Api.MinimalApi;
 using Monaco.Template.Backend.Common.Domain.Model;
 
 namespace Monaco.Template.Backend.Api.Endpoints;
 
-public static class Companies
+internal static class Companies
 {
 	public static IEndpointRouteBuilder AddCompanies(this IEndpointRouteBuilder builder, ApiVersionSet versionSet)
 	{

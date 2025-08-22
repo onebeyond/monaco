@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
 #if (filesSupport)
 using Monaco.Template.Backend.Application.Services;
 using Monaco.Template.Backend.Application.Services.Contracts;
@@ -9,6 +8,7 @@ using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Application.Commands.Behaviors;
 using Monaco.Template.Backend.Common.Application.Validators.Contracts;
 using System.Reflection;
+using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Application.ResiliencePipelines;
 using Monaco.Template.Backend.Common.Infrastructure.Context;
 #if (filesSupport)
@@ -41,13 +41,7 @@ public static class ServiceCollectionExtensions
 															 !filter.ValidatorType.IsAbstract,
 										   includeInternalTypes: true)
 				.AddDbContext<AppDbContext>(opts => opts.UseSqlServer(optionsValue.EntityFramework.ConnectionString,
-																	  sqlOptions =>
-																	  {
-																		  sqlOptions.MigrationsAssembly("Monaco.Template.Backend.Application.Infrastructure.Migrations");
-																		  sqlOptions.EnableRetryOnFailure(5,
-																										  TimeSpan.FromSeconds(3),
-																										  null);
-																	  })
+																	  sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(3), null))
 														.UseLazyLoadingProxies()
 														.EnableSensitiveDataLogging(optionsValue.EntityFramework.EnableEfSensitiveLogging))
 				.AddScoped<BaseDbContext, AppDbContext>(provider => provider.GetRequiredService<AppDbContext>());

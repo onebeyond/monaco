@@ -1,8 +1,8 @@
 ﻿using FluentAssertions;
 using Flurl.Http;
 using Microsoft.EntityFrameworkCore;
-using Monaco.Template.Backend.Application.DTOs;
-using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Application.Features.Country.DTOs;
+using Monaco.Template.Backend.Domain.Model.Entities;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 

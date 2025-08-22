@@ -1,7 +1,7 @@
 ﻿using MediatR;
-using Monaco.Template.Backend.Application.DTOs;
-using Monaco.Template.Backend.Application.DTOs.Extensions;
-using Monaco.Template.Backend.Application.Infrastructure.Context;
+using Monaco.Template.Backend.Application.Features.Country.DTOs;
+using Monaco.Template.Backend.Application.Features.Country.Extensions;
+using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Common.Application.Queries;
 using Monaco.Template.Backend.Common.Application.Queries.Extensions;
 
@@ -21,8 +21,8 @@ public sealed class GetCountryById
 		}
 
 		public Task<CountryDto?> Handle(Query request, CancellationToken cancellationToken) =>
-			request.ExecuteQueryAsync<Domain.Model.Country, CountryDto>(_dbContext,
-																		x => x.Map(),
-																		cancellationToken);
+			request.ExecuteQueryAsync<Domain.Model.Entities.Country, CountryDto>(_dbContext,
+																				 x => x.Map(),
+																				 cancellationToken);
 	}
 }

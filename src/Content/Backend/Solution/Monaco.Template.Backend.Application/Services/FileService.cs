@@ -3,10 +3,10 @@ using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Application.DTOs;
 using Monaco.Template.Backend.Common.BlobStorage;
 using Monaco.Template.Backend.Common.BlobStorage.Contracts;
-using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Model.Entities;
 using SkiaSharp;
-using File = Monaco.Template.Backend.Domain.Model.File;
-using Image = Monaco.Template.Backend.Domain.Model.Image;
+using File = Monaco.Template.Backend.Domain.Model.Entities.File;
+using Image = Monaco.Template.Backend.Domain.Model.Entities.Image;
 
 namespace Monaco.Template.Backend.Application.Services;
 
@@ -35,10 +35,10 @@ internal class FileService : IFileService
 
 	public async Task<Document> UploadDocumentAsync(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)
 	{
-		var docId = await _blobStorageService.UploadTempFileAsync(stream,
-																  fileName,
-																  contentType,
-																  cancellationToken);
+		var docId = await _blobStorageService.UploadFileAsync(stream,
+															  fileName,
+															  contentType,
+															  cancellationToken: cancellationToken);
 
 		try
 		{
@@ -50,12 +50,12 @@ internal class FileService : IFileService
 		}
 		catch
 		{
-			await _blobStorageService.DeleteAsync(docId, true, cancellationToken);
+			await _blobStorageService.DeleteAsync(docId, cancellationToken: cancellationToken);
 			throw;
 		}
 	}
 
-	public async Task<Image> UploadImageAsync(Stream stream, string fileName, string contentType, CancellationToken cancellationToken)
+	public async Task<Image> UploadImageAsync(Stream stream, string fileName, string contentType, CancellationToken cancellationToken = default)
 	{
 		using var image = SKImage.FromEncodedData(stream);
 		using var thumb = GetThumbnail(image, ThumbnailWidth, ThumbnailHeight);
@@ -63,70 +63,46 @@ internal class FileService : IFileService
 		await using var thumbStream = data.AsStream();
 		var metadata = GetMetadata(stream);
 		var dateTaken = metadata.Get<ExifDateTime>(ExifTag.DateTimeOriginal)?.Value;
-		var gpsLat = metadata.Get<GPSLatitudeLongitude>(ExifTag.GPSLatitude)?.ToFloat();
-		var gpsLong = metadata.Get<GPSLatitudeLongitude>(ExifTag.GPSLongitude)?.ToFloat();
+		(float latitude, float longitude)? gpsPosition = metadata.Contains(ExifTag.GPSLatitude) && metadata.Contains(ExifTag.GPSLongitude)
+															 ? (metadata.Get<GPSLatitudeLongitude>(ExifTag.GPSLatitude).ToFloat(), metadata.Get<GPSLatitudeLongitude>(ExifTag.GPSLongitude).ToFloat())
+															 : null;
 		stream.Position = 0; // Reset streams position to read from beginning
 		thumbStream.Position = 0;
-		var imageIds = await Task.WhenAll(_blobStorageService.UploadTempFileAsync(stream,
-																				  fileName,
-																				  contentType,
-																				  cancellationToken),
-										  _blobStorageService.UploadTempFileAsync(thumbStream,
-																				  fileName,
-																				  contentType,
-																				  cancellationToken));
+		var imageIds = await Task.WhenAll(_blobStorageService.UploadFileAsync(stream,
+																			  fileName,
+																			  contentType,
+																			  cancellationToken: cancellationToken),
+										  _blobStorageService.UploadFileAsync(thumbStream,
+																			  fileName,
+																			  contentType,
+																			  cancellationToken: cancellationToken));
 		try
 		{
 			return CreateImage(imageIds[0],
-							   imageIds[1],
 							   Path.GetFileNameWithoutExtension(fileName),
 							   Path.GetExtension(fileName),
 							   contentType,
 							   stream.Length,
-							   thumbStream.Length,
 							   (image.Width, image.Height),
-							   (thumb.Width, thumb.Height),
 							   dateTaken,
-							   gpsLat,
-							   gpsLong);
+							   gpsPosition.HasValue
+								   ? (gpsPosition.Value.latitude, gpsPosition.Value.longitude)
+								   : null,
+							   (imageIds[1],
+								thumbStream.Length,
+								(thumb.Width, thumb.Height)));
 		}
 		catch
 		{
-			await Task.WhenAll(_blobStorageService.DeleteAsync(imageIds[0], true, cancellationToken),
-							   _blobStorageService.DeleteAsync(imageIds[1], true, cancellationToken));
+			await Task.WhenAll(_blobStorageService.DeleteAsync(imageIds[0], cancellationToken: cancellationToken),
+							   _blobStorageService.DeleteAsync(imageIds[1], cancellationToken: cancellationToken));
 			throw;
 		}
 	}
 
-	public Task MakePermanentFileAsync(File file, CancellationToken cancellationToken) =>
-		file switch
-		{
-			Image image => MakePermanentImageAsync(image, cancellationToken),
-			Document document => MakePermanentDocumentAsync(document, cancellationToken),
-			_ => throw new NotImplementedException()
-		};
-
-	public Task MakePermanentFilesAsync(File[] files, CancellationToken cancellationToken) =>
-		Task.WhenAll(files.Select(f => MakePermanentFileAsync(f, cancellationToken)));
-
-	public Task MakePermanentImageAsync(Image image, CancellationToken cancellationToken) =>
-		Task.WhenAll(_blobStorageService.MakePermanentAsync(image.Id, cancellationToken),
-					 image.ThumbnailId.HasValue
-						 ? _blobStorageService.MakePermanentAsync(image.ThumbnailId.Value, cancellationToken)
-						 : Task.CompletedTask);
-
-	public Task MakePermanentImagesAsync(Image[] images, CancellationToken cancellationToken) =>
-		Task.WhenAll(images.Select(img => MakePermanentImageAsync(img, cancellationToken)));
-
-	public Task MakePermanentDocumentAsync(Document document, CancellationToken cancellationToken) =>
-		_blobStorageService.MakePermanentAsync(document.Id, cancellationToken);
-
-	public Task MakePermanentDocumentsAsync(Document[] documents, CancellationToken cancellationToken) =>
-		Task.WhenAll(documents.Select(doc => MakePermanentDocumentAsync(doc, cancellationToken)));
-
-	public async Task<FileDownloadDto> DownloadFileAsync(File item, CancellationToken cancellationToken)
+	public async Task<FileDownloadDto> DownloadFileAsync(File item, CancellationToken cancellationToken = default)
 	{
-		var file = await _blobStorageService.DownloadAsync(item.Id, item.IsTemp, cancellationToken);
+		var file = await _blobStorageService.DownloadAsync(item.Id, cancellationToken: cancellationToken);
 
 		return new(file,
 				   $"{item.Name}{item.Extension}",
@@ -142,12 +118,12 @@ internal class FileService : IFileService
 		};
 
 	public Task DeleteDocumentAsync(Document file, CancellationToken cancellationToken) =>
-		_blobStorageService.DeleteAsync(file.Id, file.IsTemp, cancellationToken);
+		_blobStorageService.DeleteAsync(file.Id, cancellationToken: cancellationToken);
 
 	public Task DeleteImageAsync(Image image, CancellationToken cancellationToken) =>
-		Task.WhenAll(_blobStorageService.DeleteAsync(image.Id, image.IsTemp, cancellationToken),
+		Task.WhenAll(_blobStorageService.DeleteAsync(image.Id, cancellationToken: cancellationToken),
 					 image.ThumbnailId.HasValue
-						 ? _blobStorageService.DeleteAsync(image.ThumbnailId.Value, image.IsTemp, cancellationToken)
+						 ? _blobStorageService.DeleteAsync(image.ThumbnailId.Value, cancellationToken: cancellationToken)
 						 : Task.CompletedTask);
 
 	public Task DeleteDocumentsAsync(Document[] documents, CancellationToken cancellationToken) =>
@@ -161,30 +137,27 @@ internal class FileService : IFileService
 
 	public async Task<File> CopyFileAsync(File file, CancellationToken cancellationToken)
 	{
-		var copyId = await _blobStorageService.CopyAsync(file.Id, file.IsTemp, cancellationToken);
+		var copyId = await _blobStorageService.CopyAsync(file.Id, cancellationToken: cancellationToken);
 
 		return file switch
 			   {
 				   Image image => CreateImage(copyId,
-											  image.ThumbnailId.HasValue
-												  ? await _blobStorageService.CopyAsync(image.ThumbnailId.Value,
-																						image.IsTemp,
-																						cancellationToken)
-												  : null,
 											  image.Name,
 											  image.Extension,
 											  image.ContentType,
 											  image.Size,
-											  image.Thumbnail?.Size,
 											  (image.Dimensions.Width,
 											   image.Dimensions.Height),
-											  image.ThumbnailId.HasValue
-												  ? (image.Thumbnail!.Dimensions.Width,
-													 image.Thumbnail.Dimensions.Height)
-												  : null,
 											  image.DateTaken,
-											  image.Position?.Latitude,
-											  image.Position?.Longitude),
+											  image.Position is not null
+												  ? (image.Position.Latitude,
+													 image.Position.Longitude)
+												  : null,
+											  (await _blobStorageService.CopyAsync(image.Thumbnail!.Id,
+																				   cancellationToken: cancellationToken),
+											   image.Thumbnail.Size,
+											   (image.Thumbnail.Dimensions.Width,
+												image.Thumbnail.Dimensions.Height))),
 				   _ => CreateDocument(copyId,
 									   file.Name,
 									   file.Extension,
@@ -210,46 +183,33 @@ internal class FileService : IFileService
 		var sourceBitmap = SKBitmap.FromImage(image);
 		using var scaledBitmap = sourceBitmap.Resize(new SKImageInfo((int)(image.Width * scale),
 																	 (int)(image.Height * scale)),
-													 SKFilterQuality.Medium);
+													 SKSamplingOptions.Default);
 		return SKImage.FromBitmap(scaledBitmap);
 	}
 
-	private static Image CreateImage(Guid imageId,
-									 Guid? thumbnailId,
+	private static Image CreateImage(Guid id,
 									 string name,
 									 string extension,
 									 string contentType,
-									 long imageSize,
-									 long? thumbSize,
-									 (int Height, int Width) imageDimensions,
-									 (int Height, int Width)? thumbDimensions,
+									 long size,
+									 (int Height, int Width) dimensions,
 									 DateTime? dateTaken,
-									 float? gpsLatitude,
-									 float? gpsLongitude) =>
-		new(imageId,
+									 (float latitude, float longitude)? gpsPosition,
+									 (Guid id,
+									  long size,
+									  (int height, int width) dimensions) thumbnail) =>
+		new(id,
 			name,
 			extension,
-			imageSize,
+			size,
 			contentType,
 			true,
-			imageDimensions.Height,
-			imageDimensions.Width,
+			dimensions,
 			dateTaken,
-			gpsLatitude,
-			gpsLongitude,
-			thumbnailId.HasValue
-				? new Image(thumbnailId.Value,
-							name,
-							extension,
-							thumbSize!.Value,
-							contentType,
-							true,
-							thumbDimensions!.Value.Height,
-							thumbDimensions!.Value.Width,
-							dateTaken,
-							gpsLatitude,
-							gpsLongitude)
-				: null);
+			gpsPosition,
+			(thumbnail.id,
+			 thumbnail.size,
+			 thumbnail.dimensions));
 
 	private static Document CreateDocument(Guid id,
 										   string name,
