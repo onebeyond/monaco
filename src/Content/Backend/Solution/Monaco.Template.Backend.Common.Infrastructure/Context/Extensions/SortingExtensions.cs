@@ -9,7 +9,7 @@ public static class SortingExtensions
 											 string defaultSortField,
 											 Dictionary<string, Expression<Func<T, object>>> sortMap)
 	{
-		ArgumentException.ThrowIfNullOrEmpty(nameof(defaultSortField));
+		ArgumentException.ThrowIfNullOrEmpty(defaultSortField, nameof(defaultSortField));
 
 		var (sortMapLower, lstSort) = GetData(sortFields, defaultSortField, sortMap);
 
@@ -24,7 +24,7 @@ public static class SortingExtensions
 											  string defaultSortField,
 											  Dictionary<string, Expression<Func<T, object>>> sortMap)
 	{
-		ArgumentException.ThrowIfNullOrEmpty(nameof(defaultSortField));
+		ArgumentException.ThrowIfNullOrEmpty(defaultSortField, nameof(defaultSortField));
 
 		var (sortMapLower, lstSort) = GetData(sortFields, defaultSortField, sortMap);
 
