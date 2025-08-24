@@ -14,7 +14,7 @@ public class AuditEventTelemetryConverter : TelemetryConverterBase
 
 	public override IEnumerable<ITelemetry> Convert(LogEvent logEvent, IFormatProvider formatProvider)
 	{
-		ArgumentNullException.ThrowIfNull(logEvent);
+		ArgumentNullException.ThrowIfNull(logEvent, nameof(logEvent));
 
 		//For complying with S4456:
 		return GetTelemetries(logEvent, formatProvider);

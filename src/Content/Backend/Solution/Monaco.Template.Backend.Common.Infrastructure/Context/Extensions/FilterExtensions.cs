@@ -22,8 +22,6 @@ public static class FilterExtensions
 											   bool defaultCondition = true,
 											   bool allConditions = true)
 	{
-		ArgumentNullException.ThrowIfNull(nameof(source));
-
 		var (filterMapLower, filterList, predicate) = GetData(queryString, filterMap, defaultCondition);
 
 		foreach (var (key, values) in filterList) //and while looping through the list of valid ones to use
@@ -55,8 +53,6 @@ public static class FilterExtensions
 												bool defaultCondition = true,
 												bool allConditions = true)
 	{
-		ArgumentNullException.ThrowIfNull(nameof(source));
-
 		var (filterMapLower, filterList, predicate) = GetData(queryString, filterMap, defaultCondition);
 
 		foreach (var (key, values) in filterList) // and while looping through the list of valid ones to use
