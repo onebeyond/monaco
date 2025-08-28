@@ -36,6 +36,7 @@
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <!--#if (massTransitIntegration)-->
     <PackageReference Include="MassTransit" />
+    <PackageReference Include="MassTransit.EntityFrameworkCore" />
     <!--#endif-->
 	<!--#if (filesSupport)-->
     <PackageReference Include="SkiaSharp" />

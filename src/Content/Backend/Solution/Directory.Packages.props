@@ -55,6 +55,7 @@
     <!--#if (massTransitIntegration)-->
     <PackageVersion Include="MassTransit" Version="8.5.2" />
     <PackageVersion Include="MassTransit.Azure.ServiceBus.Core" Version="8.5.2" />
+    <PackageVersion Include="MassTransit.EntityFrameworkCore" Version="8.5.2" />
     <PackageVersion Include="MassTransit.RabbitMQ" Version="8.5.2" />
     <!--#if (tests)-->
     <PackageVersion Include="Testcontainers.RabbitMq" Version="4.6.0" />

@@ -71,6 +71,16 @@ builder.Services
 #if (massTransitIntegration)
 	   .AddMassTransit(cfg =>
 					   {
+						   cfg.AddEntityFrameworkOutbox<AppDbContext>(o =>
+																	  {
+																		  o.QueryDelay = TimeSpan.FromSeconds(1);
+
+																		  o.UseSqlServer();
+																		  o.UseBusOutbox();
+																		  // Disable it in API so only the Worker takes care of this.
+																		  o.DisableInboxCleanupService();
+																	  });
+						   
 						   var rabbitMqConfig = configuration.GetSection("MessageBus:RabbitMQ");
 						   if (rabbitMqConfig.Exists())
 							   cfg.UsingRabbitMq((_, busCfg) => busCfg.Host(rabbitMqConfig["Host"],
