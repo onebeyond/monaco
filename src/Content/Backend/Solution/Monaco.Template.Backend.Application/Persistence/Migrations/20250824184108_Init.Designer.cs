@@ -12,7 +12,7 @@ using Monaco.Template.Backend.Application.Persistence;
 namespace Monaco.Template.Backend.Application.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250524100737_Init")]
+    [Migration("20250824184108_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace Monaco.Template.Backend.Application.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "9.0.8")
                 .HasAnnotation("Proxies:ChangeTracking", false)
                 .HasAnnotation("Proxies:CheckEquality", false)
                 .HasAnnotation("Proxies:LazyLoading", true)
@@ -1177,7 +1177,7 @@ namespace Monaco.Template.Backend.Application.Persistence.Migrations
 
             modelBuilder.Entity("Monaco.Template.Backend.Domain.Model.Entities.Company", b =>
                 {
-                    b.OwnsOne("Monaco.Template.Backend.Domain.Model.Address", "Address", b1 =>
+                    b.OwnsOne("Monaco.Template.Backend.Domain.Model.ValueObjects.Address", "Address", b1 =>
                         {
                             b1.Property<Guid>("CompanyId")
                                 .HasColumnType("uniqueidentifier");
@@ -1262,7 +1262,7 @@ namespace Monaco.Template.Backend.Application.Persistence.Migrations
                         .WithOne()
                         .HasForeignKey("Monaco.Template.Backend.Domain.Model.Entities.Image", "ThumbnailId");
 
-                    b.OwnsOne("Monaco.Template.Backend.Domain.Model.GpsPosition", "Position", b1 =>
+                    b.OwnsOne("Monaco.Template.Backend.Domain.Model.ValueObjects.GpsPosition", "Position", b1 =>
                         {
                             b1.Property<Guid>("ImageId")
                                 .HasColumnType("uniqueidentifier");
@@ -1281,7 +1281,7 @@ namespace Monaco.Template.Backend.Application.Persistence.Migrations
                                 .HasForeignKey("ImageId");
                         });
 
-                    b.OwnsOne("Monaco.Template.Backend.Domain.Model.ImageDimensions", "Dimensions", b1 =>
+                    b.OwnsOne("Monaco.Template.Backend.Domain.Model.ValueObjects.ImageDimensions", "Dimensions", b1 =>
                         {
                             b1.Property<Guid>("ImageId")
                                 .HasColumnType("uniqueidentifier");
