@@ -1,4 +1,7 @@
 ﻿using System.Reflection;
+#if massTransitIntegration
+using MassTransit;
+#endif
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -17,6 +20,15 @@ public class AppDbContext : BaseDbContext
 						IHostEnvironment env) : base(options, publisher, env)
 	{
 	}
+#if massTransitIntegration
+
+	protected override void OnModelCreating(ModelBuilder modelBuilder)
+	{
+		base.OnModelCreating(modelBuilder);
+		
+		modelBuilder.AddTransactionalOutboxEntities();
+	}
+#endif
 
 	protected override Assembly GetConfigurationsAssembly() =>
 		Assembly.GetAssembly(typeof(AppDbContext))!;

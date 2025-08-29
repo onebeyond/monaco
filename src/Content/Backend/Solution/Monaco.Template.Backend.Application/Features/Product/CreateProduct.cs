@@ -94,12 +94,12 @@ public sealed class CreateProduct
 														 pictures.Single(x => x.Id == request.DefaultPictureId));
 
 			_dbContext.Set<Domain.Model.Entities.Product>().Attach(item);
-			await _dbContext.SaveEntitiesAsync(cancellationToken);
 #if (massTransitIntegration)
 
-			//NOTE: It is strongly recommended to implement MT's Transactional Outbox for ensuring transaction of DB and message publishing
 			await _publishEndpoint.Publish(item.MapMessage(), cancellationToken);
 #endif
+			
+			await _dbContext.SaveEntitiesAsync(cancellationToken);
 
 			return CommandResult<Guid>.Success(item.Id);
 		}

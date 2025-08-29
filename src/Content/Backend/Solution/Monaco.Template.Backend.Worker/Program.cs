@@ -1,5 +1,6 @@
 #if (massTransitIntegration)
 using MassTransit;
+using Monaco.Template.Backend.Application.Persistence;
 #endif
 using Monaco.Template.Backend.Application.DependencyInjection;
 using Monaco.Template.Backend.Worker;
@@ -23,6 +24,12 @@ builder.Logging
 #if (massTransitIntegration)
 	   .AddMassTransit(cfg =>
 					   {
+						   cfg.AddEntityFrameworkOutbox<AppDbContext>(o =>
+																	  {
+																		  o.UseSqlServer();
+																		  o.DuplicateDetectionWindow = TimeSpan.FromSeconds(30);
+																	  });
+						   
 						   cfg.AddConsumersFromNamespaceContaining<Worker>();
 						   cfg.AddActivitiesFromNamespaceContaining<Worker>();
 						   
@@ -46,6 +53,8 @@ builder.Logging
 															busCfg.Host(configuration["MessageBus:ASBConnectionString"]);
 															busCfg.ConfigureEndpoints(ctx, new DefaultEndpointNameFormatter(true));
 														});
+						   
+						   cfg.AddConfigureEndpointsCallback((context, _, config) => config.UseEntityFrameworkOutbox<AppDbContext>(context));
 					   })
 #endif
 	   .AddHostedService<Worker>();
