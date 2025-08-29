@@ -15,10 +15,10 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.x
-    - name: Setup Mono
-      uses: gabrielweyer/setup-mono@v1
-      with:
-        mono-version: latest
+    - name: Install Mono
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y mono-complete
     - name: Setup NuGet CLI
       uses: nuget/setup-nuget@v2
       with:
