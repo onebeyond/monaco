@@ -11,11 +11,11 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v5.0.0
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4
+    - name: Setup Nuget
+      uses: nuget/setup-nuget@v2
       with:
-        dotnet-version: 9.x
+        nuget-api-key: ${{secrets.nuget_api_key}}
     - name: Create package
       run: nuget pack src/Monaco.Template.nuspec -OutputDirectory .
     - name: Push to NuGet
-      run: dotnet nuget push "Monaco.Template.*.nupkg" --api-key ${{secrets.nuget_api_key}} --source https://api.nuget.org/v3/index.json
+      run: nuget push "Monaco.Template.*.nupkg"
