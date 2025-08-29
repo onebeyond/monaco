@@ -10,12 +10,16 @@ jobs:
     timeout-minutes: 5
     steps:
     - name: Checkout
-      uses: actions/checkout@v5.0.0
-    - name: Setup Nuget
+      uses: actions/checkout@v4
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.x
+    - name: Setup NuGet CLI
       uses: nuget/setup-nuget@v2
       with:
-        nuget-api-key: ${{secrets.nuget_api_key}}
+        nuget-version: 'latest'
     - name: Create package
       run: nuget pack src/Monaco.Template.nuspec -OutputDirectory .
     - name: Push to NuGet
-      run: nuget push "Monaco.Template.*.nupkg"
+      run: dotnet nuget push "Monaco.Template.*.nupkg" --api-key ${{secrets.nuget_api_key}} --source https://api.nuget.org/v3/index.json
