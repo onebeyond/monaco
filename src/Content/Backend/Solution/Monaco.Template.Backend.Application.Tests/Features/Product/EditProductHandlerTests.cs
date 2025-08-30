@@ -1,13 +1,13 @@
 ﻿using AutoFixture;
-using FluentAssertions;
+using AwesomeAssertions;
 using Monaco.Template.Backend.Application.Features.Product;
 using Monaco.Template.Backend.Application.Persistence;
+using Monaco.Template.Backend.Common.Application.Commands;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Model.Entities;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
-using Monaco.Template.Backend.Common.Application.Commands;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Product;

@@ -1,7 +1,7 @@
 ﻿using AutoFixture.Xunit2;
 using Azure.Storage.Blobs;
 using Dasync.Collections;
-using FluentAssertions;
+using AwesomeAssertions;
 using Flurl.Http;
 using Microsoft.EntityFrameworkCore;
 using Monaco.Template.Backend.Api.DTOs;

@@ -1,10 +1,10 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using Monaco.Template.Backend.Application.Features.Product;
+using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
-using Monaco.Template.Backend.Application.Persistence;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Product;
@@ -24,7 +24,7 @@ public class GetProductByIdTests
 		var query = new GetProductById.Query(product.Id);
 
 		var sut = new GetProductById.Handler(_dbContextMock.Object);
-		var result = await sut.Handle(query, new CancellationToken());
+		var result = await sut.Handle(query, CancellationToken.None);
 
 		result.Should()
 			  .NotBeNull();
@@ -41,7 +41,7 @@ public class GetProductByIdTests
 		var query = new GetProductById.Query(Guid.NewGuid());
 
 		var sut = new GetProductById.Handler(_dbContextMock.Object);
-		var result = await sut.Handle(query, new CancellationToken());
+		var result = await sut.Handle(query, CancellationToken.None);
 
 		result.Should()
 			  .BeNull();

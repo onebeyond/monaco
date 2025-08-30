@@ -1,8 +1,8 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Monaco.Template.Backend.Domain.Tests.Factories.Entities;
-using System.Diagnostics.CodeAnalysis;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
 using Xunit;
 using File = Monaco.Template.Backend.Domain.Model.Entities.File;
 
@@ -178,7 +178,7 @@ public class FileTests
 		var sut = () => FileFactory.CreateMock((id,
 												name,
 												extension,
-												default,
+												0,
 												contentType,
 												isTemp,
 												uploadedOn));
