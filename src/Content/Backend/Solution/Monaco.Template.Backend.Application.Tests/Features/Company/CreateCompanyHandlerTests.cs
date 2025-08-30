@@ -1,11 +1,11 @@
 ﻿using AutoFixture;
-using FluentAssertions;
+using AwesomeAssertions;
 using Monaco.Template.Backend.Application.Features.Company;
+using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
-using Monaco.Template.Backend.Application.Persistence;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
@@ -38,7 +38,7 @@ public class CreateCompanyHandlerTests
 					  .CreateAndSetupDbSetMock([country]);
 
 		var sut = new CreateCompany.Handler(_dbContextMock.Object);
-		var result = await sut.Handle(Command, new CancellationToken());
+		var result = await sut.Handle(Command, CancellationToken.None);
 
 		companyDbSetMock.Verify(x => x.Attach(It.IsAny<Domain.Model.Entities.Company>()), Times.Once);
 		_dbContextMock.Verify(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()), Times.Once);

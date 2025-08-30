@@ -1,5 +1,5 @@
-﻿using ExifLibrary;
-using FluentAssertions;
+﻿using AwesomeAssertions;
+using ExifLibrary;
 using Monaco.Template.Backend.Application.Services;
 using Monaco.Template.Backend.Common.BlobStorage;
 using Monaco.Template.Backend.Common.BlobStorage.Contracts;
@@ -338,10 +338,10 @@ public class FileServiceTests
 
 		result.Width
 			  .Should()
-			  .BeLessOrEqualTo(120);
+			  .BeLessThanOrEqualTo(120);
 		result.Height
 			  .Should()
-			  .BeLessOrEqualTo(120);
+			  .BeLessThanOrEqualTo(120);
 	}
 
 	[Fact(DisplayName = "Get Thumbnail bigger than original keeps same size")]
@@ -359,7 +359,7 @@ public class FileServiceTests
 			  .Be(width);
 		result.Height
 			  .Should()
-			  .BeLessOrEqualTo(height);
+			  .BeLessThanOrEqualTo(height);
 	}
 }
 

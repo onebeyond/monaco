@@ -1,13 +1,13 @@
 ﻿using AutoFixture;
-using FluentAssertions;
+using AwesomeAssertions;
 using Monaco.Template.Backend.Application.Features.File;
+using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Model.Entities;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
-using Monaco.Template.Backend.Application.Persistence;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.File;
@@ -40,7 +40,7 @@ public class CreateFileHandlerTests
 						.ReturnsAsync(file);
 		
 		var sut = new CreateFile.Handler(_dbContextMock.Object, _fileServiceMock.Object);
-		var result = await sut.Handle(Command, new CancellationToken());
+		var result = await sut.Handle(Command, CancellationToken.None);
 
 		_fileServiceMock.Verify(x => x.UploadAsync(It.IsAny<Stream>(),
 												   It.IsAny<string>(),

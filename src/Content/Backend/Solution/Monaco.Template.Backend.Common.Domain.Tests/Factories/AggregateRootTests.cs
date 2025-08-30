@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using Monaco.Template.Backend.Common.Domain.Model;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;

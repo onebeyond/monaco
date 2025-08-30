@@ -1,12 +1,12 @@
 ﻿using AutoFixture;
-using FluentAssertions;
+using AwesomeAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Monaco.Template.Backend.Application.Features.File;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
+using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.File;

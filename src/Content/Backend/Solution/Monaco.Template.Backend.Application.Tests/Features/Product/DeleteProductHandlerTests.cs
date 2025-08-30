@@ -1,5 +1,5 @@
 ﻿using AutoFixture;
-using FluentAssertions;
+using AwesomeAssertions;
 using Monaco.Template.Backend.Application.Features.Product;
 using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Common.Application.Commands;

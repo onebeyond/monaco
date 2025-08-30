@@ -16,7 +16,7 @@
   <!--#endif-->
   <ItemGroup>
     <PackageReference Include="AutoFixture.Xunit2" />
-    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="AwesomeAssertions" />
     <PackageReference Include="Flurl.Http" />
 	<!--#if (auth)-->
     <PackageReference Include="Keycloak.Net.Core" />
