@@ -7,6 +7,7 @@ using Monaco.Template.Backend.Common.Infrastructure.Context.AuditTrail;
 using Monaco.Template.Backend.Common.Infrastructure.Context.Contracts;
 using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 using Monaco.Template.Backend.Common.Infrastructure.EntityConfigurations;
+using Serilog;
 using System.Reflection;
 
 namespace Monaco.Template.Backend.Common.Infrastructure.Context;
@@ -15,15 +16,17 @@ public abstract class BaseDbContext : DbContext, IUnitOfWork
 {
 	protected readonly IPublisher Publisher = null!;
 	protected readonly IHostEnvironment Env = null!;
+	protected readonly ILogger AuditLogger = null!;
 
 	protected BaseDbContext()
 	{
 	}
 
-	protected BaseDbContext(DbContextOptions options, IPublisher publisher, IHostEnvironment env) : base(options)
+	protected BaseDbContext(DbContextOptions options, IPublisher publisher, IHostEnvironment env, ILogger auditLogger) : base(options)
 	{
 		Publisher = publisher;
 		Env = env;
+		AuditLogger = auditLogger;
 	}
 
 	protected abstract Assembly GetConfigurationsAssembly();
@@ -62,8 +65,8 @@ public abstract class BaseDbContext : DbContext, IUnitOfWork
 		// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
 		// performed through the DbContext will be committed
 		await base.SaveChangesAsync(cancellationToken);
-
-		AuditLog.Audit(entries).Information("Audit Trail");
+		
+		AuditLogger.Audit(entries);
 
 		return true;
 	}

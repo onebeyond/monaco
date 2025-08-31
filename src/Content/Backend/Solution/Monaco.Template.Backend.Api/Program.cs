@@ -10,33 +10,25 @@ using Monaco.Template.Backend.Common.Api.Auth;
 using Monaco.Template.Backend.Common.Api.Cors;
 using Monaco.Template.Backend.Common.Api.Middleware.Extensions;
 using Monaco.Template.Backend.Common.Api.Swagger;
-using Monaco.Template.Backend.Common.Serilog;
-using Monaco.Template.Backend.Common.Serilog.ApplicationInsights.TelemetryConverters;
 using Monaco.Template.Backend.Api.Endpoints.Extensions;
 using Monaco.Template.Backend.Application.Persistence;
 using Serilog;
+using Serilog.Settings.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
-builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration)
-												   .WriteTo.Logger(l => l.WriteTo.Conditional(_ => context.HostingEnvironment.IsDevelopment(), // Only for dev
-																							  cfg => cfg.Debug()
-																										.WriteTo.File("logs/log.txt",
-																													  rollingInterval: RollingInterval.Day,
-																													  outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"))
-																		 .WriteTo.Console()
-																		 .WriteTo.ApplicationInsights(context.Configuration["ApplicationInsights:InstrumentationKey"],
-																									  new OperationTelemetryConverter())
-																		 .Filter.ByExcluding(x => x.Properties.ContainsKey("AuditEntries")))
-												   .WriteTo.Logger(l => l.WriteTo.ApplicationInsights(context.Configuration["ApplicationInsights:InstrumentationKey"],
-																									  new AuditEventTelemetryConverter())
-																		 .Filter.ByIncludingOnly(x => x.Properties.ContainsKey("AuditEntries")))
-												   .Enrich.WithOperationId()
-												   .Enrich.FromLogContext());
+builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration));
 
 // Add services to the container.
 var configuration = builder.Configuration;
+
+var auditLogger = new LoggerConfiguration().ReadFrom
+										   .Configuration(configuration,
+														  new ConfigurationReaderOptions { SectionName = "AuditLog" })
+										   .CreateLogger();
+builder.Services.AddSingleton<Serilog.ILogger>(auditLogger);
 #if (auth)
+
 builder.Services
 	   .AddAuthorizationWithPolicies(Scopes.List)
 	   .AddJwtBearerAuthentication(configuration["SSO:Authority"]!,
@@ -129,6 +121,9 @@ app.UseCors()
 app.MapHealthChecks("/health", new HealthCheckOptions { Predicate = _ => true });
 
 app.Run();
+
+Log.CloseAndFlush();
+auditLogger.Dispose();
 
 namespace Monaco.Template.Backend.Api
 {

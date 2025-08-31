@@ -15,32 +15,34 @@ public record AuditEntry
 		Action = _entityEntry.State.ToString();
 		_propertiesValues = _entityEntry.Properties
 										.Where(p => _entityEntry.State == EntityState.Modified && p.CurrentValue != p.OriginalValue ||
-												    _entityEntry.State != EntityState.Modified)
+													_entityEntry.State != EntityState.Modified)
 										.ToDictionary(p => p.Metadata.Name,
 													  p => new PropertyValues(_entityEntry.State switch
-																		      {
-																			      EntityState.Added => p.CurrentValue,
-																			      EntityState.Deleted => null,
-																			      EntityState.Modified => p.CurrentValue,
-																			      _ => null
-																		      },
-																		      _entityEntry.State switch
-																		      {
-																			      EntityState.Added => null,
-																			      EntityState.Deleted => p.OriginalValue,
-																			      EntityState.Modified => p.OriginalValue,
-																			      _ => null
-																		      }));
+																			  {
+																				  EntityState.Added => p.CurrentValue,
+																				  EntityState.Deleted => null,
+																				  EntityState.Modified => p.CurrentValue,
+																				  _ => null
+																			  },
+																			  _entityEntry.State switch
+																			  {
+																				  EntityState.Added => null,
+																				  EntityState.Deleted => p.OriginalValue,
+																				  EntityState.Modified => p.OriginalValue,
+																				  _ => null
+																			  }));
 	}
 
 	public string Name { get; }
 	public string Action { get; }
-	public IReadOnlyDictionary<string, object?> Keys => _entityEntry.Metadata
-																	.FindPrimaryKey()?
-																	.Properties
-																	.ToDictionary(p => p.Name,
-																				  p => _entityEntry.Property(p.Name).CurrentValue) ??
-														new Dictionary<string, object?>();
+
+	public IReadOnlyDictionary<string, object?> Keys =>
+		_entityEntry.Metadata
+					.FindPrimaryKey()?
+					.Properties
+					.ToDictionary(p => p.Name,
+								  p => _entityEntry.Property(p.Name).CurrentValue) ??
+		[];
 
 	private readonly Dictionary<string, PropertyValues> _propertiesValues;
 	public IReadOnlyDictionary<string, PropertyValues> PropertiesValues => _propertiesValues;

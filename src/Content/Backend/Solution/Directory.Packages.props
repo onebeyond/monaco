@@ -32,6 +32,7 @@
     <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageVersion Include="Serilog.Sinks.Debug" Version="3.0.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Seq" Version="9.0.0" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.4" />
     <PackageVersion Include="Throw" Version="1.4.0" />
     <!--#if (apiGateway)-->
@@ -39,7 +40,7 @@
     <!--#endif-->
     <!--#if (auth)-->
     <PackageVersion Include="Keycloak.Net.Core" Version="1.0.34" />
-    <PackageVersion Include="Testcontainers.Keycloak" Version="4.6.0" />
+    <PackageVersion Include="Testcontainers.Keycloak" Version="4.7.0" />
     <!--#endif-->
     <!--#if (filesSupport)-->
     <PackageVersion Include="AsyncEnumerator" Version="4.0.2" />
@@ -49,7 +50,7 @@
     <PackageVersion Include="SkiaSharp" Version="3.119.0" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.0" />
     <!--#if (tests)-->
-    <PackageVersion Include="Testcontainers.Azurite" Version="4.6.0" />
+    <PackageVersion Include="Testcontainers.Azurite" Version="4.7.0" />
     <!--#endif-->
     <!--#endif-->
     <!--#if (massTransitIntegration)-->
@@ -58,7 +59,7 @@
     <PackageVersion Include="MassTransit.EntityFrameworkCore" Version="8.5.2" />
     <PackageVersion Include="MassTransit.RabbitMQ" Version="8.5.2" />
     <!--#if (tests)-->
-    <PackageVersion Include="Testcontainers.RabbitMq" Version="4.6.0" />
+    <PackageVersion Include="Testcontainers.RabbitMq" Version="4.7.0" />
     <!--#endif-->
     <!--#endif-->
     <!--#if (tests)-->
@@ -69,8 +70,8 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="MockQueryable.Moq" Version="7.0.4-beta" />
     <PackageVersion Include="Moq" Version="4.20.72" />
-    <PackageVersion Include="Testcontainers" Version="4.6.0" />
-    <PackageVersion Include="Testcontainers.MsSql" Version="4.6.0" />
+    <PackageVersion Include="Testcontainers" Version="4.7.0" />
+    <PackageVersion Include="Testcontainers.MsSql" Version="4.7.0" />
     <PackageVersion Include="TngTech.ArchUnitNET.xUnit" Version="0.12.1" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.4" />

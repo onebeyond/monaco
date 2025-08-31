@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace Monaco.Template.Backend.Application.Features.Product;
 
@@ -13,10 +13,17 @@ public sealed class LongRunningProcess
 
 	internal sealed class Handler : IRequestHandler<Command>
 	{
+		private readonly ILogger<LongRunningProcess> _logger;
+
+		public Handler(ILogger<LongRunningProcess> logger)
+		{
+			_logger = logger;
+		}
+
 		public Task Handle(Command request, CancellationToken cancellationToken)
 		{
 			//Do some long-running process here
-			Log.Information("Long running process for product created: {@Product}", request);
+			_logger.LogInformation("Long running process for product created: {@Product}", request);
 			
 			return Task.CompletedTask;
 		}
