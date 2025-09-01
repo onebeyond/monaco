@@ -1,13 +1,13 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using Microsoft.Extensions.Primitives;
 using Monaco.Template.Backend.Application.Features.Country;
+using Monaco.Template.Backend.Application.Features.Country.DTOs;
+using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
-using Monaco.Template.Backend.Application.Persistence;
 using Xunit;
-using Monaco.Template.Backend.Application.Features.Country.DTOs;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Country;
 
@@ -26,7 +26,7 @@ public class GetCountryListTests
 		var query = new GetCountryList.Query(new List<KeyValuePair<string, StringValues>>());
 
 		var sut = new GetCountryList.Handler(_dbContextMock.Object);
-		var result = await sut.Handle(query, new CancellationToken());
+		var result = await sut.Handle(query, CancellationToken.None);
 
 		result.Should()
 			  .HaveCount(countries.Count).And
@@ -52,7 +52,7 @@ public class GetCountryListTests
 
 		var sut = new GetCountryList.Handler(_dbContextMock.Object);
 
-		var result = await sut.Handle(query, new CancellationToken());
+		var result = await sut.Handle(query, CancellationToken.None);
 
 		result.Should()
 			  .HaveCount(countriesSet.Count).And

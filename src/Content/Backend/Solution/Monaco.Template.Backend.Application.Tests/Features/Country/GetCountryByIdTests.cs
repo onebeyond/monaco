@@ -1,10 +1,10 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using Monaco.Template.Backend.Application.Features.Country;
+using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
-using Monaco.Template.Backend.Application.Persistence;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Country;
@@ -25,7 +25,7 @@ public class GetCountryByIdTests
 		var query = new GetCountryById.Query(country.Id);
 
 		var sut = new GetCountryById.Handler(_dbContextMock.Object);
-		var result = await sut.Handle(query, new CancellationToken());
+		var result = await sut.Handle(query, CancellationToken.None);
 
 		result.Should()
 			  .NotBeNull();
@@ -41,7 +41,7 @@ public class GetCountryByIdTests
 		var query = new GetCountryById.Query(Guid.NewGuid());
 
 		var sut = new GetCountryById.Handler(_dbContextMock.Object);
-		var result = await sut.Handle(query, new CancellationToken());
+		var result = await sut.Handle(query, CancellationToken.None);
 
 		result.Should()
 			  .BeNull();

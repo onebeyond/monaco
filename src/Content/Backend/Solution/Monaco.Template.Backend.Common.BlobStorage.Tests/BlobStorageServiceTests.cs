@@ -1,5 +1,5 @@
 ﻿using Azure.Storage.Blobs;
-using FluentAssertions;
+using AwesomeAssertions;
 using Moq;
 using Xunit;
 using System.Diagnostics.CodeAnalysis;

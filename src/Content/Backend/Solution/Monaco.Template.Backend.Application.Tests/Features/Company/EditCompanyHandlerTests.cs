@@ -1,13 +1,12 @@
 ﻿using AutoFixture;
-using FluentAssertions;
+using AwesomeAssertions;
 using Monaco.Template.Backend.Application.Features.Company;
+using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Domain.Model;
+using Monaco.Template.Backend.Domain.Model.ValueObjects;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
-using Monaco.Template.Backend.Application.Persistence;
-using Monaco.Template.Backend.Domain.Model.ValueObjects;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
@@ -44,7 +43,7 @@ public class EditCompanyHandlerTests
 		var command = Command with { Id = companyMock.Object.Id };
 
 		var sut = new EditCompany.Handler(_dbContextMock.Object);
-		var result = await sut.Handle(command, new CancellationToken());
+		var result = await sut.Handle(command, CancellationToken.None);
 
 		companyMock.Verify(x => x.Update(It.IsAny<string>(),
 										 It.IsAny<string>(),

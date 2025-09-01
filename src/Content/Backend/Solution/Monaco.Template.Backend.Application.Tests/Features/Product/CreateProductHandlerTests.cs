@@ -1,5 +1,5 @@
 ﻿using AutoFixture;
-using FluentAssertions;
+using AwesomeAssertions;
 #if (massTransitIntegration)
 using MassTransit;
 #endif

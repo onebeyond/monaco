@@ -52,7 +52,7 @@ public class AuditEventTelemetryConverter : TelemetryConverterBase
 		var hasScalarValue = logEvent.Properties.TryGetValue(propertyName, out var someValue) &&
 							 someValue is ScalarValue;
 
-		value = hasScalarValue ? ((ScalarValue)someValue!).Value : default;
+		value = hasScalarValue ? ((ScalarValue)someValue!).Value : null;
 
 		return hasScalarValue;
 	}
