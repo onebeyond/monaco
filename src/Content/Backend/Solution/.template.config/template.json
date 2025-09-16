@@ -15,7 +15,7 @@
 	},
 	"primaryOutputs": [
 		{
-			"path": "Monaco.Template.Backend.sln"
+			"path": "Monaco.Template.Backend.slnx"
 		}
 	],
 	"SpecialCustomOperations": {
