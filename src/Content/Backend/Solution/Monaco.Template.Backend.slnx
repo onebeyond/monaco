@@ -1,0 +1,60 @@
+<Solution>
+  <!--#if (commonLibraries) -->
+  <Folder Name="/.nuget/">
+    <File Path="nuget.config" />
+  </Folder>
+  <Folder Name="/Common/">
+    <!--#if (apiService) -->
+    <Project Path="Monaco.Template.Backend.Common.Api/Monaco.Template.Backend.Common.Api.csproj" />
+    <Project Path="Monaco.Template.Backend.Common.Api.Application/Monaco.Template.Backend.Common.Api.Application.csproj" />
+    <!--#endif -->
+    <!--#if (apiGateway) -->
+    <Project Path="Monaco.Template.Backend.Common.ApiGateway/Monaco.Template.Backend.Common.ApiGateway.csproj" />
+    <!--#endif -->
+    <Project Path="Monaco.Template.Backend.Common.Application/Monaco.Template.Backend.Common.Application.csproj" />
+    <!--#if (filesSupport) -->
+    <Project Path="Monaco.Template.Backend.Common.BlobStorage/Monaco.Template.Backend.Common.BlobStorage.csproj" />
+	<!--#if (tests) -->
+    <Project Path="Monaco.Template.Backend.Common.BlobStorage.Tests/Monaco.Template.Backend.Common.BlobStorage.Tests.csproj" />
+    <!--#endif -->
+    <!--#endif -->
+    <Project Path="Monaco.Template.Backend.Common.Domain/Monaco.Template.Backend.Common.Domain.csproj" />
+    <Project Path="Monaco.Template.Backend.Common.Infrastructure/Monaco.Template.Backend.Common.Infrastructure.csproj" />
+    <Project Path="Monaco.Template.Backend.Common.Serilog/Monaco.Template.Backend.Common.Serilog.csproj" />
+	<!--#if (tests) -->
+    <Project Path="Monaco.Template.Backend.Common.Tests/Monaco.Template.Backend.Common.Tests.csproj" />
+    <Project Path="Monaco.Template.Backend.Common.Domain.Tests/Monaco.Template.Backend.Common.Domain.Tests.csproj" />
+	<!--#endif -->
+  </Folder>
+  <!--#if (keycloakConfig) -->
+  <Folder Name="/KeyCloak/">
+    <File Path="realm-export-template.json" />
+  </Folder>
+  <!--#endif -->
+  <!--#endif -->
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Packages.props" />
+	<!--#if (apiService) -->
+    <File Path="Monaco.Template.Backend.Api.http" />
+    <!--#endif -->
+  </Folder>
+  <!--#if (tests) -->
+  <Folder Name="/Tests/">
+    <Project Path="Monaco.Template.Backend.Application.Tests/Monaco.Template.Backend.Application.Tests.csproj" />
+    <Project Path="Monaco.Template.Backend.ArchitectureTests/Monaco.Template.Backend.ArchitectureTests.csproj" />
+    <Project Path="Monaco.Template.Backend.Domain.Tests/Monaco.Template.Backend.Domain.Tests.csproj" />
+    <Project Path="Monaco.Template.Backend.IntegrationTests/Monaco.Template.Backend.IntegrationTests.csproj" />
+  </Folder>
+  <!--#endif -->
+  <!--#if (apiService) -->
+  <Project Path="Monaco.Template.Backend.Api/Monaco.Template.Backend.Api.csproj" />
+  <!--#endif -->
+  <Project Path="Monaco.Template.Backend.Application/Monaco.Template.Backend.Application.csproj" />
+  <Project Path="Monaco.Template.Backend.Domain/Monaco.Template.Backend.Domain.csproj" />
+  <!--#if (massTransitIntegration) -->
+  <Project Path="Monaco.Template.Backend.Messages/Monaco.Template.Backend.Messages.csproj" />
+  <!--#endif -->
+  <!--#if (workerService) -->
+  <Project Path="Monaco.Template.Backend.Worker/Monaco.Template.Backend.Worker.csproj" />
+  <!--#endif -->
+</Solution>

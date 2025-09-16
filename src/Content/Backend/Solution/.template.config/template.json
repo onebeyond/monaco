@@ -18,6 +18,34 @@
 			"path": "Monaco.Template.Backend.sln"
 		}
 	],
+	"SpecialCustomOperations": {
+		"**.slnx": {
+			"operations": [
+				{
+					"type": "conditional",
+					"configuration": {
+						"actionableIf": [ "<!--#if" ],
+						"actionableElse": [ "#else", "<!--#else" ],
+						"actionableElseif": [ "#elseif", "<!--#elseif", "#elif", "<!--#elif" ],
+						"endif": [ "#endif", "<!--#endif" ],
+						"trim" : "true",
+						"wholeLine": "true",
+						"evaluator": "C++"
+					}
+				},
+				{
+					"type": "balancednesting",
+					"configuration": {
+						"startToken": "<!--",
+						"realEndToken": "-->",
+						"pseudoEndToken": "-- >",
+						"id": "fixPseudoNestedComments",
+						"resetFlag": "_TestResetFlag_"
+					}
+				}
+			]
+		}
+	},
 	"symbols": {
 		"apiGateway": {
 			"type": "parameter",
