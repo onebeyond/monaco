@@ -1,8 +1,8 @@
 <Solution>
-  <!--#if (commonLibraries) -->
   <Folder Name="/.nuget/">
     <File Path="nuget.config" />
   </Folder>
+  <!--#if (commonLibraries) -->
   <Folder Name="/Common/">
     <!--#if (apiService) -->
     <Project Path="Monaco.Template.Backend.Common.Api/Monaco.Template.Backend.Common.Api.csproj" />
@@ -14,18 +14,22 @@
     <Project Path="Monaco.Template.Backend.Common.Application/Monaco.Template.Backend.Common.Application.csproj" />
     <!--#if (filesSupport) -->
     <Project Path="Monaco.Template.Backend.Common.BlobStorage/Monaco.Template.Backend.Common.BlobStorage.csproj" />
-	<!--#if (tests) -->
-    <Project Path="Monaco.Template.Backend.Common.BlobStorage.Tests/Monaco.Template.Backend.Common.BlobStorage.Tests.csproj" />
-    <!--#endif -->
     <!--#endif -->
     <Project Path="Monaco.Template.Backend.Common.Domain/Monaco.Template.Backend.Common.Domain.csproj" />
     <Project Path="Monaco.Template.Backend.Common.Infrastructure/Monaco.Template.Backend.Common.Infrastructure.csproj" />
     <Project Path="Monaco.Template.Backend.Common.Serilog/Monaco.Template.Backend.Common.Serilog.csproj" />
 	<!--#if (tests) -->
     <Project Path="Monaco.Template.Backend.Common.Tests/Monaco.Template.Backend.Common.Tests.csproj" />
-    <Project Path="Monaco.Template.Backend.Common.Domain.Tests/Monaco.Template.Backend.Common.Domain.Tests.csproj" />
 	<!--#endif -->
   </Folder>
+  <!--#if (tests) -->
+  <Folder Name="/Common/Tests/">
+    <!--#if (filesSupport) -->
+    <Project Path="Monaco.Template.Backend.Common.BlobStorage.Tests/Monaco.Template.Backend.Common.BlobStorage.Tests.csproj" />
+	<!--#endif -->
+    <Project Path="Monaco.Template.Backend.Common.Domain.Tests/Monaco.Template.Backend.Common.Domain.Tests.csproj" />
+  </Folder>
+  <!--#endif -->
   <!--#if (keycloakConfig) -->
   <Folder Name="/KeyCloak/">
     <File Path="realm-export-template.json" />
