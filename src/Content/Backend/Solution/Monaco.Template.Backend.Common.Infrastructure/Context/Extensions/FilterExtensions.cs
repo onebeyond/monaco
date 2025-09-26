@@ -164,7 +164,7 @@ public static class FilterExtensions
 			not null when type == typeof(bool) || type == typeof(bool?) => bool.TryParse(data, out _),
 			not null when type == typeof(Guid) || type == typeof(Guid?) => Guid.TryParse(data, out _),
 			not null when type == typeof(DateTime) || type == typeof(DateTime?) => DateTime.TryParse(data, out _),
-			not null when type == typeof(Enum) => Enum.TryParse(type, data, true, out _),
+			not null when type.IsEnum => Enum.TryParse(type, data, true, out _),
 			_ => type == typeof(string)
 		};
 	}
