@@ -128,7 +128,7 @@ public static class FilterExtensions
 			}
 		}
 		else if (type.IsEnum)
-			expression = Expression.Equal(bodyExpression, Expression.Constant(Enum.Parse(type, (string.IsNullOrWhiteSpace(value?.ToString()) ? 0.ToString() : value!.ToString()) ?? 0.ToString())));
+			expression = Expression.Equal(bodyExpression, Expression.Constant(Enum.Parse(type, (string.IsNullOrWhiteSpace(value?.ToString()) ? "0" : value!.ToString()) ?? "0")));
 		else if (type.IsAssignableFrom(typeof(Guid))) // Handles Guid values
 			expression = value.ToString() is ['!', ..]
 							 ? Expression.NotEqual(bodyExpression, Expression.Constant(Guid.Parse(value.ToString()![1..]), type))
@@ -164,7 +164,7 @@ public static class FilterExtensions
 			not null when type == typeof(bool) || type == typeof(bool?) => bool.TryParse(data, out _),
 			not null when type == typeof(Guid) || type == typeof(Guid?) => Guid.TryParse(data, out _),
 			not null when type == typeof(DateTime) || type == typeof(DateTime?) => DateTime.TryParse(data, out _),
-			not null when type == typeof(Enum) => Enum.TryParse(type, data, true, out _),
+			not null when type.IsEnum => Enum.TryParse(type, data, true, out _),
 			_ => type == typeof(string)
 		};
 	}
