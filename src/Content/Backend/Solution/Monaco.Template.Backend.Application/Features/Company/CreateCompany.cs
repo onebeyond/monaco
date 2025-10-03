@@ -27,29 +27,29 @@ public sealed class CreateCompany
 
 			RuleFor(x => x.Name)
 				.NotEmpty()
-				.MaximumLength(100)
+				.MaximumLength(Domain.Model.Entities.Company.NameLength)
 				.MustAsync(async (name, ct) => !await dbContext.ExistsAsync<Domain.Model.Entities.Company>(x => x.Name == name, ct))
 				.WithMessage("A company with the name {PropertyValue} already exists");
 
 			RuleFor(x => x.Email)
 				.NotEmpty()
 				.EmailAddress()
-				.MaximumLength(255);
+				.MaximumLength(Domain.Model.Entities.Company.EmailLength);
 
 			RuleFor(x => x.WebSiteUrl)
-				.MaximumLength(300);
+				.MaximumLength(Domain.Model.Entities.Company.WebSiteUrlLength);
 
 			RuleFor(x => x.Street)
-				.MaximumLength(100);
+				.MaximumLength(Domain.Model.ValueObjects.Address.StreetLength);
 
 			RuleFor(x => x.City)
-				.MaximumLength(100);
+				.MaximumLength(Domain.Model.ValueObjects.Address.CityLength);
 
 			RuleFor(x => x.County)
-				.MaximumLength(100);
+				.MaximumLength(Domain.Model.ValueObjects.Address.CountyLength);
 
 			RuleFor(x => x.PostCode)
-				.MaximumLength(10);
+				.MaximumLength(Domain.Model.ValueObjects.Address.PostCodeLength);
 
 			RuleFor(x => x.CountryId)
 				.NotNull()

@@ -1,6 +1,5 @@
 ﻿using AutoFixture;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Domain.Model;
 using Monaco.Template.Backend.Domain.Model.Entities;
 using Monaco.Template.Backend.Domain.Model.ValueObjects;
 using Moq;
@@ -22,7 +21,7 @@ public static class CompanyFactory
 	public static Mock<Company> Mock()
 	{
 		var fixture = FixtureFactory.Create(f => f.RegisterAddress());
-		
+
 		var mock = new Mock<Company>(fixture.Create<string>(),
 									 fixture.Create<string>(),
 									 fixture.Create<string>(),

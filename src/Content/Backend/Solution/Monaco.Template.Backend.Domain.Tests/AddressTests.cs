@@ -20,7 +20,7 @@ public class AddressTests
 								   string? postCode,
 								   Country country)
 	{
-		postCode = postCode?[..10];
+		postCode = postCode?[..Address.PostCodeLength];
 		var sut = new Address(street,
 							  city,
 							  county,

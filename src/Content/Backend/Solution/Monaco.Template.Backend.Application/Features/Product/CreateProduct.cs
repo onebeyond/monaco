@@ -9,8 +9,6 @@ using Monaco.Template.Backend.Common.Application.Commands;
 using Monaco.Template.Backend.Common.Application.Validators.Extensions;
 using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 using Monaco.Template.Backend.Domain.Model.Entities;
-#if (massTransitIntegration)
-#endif
 
 namespace Monaco.Template.Backend.Application.Features.Product;
 
@@ -98,7 +96,7 @@ public sealed class CreateProduct
 
 			await _publishEndpoint.Publish(item.MapMessage(), cancellationToken);
 #endif
-			
+
 			await _dbContext.SaveEntitiesAsync(cancellationToken);
 
 			return CommandResult<Guid>.Success(item.Id);

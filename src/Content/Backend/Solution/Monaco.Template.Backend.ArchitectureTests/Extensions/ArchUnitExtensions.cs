@@ -1,6 +1,4 @@
-﻿using ArchUnitNET.Domain;
-using ArchUnitNET.Domain.Extensions;
-using ArchUnitNET.Fluent.Syntax.Elements.Types.Classes;
+﻿using ArchUnitNET.Fluent.Syntax.Elements.Types.Classes;
 
 namespace Monaco.Template.Backend.ArchitectureTests.Extensions;
 
