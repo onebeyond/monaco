@@ -1,6 +1,5 @@
 ﻿using AutoFixture;
 using Monaco.Template.Backend.Common.Tests;
-using Monaco.Template.Backend.Domain.Model;
 using Monaco.Template.Backend.Domain.Model.Entities;
 using Monaco.Template.Backend.Domain.Model.ValueObjects;
 using Moq;
@@ -27,7 +26,7 @@ public static class AddressFactoryExtensions
 		fixture.Register(() => new Address(fixture.Create<string?>(),
 										   fixture.Create<string?>(),
 										   fixture.Create<string?>(),
-										   fixture.Create<string?>()?[..10],
+										   fixture.Create<string?>()?[..Address.PostCodeLength],
 										   fixture.Create<Country>()));
 		return fixture;
 	}
@@ -40,7 +39,7 @@ public static class AddressFactoryExtensions
 							 var mock = new Mock<Address>(fixture.Create<string?>()!,
 														  fixture.Create<string?>()!,
 														  fixture.Create<string?>()!,
-														  fixture.Create<string?>()?[..10]!,
+														  fixture.Create<string?>()?[..Address.PostCodeLength]!,
 														  country);
 							 return mock.Object;
 						 });

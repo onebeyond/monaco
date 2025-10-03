@@ -21,7 +21,7 @@ public static class DocumentFactoryExtension
 	{
 		fixture.Register(() => new Document(fixture.Create<Guid>(),
 											fixture.Create<string>(),
-											fixture.Create<string>()[..20],
+											fixture.Create<string>()[..Document.ExtensionLength],
 											fixture.Create<long>(),
 											fixture.Create<string>(),
 											false));
