@@ -1,14 +1,14 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31808.319
 MinimumVisualStudioVersion = 10.0.40219.1
-#if (commonLibraries)
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{1095FB23-B2A1-4FD6-BC12-433529EEA56E}"
 	ProjectSection(SolutionItems) = preProject
 		nuget.config = nuget.config
 	EndProjectSection
 EndProject
+#if (commonLibraries)
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{8BFE9C37-2620-4156-88B8-286537954C5E}"
 EndProject
 #if (tests)
