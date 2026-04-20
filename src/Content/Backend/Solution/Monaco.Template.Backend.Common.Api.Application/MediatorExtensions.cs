@@ -132,13 +132,13 @@ public static class MediatorExtensions
 		{
 			var result = await sender.Send(command, cancellationToken);
 			return result switch
-			{
-				Common.Application.Commands.NotFound => TypedResults.NotFound(),
-				ValidationFailure validationFailed => TypedResults.ValidationProblem(validationFailed.ValidationResult.ToDictionary()),
-				ConcurremcyConflict => TypedResults.Conflict(),
-				Forbidden => TypedResults.Forbid(),
-				_ => response
-			};
+				   {
+					   Common.Application.Commands.NotFound => TypedResults.NotFound(),
+					   ValidationFailure validationFailed => TypedResults.ValidationProblem(validationFailed.ValidationResult.ToDictionary()),
+					   ConcurrencyConflict => TypedResults.Conflict(),
+					   Forbidden => TypedResults.Forbid(),
+					   _ => response
+				   };
 		}
 
 		/// <summary>
@@ -157,14 +157,14 @@ public static class MediatorExtensions
 		{
 			var result = await sender.Send(command, cancellationToken);
 			return result switch
-			{
-				Common.Application.Commands.NotFound<TResult> => TypedResults.NotFound(),
-				ValidationFailure<TResult> validationFailed => TypedResults.ValidationProblem(validationFailed.ValidationResult.ToDictionary()),
-				ConcurremcyConflict<TResult> => TypedResults.Conflict(),
-				Forbidden<TResult> => TypedResults.Forbid(),
-				Success<TResult> success => func(success.Result),
-				_ => throw new NotImplementedException()
-			};
+				   {
+					   Common.Application.Commands.NotFound<TResult> => TypedResults.NotFound(),
+					   ValidationFailure<TResult> validationFailed => TypedResults.ValidationProblem(validationFailed.ValidationResult.ToDictionary()),
+					   ConcurrencyConflict<TResult> => TypedResults.Conflict(),
+					   Forbidden<TResult> => TypedResults.Forbid(),
+					   Success<TResult> success => func(success.Result),
+					   _ => throw new NotImplementedException()
+				   };
 		}
 	}
 

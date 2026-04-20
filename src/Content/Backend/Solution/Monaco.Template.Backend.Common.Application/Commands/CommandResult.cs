@@ -7,7 +7,7 @@ namespace Monaco.Template.Backend.Common.Application.Commands;
 /// </summary>
 /// <remarks>This type encapsulates the outcome of a command operation and acts as a discriminated union whose
 /// concrete variants are <see cref="Success{T}"/>, <see cref="NotFound{T}"/>, <see cref="ValidationFailure{T}"/>,
-/// <see cref="ConcurremcyConflict{T}"/> and <see cref="Forbidden{T}"/>. Use the static factory methods to create
+/// <see cref="ConcurrencyConflict{T}"/> and <see cref="Forbidden{T}"/>. Use the static factory methods to create
 /// instances representing each possible outcome.</remarks>
 /// <typeparam name="T">The type of the result value returned by the command.</typeparam>
 public record CommandResult<T> : CommandResult
@@ -38,8 +38,8 @@ public record CommandResult<T> : CommandResult
     /// <summary>
     /// Creates a <see cref="CommandResult{T}"/> instance representing a concurrency conflict.
     /// </summary>
-    /// <returns>A <see cref="ConcurremcyConflict{T}"/> instance indicating that a concurrency conflict was encountered while executing the command.</returns>
-    public new static ConcurremcyConflict<T?> ConcurrencyConflict() =>
+    /// <returns>A <see cref="ConcurrencyConflict{T}"/> instance indicating that a concurrency conflict was encountered while executing the command.</returns>
+    public new static ConcurrencyConflict<T?> ConcurrencyConflict() =>
         new();
 
     /// <summary>
@@ -55,7 +55,7 @@ public record CommandResult<T> : CommandResult
 /// </summary>
 /// <remarks>This type encapsulates the outcome of a command operation and acts as a discriminated union whose
 /// concrete variants are <see cref="Commands.Success"/>, <see cref="Commands.NotFound"/>,
-/// <see cref="Commands.ValidationFailure"/>, <see cref="Commands.ConcurremcyConflict"/> and
+/// <see cref="Commands.ValidationFailure"/>, <see cref="Commands.ConcurrencyConflict"/> and
 /// <see cref="Commands.Forbidden"/>. Use the static factory methods to create instances representing each possible
 /// outcome.</remarks>
 public record CommandResult
@@ -85,8 +85,8 @@ public record CommandResult
     /// <summary>
     /// Creates a <see cref="CommandResult"/> instance representing a concurrency conflict.
     /// </summary>
-    /// <returns>A <see cref="Commands.ConcurremcyConflict"/> instance indicating that a concurrency conflict was encountered while executing the command.</returns>
-    public static ConcurremcyConflict ConcurrencyConflict() =>
+    /// <returns>A <see cref="Commands.ConcurrencyConflict"/> instance indicating that a concurrency conflict was encountered while executing the command.</returns>
+    public static ConcurrencyConflict ConcurrencyConflict() =>
         new();
 
     /// <summary>
@@ -122,11 +122,11 @@ public record ValidationFailure(ValidationResult ValidationResult) : CommandResu
 public record ValidationFailure<T>(ValidationResult ValidationResult) : CommandResult<T>;
 
 /// <summary>Represents a command result indicating that a concurrency conflict was encountered while executing the command.</summary>
-public record ConcurremcyConflict : CommandResult;
+public record ConcurrencyConflict : CommandResult;
 
 /// <summary>Represents a command result indicating that a concurrency conflict was encountered while executing the command.</summary>
 /// <typeparam name="T">The type of the result value returned by the command.</typeparam>
-public record ConcurremcyConflict<T> : CommandResult<T>;
+public record ConcurrencyConflict<T> : CommandResult<T>;
 
 /// <summary>Represents a command result indicating that the command execution is not allowed.</summary>
 public record Forbidden : CommandResult;

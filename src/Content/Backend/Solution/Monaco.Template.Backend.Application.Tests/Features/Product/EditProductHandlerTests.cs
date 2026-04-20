@@ -22,13 +22,13 @@ public class EditProductHandlerTests
 	static EditProductHandlerTests()
 	{
 		var fixture = new Fixture();
-		Command = new(fixture.Create<Guid>(), // Id
-					  fixture.Create<string>(), // Title
-					  fixture.Create<string>(), // Description
-					  fixture.Create<decimal>(), // Price
-					  fixture.Create<Guid>(), // CompanyId
-					  fixture.Create<Guid[]>(), // Pictures
-					  fixture.Create<Guid>()); // DefaultPictureId
+		Command = new(fixture.Create<Guid>(),		// Id
+					  fixture.Create<string>(),		// Title
+					  fixture.Create<string>(),		// Description
+					  fixture.Create<decimal>(),	// Price
+					  fixture.Create<Guid>(),		// CompanyId
+					  fixture.Create<Guid[]>(),		// Pictures
+					  fixture.Create<Guid>());		// DefaultPictureId
 	}
 
 	[Theory(DisplayName = "Edit existing Product succeeds")]

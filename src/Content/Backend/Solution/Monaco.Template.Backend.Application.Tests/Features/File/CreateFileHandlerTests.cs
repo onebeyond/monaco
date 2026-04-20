@@ -24,9 +24,9 @@ public class CreateFileHandlerTests
 	static CreateFileHandlerTests()
 	{
 		var fixture = new Fixture();
-		Command = new(It.IsAny<Stream>(),           // Stream
-					  fixture.Create<string>(),     // FileName
-					  fixture.Create<string>());    // ContentType
+		Command = new(It.IsAny<Stream>(),			// Stream
+					  fixture.Create<string>(),		// FileName
+					  fixture.Create<string>());	// ContentType
 	}
 
 	[Theory(DisplayName = "Create new File succeeds")]

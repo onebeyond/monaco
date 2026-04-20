@@ -33,12 +33,12 @@ public class CreateProductHandlerTests
 	static CreateProductHandlerTests()
 	{
 		var fixture = new Fixture();
-		Command = new(fixture.Create<string>(), // Title
-					  fixture.Create<string>(), // Description
-					  fixture.Create<decimal>(), // Price
-					  fixture.Create<Guid>(), // CompanyId
-					  fixture.Create<Guid[]>(), // Pictures
-					  fixture.Create<Guid>()); // DefaultPictureId
+		Command = new(fixture.Create<string>(),		// Title
+					  fixture.Create<string>(),		// Description
+					  fixture.Create<decimal>(),	// Price
+					  fixture.Create<Guid>(),		// CompanyId
+					  fixture.Create<Guid[]>(),		// Pictures
+					  fixture.Create<Guid>());		// DefaultPictureId
 	}
 
 
