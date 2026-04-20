@@ -16,7 +16,7 @@ namespace Monaco.Template.Backend.Application.Tests.Features.Product;
 public class DeleteProductHandlerTests
 {
 	private readonly Mock<AppDbContext> _dbContextMock = new();
-	private static readonly DeleteProduct.Command Command = new(new Fixture().Create<Guid>());	// Id
+	private static readonly DeleteProduct.Command Command = new(new Fixture().Create<Guid>()); // Id
 
 
 	[Theory(DisplayName = "Delete existing Product succeeds")]
@@ -27,7 +27,7 @@ public class DeleteProductHandlerTests
 							  .Union(product.Pictures
 											.Select(x => x.Thumbnail!))
 							  .ToArray();
-		
+
 		_dbContextMock.CreateAndSetupDbSetMock(product, out var productDbSetMock)
 					  .CreateAndSetupDbSetMock(pictures);
 
@@ -45,6 +45,6 @@ public class DeleteProductHandlerTests
 							  Times.Once);
 
 		result.Should()
-			  .BeEquivalentTo(CommandResult.Success());
+			  .BeOfType<Success>();
 	}
 }

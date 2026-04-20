@@ -14,6 +14,7 @@ using Monaco.Template.Backend.Messages.V1;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
 using Monaco.Template.Backend.Application.Persistence;
+using Monaco.Template.Backend.Common.Application.Commands;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Product;
@@ -32,12 +33,12 @@ public class CreateProductHandlerTests
 	static CreateProductHandlerTests()
 	{
 		var fixture = new Fixture();
-		Command = new(fixture.Create<string>(),		// Title
-					  fixture.Create<string>(),		// Description
-					  fixture.Create<decimal>(),	// Price
-					  fixture.Create<Guid>(),		// CompanyId
-					  fixture.Create<Guid[]>(),		// Pictures
-					  fixture.Create<Guid>());		// DefaultPictureId
+		Command = new(fixture.Create<string>(), // Title
+					  fixture.Create<string>(), // Description
+					  fixture.Create<decimal>(), // Price
+					  fixture.Create<Guid>(), // CompanyId
+					  fixture.Create<Guid[]>(), // Pictures
+					  fixture.Create<Guid>()); // DefaultPictureId
 	}
 
 
@@ -54,8 +55,7 @@ public class CreateProductHandlerTests
 						  CompanyId = company.Id,
 						  Pictures = pictures.Select(x => x.Id)
 											 .ToArray(),
-						  DefaultPictureId = pictures.First()
-													 .Id
+						  DefaultPictureId = pictures.First().Id
 					  };
 
 #if (massTransitIntegration)
@@ -72,12 +72,7 @@ public class CreateProductHandlerTests
 		_publishEndpointMock.Verify(x => x.Publish(It.IsAny<ProductCreated>(), It.IsAny<CancellationToken>()), Times.Once);
 #endif
 
-		result.ValidationResult
-			  .IsValid
-			  .Should()
-			  .BeTrue();
-		result.ItemNotFound
-			  .Should()
-			  .BeFalse();
+		result.Should()
+			  .BeOfType<Success<Guid>>();
 	}
 }

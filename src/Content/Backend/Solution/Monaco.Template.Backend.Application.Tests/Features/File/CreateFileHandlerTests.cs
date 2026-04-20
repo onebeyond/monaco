@@ -8,6 +8,7 @@ using Monaco.Template.Backend.Domain.Model.Entities;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Common.Application.Commands;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.File;
@@ -23,9 +24,9 @@ public class CreateFileHandlerTests
 	static CreateFileHandlerTests()
 	{
 		var fixture = new Fixture();
-		Command = new(It.IsAny<Stream>(),			// Stream
-					  fixture.Create<string>(),		// FileName
-					  fixture.Create<string>());	// ContentType
+		Command = new(It.IsAny<Stream>(),           // Stream
+					  fixture.Create<string>(),     // FileName
+					  fixture.Create<string>());    // ContentType
 	}
 
 	[Theory(DisplayName = "Create new File succeeds")]
@@ -38,7 +39,7 @@ public class CreateFileHandlerTests
 												  It.IsAny<string>(),
 												  It.IsAny<CancellationToken>()))
 						.ReturnsAsync(file);
-		
+
 		var sut = new CreateFile.Handler(_dbContextMock.Object, _fileServiceMock.Object);
 		var result = await sut.Handle(Command, CancellationToken.None);
 
@@ -52,16 +53,13 @@ public class CreateFileHandlerTests
 		_dbContextMock.Verify(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()),
 							  Times.Once);
 
-		result.ValidationResult
-			  .IsValid
-			  .Should()
-			  .BeTrue();
-		result.ItemNotFound
-			  .Should()
-			  .BeFalse();
-		result.Result
-			  .Should()
-			  .Be(file.Id);
+		var res = result.Should()
+						.BeOfType<Success<Guid>>();
+
+		res.Subject
+		   .Result
+		   .Should()
+		   .Be(file.Id);
 	}
 
 	[Theory(DisplayName = "Create new File error deletes uploaded file from store")]

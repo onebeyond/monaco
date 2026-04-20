@@ -22,15 +22,15 @@ public class EditProductHandlerTests
 	static EditProductHandlerTests()
 	{
 		var fixture = new Fixture();
-		Command = new(fixture.Create<Guid>(),		// Id
-					  fixture.Create<string>(),		// Title
-					  fixture.Create<string>(),		// Description
-					  fixture.Create<decimal>(),	// Price
-					  fixture.Create<Guid>(),		// CompanyId
-					  fixture.Create<Guid[]>(),		// Pictures
-					  fixture.Create<Guid>());		// DefaultPictureId
+		Command = new(fixture.Create<Guid>(), // Id
+					  fixture.Create<string>(), // Title
+					  fixture.Create<string>(), // Description
+					  fixture.Create<decimal>(), // Price
+					  fixture.Create<Guid>(), // CompanyId
+					  fixture.Create<Guid[]>(), // Pictures
+					  fixture.Create<Guid>()); // DefaultPictureId
 	}
-	
+
 	[Theory(DisplayName = "Edit existing Product succeeds")]
 	[AutoDomainData(true)]
 	public async Task EditexistingProductSucceeds(string existingTitle,
@@ -55,12 +55,12 @@ public class EditProductHandlerTests
 						  };
 		productMock.SetupGet(x => x.Id)
 				   .Returns(Guid.NewGuid());
-		
+
 		var product = productMock.Object;
 
 		_dbContextMock.CreateAndSetupDbSetMock(product)
 					  .CreateAndSetupDbSetMock([existingCompany, newCompany])
-					  .CreateAndSetupDbSetMock([..existingPictures, ..newPictures]);
+					  .CreateAndSetupDbSetMock([.. existingPictures, .. newPictures]);
 
 		var command = Command with
 					  {
@@ -69,7 +69,7 @@ public class EditProductHandlerTests
 						  Description = newDescription,
 						  Price = newPrice,
 						  CompanyId = newCompany.Id,
-						  Pictures = [..newPictures.Select(x => x.Id)],
+						  Pictures = [.. newPictures.Select(x => x.Id)],
 						  DefaultPictureId = newPictures.First().Id
 					  };
 
@@ -86,8 +86,8 @@ public class EditProductHandlerTests
 
 		_dbContextMock.Verify(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()),
 							  Times.Once);
-		
+
 		result.Should()
-			  .BeEquivalentTo(CommandResult.Success());
+			  .BeOfType<Success>();
 	}
 }

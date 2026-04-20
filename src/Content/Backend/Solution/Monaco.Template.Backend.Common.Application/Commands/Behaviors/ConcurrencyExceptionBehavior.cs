@@ -62,7 +62,7 @@ public class ConcurrencyExceptionBehavior<TCommand> : IPipelineBehavior<TCommand
 			}
 			catch (DbUpdateConcurrencyException)
 			{
-				return CommandResult.ConcurrencyConflicted();
+				return CommandResult.ConcurrencyConflict();
 			}
 
 		try
@@ -71,7 +71,7 @@ public class ConcurrencyExceptionBehavior<TCommand> : IPipelineBehavior<TCommand
 		}
 		catch (DbUpdateConcurrencyException)
 		{
-			return CommandResult.ConcurrencyConflicted();
+			return CommandResult.ConcurrencyConflict();
 		}
 	}
 }
@@ -133,7 +133,7 @@ public class ConcurrencyExceptionBehavior<TCommand, TResult> : IPipelineBehavior
 			}
 			catch (DbUpdateConcurrencyException)
 			{
-				return CommandResult<TResult?>.ConcurrencyConflicted();
+				return CommandResult<TResult?>.ConcurrencyConflict();
 			}
 
 
@@ -143,7 +143,7 @@ public class ConcurrencyExceptionBehavior<TCommand, TResult> : IPipelineBehavior
 		}
 		catch (DbUpdateConcurrencyException)
 		{
-			return CommandResult<TResult?>.ConcurrencyConflicted();
+			return CommandResult<TResult?>.ConcurrencyConflict();
 		}
 	}
 }

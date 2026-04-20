@@ -5,6 +5,7 @@ using Monaco.Template.Backend.Common.Application.Commands;
 using Monaco.Template.Backend.Common.Application.DTOs;
 using Monaco.Template.Backend.Common.Application.Queries;
 using Monaco.Template.Backend.Common.Domain.Model;
+using NotFound = Microsoft.AspNetCore.Http.HttpResults.NotFound;
 
 namespace Monaco.Template.Backend.Common.Api.Application;
 
@@ -87,10 +88,10 @@ public static class MediatorExtensions
 		/// <param name="uriParams">The parameters (if any) to pass for concatenating into the resultUri</param>
 		/// <param name="cancellationToken"></param>
 		/// <returns></returns>
-		public async Task<Results<Created<CreatedResponse>, NotFound, ValidationProblem, Conflict>> ExecuteCommandCreatedAsync(CommandBase<Guid> command,
-																															   string resultUri,
-																															   object[]? uriParams = null,
-																															   CancellationToken cancellationToken = default) =>
+		public async Task<Results<Created<CreatedResponse>, NotFound, ValidationProblem, Conflict, ForbidHttpResult>> ExecuteCommandCreatedAsync(CommandBase<Guid> command,
+																																				 string resultUri,
+																																				 object[]? uriParams = null,
+																																				 CancellationToken cancellationToken = default) =>
 			await sender.ExecuteCommandAsync(command,
 											 result => TypedResults.Created(string.Format(resultUri, [.. uriParams ?? [], result]),
 																			new CreatedResponse(result)),
@@ -102,8 +103,8 @@ public static class MediatorExtensions
 		/// <param name="command"></param>
 		/// <param name="cancellationToken"></param>
 		/// <returns></returns>
-		public async Task<Results<NoContent, NotFound, ValidationProblem, Conflict>> ExecuteCommandNoContentAsync(CommandBase command,
-																												  CancellationToken cancellationToken = default) =>
+		public async Task<Results<NoContent, NotFound, ValidationProblem, Conflict, ForbidHttpResult>> ExecuteCommandNoContentAsync(CommandBase command,
+																																	CancellationToken cancellationToken = default) =>
 			await sender.ExecuteCommandAsync(command, TypedResults.NoContent(), cancellationToken);
 
 		/// <summary>
@@ -112,8 +113,8 @@ public static class MediatorExtensions
 		/// <param name="command"></param>
 		/// <param name="cancellationToken"></param>
 		/// <returns></returns>
-		public async Task<Results<Ok, NotFound, ValidationProblem, Conflict>> ExecuteCommandOkAsync(CommandBase command,
-																									CancellationToken cancellationToken = default) =>
+		public async Task<Results<Ok, NotFound, ValidationProblem, Conflict, ForbidHttpResult>> ExecuteCommandOkAsync(CommandBase command,
+																													  CancellationToken cancellationToken = default) =>
 			await sender.ExecuteCommandAsync(command, TypedResults.Ok(), cancellationToken);
 
 		/// <summary>
@@ -124,17 +125,18 @@ public static class MediatorExtensions
 		/// <param name="response"></param>
 		/// <param name="cancellationToken"></param>
 		/// <returns></returns>
-		public async Task<Results<TResponse, NotFound, ValidationProblem, Conflict>> ExecuteCommandAsync<TResponse>(CommandBase command,
-																													TResponse response,
-																													CancellationToken cancellationToken = default)
+		public async Task<Results<TResponse, NotFound, ValidationProblem, Conflict, ForbidHttpResult>> ExecuteCommandAsync<TResponse>(CommandBase command,
+																																	  TResponse response,
+																																	  CancellationToken cancellationToken = default)
 			where TResponse : IResult
 		{
 			var result = await sender.Send(command, cancellationToken);
 			return result switch
 			{
-				{ ItemNotFound: true } => TypedResults.NotFound(),
-				{ ValidationResult.IsValid: false } => TypedResults.ValidationProblem(result.ValidationResult.ToDictionary()),
-				{ ConcurrencyConflict: true } => TypedResults.Conflict(),
+				Common.Application.Commands.NotFound => TypedResults.NotFound(),
+				ValidationFailure validationFailed => TypedResults.ValidationProblem(validationFailed.ValidationResult.ToDictionary()),
+				ConcurremcyConflict => TypedResults.Conflict(),
+				Forbidden => TypedResults.Forbid(),
 				_ => response
 			};
 		}
@@ -148,18 +150,20 @@ public static class MediatorExtensions
 		/// <param name="func">A function to convert the result to the desired response type</param>
 		/// <param name="cancellationToken"></param>
 		/// <returns></returns>
-		public async Task<Results<TResponse, NotFound, ValidationProblem, Conflict>> ExecuteCommandAsync<TResult, TResponse>(CommandBase<TResult> command,
-																															 Func<TResult, TResponse> func,
-																															 CancellationToken cancellationToken = default)
+		public async Task<Results<TResponse, NotFound, ValidationProblem, Conflict, ForbidHttpResult>> ExecuteCommandAsync<TResult, TResponse>(CommandBase<TResult> command,
+																																			   Func<TResult, TResponse> func,
+																																			   CancellationToken cancellationToken = default)
 			where TResponse : IResult
 		{
 			var result = await sender.Send(command, cancellationToken);
 			return result switch
 			{
-				{ ItemNotFound: true } => TypedResults.NotFound(),
-				{ ValidationResult.IsValid: false } => TypedResults.ValidationProblem(result.ValidationResult.ToDictionary()),
-				{ ConcurrencyConflict: true } => TypedResults.Conflict(),
-				_ => func(result.Result)
+				Common.Application.Commands.NotFound<TResult> => TypedResults.NotFound(),
+				ValidationFailure<TResult> validationFailed => TypedResults.ValidationProblem(validationFailed.ValidationResult.ToDictionary()),
+				ConcurremcyConflict<TResult> => TypedResults.Conflict(),
+				Forbidden<TResult> => TypedResults.Forbid(),
+				Success<TResult> success => func(success.Result),
+				_ => throw new NotImplementedException()
 			};
 		}
 	}

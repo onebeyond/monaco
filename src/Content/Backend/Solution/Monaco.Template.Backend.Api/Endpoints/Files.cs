@@ -21,10 +21,10 @@ internal static class Files
 													  "Files");
 
 			files.MapPost("",
-						  Task<Results<Created<CreatedResponse>, NotFound, ValidationProblem, Conflict>> ([FromServices] ISender sender,
-																										  IFormFile file,
-																										  HttpContext context,
-																										  CancellationToken cancellationToken) =>
+						  Task<Results<Created<CreatedResponse>, NotFound, ValidationProblem, Conflict, ForbidHttpResult>> ([FromServices] ISender sender,
+																															IFormFile file,
+																															HttpContext context,
+																															CancellationToken cancellationToken) =>
 							  sender.ExecuteCommandCreatedAsync(new CreateFile.Command(file.OpenReadStream(),
 																					   file.FileName,
 																					   file.ContentType),

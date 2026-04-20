@@ -53,10 +53,10 @@ internal static class Companies
 #endif
 
 			companies.MapPost("",
-							  Task<Results<Created<CreatedResponse>, NotFound, ValidationProblem, Conflict>> ([FromServices] ISender sender,
-																											  [FromBody] CompanyCreateEditDto dto,
-																											  HttpContext context,
-																											  CancellationToken cancellationToken) =>
+							  Task<Results<Created<CreatedResponse>, NotFound, ValidationProblem, Conflict, ForbidHttpResult>> ([FromServices] ISender sender,
+																																[FromBody] CompanyCreateEditDto dto,
+																																HttpContext context,
+																																CancellationToken cancellationToken) =>
 								  sender.ExecuteCommandCreatedAsync(dto.MapCreateCommand(),
 																	"api/v{0}/Companies/{1}",
 																	[context.GetRequestedApiVersion()!],
@@ -70,10 +70,10 @@ internal static class Companies
 #endif
 
 			companies.MapPut("{id:guid}",
-							 Task<Results<NoContent, NotFound, ValidationProblem, Conflict>> ([FromServices] ISender sender,
-																							  [FromRoute] Guid id,
-																							  [FromBody] CompanyCreateEditDto dto,
-																							  CancellationToken cancellationToken) =>
+							 Task<Results<NoContent, NotFound, ValidationProblem, Conflict, ForbidHttpResult>> ([FromServices] ISender sender,
+																												[FromRoute] Guid id,
+																												[FromBody] CompanyCreateEditDto dto,
+																												CancellationToken cancellationToken) =>
 								 sender.ExecuteCommandNoContentAsync(dto.MapEditCommand(id),
 																	 cancellationToken),
 							 "EditCompany",
@@ -85,9 +85,9 @@ internal static class Companies
 #endif
 
 			companies.MapDelete("{id:guid}",
-								Task<Results<Ok, NotFound, ValidationProblem, Conflict>> ([FromServices] ISender sender,
-																						  [FromRoute] Guid id,
-																						  CancellationToken cancellationToken) =>
+								Task<Results<Ok, NotFound, ValidationProblem, Conflict, ForbidHttpResult>> ([FromServices] ISender sender,
+																											[FromRoute] Guid id,
+																											CancellationToken cancellationToken) =>
 									sender.ExecuteCommandOkAsync(new DeleteCompany.Command(id),
 																 cancellationToken),
 								"DeleteCompany",

@@ -67,7 +67,7 @@ public class DeleteCompanyValidatorTests
 
 	[Theory(DisplayName = "Company assigned to Product generates error")]
 	[AutoDomainData(true)]
-	public async Task CompanyAssignedToProductGeneratesError(Domain.Model.Entities.Company company, Domain.Model.Entities.Product product)
+	public async Task CompanyAssignedToProductGeneratesError(Domain.Model.Entities.Product product)
 	{
 		var command = Command with { Id = product.CompanyId };
 

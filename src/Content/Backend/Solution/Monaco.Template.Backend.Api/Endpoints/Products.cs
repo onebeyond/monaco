@@ -53,10 +53,10 @@ internal static class Products
 #endif
 
 			products.MapPost("",
-							 Task<Results<Created<CreatedResponse>, NotFound, ValidationProblem, Conflict>> ([FromServices] ISender sender,
-																											 [FromBody] ProductCreateEditDto dto,
-																											 HttpContext context,
-																											 CancellationToken cancellationToken) =>
+							 Task<Results<Created<CreatedResponse>, NotFound, ValidationProblem, Conflict, ForbidHttpResult>> ([FromServices] ISender sender,
+																															   [FromBody] ProductCreateEditDto dto,
+																															   HttpContext context,
+																															   CancellationToken cancellationToken) =>
 								 sender.ExecuteCommandCreatedAsync(dto.Map(),
 																   "api/v{0}/Products/{1}",
 																   [context.GetRequestedApiVersion()!],
@@ -70,10 +70,10 @@ internal static class Products
 #endif
 
 			products.MapPut("{id:guid}",
-							Task<Results<NoContent, NotFound, ValidationProblem, Conflict>> ([FromServices] ISender sender,
-																							 [FromRoute] Guid id,
-																							 [FromBody] ProductCreateEditDto dto,
-																							 CancellationToken cancellationToken) =>
+							Task<Results<NoContent, NotFound, ValidationProblem, Conflict, ForbidHttpResult>> ([FromServices] ISender sender,
+																											   [FromRoute] Guid id,
+																											   [FromBody] ProductCreateEditDto dto,
+																											   CancellationToken cancellationToken) =>
 								sender.ExecuteCommandNoContentAsync(dto.Map(id),
 																	cancellationToken),
 							"EditProduct",
@@ -85,9 +85,9 @@ internal static class Products
 #endif
 
 			products.MapDelete("{id:guid}",
-							   Task<Results<Ok, NotFound, ValidationProblem, Conflict>> ([FromServices] ISender sender,
-																						 [FromRoute] Guid id,
-																						 CancellationToken cancellationToken) =>
+							   Task<Results<Ok, NotFound, ValidationProblem, Conflict, ForbidHttpResult>> ([FromServices] ISender sender,
+																										   [FromRoute] Guid id,
+																										   CancellationToken cancellationToken) =>
 								   sender.ExecuteCommandOkAsync(new DeleteProduct.Command(id),
 																cancellationToken),
 							   "DeleteProduct",

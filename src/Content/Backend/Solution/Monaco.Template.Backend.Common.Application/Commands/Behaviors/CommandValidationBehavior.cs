@@ -30,7 +30,7 @@ public class CommandValidationBehavior<TCommand> : IPipelineBehavior<TCommand, C
 	{
 		var validationResult = await Validator.ValidateAsync(request, cancellationToken);
 		if (!validationResult.IsValid)
-			return CommandResult.ValidationFailed(validationResult);
+			return CommandResult.ValidationFailure(validationResult);
 
 		return await next(cancellationToken);
 	}
@@ -65,7 +65,7 @@ public class CommandValidationBehavior<TCommand, TResult> : IPipelineBehavior<TC
 	{
 		var validationResult = await Validator.ValidateAsync(request, cancellationToken);
 		if (!validationResult.IsValid)
-			return CommandResult<TResult?>.ValidationFailed(validationResult, default);
+			return CommandResult<TResult?>.ValidationFailure(validationResult);
 
 		return await next(cancellationToken);
 	}

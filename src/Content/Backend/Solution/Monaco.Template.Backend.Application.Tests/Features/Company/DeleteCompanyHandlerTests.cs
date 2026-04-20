@@ -22,7 +22,7 @@ public class DeleteCompanyHandlerTests
 	public async Task DeleteCompanySucceeds(Domain.Model.Entities.Company company)
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(company);
-		
+
 		var sut = new DeleteCompany.Handler(_dbContextMock.Object);
 
 		var result = await sut.Handle(Command, CancellationToken.None);
@@ -31,6 +31,6 @@ public class DeleteCompanyHandlerTests
 							  Times.Once);
 
 		result.Should()
-			  .BeEquivalentTo(CommandResult.Success());
+			  .BeOfType<Success>();
 	}
 }

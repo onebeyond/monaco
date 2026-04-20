@@ -6,6 +6,7 @@ using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Common.Application.Commands;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
@@ -42,12 +43,7 @@ public class CreateCompanyHandlerTests
 
 		companyDbSetMock.Verify(x => x.Add(It.IsAny<Domain.Model.Entities.Company>()), Times.Once);
 		_dbContextMock.Verify(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()), Times.Once);
-		result.ValidationResult
-			  .IsValid
-			  .Should()
-			  .BeTrue();
-		result.ItemNotFound
-			  .Should()
-			  .BeFalse();
+		result.Should()
+			  .BeOfType<Success<Guid>>();
 	}
 }
