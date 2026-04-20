@@ -46,6 +46,7 @@ builder.Services
 #endif
 
 builder.Services
+	   .AddProblemDetails()
 	   .ConfigureApplication(options =>
 							 {
 								 options.EntityFramework.ConnectionString = configuration.GetConnectionString("AppDbContext")!;
@@ -104,6 +105,9 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 	app.UseDeveloperExceptionPage();
+
+app.UseExceptionHandler()
+   .UseStatusCodePages();
 
 #if (auth)
 app.UseOpenApiDocs(configuration["Scalar:Title"]!,
