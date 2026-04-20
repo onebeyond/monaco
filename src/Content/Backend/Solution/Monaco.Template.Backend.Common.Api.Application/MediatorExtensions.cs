@@ -137,7 +137,8 @@ public static class MediatorExtensions
 					   ValidationFailure validationFailed => TypedResults.ValidationProblem(validationFailed.ValidationResult.ToDictionary()),
 					   ConcurrencyConflict => TypedResults.Conflict(),
 					   Forbidden => TypedResults.Forbid(),
-					   _ => response
+					   Success => response,
+					   _ => throw new InvalidOperationException($"Unexpected command result type '{result?.GetType().FullName ?? "null"}' returned for command '{command.GetType().FullName}'.")
 				   };
 		}
 

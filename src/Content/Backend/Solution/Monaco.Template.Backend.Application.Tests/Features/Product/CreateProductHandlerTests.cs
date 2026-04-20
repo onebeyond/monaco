@@ -72,7 +72,11 @@ public class CreateProductHandlerTests
 		_publishEndpointMock.Verify(x => x.Publish(It.IsAny<ProductCreated>(), It.IsAny<CancellationToken>()), Times.Once);
 #endif
 
-		result.Should()
-			  .BeOfType<Success<Guid>>();
+		var success = result.Should()
+							.BeOfType<Success<Guid>>();
+		success.Subject
+			   .Result
+			   .Should()
+			   .NotBeEmpty();
 	}
 }

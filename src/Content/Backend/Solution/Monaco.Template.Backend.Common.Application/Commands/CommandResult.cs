@@ -98,15 +98,15 @@ public abstract record CommandResult
 }
 
 /// <summary>Represents a successful command execution.</summary>
-public record Success : CommandResult;
+public sealed record Success : CommandResult;
 
 /// <summary>Represents a successful command execution.</summary>
 /// <typeparam name="T">The type of the result value returned by the command.</typeparam>
 /// <param name="Result">The result value produced by the command.</param>
-public record Success<T>(T Result) : CommandResult<T>;
+public sealed record Success<T>(T Result) : CommandResult<T>;
 
 /// <summary>Represents a command result indicating that the target item was not found.</summary>
-public record NotFound : CommandResult;
+public sealed record NotFound : CommandResult;
 
 /// <summary>Represents a command result indicating that the target item was not found.</summary>
 /// <typeparam name="T">The type of the result value returned by the command.</typeparam>

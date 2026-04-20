@@ -43,7 +43,12 @@ public class CreateCompanyHandlerTests
 
 		companyDbSetMock.Verify(x => x.Add(It.IsAny<Domain.Model.Entities.Company>()), Times.Once);
 		_dbContextMock.Verify(x => x.SaveEntitiesAsync(It.IsAny<CancellationToken>()), Times.Once);
-		result.Should()
-			  .BeOfType<Success<Guid>>();
+
+		var success = result.Should()
+							.BeOfType<Success<Guid>>();
+		success.Subject
+			   .Result
+			   .Should()
+			   .NotBeEmpty();
 	}
 }
