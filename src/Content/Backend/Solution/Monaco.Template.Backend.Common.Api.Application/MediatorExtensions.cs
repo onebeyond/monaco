@@ -163,7 +163,7 @@ public static class MediatorExtensions
 					   ConcurrencyConflict<TResult> => TypedResults.Conflict(),
 					   Forbidden<TResult> => TypedResults.Forbid(),
 					   Success<TResult> success => func(success.Result),
-					   _ => throw new NotImplementedException()
+					   _ => throw new InvalidOperationException($"Unexpected command result type '{result?.GetType().FullName ?? "null"}' returned for command '{command.GetType().FullName}'.")
 				   };
 		}
 	}
