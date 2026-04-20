@@ -138,7 +138,7 @@ public static class MediatorExtensions
 					   ConcurrencyConflict => TypedResults.Conflict(),
 					   Forbidden => TypedResults.Forbid(),
 					   Success => response,
-					   _ => throw new InvalidOperationException($"Unexpected command result type '{result?.GetType().FullName ?? "null"}' returned for command '{command.GetType().FullName}'.")
+					   _ => throw new InvalidOperationException($"Unexpected command result type '{result.GetType().FullName ?? "null"}' returned for command '{command.GetType().FullName}'.")
 				   };
 		}
 
@@ -164,7 +164,7 @@ public static class MediatorExtensions
 					   ConcurrencyConflict<TResult> => TypedResults.Conflict(),
 					   Forbidden<TResult> => TypedResults.Forbid(),
 					   Success<TResult> success => func(success.Result),
-					   _ => throw new InvalidOperationException($"Unexpected command result type '{result?.GetType().FullName ?? "null"}' returned for command '{command.GetType().FullName}'.")
+					   _ => throw new InvalidOperationException($"Unexpected command result type '{result.GetType().FullName ?? "null"}' returned for command '{command.GetType().FullName}'.")
 				   };
 		}
 	}

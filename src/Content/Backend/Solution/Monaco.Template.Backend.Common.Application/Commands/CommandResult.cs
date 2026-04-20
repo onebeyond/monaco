@@ -24,7 +24,7 @@ public abstract record CommandResult<T> : CommandResult
     /// Creates a <see cref="CommandResult{T}"/> instance representing a "Not Found" result.
     /// </summary>
     /// <returns>A <see cref="NotFound{T}"/> instance indicating that the target item was not found.</returns>
-    public new static NotFound<T?> NotFound() =>
+    public new static NotFound<T> NotFound() =>
         new();
 
     /// <summary>
@@ -32,14 +32,14 @@ public abstract record CommandResult<T> : CommandResult
     /// </summary>
     /// <param name="validationResult">The result of the validation process, containing details about the validation errors.</param>
     /// <returns>A <see cref="ValidationFailure{T}"/> instance carrying the provided <paramref name="validationResult"/>.</returns>
-    public new static ValidationFailure<T?> ValidationFailure(ValidationResult validationResult) =>
+    public new static ValidationFailure<T> ValidationFailure(ValidationResult validationResult) =>
         new(validationResult);
 
     /// <summary>
     /// Creates a <see cref="CommandResult{T}"/> instance representing a concurrency conflict.
     /// </summary>
     /// <returns>A <see cref="ConcurrencyConflict{T}"/> instance indicating that a concurrency conflict was encountered while executing the command.</returns>
-    public new static ConcurrencyConflict<T?> ConcurrencyConflict() =>
+    public new static ConcurrencyConflict<T> ConcurrencyConflict() =>
         new();
 
     /// <summary>

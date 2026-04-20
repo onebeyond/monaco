@@ -53,8 +53,7 @@ public class CreateProductHandlerTests
 		var command = Command with
 					  {
 						  CompanyId = company.Id,
-						  Pictures = pictures.Select(x => x.Id)
-											 .ToArray(),
+						  Pictures = [.. pictures.Select(x => x.Id)],
 						  DefaultPictureId = pictures.First().Id
 					  };
 
