@@ -45,18 +45,13 @@ public abstract class IntegrationTest : IAsyncLifetime
 		return RestService.For<T>(_httpClient);
 	}
 
-	private HttpClient CreateHttpClient(WebApplicationFactory<Api.Program> factory)
-	{
+	private HttpClient CreateHttpClient(WebApplicationFactory<Api.Program> factory) =>
 #if (auth)
-		var httpClient = factory.CreateDefaultClient(new BearerTokenHandler(() => AccessToken));
+		factory.CreateDefaultClient(new UriBuilder(factory.Server.BaseAddress) { Scheme = Uri.UriSchemeHttps, Port = -1 }.Uri,
+									new BearerTokenHandler(() => AccessToken));
 #else
-		var httpClient = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+		factory.CreateDefaultClient(new UriBuilder(factory.Server.BaseAddress) { Scheme = Uri.UriSchemeHttps, Port = -1 }.Uri);
 #endif
-		// Switch only the scheme to https so requests bypass UseHttpsRedirection (the in-memory
-		// TestServer derives Request.IsHttps from the URI scheme; no TLS is actually involved).
-		httpClient.BaseAddress = new UriBuilder(httpClient.BaseAddress!) { Scheme = Uri.UriSchemeHttps, Port = -1 }.Uri;
-		return httpClient;
-	}
 #if (auth)
 
 	private sealed class BearerTokenHandler(Func<AccessTokenDto?> tokenAccessor) : DelegatingHandler
