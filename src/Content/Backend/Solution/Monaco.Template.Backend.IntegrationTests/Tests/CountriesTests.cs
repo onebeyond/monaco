@@ -1,8 +1,7 @@
 ﻿using AwesomeAssertions;
-using Flurl.Http;
 using Microsoft.EntityFrameworkCore;
-using Monaco.Template.Backend.Application.Features.Country.DTOs;
 using Monaco.Template.Backend.Domain.Model.Entities;
+using Monaco.Template.Backend.IntegrationTests.Apis;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
@@ -32,23 +31,24 @@ public class CountriesTests : IntegrationTest
 	[Fact(DisplayName = "Get Countries succeeds")]
 	public async Task GetCountriesSucceeds()
 	{
-		using var client = GetClient(Fixture.WebAppFactory);
-		var response = await client.Request(ApiRoutes.Countries.Query())
-								   .GetAsync();
+		var api = GetApi<ICountriesApi>(Fixture.WebAppFactory);
+		var response = await api.Query();
 
 		response.StatusCode
 				.Should()
-				.Be((int)HttpStatusCode.OK);
+				.Be(HttpStatusCode.OK);
 
-		var result = await response.GetJsonAsync<CountryDto[]>();
+		response.Content
+				.Should()
+				.NotBeNull();
+
 		var countriesCount = await Fixture.GetDbContext(Fixture.WebAppFactory.Services)
 										  .Set<Country>()
 										  .CountAsync();
 
-		result.Should()
-			  .NotBeNull();
-		result.Should()
-			  .HaveCount(countriesCount);
+		response.Content
+				.Should()
+				.HaveCount(countriesCount);
 	}
 
 	[Fact(DisplayName = "Get Country succeeds")]
@@ -56,23 +56,22 @@ public class CountriesTests : IntegrationTest
 	{
 		var countryId = Guid.Parse("534A826B-70EF-2128-1A4C-52E23B7D5447");
 
-		using var client = GetClient(Fixture.WebAppFactory);
-		var response = await client.Request(ApiRoutes.Countries.Get(countryId))
-								   .GetAsync();
+		var api = GetApi<ICountriesApi>(Fixture.WebAppFactory);
+		var response = await api.Get(countryId);
 
 		response.StatusCode
 				.Should()
-				.Be((int)HttpStatusCode.OK);
+				.Be(HttpStatusCode.OK);
 
-		var result = await response.GetJsonAsync<CountryDto>();
 		var country = await Fixture.GetDbContext(Fixture.WebAppFactory.Services)
 								   .Set<Country>()
 								   .SingleAsync(c => c.Id == countryId);
 
-		result.Should()
-			  .NotBeNull();
-		result.Name
-			  .Should()
-			  .Be(country.Name);
+		response.Content
+				.Should()
+				.NotBeNull();
+		response.Content!.Name
+				.Should()
+				.Be(country.Name);
 	}
 }

@@ -256,6 +256,8 @@
 						"Monaco.Template.Backend.Domain.Tests/ImageDimensionsTests.cs",
 						"Monaco.Template.Backend.Domain.Tests/ImageTests.cs",
 						"Monaco.Template.Backend.Domain.Tests/ProductTests.cs",
+						"Monaco.Template.Backend.IntegrationTests/Apis/IFilesApi.cs",
+						"Monaco.Template.Backend.IntegrationTests/Apis/IProductsApi.cs",
 						"Monaco.Template.Backend.IntegrationTests/Imports/Pictures/**/*",
 						"Monaco.Template.Backend.IntegrationTests/Scripts/Products.sql",
 						"Monaco.Template.Backend.IntegrationTests/Tests/FilesTests.cs",

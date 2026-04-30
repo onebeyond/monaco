@@ -1,13 +1,16 @@
-﻿using AutoFixture.Xunit2;
+using AutoFixture.Xunit2;
 using AwesomeAssertions;
 using Azure.Storage.Blobs;
-using Flurl.Http;
+#if (massTransitIntegration)
+using MassTransit.Testing;
+#endif
 using Microsoft.EntityFrameworkCore;
 using Monaco.Template.Backend.Api.DTOs;
 using Monaco.Template.Backend.Application.Features.Product.DTOs;
-using Monaco.Template.Backend.Common.Api.Application;
 using Monaco.Template.Backend.Common.Domain.Model;
 using Monaco.Template.Backend.Domain.Model.Entities;
+using Monaco.Template.Backend.IntegrationTests.Apis;
+using Monaco.Template.Backend.IntegrationTests.Factories;
 #if (massTransitIntegration && (apiService || workerService))
 using Monaco.Template.Backend.Messages.V1;
 #endif
@@ -16,8 +19,6 @@ using Monaco.Template.Backend.Worker.Consumers;
 #endif
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using MassTransit.Testing;
-using Monaco.Template.Backend.IntegrationTests.Factories;
 using File = System.IO.File;
 
 namespace Monaco.Template.Backend.IntegrationTests.Tests;
@@ -69,19 +70,24 @@ public class ProductsTests : IntegrationTest
 											  int? limit,
 											  int expectedItemsCount)
 	{
-		using var client = GetClient(Fixture.WebAppFactory);
-		var response = await client.Request(ApiRoutes.Products.Query(expandCompany,
-																	 expandPictures,
-																	 expandDefaultPicture,
-																	 offset,
-																	 limit))
-								   .GetAsync();
+		List<string> expand = [];
+		if (expandCompany)
+			expand.Add(nameof(ProductDto.Company));
+		if (expandPictures)
+			expand.Add(nameof(ProductDto.Pictures));
+		if (expandDefaultPicture)
+			expand.Add(nameof(ProductDto.DefaultPicture));
+
+		var api = GetApi<IProductsApi>(Fixture.WebAppFactory);
+		var response = await api.Query(expand.Count > 0 ? [.. expand] : null,
+									   offset,
+									   limit);
 
 		response.StatusCode
 				.Should()
-				.Be((int)HttpStatusCode.OK);
+				.Be(HttpStatusCode.OK);
 
-		var result = await response.GetJsonAsync<Page<ProductDto>>();
+		var result = response.Content;
 
 		result.Should()
 			  .NotBeNull();
@@ -139,15 +145,14 @@ public class ProductsTests : IntegrationTest
 	{
 		var productId = Guid.Parse("FA934D1C-1E6D-4DD4-ADC2-08DC18C8810C");
 
-		using var client = GetClient(Fixture.WebAppFactory);
-		var response = await client.Request(ApiRoutes.Products.Get(productId))
-								   .GetAsync();
+		var api = GetApi<IProductsApi>(Fixture.WebAppFactory);
+		var response = await api.Get(productId);
 
 		response.StatusCode
 				.Should()
-				.Be((int)HttpStatusCode.OK);
+				.Be(HttpStatusCode.OK);
 
-		var result = await response.GetJsonAsync<ProductDto>();
+		var result = response.Content;
 		var product = await Fixture.GetDbContext(Fixture.WebAppFactory.Services)
 								   .Set<Product>()
 								   .Include(x => x.Company)
@@ -234,11 +239,8 @@ public class ProductsTests : IntegrationTest
 												  Guid pictureId,
 												  bool? isThumbnail = null)
 	{
-		using var client = GetClient(Fixture.WebAppFactory);
-		var response = await client.Request(ApiRoutes.Products.DownloadPicture(productId,
-																			   pictureId,
-																			   isThumbnail))
-								   .GetAsync();
+		var api = GetApi<IProductsApi>(Fixture.WebAppFactory);
+		using var response = await api.DownloadPicture(productId, pictureId, isThumbnail);
 
 		var picture = await Fixture.GetDbContext(Fixture.WebAppFactory.Services)
 								   .Set<Image>()
@@ -249,16 +251,21 @@ public class ProductsTests : IntegrationTest
 
 		response.StatusCode
 				.Should()
-				.Be((int)HttpStatusCode.OK);
-		response.Headers
+				.Be(HttpStatusCode.OK);
+		response.Content
+				.Headers
+				.ContentType!
+				.ToString()
 				.Should()
-				.Contain(("Content-Type", picture.ContentType));
-		response.Headers
+				.Be(picture.ContentType);
+		response.Content
+				.Headers
+				.ContentDisposition!
+				.ToString()
 				.Should()
-				.Contain(("Content-Disposition",
-						  string.Format("attachment; filename={0}{1}; filename*=UTF-8''{0}{1}",
-										picture.Name,
-										picture.Extension)));
+				.Be(string.Format("attachment; filename={0}{1}; filename*=UTF-8''{0}{1}",
+								  picture.Name,
+								  picture.Extension));
 	}
 
 	[Theory(DisplayName = "Create new Product succeeds")]
@@ -270,7 +277,7 @@ public class ProductsTests : IntegrationTest
 		var webAppFactory = Fixture.WebAppFactory.GetCustomFactory(b => b.AddMassTransitTestHarnessForWebApp());
 		var workerServiceFactory = Fixture.WorkerServiceFactory.GetCustomFactory(b => b.AddMassTransitTestHarnessForWorker());
 
-		using var client = GetClient(webAppFactory);
+		var api = GetApi<IProductsApi>(webAppFactory);
 #if (auth)
 		await SetupAccessToken();
 #endif
@@ -294,13 +301,13 @@ public class ProductsTests : IntegrationTest
 										   [.. tempImages.Select(i => i.Id)],
 										   tempImages.Last().Id);
 
-		var response = await client.Request(ApiRoutes.Products.Post()).PostJsonAsync(dto);
+		var response = await api.Create(dto);
 
 		response.StatusCode
 				.Should()
-				.Be((int)HttpStatusCode.Created);
+				.Be(HttpStatusCode.Created);
 
-		var result = await response.GetJsonAsync<CreatedResponse>();
+		var result = response.Content;
 
 		result.Should()
 			  .NotBeNull();
@@ -308,8 +315,9 @@ public class ProductsTests : IntegrationTest
 			  .Should()
 			  .NotBeEmpty();
 		response.Headers
+				.Location
 				.Should()
-				.Contain(("Location", ApiRoutes.Products.Get(result.Id).ToString()));
+				.Be(new Uri($"api/v1/Products/{result.Id}", UriKind.Relative));
 
 		var products = await Fixture.GetDbContext(webAppFactory.Services)
 									.Set<Product>()
@@ -411,13 +419,12 @@ public class ProductsTests : IntegrationTest
 										   [.. productPictures],
 										   newPictureId);
 
-		using var client = GetClient(Fixture.WebAppFactory);
-		var response = await client.Request(ApiRoutes.Products.Put(productId))
-								   .PutJsonAsync(dto);
+		var api = GetApi<IProductsApi>(Fixture.WebAppFactory);
+		var response = await api.Update(productId, dto);
 
 		response.StatusCode
 				.Should()
-				.Be((int)HttpStatusCode.NoContent);
+				.Be(HttpStatusCode.NoContent);
 
 		var product = await Fixture.GetDbContext(Fixture.WebAppFactory.Services)
 								   .Set<Product>()
@@ -486,13 +493,12 @@ public class ProductsTests : IntegrationTest
 		await SetupAccessToken();
 #endif
 		var productId = Guid.Parse("FA934D1C-1E6D-4DD4-ADC2-08DC18C8810C");
-		using var client = GetClient(Fixture.WebAppFactory);
-		var response = await client.Request(ApiRoutes.Products.Delete(productId))
-								   .DeleteAsync();
+		var api = GetApi<IProductsApi>(Fixture.WebAppFactory);
+		var response = await api.Delete(productId);
 
 		response.StatusCode
 				.Should()
-				.Be((int)HttpStatusCode.OK);
+				.Be(HttpStatusCode.OK);
 
 		var products = await Fixture.GetDbContext(Fixture.WebAppFactory.Services)
 									.Set<Product>()

@@ -1,8 +1,11 @@
-﻿using Flurl.Http;
-using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
+#if (apiService)
+using Refit;
+#endif
 #if (apiService && auth)
+using System.Net.Http.Headers;
 using Monaco.Template.Backend.IntegrationTests.Auth;
 #endif
 
@@ -23,37 +26,44 @@ public abstract class IntegrationTest : IAsyncLifetime
 	{
 		Fixture = fixture;
 
-#if (apiService)
-#if (auth)
-
+#if (apiService && auth)
 		if (RequiresAuthentication)
 			KeycloakService = new KeycloakService(Fixture.KeycloakContainer.GetBaseAddress(),
 												  AppFixture.KeycloakRealm,
 												  AppFixture.KeycloakRealmUsername,
 												  AppFixture.KeycloakRealmPassword);
-#else
-				 .AllowAnyHttpStatus();
-
-#endif
 #endif
 	}
 
 #if (apiService)
-	protected FlurlClient GetClient(WebApplicationFactory<Api.Program> factory) =>
-        new FlurlClient(factory.CreateClient(new() { AllowAutoRedirect = false }))
+	protected T GetApi<T>(WebApplicationFactory<Api.Program> factory)
+	{
 #if (auth)
-            .AllowAnyHttpStatus()
-            .BeforeCall(call =>
-            {
-                if (AccessToken is not null)
-                    call.Request.WithOAuthBearerToken(AccessToken.AccessToken);
-            });
-
+		var httpClient = factory.CreateDefaultClient(new BearerTokenHandler(() => AccessToken));
 #else
-			.AllowAnyHttpStatus();
+		var httpClient = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+#endif
+		// Switch only the scheme to https so requests bypass UseHttpsRedirection (the in-memory
+		// TestServer derives Request.IsHttps from the URI scheme; no TLS is actually involved).
+		httpClient.BaseAddress = new UriBuilder(httpClient.BaseAddress!) { Scheme = Uri.UriSchemeHttps, Port = -1 }.Uri;
+		return RestService.For<T>(httpClient);
+	}
+#if (auth)
 
+	private sealed class BearerTokenHandler(Func<AccessTokenDto?> tokenAccessor) : DelegatingHandler
+	{
+		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+															   CancellationToken cancellationToken)
+		{
+			var token = tokenAccessor();
+			if (token is not null)
+				request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
+			return base.SendAsync(request, cancellationToken);
+		}
+	}
 #endif
 #endif
+
 	public virtual Task InitializeAsync() =>
 		Task.CompletedTask;
 
