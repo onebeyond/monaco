@@ -15,6 +15,9 @@ namespace Monaco.Template.Backend.IntegrationTests;
 public abstract class IntegrationTest : IAsyncLifetime
 {
 	protected readonly AppFixture Fixture;
+#if (apiService)
+	private HttpClient? _httpClient;
+#endif
 #if (apiService && auth)
 	protected KeycloakService? KeycloakService;
 	protected AccessTokenDto? AccessToken;
@@ -38,6 +41,12 @@ public abstract class IntegrationTest : IAsyncLifetime
 #if (apiService)
 	protected T GetApi<T>(WebApplicationFactory<Api.Program> factory)
 	{
+		_httpClient ??= CreateHttpClient(factory);
+		return RestService.For<T>(_httpClient);
+	}
+
+	private HttpClient CreateHttpClient(WebApplicationFactory<Api.Program> factory)
+	{
 #if (auth)
 		var httpClient = factory.CreateDefaultClient(new BearerTokenHandler(() => AccessToken));
 #else
@@ -46,7 +55,7 @@ public abstract class IntegrationTest : IAsyncLifetime
 		// Switch only the scheme to https so requests bypass UseHttpsRedirection (the in-memory
 		// TestServer derives Request.IsHttps from the URI scheme; no TLS is actually involved).
 		httpClient.BaseAddress = new UriBuilder(httpClient.BaseAddress!) { Scheme = Uri.UriSchemeHttps, Port = -1 }.Uri;
-		return RestService.For<T>(httpClient);
+		return httpClient;
 	}
 #if (auth)
 
@@ -91,6 +100,12 @@ public abstract class IntegrationTest : IAsyncLifetime
 					 .Database
 					 .ExecuteSqlRawAsync(await File.ReadAllTextAsync(filePath));
 
-	public virtual async Task DisposeAsync() =>
+	public virtual async Task DisposeAsync()
+	{
 		await Fixture.ResetDatabaseDataAsync();
+#if (apiService)
+		_httpClient?.Dispose();
+		_httpClient = null;
+#endif
+	}
 }

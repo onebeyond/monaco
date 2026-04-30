@@ -261,11 +261,21 @@ public class ProductsTests : IntegrationTest
 		response.Content
 				.Headers
 				.ContentDisposition!
-				.ToString()
+				.DispositionType
 				.Should()
-				.Be(string.Format("attachment; filename={0}{1}; filename*=UTF-8''{0}{1}",
-								  picture.Name,
-								  picture.Extension));
+				.Be("attachment");
+		response.Content
+				.Headers
+				.ContentDisposition!
+				.FileName
+				.Should()
+				.Be($"{picture.Name}{picture.Extension}");
+		response.Content
+				.Headers
+				.ContentDisposition!
+				.FileNameStar
+				.Should()
+				.Be($"{picture.Name}{picture.Extension}");
 	}
 
 	[Theory(DisplayName = "Create new Product succeeds")]
