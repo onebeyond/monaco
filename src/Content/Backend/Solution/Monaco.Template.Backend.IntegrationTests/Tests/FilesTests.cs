@@ -31,7 +31,7 @@ public class FilesTests : IntegrationTest
 	}
 
 	[Fact(DisplayName = "Upload File succeeds")]
-	public async Task UploadFileSuccceeds()
+	public async Task UploadFileSucceeds()
 	{
 		const string fileExtension = ".png";
 		const string fileName = $"CSharp-Logo{fileExtension}";
