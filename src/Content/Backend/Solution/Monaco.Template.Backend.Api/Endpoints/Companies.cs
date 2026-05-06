@@ -25,11 +25,11 @@ internal static class Companies
 														  "Companies");
 
 			companies.MapGet("",
-							 Task<Results<Ok<Page<CompanyDto>>, NotFound>> ([FromServices] ISender sender,
-																			HttpRequest request,
-																			CancellationToken cancellationToken) =>
-								 sender.ExecuteQueryAsync(new GetCompanyPage.Query(request.Query),
-														  cancellationToken),
+							 Task<Results<Ok<Page<CompanyDto>>, NotFound, ValidationProblem>> ([FromServices] ISender sender,
+																							   HttpRequest request,
+																							   CancellationToken cancellationToken) =>
+								 sender.ExecutePagedQueryAsync(new GetCompanyPage.Query(request.Query),
+															   cancellationToken),
 							 "GetCompanies",
 #if (!auth)
 							 "Gets a page of companies");
@@ -39,9 +39,9 @@ internal static class Companies
 #endif
 
 			companies.MapGet("{id:guid}",
-							 Task<Results<Ok<CompanyDto?>, NotFound>> ([FromServices] ISender sender,
-																	   [FromRoute] Guid id,
-																	   CancellationToken cancellationToken) =>
+							 Task<Results<Ok<CompanyDto>, NotFound>> ([FromServices] ISender sender,
+																	  [FromRoute] Guid id,
+																	  CancellationToken cancellationToken) =>
 								 sender.ExecuteQueryAsync(new GetCompanyById.Query(id),
 														  cancellationToken),
 							 "GetCompany",

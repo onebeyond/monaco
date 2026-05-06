@@ -9,9 +9,9 @@ namespace Monaco.Template.Backend.Application.Features.Country;
 
 public sealed class GetCountryById
 {
-	public sealed record Query(Guid Id) : QueryByIdBase<CountryDto?>(Id);
+	public sealed record Query(Guid Id) : QueryByIdBase<QueryResult<CountryDto>>(Id);
 
-	internal sealed class Handler : IRequestHandler<Query, CountryDto?>
+	internal sealed class Handler : IRequestHandler<Query, QueryResult<CountryDto>>
 	{
 		private readonly AppDbContext _dbContext;
 
@@ -20,9 +20,9 @@ public sealed class GetCountryById
 			_dbContext = dbContext;
 		}
 
-		public Task<CountryDto?> Handle(Query request, CancellationToken cancellationToken) =>
+		public Task<QueryResult<CountryDto>> Handle(Query request, CancellationToken cancellationToken) =>
 			request.ExecuteQueryAsync<Domain.Model.Entities.Country, CountryDto>(_dbContext,
-																				 x => x.Map(),
+																				 x => x?.Map(),
 																				 cancellationToken);
 	}
 }

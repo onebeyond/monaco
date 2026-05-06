@@ -18,15 +18,15 @@ internal static class Countries
 			var countries = builder.CreateApiGroupBuilder(versionSet, "Countries");
 
 			countries.MapGet("",
-							 Task<Results<Ok<List<CountryDto>>, NotFound>> ([FromServices] ISender sender,
-																			HttpRequest request) =>
+							 Task<Results<Ok<List<CountryDto>>, NotFound, ValidationProblem>> ([FromServices] ISender sender,
+																							   HttpRequest request) =>
 								 sender.ExecuteQueryAsync(new GetCountryList.Query(request.Query)),
 							 "GetCountries",
 							 "Gets a list of countries");
 
 			countries.MapGet("{id:guid}",
-							 Task<Results<Ok<CountryDto?>, NotFound>> ([FromServices] ISender sender,
-																	   [FromRoute] Guid id) =>
+							 Task<Results<Ok<CountryDto>, NotFound>> ([FromServices] ISender sender,
+																	  [FromRoute] Guid id) =>
 								 sender.ExecuteQueryAsync(new GetCountryById.Query(id)),
 							 "GetCountry",
 							 "Gets a country by Id");

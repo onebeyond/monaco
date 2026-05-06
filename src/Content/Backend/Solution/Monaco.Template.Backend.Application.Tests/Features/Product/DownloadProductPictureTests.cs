@@ -3,6 +3,7 @@ using Monaco.Template.Backend.Application.Features.Product;
 using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Application.Services.Contracts;
 using Monaco.Template.Backend.Common.Application.DTOs;
+using Monaco.Template.Backend.Common.Application.Queries;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
@@ -25,7 +26,7 @@ public class DownloadProductPictureTests
 		_dbContextMock.CreateAndSetupDbSetMock(products);
 
 		var product = products.First();
-		var picture = product.Pictures.First();
+		var picture = product.Pictures[0];
 		var pictureFileName = $"{picture.Name}{picture.Extension}";
 
 		_fileServiceMock.Setup(x => x.DownloadFileAsync(It.IsAny<Domain.Model.Entities.File>(), 
@@ -41,9 +42,12 @@ public class DownloadProductPictureTests
 		var sut = new DownloadProductPicture.Handler(_dbContextMock.Object, _fileServiceMock.Object);
 		var result = await sut.Handle(query, CancellationToken.None);
 
-		result.Should()
-			  .NotBeNull();
-		result!.FileName
+		var success = result.Should()
+							.BeOfType<Success<FileDownloadDto>>();
+		
+		success.Subject
+			   .Result
+			   .FileName
 			   .Should()
 			   .Be(pictureFileName);
 	}
@@ -55,7 +59,7 @@ public class DownloadProductPictureTests
 		_dbContextMock.CreateAndSetupDbSetMock(products);
 
 		var product = products.First();
-		var picture = product.Pictures.First();
+		var picture = product.Pictures[0];
 		var pictureFileName = $"{picture.Name}{picture.Extension}";
 
 		_fileServiceMock.Setup(x => x.DownloadFileAsync(It.IsAny<Domain.Model.Entities.File>(), It.IsAny<CancellationToken>()))
@@ -70,9 +74,12 @@ public class DownloadProductPictureTests
 		var sut = new DownloadProductPicture.Handler(_dbContextMock.Object, _fileServiceMock.Object);
 		var result = await sut.Handle(query, CancellationToken.None);
 
-		result.Should()
-			  .NotBeNull();
-		result!.FileName
+		var success = result.Should()
+							.BeOfType<Success<FileDownloadDto>>();
+
+		success.Subject
+			   .Result
+			   .FileName
 			   .Should()
 			   .Be(pictureFileName);
 	}
@@ -90,6 +97,6 @@ public class DownloadProductPictureTests
 		var result = await sut.Handle(query, CancellationToken.None);
 
 		result.Should()
-			  .BeNull();
+			  .BeOfType<NotFound<FileDownloadDto>>();
 	}
 }

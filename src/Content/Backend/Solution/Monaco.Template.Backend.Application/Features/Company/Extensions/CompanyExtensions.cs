@@ -7,21 +7,19 @@ namespace Monaco.Template.Backend.Application.Features.Company.Extensions;
 
 internal static class CompanyExtensions
 {
-	extension(Domain.Model.Entities.Company? value)
+	extension(Domain.Model.Entities.Company value)
 	{
-		public CompanyDto? Map(bool expandCountry = false) =>
-			value is null
-				? null
-				: new(value.Id,
-					  value.Name,
-					  value.Email,
-					  value.WebSiteUrl,
-					  value.Address?.Street,
-					  value.Address?.City,
-					  value.Address?.County,
-					  value.Address?.PostCode,
-					  value.Address?.CountryId,
-					  expandCountry ? value.Address?.Country.Map() : null);
+		public CompanyDto Map(bool expandCountry = false) =>
+			new(value.Id,
+				value.Name,
+				value.Email,
+				value.WebSiteUrl,
+				value.Address?.Street,
+				value.Address?.City,
+				value.Address?.County,
+				value.Address?.PostCode,
+				value.Address?.CountryId,
+				expandCountry ? value.Address?.Country.Map() : null);
 	}
 
 	extension(CreateCompany.Command value)

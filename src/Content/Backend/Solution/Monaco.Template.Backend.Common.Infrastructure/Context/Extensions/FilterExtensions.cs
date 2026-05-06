@@ -89,7 +89,7 @@ public static class FilterExtensions
 		return (filterMapLower, filterList, predicate);
 	}
 
-	private static Expression GetBodyExpression<T>(Expression<Func<T, object>> expression) =>
+	public static Expression GetBodyExpression<T>(Expression<Func<T, object>> expression) =>
 		expression.Body.NodeType == ExpressionType.Convert ? ((UnaryExpression)expression.Body).Operand : expression.Body;
 
 	private static Expression<Func<T, bool>> GetOperationExpression<T>(string fieldKey, Expression<Func<T, object>> fieldMap, object? value, bool toLowerCase = false)
@@ -153,7 +153,7 @@ public static class FilterExtensions
 		return Expression.Lambda<Func<T, bool>>(expression, fieldMap.Parameters);
 	}
 
-	private static bool ValidateDataType(string? data, Type type)
+	public static bool ValidateDataType(string? data, Type type)
 	{
 		data = data is ['!', ..] ? data[1..] : data;
 		return data switch

@@ -5,6 +5,8 @@ using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Application.Features.Company.DTOs;
+using Monaco.Template.Backend.Common.Application.Queries;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Company;
@@ -27,9 +29,11 @@ public class GetCompanyByIdTests
 		var sut = new GetCompanyById.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(query, CancellationToken.None);
 
-		result.Should()
-			  .NotBeNull();
-		result!.Name
+		var success = result.Should()
+							.BeOfType<Success<CompanyDto>>();
+		success.Subject
+			   .Result
+			   .Name
 			   .Should()
 			   .Be(company.Name);
 	}
@@ -45,6 +49,6 @@ public class GetCompanyByIdTests
 		var result = await sut.Handle(query, CancellationToken.None);
 
 		result.Should()
-			  .BeNull();
+			  .BeOfType<NotFound<CompanyDto>>();
 	}
 }

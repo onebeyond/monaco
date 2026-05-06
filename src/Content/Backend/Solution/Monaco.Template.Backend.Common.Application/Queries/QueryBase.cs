@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Primitives;
+using System.Linq.Expressions;
 
 namespace Monaco.Template.Backend.Common.Application.Queries;
 
@@ -10,15 +11,15 @@ namespace Monaco.Template.Backend.Common.Application.Queries;
 /// <remarks>This class is designed to be inherited by specific query implementations. It provides access to the
 /// query parameters as key-value pairs and includes helper methods for retrieving typed values from the query
 /// parameters. The query parameters are case-insensitive for key matching.</remarks>
-/// <typeparam name="T">The type of the result expected from the query.</typeparam>
+/// <typeparam name="TResult">The type of the result expected from the query.</typeparam>
 /// <param name="QueryParams">Represents the query parameters collection</param>
-public abstract record QueryBase<T>(IEnumerable<KeyValuePair<string, StringValues>> QueryParams) : IRequest<T>
+public abstract record QueryBase<TResult>(IEnumerable<KeyValuePair<string, StringValues>> QueryParams) : IRequest<TResult>
 {
-	private const string ExpandParam = "expand";
+	protected const string ExpandParam = "expand";
 
 	public virtual IEnumerable<KeyValuePair<string, StringValues>> QueryParams { get; } = QueryParams;
 	public virtual string?[] Sort => [.. QueryParams.FirstOrDefault(x => x.Key == "sort").Value];
-
+	
 	/// <summary>
 	/// Determines whether the specified value is included in the "expand" query parameter.
 	/// </summary>
@@ -82,4 +83,10 @@ public abstract record QueryBase<T>(IEnumerable<KeyValuePair<string, StringValue
 																						.Value
 																						.Select(x => Enum.TryParse<TEnum>(x, true, out var y) ? y : (TEnum?)null)
 																						.FirstOrDefault(x => x is not null);
+}
+
+public abstract record QueryBase<TResult, TEntity>(IEnumerable<KeyValuePair<string, StringValues>> QueryParams) : QueryBase<QueryResult<TResult>>(QueryParams) where TEntity : class
+{
+	public virtual Dictionary<string, Expression<Func<TEntity, object>>> GetFilteringMappedFields() => [];
+	public virtual Dictionary<string, Expression<Func<TEntity, object>>> GetSortingMappedFields() => GetFilteringMappedFields();
 }

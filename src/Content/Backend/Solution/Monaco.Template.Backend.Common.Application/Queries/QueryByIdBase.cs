@@ -10,4 +10,4 @@ namespace Monaco.Template.Backend.Common.Application.Queries;
 /// include additional query parameters.</remarks>
 /// <typeparam name="T">The type of the entity to be retrieved.</typeparam>
 /// <param name="Id">The unique identifier of the entity to query.</param>
-public abstract record QueryByIdBase<T>(Guid Id) : IRequest<T?>;
+public abstract record QueryByIdBase<T>(Guid Id) : IRequest<T>;
