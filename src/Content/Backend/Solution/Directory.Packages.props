@@ -8,7 +8,7 @@
     <PackageVersion Include="DelegateDecompiler.EntityFrameworkCore5" Version="0.35.3" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageVersion Include="Flurl.Http" Version="4.0.2" />
+    <PackageVersion Include="Flurl" Version="4.0.0" />
     <PackageVersion Include="LinqKit.Microsoft.EntityFrameworkCore" Version="10.0.10" />
     <PackageVersion Include="MediatR" Version="12.5.0" />
     <PackageVersion Include="MediatR.Contracts" Version="2.0.1" />
@@ -24,6 +24,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
     <PackageVersion Include="Polly.Core" Version="8.6.5" />
     <PackageVersion Include="Polly.Extensions" Version="8.6.5" />
+    <PackageVersion Include="Refit" Version="10.1.6" />
     <PackageVersion Include="Respawn" Version="7.0.0" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.12.27" />
     <PackageVersion Include="Serilog" Version="4.3.0" />

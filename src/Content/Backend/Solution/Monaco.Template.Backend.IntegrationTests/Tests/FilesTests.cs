@@ -1,7 +1,8 @@
-﻿using AwesomeAssertions;
-using Flurl.Http;
+using AwesomeAssertions;
 using Microsoft.EntityFrameworkCore;
 using Monaco.Template.Backend.Domain.Model.Entities;
+using Monaco.Template.Backend.IntegrationTests.Apis;
+using Refit;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using File = Monaco.Template.Backend.Domain.Model.Entities.File;
@@ -30,23 +31,21 @@ public class FilesTests : IntegrationTest
 	}
 
 	[Fact(DisplayName = "Upload File succeeds")]
-	public async Task UploadFileSuccceeds()
+	public async Task UploadFileSucceeds()
 	{
 		const string fileExtension = ".png";
 		const string fileName = $"CSharp-Logo{fileExtension}";
-		const string file = $@"Imports\Pictures\{fileName}";
+		const string filePath = $@"Imports\Pictures\{fileName}";
 		const string contentType = "image/png";
 
-		using var client = GetClient(Fixture.WebAppFactory);
-		var response = await client.Request(ApiRoutes.Files.Post())
-								   .PostMultipartAsync(b => b.AddFile("file",
-																	  System.IO.File.OpenRead(file),
-																	  fileName, contentType));
+		var api = GetApi<IFilesApi>(Fixture.WebAppFactory);
+		await using var stream = System.IO.File.OpenRead(filePath);
+		var response = await api.Upload(new StreamPart(stream, fileName, contentType));
 		var uploadDate = DateTime.UtcNow;
 
 		response.StatusCode
 				.Should()
-				.Be((int)HttpStatusCode.Created);
+				.Be(HttpStatusCode.Created);
 
 		var files = await Fixture.GetDbContext(Fixture.WebAppFactory.Services)
 								 .Set<File>()

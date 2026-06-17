@@ -1,8 +1,11 @@
-﻿using Flurl.Http;
-using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.CodeAnalysis;
+#if (apiService)
+using Refit;
+#endif
 #if (apiService && auth)
+using System.Net.Http.Headers;
 using Monaco.Template.Backend.IntegrationTests.Auth;
 #endif
 
@@ -12,6 +15,9 @@ namespace Monaco.Template.Backend.IntegrationTests;
 public abstract class IntegrationTest : IAsyncLifetime
 {
 	protected readonly AppFixture Fixture;
+#if (apiService)
+	private HttpClient? _httpClient;
+#endif
 #if (apiService && auth)
 	protected KeycloakService? KeycloakService;
 	protected AccessTokenDto? AccessToken;
@@ -23,37 +29,45 @@ public abstract class IntegrationTest : IAsyncLifetime
 	{
 		Fixture = fixture;
 
-#if (apiService)
-#if (auth)
-
+#if (apiService && auth)
 		if (RequiresAuthentication)
 			KeycloakService = new KeycloakService(Fixture.KeycloakContainer.GetBaseAddress(),
 												  AppFixture.KeycloakRealm,
 												  AppFixture.KeycloakRealmUsername,
 												  AppFixture.KeycloakRealmPassword);
-#else
-				 .AllowAnyHttpStatus();
-
-#endif
 #endif
 	}
 
 #if (apiService)
-	protected FlurlClient GetClient(WebApplicationFactory<Api.Program> factory) =>
-        new FlurlClient(factory.CreateClient(new() { AllowAutoRedirect = false }))
+	protected T GetApi<T>(WebApplicationFactory<Api.Program> factory)
+	{
+		_httpClient ??= CreateHttpClient(factory);
+		return RestService.For<T>(_httpClient);
+	}
+
+	private HttpClient CreateHttpClient(WebApplicationFactory<Api.Program> factory) =>
 #if (auth)
-            .AllowAnyHttpStatus()
-            .BeforeCall(call =>
-            {
-                if (AccessToken is not null)
-                    call.Request.WithOAuthBearerToken(AccessToken.AccessToken);
-            });
-
+		factory.CreateDefaultClient(new UriBuilder(factory.Server.BaseAddress) { Scheme = Uri.UriSchemeHttps, Port = -1 }.Uri,
+									new BearerTokenHandler(() => AccessToken));
 #else
-			.AllowAnyHttpStatus();
+		factory.CreateDefaultClient(new UriBuilder(factory.Server.BaseAddress) { Scheme = Uri.UriSchemeHttps, Port = -1 }.Uri);
+#endif
+#if (auth)
 
+	private sealed class BearerTokenHandler(Func<AccessTokenDto?> tokenAccessor) : DelegatingHandler
+	{
+		protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+															   CancellationToken cancellationToken)
+		{
+			var token = tokenAccessor();
+			if (token is not null)
+				request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
+			return base.SendAsync(request, cancellationToken);
+		}
+	}
 #endif
 #endif
+
 	public virtual Task InitializeAsync() =>
 		Task.CompletedTask;
 
@@ -81,6 +95,12 @@ public abstract class IntegrationTest : IAsyncLifetime
 					 .Database
 					 .ExecuteSqlRawAsync(await File.ReadAllTextAsync(filePath));
 
-	public virtual async Task DisposeAsync() =>
+	public virtual async Task DisposeAsync()
+	{
 		await Fixture.ResetDatabaseDataAsync();
+#if (apiService)
+		_httpClient?.Dispose();
+		_httpClient = null;
+#endif
+	}
 }
