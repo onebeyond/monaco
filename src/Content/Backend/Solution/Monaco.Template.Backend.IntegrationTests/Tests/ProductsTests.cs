@@ -10,11 +10,13 @@ using Monaco.Template.Backend.Application.Features.Product.DTOs;
 using Monaco.Template.Backend.Common.Domain.Model;
 using Monaco.Template.Backend.Domain.Model.Entities;
 using Monaco.Template.Backend.IntegrationTests.Apis;
+#if (massTransitIntegration || workerService)
 using Monaco.Template.Backend.IntegrationTests.Factories;
+#endif
 #if (massTransitIntegration && (apiService || workerService))
 using Monaco.Template.Backend.Messages.V1;
 #endif
-#if (massTransitIntegration || workerService)
+#if (massTransitIntegration && workerService)
 using Monaco.Template.Backend.Worker.Consumers;
 #endif
 using System.Diagnostics.CodeAnalysis;
@@ -284,8 +286,16 @@ public class ProductsTests : IntegrationTest
 											   string description,
 											   decimal price)
 	{
+#if (massTransitIntegration)
 		var webAppFactory = Fixture.WebAppFactory.GetCustomFactory(b => b.AddMassTransitTestHarnessForWebApp());
+#else
+		var webAppFactory = Fixture.WebAppFactory;
+#endif
+#if (workerService && massTransitIntegration)
 		var workerServiceFactory = Fixture.WorkerServiceFactory.GetCustomFactory(b => b.AddMassTransitTestHarnessForWorker());
+#elif (workerService)
+		var workerServiceFactory = Fixture.WorkerServiceFactory;
+#endif
 
 		var api = GetApi<IProductsApi>(webAppFactory);
 #if (auth)

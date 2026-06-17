@@ -13,12 +13,12 @@ using Respawn;
 using Testcontainers.MsSql;
 #if (massTransitIntegration)
 using Testcontainers.RabbitMq;
+#endif
 using Monaco.Template.Backend.IntegrationTests.Factories;
 using Monaco.Template.Backend.Application.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-#endif
 
 namespace Monaco.Template.Backend.IntegrationTests;
 
@@ -111,15 +111,15 @@ public class AppFixture : IAsyncLifetime
 
 	public string RabbitMqHost =>
 		RabbitMqConnectionString.Host;
-	
+
 	public int RabbitMqPort =>
 		RabbitMqConnectionString.Port!.Value;
-	
+
 	public string RabbitMqUsername =>
 		RabbitMqConnectionString.UserInfo
 								.Split(':')
 								.First();
-	
+
 	public string RabbitMqPassword =>
 		RabbitMqConnectionString.UserInfo
 								.Split(':')
