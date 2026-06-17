@@ -99,11 +99,11 @@ internal static class Products
 #endif
 
 			products.MapGet("{productId:guid}/Pictures/{pictureId:guid}",
-							Task<Results<FileStreamHttpResult, NotFound>> ([FromServices] ISender sender,
-																		   [FromRoute] Guid productId,
-																		   [FromRoute] Guid pictureId,
-																		   HttpRequest request,
-																		   CancellationToken cancellationToken) =>
+							Task<Results<FileStreamHttpResult, NotFound, ValidationProblem>> ([FromServices] ISender sender,
+																							  [FromRoute] Guid productId,
+																							  [FromRoute] Guid pictureId,
+																							  HttpRequest request,
+																							  CancellationToken cancellationToken) =>
 								sender.ExecuteFileDownloadAsync(new DownloadProductPicture.Query(productId,
 																								 pictureId,
 																								 request.Query),

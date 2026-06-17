@@ -27,7 +27,7 @@ public sealed class GetCompanyById
 									   .Include(x => x.Address!.Country)
 									   .SingleOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 			
-			return QueryResult<CompanyDto>.SuccessOrNotFound(item?.Map());
+			return QueryResult<CompanyDto>.SuccessOrNotFound(item?.Map(true));
 		}
 	}
 }

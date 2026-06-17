@@ -18,7 +18,7 @@ public abstract record QueryBase<TResult>(IEnumerable<KeyValuePair<string, Strin
 	protected const string ExpandParam = "expand";
 
 	public virtual IEnumerable<KeyValuePair<string, StringValues>> QueryParams { get; } = QueryParams;
-	public virtual string?[] Sort => [.. QueryParams.FirstOrDefault(x => x.Key == "sort").Value];
+	public virtual string?[] Sort => [.. QueryParams.FirstOrDefault(x => x.Key.Equals("sort", StringComparison.InvariantCultureIgnoreCase)).Value];
 	
 	/// <summary>
 	/// Determines whether the specified value is included in the "expand" query parameter.

@@ -35,26 +35,26 @@ public static class MediatorQueryExtensions
 			await sender.ExecuteQueryAsync(query, cancellationToken);
 
 		/// <summary>
-		/// Executes the query passed and returns the corresponding response that can be either Ok(result) or a NotFound() result depending on whether the retuned result is null or not
+		/// Executes the query passed and returns the corresponding response that can be either Ok(result), NotFound or ValidationProblem.
 		/// </summary>
 		/// <typeparam name="TResult">The type of the records returned by the query</typeparam>
 		/// <param name="query"></param>
 		/// <param name="cancellationToken"></param>
 		/// <returns></returns>
-		public async Task<Results<Ok<TResult>, NotFound>> ExecuteQueryAsync<TResult>(QueryBase<QueryResult<TResult>> query,
-																					 CancellationToken cancellationToken = default) =>
-			OkOrNotFound(await sender.Send(query, cancellationToken));
+		public async Task<Results<Ok<TResult>, NotFound, ValidationProblem>> ExecuteQueryAsync<TResult>(QueryBase<QueryResult<TResult>> query,
+																										CancellationToken cancellationToken = default) =>
+			OkOrNotFoundOrValidationProblem(await sender.Send(query, cancellationToken));
 
 		/// <summary>
-		/// Executes the paged query passed and returns the corresponding response that can be either Ok(result) or a NotFound() result depending on whether the returned result is null or not
+		/// Executes the paged query passed and returns the corresponding response that can be either Ok(result), NotFound or ValidationProblem.
 		/// </summary>
 		/// <typeparam name="TResult">The type of the records contained in the page returned by the query</typeparam>
 		/// <param name="query"></param>
 		/// <param name="cancellationToken"></param>
 		/// <returns></returns>
-		public async Task<Results<Ok<Page<TResult>>, NotFound>> ExecuteQueryAsync<TResult>(QueryPagedBase<TResult> query,
-																						   CancellationToken cancellationToken = default) =>
-			OkOrNotFound(await sender.Send(query, cancellationToken));
+		public async Task<Results<Ok<Page<TResult>>, NotFound, ValidationProblem>> ExecuteQueryAsync<TResult>(QueryPagedBase<TResult> query,
+																											  CancellationToken cancellationToken = default) =>
+			OkOrNotFoundOrValidationProblem(await sender.Send(query, cancellationToken));
 
 		/// <summary>
 		/// Executes the query passed and returns the corresponding response that can be either Ok(result) or a NotFound() result depending on whether the returned item is null or not
@@ -80,15 +80,15 @@ public static class MediatorQueryExtensions
 			OkOrNotFound(await sender.Send(query, cancellationToken));
 
 		/// <summary>
-		/// Executes the query passed and returns a FileStreamResult for allowing download of a file or a NotFound() result depending on whether the returned item is null or not
+		/// Executes the query passed and returns a FileStreamResult, NotFound or ValidationProblem.
 		/// </summary>
 		/// <typeparam name="TResult"></typeparam>
 		/// <param name="query"></param>
 		/// <param name="cancellationToken"></param>
 		/// <returns></returns>
-		public async Task<Results<FileStreamHttpResult, NotFound>> ExecuteFileDownloadAsync<TResult>(QueryBase<QueryResult<TResult>> query,
-																									 CancellationToken cancellationToken = default) where TResult : FileDownloadDto =>
-			FileDownloadOrNotFound(await sender.Send(query, cancellationToken));
+		public async Task<Results<FileStreamHttpResult, NotFound, ValidationProblem>> ExecuteFileDownloadAsync<TResult>(QueryBase<QueryResult<TResult>> query,
+																														CancellationToken cancellationToken = default) where TResult : FileDownloadDto =>
+			FileDownloadOrNotFoundOrValidationProblem(await sender.Send(query, cancellationToken));
 
 		/// <summary>
 		/// Executes the query passed and returns a FileStreamResult for allowing download of a file or a NotFound() result depending on whether the returned item is null or not
@@ -102,6 +102,15 @@ public static class MediatorQueryExtensions
 			FileDownloadOrNotFound(await sender.Send(query, cancellationToken));
 	}
 
+	private static Results<FileStreamHttpResult, NotFound, ValidationProblem> FileDownloadOrNotFoundOrValidationProblem<TResult>(QueryResult<TResult> result) where TResult : FileDownloadDto =>
+		ResponseOrNotFoundOrValidationProblem(result,
+											  success => TypedResults.File(success.FileContent,
+																		   success.ContentType,
+																		   success.FileName));
+
+	private static Results<Ok<TResult>, NotFound, ValidationProblem> OkOrNotFoundOrValidationProblem<TResult>(QueryResult<TResult> result) =>
+		ResponseOrNotFoundOrValidationProblem(result, TypedResults.Ok);
+
 	private static Results<FileStreamHttpResult, NotFound> FileDownloadOrNotFound<TResult>(QueryResult<TResult> result) where TResult : FileDownloadDto =>
 		ResponseOrNotFound(result,
 						   success => TypedResults.File(success.FileContent,
@@ -110,6 +119,15 @@ public static class MediatorQueryExtensions
 
 	private static Results<Ok<TResult>, NotFound> OkOrNotFound<TResult>(QueryResult<TResult> result) =>
 		ResponseOrNotFound(result, TypedResults.Ok);
+
+	private static Results<TResponse, NotFound, ValidationProblem> ResponseOrNotFoundOrValidationProblem<TResult, TResponse>(QueryResult<TResult> result, Func<TResult, TResponse> func) where TResponse : IResult =>
+		result switch
+		{
+			Success<TResult> success => func(success.Result),
+			Common.Application.Queries.NotFound<TResult> => TypedResults.NotFound(),
+			ValidationFailure<TResult> validationFailed => TypedResults.ValidationProblem(validationFailed.ValidationResult.ToDictionary()),
+			_ => throw new InvalidOperationException($"Unexpected query result type '{result.GetType().FullName ?? "null"}' returned.")
+		};
 
 	private static Results<TResponse, NotFound> ResponseOrNotFound<TResult, TResponse>(QueryResult<TResult> result, Func<TResult, TResponse> func) where TResponse : IResult =>
 		result switch

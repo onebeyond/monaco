@@ -3,7 +3,9 @@ using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 
 namespace Monaco.Template.Backend.Common.Application.Queries.Validators;
 
-public sealed class QueryBaseValidator<T, TEntity> : AbstractValidator<QueryBase<T, TEntity>> where TEntity : class
+public sealed class QueryBaseValidator<TQuery, T, TEntity> : AbstractValidator<TQuery>
+	where TQuery : QueryBase<T, TEntity>
+	where TEntity : class
 {
 	public QueryBaseValidator()
 	{

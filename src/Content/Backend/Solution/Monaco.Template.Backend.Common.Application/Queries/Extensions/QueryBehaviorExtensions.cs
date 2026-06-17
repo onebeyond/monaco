@@ -14,8 +14,10 @@ public static class QueryBehaviorExtensions
 		/// <summary>
 		/// Scans the assembly for query types returning <see cref="QueryResult{T}"/>, registers
 		/// <see cref="QueryValidationBehavior{TQuery,TResult}"/> for each, and automatically registers
-		/// the appropriate default base validators (<see cref="QueryPagedBaseValidator{T}"/> or
-		/// <see cref="QueryPagedBaseValidator{T,TEntity}"/>).
+		/// the appropriate default base validators closed over the concrete query type
+		/// (<see cref="QueryPagedBaseValidator{TQuery,T}"/>,
+		/// <see cref="QueryPagedBaseValidator{TQuery,T,TEntity}"/> or
+		/// <see cref="QueryBaseValidator{TQuery,T,TEntity}"/>).
 		/// Specific validators already registered in DI will also be picked up by the behavior.
 		/// </summary>
 		public IServiceCollection RegisterQueryValidationBehaviors(Assembly assembly)
@@ -58,17 +60,16 @@ public static class QueryBehaviorExtensions
 			{
 				var found = true;
 				switch (baseType.GetGenericTypeDefinition())
-				{
-					case var t when t == typeof(QueryPagedBase<,>):
-						services.AddScoped(validatorInterface, typeof(QueryPagedBaseValidator<,>).MakeGenericType(baseType.GenericTypeArguments));
-						services.AddScoped(validatorInterface, typeof(QueryBaseValidator<,>).MakeGenericType(baseType.GenericTypeArguments));
-						break;
-					case var t when t == typeof(QueryPagedBase<>):
-						services.AddScoped(validatorInterface, typeof(QueryPagedBaseValidator<>).MakeGenericType(baseType.GenericTypeArguments));
-						break;
-					case var t when t == typeof(QueryBase<,>):
-						services.AddScoped(validatorInterface, typeof(QueryBaseValidator<,>).MakeGenericType(baseType.GenericTypeArguments));
-						break;
+					{
+						case var t when t == typeof(QueryPagedBase<,>):
+							services.AddScoped(validatorInterface, typeof(QueryPagedBaseValidator<,,>).MakeGenericType([queryType, .. baseType.GenericTypeArguments]));
+							break;
+						case var t when t == typeof(QueryPagedBase<>):
+							services.AddScoped(validatorInterface, typeof(QueryPagedBaseValidator<,>).MakeGenericType([queryType, .. baseType.GenericTypeArguments]));
+							break;
+						case var t when t == typeof(QueryBase<,>):
+							services.AddScoped(validatorInterface, typeof(QueryBaseValidator<,,>).MakeGenericType([queryType, .. baseType.GenericTypeArguments]));
+							break;
 					default:
 						found = false;
 						break;
