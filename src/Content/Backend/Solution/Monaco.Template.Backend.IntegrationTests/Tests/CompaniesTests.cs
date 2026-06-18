@@ -97,6 +97,25 @@ public class CompaniesTests : IntegrationTest
 				.Be(HttpStatusCode.BadRequest);
 	}
 
+	[Fact(DisplayName = "Get Companies page with lowercase sort field succeeds")]
+	public async Task GetCompaniesPageWithLowercaseSortFieldSucceeds()
+	{
+		var api = GetApi<ICompaniesApi>(Fixture.WebAppFactory);
+		var response = await api.Query(sort: ["name"]);
+
+		response.StatusCode
+				.Should()
+				.Be(HttpStatusCode.OK);
+
+		response.Content
+				.Should()
+				.NotBeNull();
+		response.Content!
+				.Items
+				.Should()
+				.BeInAscendingOrder(x => x.Name);
+	}
+
 	[Theory(DisplayName = "Get Companies page succeeds")]
 	[InlineData(false, null, null, 3)]
 	[InlineData(true, 1, 5, 2)]

@@ -124,6 +124,24 @@ public class ProductsTests : IntegrationTest
 				.Be(HttpStatusCode.BadRequest);
 	}
 
+	[Fact(DisplayName = "Get Products page with lowercase sort field succeeds")]
+	public async Task GetProductsPageWithLowercaseSortFieldSucceeds()
+	{
+		var api = GetApi<IProductsApi>(Fixture.WebAppFactory);
+		var response = await api.Query(sort: ["price"]);
+
+		response.StatusCode
+				.Should()
+				.Be(HttpStatusCode.OK);
+
+		response.Content
+				.Should()
+				.NotBeNull();
+		response.Content!.Items
+				.Should()
+				.BeInAscendingOrder(x => x.Price);
+	}
+
 	[Theory(DisplayName = "Get Products page succeeds")]
 	[InlineData(false, false, false, null, null, 3)]
 	[InlineData(true, true, true, 1, 5, 2)]

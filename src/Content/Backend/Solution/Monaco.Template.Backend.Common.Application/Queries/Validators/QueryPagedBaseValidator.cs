@@ -66,6 +66,7 @@ public sealed class QueryPagedBaseValidator<TQuery, T, TEntity> : QueryPagedVali
 		RuleForEach(x => x.Sort)
 			.Must((query, sortField) => sortField is null ||
 										query.GetSortingMappedFields()
+											 .ToDictionary(StringComparer.OrdinalIgnoreCase)
 											 .ContainsKey(sortField.TrimStart('-')))
 			.WithMessage((_, sortField) => $"Sort field '{sortField?.TrimStart('-')}' is not a valid sortable field.");
 

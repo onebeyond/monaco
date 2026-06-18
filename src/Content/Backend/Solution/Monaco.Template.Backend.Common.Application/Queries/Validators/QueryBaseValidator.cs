@@ -10,9 +10,9 @@ public sealed class QueryBaseValidator<TQuery, T, TEntity> : AbstractValidator<T
 	public QueryBaseValidator()
 	{
 		RuleForEach(x => x.Sort)
-			.Must((query, sortField) => sortField is null ||
-										query.GetSortingMappedFields()
-											 .ContainsKey(sortField.TrimStart('-')))
+			.Must((query, sortField) => sortField is null || query.GetSortingMappedFields()
+																  .ToDictionary(StringComparer.OrdinalIgnoreCase)
+																  .ContainsKey(sortField.TrimStart('-')))
 			.WithMessage((_, sortField) => $"Sort field '{sortField?.TrimStart('-')}' is not a valid sortable field.");
 
 		RuleFor(x => x.QueryParams)
@@ -20,7 +20,7 @@ public sealed class QueryBaseValidator<TQuery, T, TEntity> : AbstractValidator<T
 					{
 						if (context.InstanceToValidate.GetFilteringMappedFields().Count == 0)
 							return;
-						
+
 						var mappedFields = context.InstanceToValidate
 												  .GetFilteringMappedFields()
 												  .ToDictionary(StringComparer.OrdinalIgnoreCase);
@@ -29,9 +29,8 @@ public sealed class QueryBaseValidator<TQuery, T, TEntity> : AbstractValidator<T
 						{
 							var type = FilterExtensions.GetBodyExpression(mappedFields[param.Key]).Type;
 
-							foreach (var value in param.Value
-													   .Where(v => v is not null &&
-																   !FilterExtensions.ValidateDataType(v, type)))
+							foreach (var value in param.Value.Where(v => v is not null &&
+																		 !FilterExtensions.ValidateDataType(v, type)))
 								context.AddFailure(param.Key, $"Value '{value}' is not valid for filter field '{param.Key}' which expects type '{type.Name}'.");
 						}
 					});
