@@ -6,7 +6,7 @@ namespace Monaco.Template.Backend.IntegrationTests.Apis;
 internal interface ICountriesApi
 {
     [Get("/api/v1/Countries")]
-    Task<IApiResponse<CountryDto[]>> Query();
+    Task<IApiResponse<CountryDto[]>> Query([Query(CollectionFormat.Multi)] string[]? sort = null);
 
     [Get("/api/v1/Countries/{id}")]
     Task<IApiResponse<CountryDto>> Get(Guid id);

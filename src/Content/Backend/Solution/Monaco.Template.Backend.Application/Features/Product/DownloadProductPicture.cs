@@ -12,12 +12,12 @@ public sealed class DownloadProductPicture
 {
 	public sealed record Query(Guid ProductId,
 							   Guid PictureId,
-							   IEnumerable<KeyValuePair<string, StringValues>> QueryParams) : QueryBase<FileDownloadDto?>(QueryParams)
+							   IEnumerable<KeyValuePair<string, StringValues>> QueryParams) : QueryBase<QueryResult<FileDownloadDto>>(QueryParams)
 	{
 		public bool? IsThumbnail => GetValueBool("thumbnail");
 	};
 
-	internal sealed class Handler : IRequestHandler<Query, FileDownloadDto?>
+	internal sealed class Handler : IRequestHandler<Query, QueryResult<FileDownloadDto>>
 	{
 		private readonly AppDbContext _dbContext;
 		private readonly IFileService _fileService;
@@ -28,7 +28,7 @@ public sealed class DownloadProductPicture
 			_fileService = fileService;
 		}
 
-		public async Task<FileDownloadDto?> Handle(Query request, CancellationToken cancellationToken)
+		public async Task<QueryResult<FileDownloadDto>> Handle(Query request, CancellationToken cancellationToken)
 		{
 			var query = _dbContext.Set<Domain.Model.Entities.Product>()
 								  .AsNoTracking()
@@ -42,8 +42,8 @@ public sealed class DownloadProductPicture
 			var item = await query.SingleOrDefaultAsync(cancellationToken);
 
 			return item is null
-					   ? null
-					   : await _fileService.DownloadFileAsync(item, cancellationToken);
+					   ? QueryResult<FileDownloadDto>.NotFound()
+					   : QueryResult<FileDownloadDto>.Success(await _fileService.DownloadFileAsync(item, cancellationToken));
 		}
 	}
 }

@@ -62,6 +62,86 @@ public class ProductsTests : IntegrationTest
 	private BlobContainerClient GetBlobContainerClient() =>
 		new(Fixture.StorageConnectionString, AppFixture.StorageContainer);
 
+	[Theory(DisplayName = "Get Products page with invalid offset returns validation error")]
+	[InlineData(-1)]
+	[InlineData(-100)]
+	public async Task GetProductsPageWithInvalidOffsetReturnsValidationError(int offset)
+	{
+		var api = GetApi<IProductsApi>(Fixture.WebAppFactory);
+		var response = await api.Query(offset: offset);
+
+		response.StatusCode
+				.Should()
+				.Be(HttpStatusCode.BadRequest);
+	}
+
+	[Theory(DisplayName = "Get Products page with non-integer offset returns validation error")]
+	[InlineData("abc")]
+	public async Task GetProductsPageWithNonIntegerOffsetReturnsValidationError(string offset)
+	{
+		var api = GetApi<IProductsApi>(Fixture.WebAppFactory);
+		var response = await api.QueryRaw(offset: offset);
+
+		response.StatusCode
+				.Should()
+				.Be(HttpStatusCode.BadRequest);
+	}
+
+	[Theory(DisplayName = "Get Products page with invalid limit returns validation error")]
+	[InlineData(0)]
+	[InlineData(-1)]
+	[InlineData(101)]
+	public async Task GetProductsPageWithInvalidLimitReturnsValidationError(int limit)
+	{
+		var api = GetApi<IProductsApi>(Fixture.WebAppFactory);
+		var response = await api.Query(limit: limit);
+
+		response.StatusCode
+				.Should()
+				.Be(HttpStatusCode.BadRequest);
+	}
+
+	[Theory(DisplayName = "Get Products page with non-integer limit returns validation error")]
+	[InlineData("abc")]
+	public async Task GetProductsPageWithNonIntegerLimitReturnsValidationError(string limit)
+	{
+		var api = GetApi<IProductsApi>(Fixture.WebAppFactory);
+		var response = await api.QueryRaw(limit: limit);
+
+		response.StatusCode
+				.Should()
+				.Be(HttpStatusCode.BadRequest);
+	}
+
+	[Fact(DisplayName = "Get Products page with invalid sort field returns validation error")]
+	public async Task GetProductsPageWithInvalidSortFieldReturnsValidationError()
+	{
+		var api = GetApi<IProductsApi>(Fixture.WebAppFactory);
+		var response = await api.Query(sort: ["nonExistentField"]);
+
+		response.StatusCode
+				.Should()
+				.Be(HttpStatusCode.BadRequest);
+	}
+
+	[Fact(DisplayName = "Get Products page with lowercase sort field succeeds")]
+	public async Task GetProductsPageWithLowercaseSortFieldSucceeds()
+	{
+		var api = GetApi<IProductsApi>(Fixture.WebAppFactory);
+		var response = await api.Query(sort: ["price"]);
+
+		response.StatusCode
+				.Should()
+				.Be(HttpStatusCode.OK);
+
+		response.Content
+				.Should()
+				.NotBeNull();
+		response.Content!.Items
+				.Should()
+				.BeInAscendingOrder(x => x.Price);
+	}
+
 	[Theory(DisplayName = "Get Products page succeeds")]
 	[InlineData(false, false, false, null, null, 3)]
 	[InlineData(true, true, true, 1, 5, 2)]
@@ -134,7 +214,9 @@ public class ProductsTests : IntegrationTest
 								  p.DefaultPicture
 								   .Should()
 								   .BeNull();
-						  });
+						  })
+			  .And
+			  .BeInAscendingOrder(p => p.Title);
 		result.Pager
 			  .Should()
 			  .BeEquivalentTo(new Pager(offset ?? 0,

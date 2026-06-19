@@ -54,7 +54,9 @@ public class ApplicationTests : BaseTest
 	private readonly GivenClassesConjunction _validators = Classes().That()
 																	.AreAssignableTo(Validator)
 																	.And()
-																	.AreNotAbstract();
+																	.AreNotAbstract()
+																	.And()
+																	.ResideInAssembly(ApplicationAssembly);
 
 	private static readonly Class AggregateRoot = Architecture.GetClassOfType(typeof(AggregateRoot));
 	private static readonly Class Entity = Architecture.GetClassOfType(typeof(Entity));

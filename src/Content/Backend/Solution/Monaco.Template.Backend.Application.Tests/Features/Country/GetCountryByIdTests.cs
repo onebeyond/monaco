@@ -1,6 +1,8 @@
 ﻿using AwesomeAssertions;
 using Monaco.Template.Backend.Application.Features.Country;
+using Monaco.Template.Backend.Application.Features.Country.DTOs;
 using Monaco.Template.Backend.Application.Persistence;
+using Monaco.Template.Backend.Common.Application.Queries;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 using Moq;
@@ -27,9 +29,12 @@ public class GetCountryByIdTests
 		var sut = new GetCountryById.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(query, CancellationToken.None);
 
-		result.Should()
-			  .NotBeNull();
-		result!.Name
+		var success = result.Should()
+							.BeOfType<Success<CountryDto>>();
+		
+		success.Subject
+			   .Result
+			   .Name
 			   .Should()
 			   .Be(country.Name);
 	}
@@ -44,6 +49,6 @@ public class GetCountryByIdTests
 		var result = await sut.Handle(query, CancellationToken.None);
 
 		result.Should()
-			  .BeNull();
+			  .BeOfType<NotFound<CountryDto>>();
 	}
 }

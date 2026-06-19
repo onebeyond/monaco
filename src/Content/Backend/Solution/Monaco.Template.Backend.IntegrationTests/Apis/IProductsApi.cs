@@ -11,9 +11,16 @@ internal interface IProductsApi
     [Get("/api/v1/Products")]
     Task<IApiResponse<Page<ProductDto>>> Query([Query(CollectionFormat.Multi)] string[]? expand = null,
                                                int? offset = null,
-                                               int? limit = null);
+                                               int? limit = null,
+											   [Query(CollectionFormat.Multi)] string[]? sort = null);
 
-    [Get("/api/v1/Products/{id}")]
+	[Get("/api/v1/Products")]
+	Task<IApiResponse<Page<ProductDto>>> QueryRaw([Query(CollectionFormat.Multi)] string[]? expand = null,
+												  string? offset = null,
+												  string? limit = null,
+												  [Query(CollectionFormat.Multi)] string[]? sort = null);
+
+	[Get("/api/v1/Products/{id}")]
     Task<IApiResponse<ProductDto>> Get(Guid id);
 
     [Get("/api/v1/Products/{productId}/Pictures/{pictureId}")]

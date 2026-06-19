@@ -6,6 +6,7 @@ using Monaco.Template.Backend.Application.Services;
 using Monaco.Template.Backend.Application.Services.Contracts;
 #endif
 using Monaco.Template.Backend.Common.Application.Commands.Behaviors;
+using Monaco.Template.Backend.Common.Application.Queries.Extensions;
 using Monaco.Template.Backend.Common.Application.Validators.Contracts;
 using System.Reflection;
 using Monaco.Template.Backend.Application.Persistence;
@@ -34,6 +35,7 @@ public static class ServiceCollectionExtensions
 					.AddMediatR(config => config.RegisterServicesFromAssemblies(GetApplicationAssembly()))
 					.RegisterCommandConcurrencyExceptionBehaviors(GetApplicationAssembly())
 					.RegisterCommandValidationBehaviors(GetApplicationAssembly())
+					.RegisterQueryValidationBehaviors(GetApplicationAssembly())
 					.AddValidatorsFromAssembly(GetApplicationAssembly(),
 											   filter: filter => !filter.ValidatorType
 																		.GetInterfaces()

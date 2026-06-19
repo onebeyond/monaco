@@ -3,6 +3,8 @@ using Microsoft.Extensions.Primitives;
 using Monaco.Template.Backend.Application.Features.Company;
 using Monaco.Template.Backend.Application.Features.Company.DTOs;
 using Monaco.Template.Backend.Application.Persistence;
+using Monaco.Template.Backend.Common.Application.Queries;
+using Monaco.Template.Backend.Common.Domain.Model;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
@@ -23,22 +25,28 @@ public class GetCompanyPageTests
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(companies);
 
-		var query = new GetCompanyPage.Query(new List<KeyValuePair<string, StringValues>>());
+		var query = new GetCompanyPage.Query([]);
 
 		var sut = new GetCompanyPage.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(query, CancellationToken.None);
 
-		result.Should()
-			  .NotBeNull();
-		result!.Pager
+		var success = result.Should()
+							.BeOfType<Success<Page<CompanyDto>>>();
+
+		success.Subject
+			   .Result
+			   .Pager
 			   .Count
 			   .Should()
 			   .Be(companies.Count);
-		result.Items
-			  .Should()
-			  .HaveCount(companies.Count).And
-			  .Contain(x => companies.Any(c => c.Name == x.Name)).And
-			  .BeInAscendingOrder(x => x.Name);
+
+		success.Subject
+			   .Result
+			   .Items
+			   .Should()
+			   .HaveCount(companies.Count).And
+			   .Contain(x => companies.Any(c => c.Name == x.Name)).And
+			   .BeInAscendingOrder(x => x.Name);
 	}
 
 	[Theory(DisplayName = "Get company page with params succeeds")]
@@ -50,8 +58,7 @@ public class GetCompanyPageTests
 		var queryString = new List<KeyValuePair<string, StringValues>>
 						  {
 							  new(nameof(CompanyDto.Name),
-								  new(companiesSet.Select(x => x.Name)
-												  .ToArray())),
+								  new([..companiesSet.Select(x => x.Name)])),
 							  new("expand", nameof(CompanyDto.Country)),
 							  new("sort", $"-{nameof(CompanyDto.Name)}")
 						  };
@@ -61,16 +68,22 @@ public class GetCompanyPageTests
 		var sut = new GetCompanyPage.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(query, CancellationToken.None);
 
-		result.Should()
-			  .NotBeNull();
-		result!.Pager
+		var success = result.Should()
+							.BeOfType<Success<Page<CompanyDto>>>();
+
+		success.Subject
+			   .Result
+			   .Pager
 			   .Count
 			   .Should()
 			   .Be(companiesSet.Count);
-		result.Items
-			  .Should()
-			  .HaveCount(companiesSet.Count).And
-			  .Contain(x => companiesSet.Any(c => c.Name == x.Name)).And
-			  .BeInDescendingOrder(x => x.Name);
+
+		success.Subject
+			   .Result
+			   .Items
+			   .Should()
+			   .HaveCount(companiesSet.Count).And
+			   .Contain(x => companiesSet.Any(c => c.Name == x.Name)).And
+			   .BeInDescendingOrder(x => x.Name);
 	}
 }

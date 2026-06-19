@@ -25,9 +25,9 @@ internal static class Products
 														 "Products");
 
 			products.MapGet("",
-							Task<Results<Ok<Page<ProductDto>>, NotFound>> ([FromServices] ISender sender,
-																		   HttpRequest request,
-																		   CancellationToken cancellationToken) =>
+							Task<Results<Ok<Page<ProductDto>>, NotFound, ValidationProblem>> ([FromServices] ISender sender,
+																							  HttpRequest request,
+																							  CancellationToken cancellationToken) =>
 								sender.ExecuteQueryAsync(new GetProductPage.Query(request.Query),
 														 cancellationToken),
 							"GetProducts",
@@ -39,9 +39,9 @@ internal static class Products
 #endif
 
 			products.MapGet("{id:guid}",
-							Task<Results<Ok<ProductDto?>, NotFound>> ([FromServices] ISender sender,
-																	  [FromRoute] Guid id,
-																	  CancellationToken cancellationToken) =>
+							Task<Results<Ok<ProductDto>, NotFound, ValidationProblem>> ([FromServices] ISender sender,
+																						[FromRoute] Guid id,
+																						CancellationToken cancellationToken) =>
 								sender.ExecuteQueryAsync(new GetProductById.Query(id),
 														 cancellationToken),
 							"GetProduct",
@@ -99,11 +99,11 @@ internal static class Products
 #endif
 
 			products.MapGet("{productId:guid}/Pictures/{pictureId:guid}",
-							Task<Results<FileStreamHttpResult, NotFound>> ([FromServices] ISender sender,
-																		   [FromRoute] Guid productId,
-																		   [FromRoute] Guid pictureId,
-																		   HttpRequest request,
-																		   CancellationToken cancellationToken) =>
+							Task<Results<FileStreamHttpResult, NotFound, ValidationProblem>> ([FromServices] ISender sender,
+																							  [FromRoute] Guid productId,
+																							  [FromRoute] Guid pictureId,
+																							  HttpRequest request,
+																							  CancellationToken cancellationToken) =>
 								sender.ExecuteFileDownloadAsync(new DownloadProductPicture.Query(productId,
 																								 pictureId,
 																								 request.Query),

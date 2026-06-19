@@ -9,9 +9,9 @@ namespace Monaco.Template.Backend.Application.Features.Company;
 
 public sealed class GetCompanyById
 {
-	public sealed record Query(Guid Id) : QueryByIdBase<CompanyDto?>(Id);
+	public sealed record Query(Guid Id) : QueryByIdBase<QueryResult<CompanyDto>>(Id);
 
-	internal sealed class Handler : IRequestHandler<Query, CompanyDto?>
+	internal sealed class Handler : IRequestHandler<Query, QueryResult<CompanyDto>>
 	{
 		private readonly AppDbContext _dbContext;
 
@@ -20,13 +20,14 @@ public sealed class GetCompanyById
 			_dbContext = dbContext;
 		}
 
-		public async Task<CompanyDto?> Handle(Query request, CancellationToken cancellationToken)
+		public async Task<QueryResult<CompanyDto>> Handle(Query request, CancellationToken cancellationToken)
 		{
 			var item = await _dbContext.Set<Domain.Model.Entities.Company>()
 									   .AsNoTracking()
 									   .Include(x => x.Address!.Country)
 									   .SingleOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-			return item.Map(true);
+			
+			return QueryResult<CompanyDto>.SuccessOrNotFound(item?.Map(true));
 		}
 	}
 }

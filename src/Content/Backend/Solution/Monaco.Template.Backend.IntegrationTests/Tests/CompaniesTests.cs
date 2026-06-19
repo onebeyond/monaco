@@ -35,6 +35,87 @@ public class CompaniesTests : IntegrationTest
 #endif
 	}
 
+	[Theory(DisplayName = "Get Companies page with invalid offset returns validation error")]
+	[InlineData(-1)]
+	[InlineData(-100)]
+	public async Task GetCompaniesPageWithInvalidOffsetReturnsValidationError(int offset)
+	{
+		var api = GetApi<ICompaniesApi>(Fixture.WebAppFactory);
+		var response = await api.Query(offset: offset);
+
+		response.StatusCode
+				.Should()
+				.Be(HttpStatusCode.BadRequest);
+	}
+
+	[Theory(DisplayName = "Get Companies page with non-integer offset returns validation error")]
+	[InlineData("abc")]
+	public async Task GetCompaniesPageWithNonIntegerOffsetReturnsValidationError(string offset)
+	{
+		var api = GetApi<ICompaniesApi>(Fixture.WebAppFactory);
+		var response = await api.QueryRaw(offset: offset);
+
+		response.StatusCode
+				.Should()
+				.Be(HttpStatusCode.BadRequest);
+	}
+
+	[Theory(DisplayName = "Get Companies page with invalid limit returns validation error")]
+	[InlineData(0)]
+	[InlineData(-1)]
+	[InlineData(101)]
+	public async Task GetCompaniesPageWithInvalidLimitReturnsValidationError(int limit)
+	{
+		var api = GetApi<ICompaniesApi>(Fixture.WebAppFactory);
+		var response = await api.Query(limit: limit);
+
+		response.StatusCode
+				.Should()
+				.Be(HttpStatusCode.BadRequest);
+	}
+
+	[Theory(DisplayName = "Get Companies page with non-integer limit returns validation error")]
+	[InlineData("abc")]
+	public async Task GetCompaniesPageWithNonIntegerLimitReturnsValidationError(string limit)
+	{
+		var api = GetApi<ICompaniesApi>(Fixture.WebAppFactory);
+		var response = await api.QueryRaw(limit: limit);
+
+		response.StatusCode
+				.Should()
+				.Be(HttpStatusCode.BadRequest);
+	}
+
+	[Fact(DisplayName = "Get Companies page with invalid sort field returns validation error")]
+	public async Task GetCompaniesPageWithInvalidSortFieldReturnsValidationError()
+	{
+		var api = GetApi<ICompaniesApi>(Fixture.WebAppFactory);
+		var response = await api.Query(sort: ["nonExistentField"]);
+
+		response.StatusCode
+				.Should()
+				.Be(HttpStatusCode.BadRequest);
+	}
+
+	[Fact(DisplayName = "Get Companies page with lowercase sort field succeeds")]
+	public async Task GetCompaniesPageWithLowercaseSortFieldSucceeds()
+	{
+		var api = GetApi<ICompaniesApi>(Fixture.WebAppFactory);
+		var response = await api.Query(sort: ["name"]);
+
+		response.StatusCode
+				.Should()
+				.Be(HttpStatusCode.OK);
+
+		response.Content
+				.Should()
+				.NotBeNull();
+		response.Content!
+				.Items
+				.Should()
+				.BeInAscendingOrder(x => x.Name);
+	}
+
 	[Theory(DisplayName = "Get Companies page succeeds")]
 	[InlineData(false, null, null, 3)]
 	[InlineData(true, 1, 5, 2)]

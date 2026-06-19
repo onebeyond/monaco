@@ -5,6 +5,8 @@ using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
 using System.Diagnostics.CodeAnalysis;
+using Monaco.Template.Backend.Application.Features.Product.DTOs;
+using Monaco.Template.Backend.Common.Application.Queries;
 using Xunit;
 
 namespace Monaco.Template.Backend.Application.Tests.Features.Product;
@@ -26,9 +28,12 @@ public class GetProductByIdTests
 		var sut = new GetProductById.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(query, CancellationToken.None);
 
-		result.Should()
-			  .NotBeNull();
-		result!.Title
+		var success = result.Should()
+							.BeOfType<Success<ProductDto>>();
+
+		success.Subject
+			   .Result
+			   .Title
 			   .Should()
 			   .Be(product.Title);
 	}
@@ -44,6 +49,6 @@ public class GetProductByIdTests
 		var result = await sut.Handle(query, CancellationToken.None);
 
 		result.Should()
-			  .BeNull();
+			  .BeOfType<NotFound<ProductDto>>();
 	}
 }

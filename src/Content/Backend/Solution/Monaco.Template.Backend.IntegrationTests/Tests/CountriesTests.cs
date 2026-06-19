@@ -51,6 +51,21 @@ public class CountriesTests : IntegrationTest
 				.HaveCount(countriesCount);
 	}
 
+	[Fact(DisplayName = "Get Countries with lowercase sort field succeeds")]
+	public async Task GetCountriesWithLowercaseSortFieldSucceeds()
+	{
+		var api = GetApi<ICountriesApi>(Fixture.WebAppFactory);
+		var response = await api.Query(["name"]);
+
+		response.StatusCode
+				.Should()
+				.Be(HttpStatusCode.OK);
+
+		response.Content
+				.Should()
+				.NotBeNullOrEmpty();
+	}
+
 	[Fact(DisplayName = "Get Country succeeds")]
 	public async Task GetCountrySucceeds()
 	{

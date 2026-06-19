@@ -3,6 +3,7 @@ using Microsoft.Extensions.Primitives;
 using Monaco.Template.Backend.Application.Features.Country;
 using Monaco.Template.Backend.Application.Features.Country.DTOs;
 using Monaco.Template.Backend.Application.Persistence;
+using Monaco.Template.Backend.Common.Application.Queries;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
@@ -23,15 +24,20 @@ public class GetCountryListTests
 	{
 		_dbContextMock.CreateAndSetupDbSetMock(countries);
 
-		var query = new GetCountryList.Query(new List<KeyValuePair<string, StringValues>>());
+		var query = new GetCountryList.Query([]);
 
 		var sut = new GetCountryList.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(query, CancellationToken.None);
 
-		result.Should()
-			  .HaveCount(countries.Count).And
-			  .Contain(x => countries.Any(c => c.Name == x.Name)).And
-			  .BeInAscendingOrder(x => x.Name);
+		var success = result.Should()
+							.BeOfType<Success<List<CountryDto>>>();
+
+		success.Subject
+			   .Result
+			   .Should()
+			   .HaveCount(countries.Count).And
+			   .Contain(x => countries.Any(c => c.Name == x.Name)).And
+			   .BeInAscendingOrder(x => x.Name);
 	}
 
 	[Theory(DisplayName = "Get country list with params succeeds")]
@@ -44,7 +50,7 @@ public class GetCountryListTests
 		var queryString = new List<KeyValuePair<string, StringValues>>
 		{
 			new(nameof(CountryDto.Name),
-				new(countriesSet.Select(x => x.Name).ToArray())),
+				new([..countriesSet.Select(x => x.Name)])),
 			new("sort", $"-{nameof(CountryDto.Name)}")
 		};
 
@@ -54,9 +60,14 @@ public class GetCountryListTests
 
 		var result = await sut.Handle(query, CancellationToken.None);
 
-		result.Should()
-			  .HaveCount(countriesSet.Count).And
-			  .Contain(x => countriesSet.Any(c => c.Name == x.Name)).And
-			  .BeInDescendingOrder(x => x.Name);
+		var success = result.Should()
+							.BeOfType<Success<List<CountryDto>>>();
+
+		success.Subject
+			   .Result
+			   .Should()
+			   .HaveCount(countriesSet.Count).And
+			   .Contain(x => countriesSet.Any(c => c.Name == x.Name)).And
+			   .BeInDescendingOrder(x => x.Name);
 	}
 }

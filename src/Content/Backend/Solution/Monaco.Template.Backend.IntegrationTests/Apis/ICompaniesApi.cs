@@ -11,9 +11,16 @@ internal interface ICompaniesApi
     [Get("/api/v1/Companies")]
     Task<IApiResponse<Page<CompanyDto>>> Query([Query(CollectionFormat.Multi)] string[]? expand = null,
                                                int? offset = null,
-                                               int? limit = null);
+                                               int? limit = null,
+											   [Query(CollectionFormat.Multi)] string[]? sort = null);
 
-    [Get("/api/v1/Companies/{id}")]
+	[Get("/api/v1/Companies")]
+	Task<IApiResponse<Page<CompanyDto>>> QueryRaw([Query(CollectionFormat.Multi)] string[]? expand = null,
+												  string? offset = null,
+												  string? limit = null,
+												  [Query(CollectionFormat.Multi)] string[]? sort = null);
+
+	[Get("/api/v1/Companies/{id}")]
     Task<IApiResponse<CompanyDto>> Get(Guid id);
 
     [Post("/api/v1/Companies")]

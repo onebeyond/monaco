@@ -3,6 +3,8 @@ using Microsoft.Extensions.Primitives;
 using Monaco.Template.Backend.Application.Features.Product;
 using Monaco.Template.Backend.Application.Features.Product.DTOs;
 using Monaco.Template.Backend.Application.Persistence;
+using Monaco.Template.Backend.Common.Application.Queries;
+using Monaco.Template.Backend.Common.Domain.Model;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
@@ -27,17 +29,23 @@ public class GetProductPageTests
 		var sut = new GetProductPage.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(query, CancellationToken.None);
 
-		result.Should()
-			  .NotBeNull();
-		result!.Pager
+		var success = result.Should()
+							.BeOfType<Success<Page<ProductDto>>>();
+		
+		success.Subject
+			   .Result
+			   .Pager
 			   .Count
 			   .Should()
 			   .Be(products.Count);
-		result.Items
-			  .Should()
-			  .HaveCount(products.Count).And
-			  .Contain(x => products.Any(c => c.Title == x.Title)).And
-			  .BeInAscendingOrder(x => x.Title);
+		
+		success.Subject
+			   .Result
+			   .Items
+			   .Should()
+			   .HaveCount(products.Count).And
+			   .Contain(x => products.Any(c => c.Title == x.Title)).And
+			   .BeInAscendingOrder(x => x.Title);
 	}
 
 	[Theory(DisplayName = "Get product page with params succeeds")]
@@ -48,8 +56,7 @@ public class GetProductPageTests
 		var productsSet = products.GetRange(0, 2);
 		var query = new GetProductPage.Query([
 												 new(nameof(ProductDto.Title),
-													 new(productsSet.Select(x => x.Title)
-																	.ToArray())),
+													 new([..productsSet.Select(x => x.Title)])),
 												 new("expand",
 													 new StringValues([
 																	   nameof(ProductDto.Company),
@@ -62,16 +69,22 @@ public class GetProductPageTests
 		var sut = new GetProductPage.Handler(_dbContextMock.Object);
 		var result = await sut.Handle(query, CancellationToken.None);
 
-		result.Should()
-			  .NotBeNull();
-		result!.Pager
+		var success = result.Should()
+							.BeOfType<Success<Page<ProductDto>>>();
+		
+		success.Subject
+			   .Result
+			   .Pager
 			   .Count
 			   .Should()
 			   .Be(productsSet.Count);
-		result.Items
-			  .Should()
-			  .HaveCount(productsSet.Count).And
-			  .Contain(x => productsSet.Any(c => c.Title == x.Title)).And
-			  .BeInDescendingOrder(x => x.Title);
+
+		success.Subject
+			   .Result
+			   .Items
+			   .Should()
+			   .HaveCount(productsSet.Count).And
+			   .Contain(x => productsSet.Any(c => c.Title == x.Title)).And
+			   .BeInDescendingOrder(x => x.Title);
 	}
 }
