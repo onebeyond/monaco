@@ -25,8 +25,8 @@ internal static class Countries
 							 "Gets a list of countries");
 
 			countries.MapGet("{id:guid}",
-							 Task<Results<Ok<CountryDto>, NotFound>> ([FromServices] ISender sender,
-																	  [FromRoute] Guid id) =>
+							 Task<Results<Ok<CountryDto>, NotFound, ValidationProblem>> ([FromServices] ISender sender,
+																						 [FromRoute] Guid id) =>
 								 sender.ExecuteQueryAsync(new GetCountryById.Query(id)),
 							 "GetCountry",
 							 "Gets a country by Id");

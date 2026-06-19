@@ -39,9 +39,9 @@ internal static class Products
 #endif
 
 			products.MapGet("{id:guid}",
-							Task<Results<Ok<ProductDto>, NotFound>> ([FromServices] ISender sender,
-																	 [FromRoute] Guid id,
-																	 CancellationToken cancellationToken) =>
+							Task<Results<Ok<ProductDto>, NotFound, ValidationProblem>> ([FromServices] ISender sender,
+																						[FromRoute] Guid id,
+																						CancellationToken cancellationToken) =>
 								sender.ExecuteQueryAsync(new GetProductById.Query(id),
 														 cancellationToken),
 							"GetProduct",

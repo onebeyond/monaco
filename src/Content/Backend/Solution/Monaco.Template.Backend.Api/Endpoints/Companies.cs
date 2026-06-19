@@ -39,9 +39,9 @@ internal static class Companies
 #endif
 
 			companies.MapGet("{id:guid}",
-							 Task<Results<Ok<CompanyDto>, NotFound>> ([FromServices] ISender sender,
-																	  [FromRoute] Guid id,
-																	  CancellationToken cancellationToken) =>
+							 Task<Results<Ok<CompanyDto>, NotFound, ValidationProblem>> ([FromServices] ISender sender,
+																						 [FromRoute] Guid id,
+																						 CancellationToken cancellationToken) =>
 								 sender.ExecuteQueryAsync(new GetCompanyById.Query(id),
 														  cancellationToken),
 							 "GetCompany",
