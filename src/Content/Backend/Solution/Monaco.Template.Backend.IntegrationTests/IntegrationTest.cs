@@ -90,10 +90,12 @@ public abstract class IntegrationTest : IAsyncLifetime
 
 #endif
 
+#if (apiService)
 	protected virtual async Task RunScriptAsync(string filePath) =>
 		await Fixture.GetDbContext(Fixture.WebAppFactory.Services)
 					 .Database
 					 .ExecuteSqlRawAsync(await File.ReadAllTextAsync(filePath));
+#endif
 
 	public virtual async Task DisposeAsync()
 	{

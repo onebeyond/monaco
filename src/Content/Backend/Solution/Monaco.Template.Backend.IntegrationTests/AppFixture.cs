@@ -97,7 +97,7 @@ public class AppFixture : IAsyncLifetime
 #if (apiService)
 		await GetDbContext(WebAppFactory.Services)
 #elif (workerService)
-		await GetDbContext(WorkerServiceInstance.Services)
+		await GetDbContext(WorkerServiceFactory.Services)
 #endif
 			.GetService<IMigrator>()
 			.MigrateAsync(targetMigration);
@@ -187,7 +187,7 @@ public class AppFixture : IAsyncLifetime
 #if (apiService)
 		var services = WebAppFactory.Services;
 #elif (workerService)
-		var services = WorkerServiceInstance.Services;
+		var services = WorkerServiceFactory.Services;
 #endif
 		var connection = GetDbContext(services).Database
 											   .GetDbConnection();

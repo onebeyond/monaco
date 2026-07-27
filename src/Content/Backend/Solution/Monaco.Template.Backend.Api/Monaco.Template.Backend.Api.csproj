@@ -29,17 +29,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
-    <PackageReference Include="Serilog.AspNetCore" />
-    <PackageReference Include="Serilog.Settings.Configuration" />
-    <PackageReference Include="Serilog.Sinks.Debug" />
-    <PackageReference Include="Serilog.Sinks.File" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Monaco.Template.Backend.Application\Monaco.Template.Backend.Application.csproj" />
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Api.Application\Monaco.Template.Backend.Common.Api.Application.csproj" />
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Api\Monaco.Template.Backend.Common.Api.csproj" />
-    <ProjectReference Include="..\Monaco.Template.Backend.Common.Serilog\Monaco.Template.Backend.Common.Serilog.csproj" />
   </ItemGroup>
 
   <ItemGroup>

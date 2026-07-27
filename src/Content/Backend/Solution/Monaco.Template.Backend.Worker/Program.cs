@@ -4,14 +4,10 @@ using Monaco.Template.Backend.Application.Persistence;
 #endif
 using Monaco.Template.Backend.Application.DependencyInjection;
 using Monaco.Template.Backend.Worker;
-using Serilog;
 
 var builder = Host.CreateApplicationBuilder(args);
 var configuration = builder.Configuration;
-builder.Logging
-	   .ClearProviders()
-	   .Services
-	   .AddSerilog(cfg => cfg.ReadFrom.Configuration(configuration))
+builder.Services
 	   .ConfigureApplication(options =>
 							 {
 								 options.EntityFramework.ConnectionString = configuration.GetConnectionString("AppDbContext")!;

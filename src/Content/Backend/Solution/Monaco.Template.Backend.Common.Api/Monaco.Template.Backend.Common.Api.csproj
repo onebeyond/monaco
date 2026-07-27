@@ -26,7 +26,6 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Scalar.AspNetCore" />
-    <PackageReference Include="Serilog" />
   </ItemGroup>
 
 </Project>

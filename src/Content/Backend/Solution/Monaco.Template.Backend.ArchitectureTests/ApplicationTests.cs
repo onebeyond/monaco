@@ -13,9 +13,10 @@ namespace Monaco.Template.Backend.ArchitectureTests;
 public class ApplicationTests : BaseTest
 {
 	private static readonly Architecture Architecture = new ArchLoader().LoadAssemblies(ApplicationAssembly,
-																						CommonApplicationAssembly,
-																						DomainAssembly,
-																						CommonDomainAssembly)
+																		CommonApplicationAssembly,
+																		DomainAssembly,
+																		CommonDomainAssembly,
+																		typeof(IRequestHandler<>).Assembly)
 																		.Build();
 
 	private readonly IObjectProvider<IType> _applicationLayer = Types().That()

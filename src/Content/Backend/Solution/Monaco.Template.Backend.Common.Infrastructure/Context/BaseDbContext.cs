@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Monaco.Template.Backend.Common.Domain.Model;
 using Monaco.Template.Backend.Common.Domain.Model.Contracts;
-using Monaco.Template.Backend.Common.Infrastructure.Context.AuditTrail;
 using Monaco.Template.Backend.Common.Infrastructure.Context.Contracts;
 using Monaco.Template.Backend.Common.Infrastructure.Context.Extensions;
 using Monaco.Template.Backend.Common.Infrastructure.EntityConfigurations;
@@ -57,13 +56,9 @@ public abstract class BaseDbContext : DbContext, IUnitOfWork
 
 		ResetReferentialEntitiesState();
 
-		var entries = GetEntriesForAudit();
-
 		// After executing this line all the changes (from the Command Handler and Domain Event Handlers)
 		// performed through the DbContext will be committed
 		await base.SaveChangesAsync(cancellationToken);
-
-		AuditLog.Audit(entries).Information("Audit Trail");
 
 		return true;
 	}
@@ -73,17 +68,4 @@ public abstract class BaseDbContext : DbContext, IUnitOfWork
 		foreach (var entry in ChangeTracker.Entries<IReferential>())
 			entry.State = EntityState.Unchanged;
 	}
-
-	protected virtual List<AuditEntry> GetEntriesForAudit() =>
-	[
-		.. ChangeTracker.Entries()
-						.Where(x => new[]
-									{
-										EntityState.Added,
-										EntityState.Modified,
-										EntityState.Deleted
-									}.Contains(x.State) &&
-									x.Entity is not INonAuditable)
-						.Select(x => new AuditEntry(x))
-	];
 }

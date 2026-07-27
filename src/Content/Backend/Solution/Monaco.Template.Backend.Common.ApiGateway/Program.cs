@@ -1,12 +1,9 @@
 using Monaco.Template.Backend.Common.ApiGateway.Auth;
 using Monaco.Template.Backend.Common.Api.Auth;
 using Monaco.Template.Backend.Common.Api.Cors;
-using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("reverseProxy.json", false, true);
-builder.Logging.ClearProviders();
-builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(context.Configuration));
 
 // Add services to the container.
 var configuration = builder.Configuration;
@@ -26,8 +23,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 	app.UseDeveloperExceptionPage();
 
-app.UseSerilogRequestLogging()
-   .UseCors()
+app.UseCors()
    .UseHttpsRedirection()
    .UseAuthentication()
    .UseAuthorization();

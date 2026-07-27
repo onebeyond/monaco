@@ -19,21 +19,12 @@
     <PackageReference Include="MassTransit.RabbitMQ" />
     <!--#endif-->
     <PackageReference Include="Microsoft.Extensions.Hosting" />
-    <PackageReference Include="Serilog.Extensions.Hosting" />
-    <PackageReference Include="Serilog.Settings.Configuration" />
-    <PackageReference Include="Serilog.Sinks.Console" />
-    <PackageReference Include="Serilog.Sinks.File" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Monaco.Template.Backend.Application\Monaco.Template.Backend.Application.csproj" />
-    <ProjectReference Include="..\Monaco.Template.Backend.Common.Serilog\Monaco.Template.Backend.Common.Serilog.csproj" />
     <!--#if (massTransitIntegration)-->
     <ProjectReference Include="..\Monaco.Template.Backend.Messages\Monaco.Template.Backend.Messages.csproj" />
     <!--#endif-->
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="logs\" />
   </ItemGroup>
 </Project>

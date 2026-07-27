@@ -17,7 +17,6 @@
     <!--#endif -->
     <Project Path="Monaco.Template.Backend.Common.Domain/Monaco.Template.Backend.Common.Domain.csproj" />
     <Project Path="Monaco.Template.Backend.Common.Infrastructure/Monaco.Template.Backend.Common.Infrastructure.csproj" />
-    <Project Path="Monaco.Template.Backend.Common.Serilog/Monaco.Template.Backend.Common.Serilog.csproj" />
 	<!--#if (tests) -->
     <Project Path="Monaco.Template.Backend.Common.Tests/Monaco.Template.Backend.Common.Tests.csproj" />
 	<!--#endif -->
