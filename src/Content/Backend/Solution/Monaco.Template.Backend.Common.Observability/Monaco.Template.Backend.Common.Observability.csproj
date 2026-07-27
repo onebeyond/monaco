@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	<PackageVersion>0.0.1-alpha1</PackageVersion>
+	<Title>Monaco.Template.Backend.Common.Observability</Title>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<Authors>One Beyond</Authors>
+	<Company>One Beyond</Company>
+	<Copyright>One Beyond</Copyright>
+	<PackageProjectUrl>https://github.com/onebeyond/monaco</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/onebeyond/monaco.git</RepositoryUrl>
+	<Description>Library that defines shared OpenTelemetry host profiles.</Description>
+	<RepositoryType>Git</RepositoryType>
+	<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+	<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.SqlClient" />
+  </ItemGroup>
+
+</Project>

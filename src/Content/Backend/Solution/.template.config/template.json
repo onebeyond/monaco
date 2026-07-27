@@ -186,7 +186,7 @@
 					"condition": "(!apiService)",
 					"exclude": [
 						"Monaco.Template.Backend.Api/**/*",
-						"Monaco.Template.Backend.*.Api*/**/*",
+						"Monaco.Template.Backend.Common.Api.Application/**/*",
 						"Monaco.Template.Backend.IntegrationTests/Apis/**/*",
 						"Monaco.Template.Backend.IntegrationTests/Factories/ApiWebApplicationFactory.cs",
 						"Monaco.Template.Backend.IntegrationTests/Tests/CompaniesTests.cs",
@@ -214,6 +214,24 @@
 						"nuget.config",
 						"realm-export-template.json",
 						"Monaco.Template.Backend.Common.*/**/*"
+					]
+				},
+				{
+					"condition": "(!apiService && !apiGateway)",
+					"exclude": [
+						"Monaco.Template.Backend.Common.Api/**/*"
+					]
+				},
+				{
+					"condition": "(!commonLibraries || (!apiService && !workerService && !apiGateway))",
+					"exclude": [
+						"Monaco.Template.Backend.Common.Observability/**/*"
+					]
+				},
+				{
+					"condition": "(!commonLibraries || !apiService || !workerService || !apiGateway)",
+					"exclude": [
+						"Monaco.Template.Backend.ArchitectureTests/ObservabilityPackageGraphTests.cs"
 					]
 				},
 				{

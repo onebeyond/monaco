@@ -4,8 +4,10 @@
   </Folder>
   <!--#if (commonLibraries) -->
   <Folder Name="/Common/">
-    <!--#if (apiService) -->
+    <!--#if (apiService || apiGateway) -->
     <Project Path="Monaco.Template.Backend.Common.Api/Monaco.Template.Backend.Common.Api.csproj" />
+    <!--#endif -->
+    <!--#if (apiService) -->
     <Project Path="Monaco.Template.Backend.Common.Api.Application/Monaco.Template.Backend.Common.Api.Application.csproj" />
     <!--#endif -->
     <!--#if (apiGateway) -->
@@ -17,6 +19,9 @@
     <!--#endif -->
     <Project Path="Monaco.Template.Backend.Common.Domain/Monaco.Template.Backend.Common.Domain.csproj" />
     <Project Path="Monaco.Template.Backend.Common.Infrastructure/Monaco.Template.Backend.Common.Infrastructure.csproj" />
+	<!--#if (apiService || workerService || apiGateway) -->
+    <Project Path="Monaco.Template.Backend.Common.Observability/Monaco.Template.Backend.Common.Observability.csproj" />
+	<!--#endif -->
 	<!--#if (tests) -->
     <Project Path="Monaco.Template.Backend.Common.Tests/Monaco.Template.Backend.Common.Tests.csproj" />
 	<!--#endif -->

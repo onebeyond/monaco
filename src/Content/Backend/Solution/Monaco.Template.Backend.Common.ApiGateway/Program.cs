@@ -1,6 +1,9 @@
 using Monaco.Template.Backend.Common.ApiGateway.Auth;
 using Monaco.Template.Backend.Common.Api.Auth;
 using Monaco.Template.Backend.Common.Api.Cors;
+#if (commonLibraries)
+using Monaco.Template.Backend.Common.Observability;
+#endif
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("reverseProxy.json", false, true);
@@ -16,6 +19,10 @@ builder.Services
 	   .AddCorsPolicies(configuration)
 	   .AddReverseProxy()
 	   .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+
+#if (commonLibraries)
+builder.Services.AddGatewayObservabilityProfile();
+#endif
 
 var app = builder.Build();
 

@@ -35,6 +35,9 @@
     <ProjectReference Include="..\Monaco.Template.Backend.Application\Monaco.Template.Backend.Application.csproj" />
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Api.Application\Monaco.Template.Backend.Common.Api.Application.csproj" />
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Api\Monaco.Template.Backend.Common.Api.csproj" />
+    <!--#if (commonLibraries)-->
+    <ProjectReference Include="..\Monaco.Template.Backend.Common.Observability\Monaco.Template.Backend.Common.Observability.csproj" />
+    <!--#endif-->
   </ItemGroup>
 
   <ItemGroup>

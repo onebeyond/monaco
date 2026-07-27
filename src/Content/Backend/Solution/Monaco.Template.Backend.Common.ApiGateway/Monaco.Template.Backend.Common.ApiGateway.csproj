@@ -11,6 +11,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Api\Monaco.Template.Backend.Common.Api.csproj" />
+    <!--#if (commonLibraries)-->
+    <ProjectReference Include="..\Monaco.Template.Backend.Common.Observability\Monaco.Template.Backend.Common.Observability.csproj" />
+    <!--#endif-->
   </ItemGroup>
 
 </Project>
