@@ -18,6 +18,18 @@
 			"path": "Monaco.Template.Backend.slnx"
 		}
 	],
+	"postActions": [
+		{
+			"actionId": "AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C",
+			"description": "Review the generated local observability guide",
+			"condition": "(apiService || workerService || apiGateway)",
+			"manualInstructions": [
+				{
+					"text": "Review OBSERVABILITY.md for the generated local-observability guidance."
+				}
+			]
+		}
+	],
 	"symbols": {
 		"apiGateway": {
 			"type": "parameter",
@@ -170,12 +182,19 @@
 				"**/*.user",
 				"**/*.lock.json",
 				"**/.vs/**/*",
-				"**/logs/**",
-				"**/TestResults/**",
-				"**/[Pp]ublish/**/*",
+			"**/logs/**",
+			"**/TestResults/**",
+			"Monaco.Template.Backend.ArchitectureTests/ObservabilityGuideTemplateGenerationTests.cs",
+			"**/[Pp]ublish/**/*",
 				"**/.idea/**/*"
 			],
 			"modifiers": [
+				{
+					"condition": "(!apiService && !workerService && !apiGateway)",
+					"exclude": [
+						"OBSERVABILITY.md"
+					]
+				},
 				{
 					"condition": "(!apiGateway)",
 					"exclude": [
