@@ -241,12 +241,13 @@
 						"Monaco.Template.Backend.Common.Api/**/*"
 					]
 				},
-				{
-					"condition": "(!commonLibraries || (!apiService && !workerService && !apiGateway))",
-					"exclude": [
-						"Monaco.Template.Backend.Common.Observability/**/*"
-					]
-				},
+			{
+				"condition": "(!commonLibraries || (!apiService && !workerService && !apiGateway))",
+				"exclude": [
+					"Monaco.Template.Backend.Common.Observability/**/*",
+					"Monaco.Template.Backend.ArchitectureTests/ObservabilityResourceTests.cs"
+				]
+			},
 				{
 					"condition": "(!commonLibraries || !apiService || !workerService || !apiGateway)",
 					"exclude": [

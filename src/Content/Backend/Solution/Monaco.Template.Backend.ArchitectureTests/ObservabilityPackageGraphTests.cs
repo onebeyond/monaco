@@ -78,6 +78,23 @@ public sealed class ObservabilityPackageGraphTests
 		AssertProfileContainsOnly(profiles, "GatewayInstrumentations", "internal enum ObservabilityInstrumentation", "Runtime", "AspNetCore", "Http");
 	}
 
+	[Fact(DisplayName = "Shared observability composition uses one unified OTLP exporter and applicable signal instrumentation")]
+	public void SharedObservabilityCompositionUsesOneUnifiedOtlpExporterAndApplicableSignalInstrumentation()
+	{
+		var profiles = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityServiceCollectionExtensions.cs"));
+
+		Assert.Equal(1, CountOccurrences(profiles, "UseOtlpExporter"));
+		Assert.DoesNotContain("AddOtlpExporter", profiles, StringComparison.Ordinal);
+		Assert.Contains("WithLogging", profiles, StringComparison.Ordinal);
+		Assert.Contains("WithTracing", profiles, StringComparison.Ordinal);
+		Assert.Contains("WithMetrics", profiles, StringComparison.Ordinal);
+		Assert.Contains("IncludeFormattedMessage = true", profiles, StringComparison.Ordinal);
+		Assert.Contains("IncludeScopes = true", profiles, StringComparison.Ordinal);
+		Assert.Contains("ParseStateValues = false", profiles, StringComparison.Ordinal);
+		Assert.Contains("ConfigureTracing", profiles, StringComparison.Ordinal);
+		Assert.Contains("ConfigureMetrics", profiles, StringComparison.Ordinal);
+	}
+
 	[Fact(DisplayName = "Template excludes observability from E1 and no-host output")]
 	public void TemplateExcludesObservabilityFromE1AndNoHostOutput()
 	{
@@ -87,6 +104,7 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("Monaco.Template.Backend.Common.Observability/**/*", template, StringComparison.Ordinal);
 		Assert.Contains("(!commonLibraries || !apiService || !workerService || !apiGateway)", template, StringComparison.Ordinal);
 		Assert.Contains("Monaco.Template.Backend.ArchitectureTests/ObservabilityPackageGraphTests.cs", template, StringComparison.Ordinal);
+		Assert.Contains("Monaco.Template.Backend.ArchitectureTests/ObservabilityResourceTests.cs", template, StringComparison.Ordinal);
 		Assert.DoesNotContain("Monaco.Template.Backend.*.Api*/**/*", template, StringComparison.Ordinal);
 		Assert.Contains("(!apiService && !apiGateway)", template, StringComparison.Ordinal);
 
@@ -150,6 +168,20 @@ public sealed class ObservabilityPackageGraphTests
 		var guideGateEnd = solution.IndexOf("<!--#endif -->", guideGate, StringComparison.Ordinal);
 		Assert.True(solutionItems >= 0 && guideGate > solutionItems && guideEntry > guideGate && guideGateEnd > guideEntry,
 					"The OBSERVABILITY.md Solution Item must sit inside its own Runtime Host conditional within /Solution Items/.");
+	}
+
+	[Fact(DisplayName = "Generated local observability guide documents only applicable Story 1.4 host profiles")]
+	public void GeneratedLocalObservabilityGuideDocumentsOnlyApplicableStory14HostProfiles()
+	{
+		var guide = ReadSolutionFile("OBSERVABILITY.md").Replace("\r\n", "\n", StringComparison.Ordinal);
+
+		Assert.Contains("<!--#if (commonLibraries) -->\n## Runtime host profiles and resource identity", guide, StringComparison.Ordinal);
+		Assert.Contains("<!--#if (apiService) -->\n### API profile", guide, StringComparison.Ordinal);
+		Assert.Contains("<!--#if (workerService) -->\n### Worker profile", guide, StringComparison.Ordinal);
+		Assert.Contains("<!--#if (apiGateway) -->\n### Gateway profile", guide, StringComparison.Ordinal);
+		Assert.Contains("generated fallbacks, then `OTEL_RESOURCE_ATTRIBUTES` collisions, then `OTEL_SERVICE_NAME`", guide, StringComparison.Ordinal);
+		Assert.Contains("low-cardinality, non-secret operational metadata", guide, StringComparison.Ordinal);
+		Assert.Contains("static external-observability handoff only", guide, StringComparison.Ordinal);
 	}
 
 	private static void AssertHostUsesSingleProfile(string hostProject, string profileMethod)

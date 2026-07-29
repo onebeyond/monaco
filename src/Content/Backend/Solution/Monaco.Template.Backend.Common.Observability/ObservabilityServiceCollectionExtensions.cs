@@ -1,4 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
+using OpenTelemetry;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 namespace Monaco.Template.Backend.Common.Observability;
 
@@ -15,8 +20,51 @@ public static class ObservabilityServiceCollectionExtensions
 
 	private static IServiceCollection AddProfile(IServiceCollection services, ObservabilityHostProfile profile)
 	{
+		if (services.Any(descriptor => descriptor.ServiceType == typeof(ObservabilityProfileRegistration)))
+			throw new InvalidOperationException("Observability profile is already registered for this host.");
+
+		var resource = ObservabilityResource.Create(profile);
+
+		services.AddOpenTelemetry()
+				.ConfigureResource(builder => builder.AddAttributes(resource.Attributes))
+				.UseOtlpExporter()
+				.WithLogging(_ => { }, ConfigureLogging)
+				.WithTracing(builder => ConfigureTracing(builder, profile))
+				.WithMetrics(builder => ConfigureMetrics(builder, profile));
+
 		services.Add(ServiceDescriptor.Singleton(new ObservabilityProfileRegistration(profile)));
 		return services;
+	}
+
+	private static void ConfigureLogging(OpenTelemetryLoggerOptions options)
+	{
+		options.IncludeFormattedMessage = true;
+		options.IncludeScopes = true;
+		options.ParseStateValues = false;
+	}
+
+	private static void ConfigureTracing(TracerProviderBuilder builder, ObservabilityHostProfile profile)
+	{
+		if (profile is ObservabilityHostProfile.Api or ObservabilityHostProfile.Gateway)
+			builder.AddAspNetCoreInstrumentation();
+
+		builder.AddHttpClientInstrumentation();
+
+		if (profile is ObservabilityHostProfile.Api or ObservabilityHostProfile.Worker)
+			builder.AddSqlClientInstrumentation();
+	}
+
+	private static void ConfigureMetrics(MeterProviderBuilder builder, ObservabilityHostProfile profile)
+	{
+		builder.AddRuntimeInstrumentation();
+
+		if (profile is ObservabilityHostProfile.Api or ObservabilityHostProfile.Gateway)
+			builder.AddAspNetCoreInstrumentation();
+
+		builder.AddHttpClientInstrumentation();
+
+		if (profile is ObservabilityHostProfile.Api or ObservabilityHostProfile.Worker)
+			builder.AddSqlClientInstrumentation();
 	}
 }
 

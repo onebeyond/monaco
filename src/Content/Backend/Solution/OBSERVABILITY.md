@@ -66,7 +66,7 @@ The following deterministic insertion points reserve sequence and ownership for 
 
 | Placeholder | Owning story |
 |---|---|
-| `<!-- OBSERVABILITY: 1.4 HOST-PROFILES -->` | 1.4 |
+| Runtime host profiles below | 1.4 |
 | `<!-- OBSERVABILITY: 1.5 CONFIGURATION -->` | 1.5 |
 | `<!-- OBSERVABILITY: 1.6 SUCCESSFUL-COMPANIES -->` | 1.6 |
 | `<!-- OBSERVABILITY: 1.7 LOCAL-FIRST-RUN -->` | 1.7 |
@@ -82,3 +82,33 @@ The following deterministic insertion points reserve sequence and ownership for 
 | `<!-- OBSERVABILITY: 5.3 REDUCED-API-VERIFICATION -->` | 5.3 |
 | `<!-- OBSERVABILITY: 5.4 STATIC-SHAPE-BOUNDARIES -->` | 5.4 |
 | `<!-- OBSERVABILITY: 5.5 CONSOLIDATION -->` | 5.5 |
+
+<!--#if (commonLibraries) -->
+## Runtime host profiles and resource identity
+
+Each generated Runtime Host emits Operational Logs, Traces, and Metrics through Monaco's shared OpenTelemetry composition and one unified OTLP exporter path. Ordinary application logging stays on the built-in DI `ILogger` route: Console logging remains enabled, and OpenTelemetry receives the same event without a second logger, custom correlation fields, or manual spans.
+
+<!--#if (apiService) -->
+### API profile
+
+The API profile registers Runtime, ASP.NET Core, HttpClient, and SQL Client instrumentation.
+<!--#endif -->
+
+<!--#if (workerService) -->
+### Worker profile
+
+The Worker profile registers Runtime, HttpClient, and SQL Client instrumentation.
+<!--#endif -->
+
+<!--#if (apiGateway) -->
+### Gateway profile
+
+The Gateway profile registers Runtime, ASP.NET Core, and HttpClient instrumentation.
+<!--#endif -->
+
+### Resource metadata
+
+Every enabled Signal in one process uses the same startup-immutable resource. Its generated `service.name` fallback is `<solution>.Api`, `<solution>.Worker`, or `<solution>.Common.ApiGateway` for the applicable host, and `service.namespace` falls back to `<solution>`. Precedence is exact: generated fallbacks, then `OTEL_RESOURCE_ATTRIBUTES` collisions, then `OTEL_SERVICE_NAME` for final `service.name` precedence.
+
+Use only low-cardinality, non-secret operational metadata. Standard `service.version`, `service.instance.id`, `service.namespace`, and `deployment.environment.name` attributes are supported. Never provide credentials, secrets, personal data, tenant or customer identifiers, request or payload data, or user identity. Passing resource validation is not a privacy certification.
+<!--#endif -->
