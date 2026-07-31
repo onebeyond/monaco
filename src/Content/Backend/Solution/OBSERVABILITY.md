@@ -1,6 +1,6 @@
 # Local observability
 
-This is Monaco's authoritative generated guide for local observability. It is intentionally a scaffold: this generated shape does not yet claim any Signal, resource identity, configuration, persistence, messaging, identity, or Metric capability beyond the guide itself.
+This is Monaco's authoritative generated guide for local observability. It documents only the observability capability this generated shape actually provides: when the shared observability package is included, its Signal composition, resource identity, and configuration are described below; when it is excluded, this guide is a static external-observability handoff only. No Signal, resource identity, configuration, persistence, messaging, identity, or Metric capability is claimed beyond what this guide documents.
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ The following deterministic insertion points reserve sequence and ownership for 
 | Placeholder | Owning story |
 |---|---|
 | Runtime host profiles below | 1.4 |
-| `<!-- OBSERVABILITY: 1.5 CONFIGURATION -->` | 1.5 |
+| Configuration and routing below | 1.5 |
 | `<!-- OBSERVABILITY: 1.6 SUCCESSFUL-COMPANIES -->` | 1.6 |
 | `<!-- OBSERVABILITY: 1.7 LOCAL-FIRST-RUN -->` | 1.7 |
 | `<!-- OBSERVABILITY: 2.1 FAILURE-ISOLATION -->` | 2.1 |
@@ -82,6 +82,30 @@ The following deterministic insertion points reserve sequence and ownership for 
 | `<!-- OBSERVABILITY: 5.3 REDUCED-API-VERIFICATION -->` | 5.3 |
 | `<!-- OBSERVABILITY: 5.4 STATIC-SHAPE-BOUNDARIES -->` | 5.4 |
 | `<!-- OBSERVABILITY: 5.5 CONSOLIDATION -->` | 5.5 |
+
+<!--#if (commonLibraries) -->
+## Configuration and routing
+
+Configuration is resolved once during startup from the normal .NET provider order: `appsettings.json`, environment-specific JSON, Development User Secrets, environment variables, then command-line arguments. For the same key, the last provider wins; an empty winning value is missing and does not reveal a lower-priority value. Providers are not reloaded and Monaco does not rebuild telemetry after startup.
+
+Use only the neutral `Observability` section for Monaco-owned controls:
+
+| Key | Default | Accepted value | Malformed behavior |
+|---|---|---|---|
+| `Observability:Signals:{Traces,Metrics,Logs}:Enabled` | `true` | `true` or `false` (case-insensitive) | Startup fails |
+| `Observability:SqlClient:QueryTextMode` | `SanitizedText` | `SanitizedText` or `SummaryOnly` | Safely resolves to `SummaryOnly` |
+| `Observability:Identity:Mode` | `Subject` | `Subject`, `HmacSha256`, or `Disabled` | Safely resolves to `Disabled` |
+| `Observability:Shutdown:FlushTimeout` | `00:00:05` | constant-format `TimeSpan`, greater than zero and at most five seconds | Startup fails |
+
+Standard OpenTelemetry controls remain root keys, not `Monaco:*` aliases. `OTEL_SDK_DISABLED=true` dominates every Signal/exporter setting and creates no OpenTelemetry providers; Console and DI `ILogger` remain available. Any other non-empty value does not disable the SDK and emits a safe startup diagnostic.
+
+The common OTLP controls are `OTEL_EXPORTER_OTLP_{ENDPOINT,PROTOCOL,HEADERS,TIMEOUT,COMPRESSION}`. Each Signal may override its common value through `OTEL_EXPORTER_OTLP_TRACES_*`, `..._METRICS_*`, or `..._LOGS_*`; signal-specific values win after each key has resolved normal .NET-provider precedence. Development defaults use `http://localhost:4317` and `grpc`.
+
+Supported operational root keys are `OTEL_SERVICE_NAME`, `OTEL_RESOURCE_ATTRIBUTES`, `OTEL_TRACES_SAMPLER`, `OTEL_TRACES_SAMPLER_ARG`, `OTEL_BSP_*`, `OTEL_BLRP_*`, `OTEL_METRIC_EXPORT_{INTERVAL,TIMEOUT}`, and applicable `Logging:LogLevel` categories. Logs and Traces default to queue `2048`, batch `512`, delay/timeout `5000` ms; Metrics default to interval `60000` ms and timeout `5000` ms. Explicit values are validated at startup, including `batch <= queue`.
+
+Do not configure exporter selection, propagators, auto-instrumentation, YAML, retry/disk buffering, certificates/client keys, temporality/exemplars, attribute limits, or provider-specific logging switches. Use environment variables or Development User Secrets for any future secret-capable setting; never commit headers, credentials, authorization values, certificates, or HMAC material. The complete spelling, range, malformed-value, and characterization contract is `CONFIGURATION-MATRIX.md` in Monaco's source repository; it is not copied into generated output.
+
+<!--#endif -->
 
 <!--#if (commonLibraries) -->
 ## Runtime host profiles and resource identity

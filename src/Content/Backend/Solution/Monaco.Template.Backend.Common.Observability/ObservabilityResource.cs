@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Configuration;
 using OpenTelemetry.Resources;
 
 namespace Monaco.Template.Backend.Common.Observability;
@@ -12,10 +13,16 @@ internal static partial class ObservabilityResource
 	private static readonly UTF8Encoding StrictUtf8 = new(false, true);
 	private static readonly string ProcessInstanceId = Guid.NewGuid().ToString("D");
 
-	internal static Resource Create(ObservabilityHostProfile profile) =>
-		Create(profile, GetApplicationName(), GetEnvironmentName());
+	internal static Resource Create(ObservabilityHostProfile profile, IConfiguration configuration) =>
+		Create(profile, GetApplicationName(), GetEnvironmentName(), configuration);
 
 	internal static Resource Create(ObservabilityHostProfile profile, string applicationName, string environmentName)
+	{
+		var configuration = new ConfigurationBuilder().AddEnvironmentVariables().Build();
+		return Create(profile, applicationName, environmentName, configuration);
+	}
+
+	internal static Resource Create(ObservabilityHostProfile profile, string applicationName, string environmentName, IConfiguration configuration)
 	{
 		if (string.IsNullOrWhiteSpace(applicationName))
 			throw new InvalidOperationException("Unable to determine the generated host application name.");
@@ -28,11 +35,11 @@ internal static partial class ObservabilityResource
 							 ["deployment.environment.name"] = NormalizeEnvironmentName(environmentName)
 						 };
 
-		foreach (var attribute in ParseResourceAttributes(Environment.GetEnvironmentVariable(ResourceAttributesEnvironmentVariable)))
+		foreach (var attribute in ParseResourceAttributes(configuration[ResourceAttributesEnvironmentVariable]))
 			attributes[attribute.Key] = attribute.Value;
 
-		var serviceName = Environment.GetEnvironmentVariable(ServiceNameEnvironmentVariable);
-		if (serviceName is not null)
+		var serviceName = configuration[ServiceNameEnvironmentVariable];
+		if (!string.IsNullOrEmpty(serviceName))
 			attributes["service.name"] = ValidateServiceName(serviceName);
 
 		return ResourceBuilder.CreateEmpty().AddAttributes(attributes).Build();
@@ -50,7 +57,7 @@ internal static partial class ObservabilityResource
 			var dotnetEnvironment => dotnetEnvironment
 		};
 
-	private static string GetSolutionName(ObservabilityHostProfile profile, string applicationName)
+	internal static string GetSolutionName(ObservabilityHostProfile profile, string applicationName)
 	{
 		var suffix = profile switch
 					 {
@@ -74,9 +81,9 @@ internal static partial class ObservabilityResource
 		return serviceName;
 	}
 
-	private static IReadOnlyList<KeyValuePair<string, object>> ParseResourceAttributes(string? rawValue)
+	private static List<KeyValuePair<string, object>> ParseResourceAttributes(string? rawValue)
 	{
-		if (rawValue is null)
+		if (string.IsNullOrEmpty(rawValue))
 			return [];
 
 		int byteCount;
@@ -115,6 +122,9 @@ internal static partial class ObservabilityResource
 
 		return attributes;
 	}
+
+	internal static void ValidateAttributes(string rawValue) =>
+		_ = ParseResourceAttributes(rawValue);
 
 	private static string PercentDecode(string value)
 	{

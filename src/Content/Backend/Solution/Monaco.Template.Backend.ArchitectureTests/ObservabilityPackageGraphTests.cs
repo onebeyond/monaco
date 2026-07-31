@@ -1,4 +1,8 @@
 using System.Text.Json;
+using System.Reflection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Monaco.Template.Backend.Common.Observability;
 
 namespace Monaco.Template.Backend.ArchitectureTests;
 
@@ -63,15 +67,32 @@ public sealed class ObservabilityPackageGraphTests
 	[Fact(DisplayName = "Every eligible host references Common.Observability once and selects one applicable profile")]
 	public void EligibleHostsReferenceThePackageOnceAndSelectOneApplicableProfile()
 	{
-		AssertHostUsesSingleProfile("Monaco.Template.Backend.Api", "AddApiObservabilityProfile");
-		AssertHostUsesSingleProfile("Monaco.Template.Backend.Worker", "AddWorkerObservabilityProfile");
-		AssertHostUsesSingleProfile("Monaco.Template.Backend.Common.ApiGateway", "AddGatewayObservabilityProfile");
+		AssertHostUsesSingleProfile("Monaco.Template.Backend.Api", "AddApiObservability()");
+		AssertHostUsesSingleProfile("Monaco.Template.Backend.Worker", "AddWorkerObservability()");
+		AssertHostUsesSingleProfile("Monaco.Template.Backend.Common.ApiGateway", "AddGatewayObservability()");
+	}
+
+	[Fact(DisplayName = "Public observability composition API exposes only host-builder entry points")]
+	public void PublicObservabilityCompositionApiExposesOnlyHostBuilderEntryPoints()
+	{
+		var methods = typeof(ObservabilityHostBuilderExtensions).GetMethods(BindingFlags.Public | BindingFlags.Static)
+																.Where(method => method.Name.StartsWith("Add", StringComparison.Ordinal) && method.Name.EndsWith("Observability", StringComparison.Ordinal))
+																.OrderBy(method => method.Name)
+																.ToArray();
+
+		Assert.Equal(["AddApiObservability", "AddGatewayObservability", "AddWorkerObservability"], methods.Select(method => method.Name));
+		Assert.All(methods, method =>
+							{
+								Assert.Single(method.GetParameters());
+								Assert.Equal(typeof(IHostApplicationBuilder), method.GetParameters()[0].ParameterType);
+								Assert.DoesNotContain(method.GetParameters(), parameter => parameter.ParameterType == typeof(IConfiguration));
+							});
 	}
 
 	[Fact(DisplayName = "Profile definitions contain only their applicable instrumentation")]
 	public void ProfileDefinitionsContainOnlyTheirApplicableInstrumentation()
 	{
-		var profiles = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityServiceCollectionExtensions.cs"));
+		var profiles = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityHostBuilderExtensions.cs"));
 
 		AssertProfileContainsOnly(profiles, "ApiInstrumentations", "WorkerInstrumentations", "Runtime", "AspNetCore", "Http", "SqlClient");
 		AssertProfileContainsOnly(profiles, "WorkerInstrumentations", "GatewayInstrumentations", "Runtime", "Http", "SqlClient");
@@ -81,7 +102,7 @@ public sealed class ObservabilityPackageGraphTests
 	[Fact(DisplayName = "Shared observability composition uses one unified OTLP exporter and applicable signal instrumentation")]
 	public void SharedObservabilityCompositionUsesOneUnifiedOtlpExporterAndApplicableSignalInstrumentation()
 	{
-		var profiles = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityServiceCollectionExtensions.cs"));
+		var profiles = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityHostBuilderExtensions.cs"));
 
 		Assert.Equal(1, CountOccurrences(profiles, "UseOtlpExporter"));
 		Assert.DoesNotContain("AddOtlpExporter", profiles, StringComparison.Ordinal);
@@ -215,10 +236,8 @@ public sealed class ObservabilityPackageGraphTests
 	private static string FindSolutionDirectory()
 	{
 		for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
-		{
 			if (File.Exists(Path.Combine(directory.FullName, "Monaco.Template.Backend.slnx")))
 				return directory.FullName;
-		}
 
 		throw new DirectoryNotFoundException("Could not locate Monaco.Template.Backend.slnx from the test output directory.");
 	}

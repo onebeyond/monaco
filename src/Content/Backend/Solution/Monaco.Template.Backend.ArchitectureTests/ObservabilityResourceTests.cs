@@ -9,8 +9,6 @@ namespace Monaco.Template.Backend.ArchitectureTests;
 [Trait("Architecture Tests", "Observability")]
 public sealed class ObservabilityResourceTests
 {
-	private static readonly Lock EnvironmentLock = new();
-
 	[Fact(DisplayName = "Generated host fallbacks identify every runtime host consistently")]
 	public void GeneratedHostFallbacksIdentifyEveryRuntimeHostConsistently()
 	{
@@ -68,13 +66,24 @@ public sealed class ObservabilityResourceTests
 							Assert.Contains("OTEL_RESOURCE_ATTRIBUTES", exception.Message, StringComparison.Ordinal);
 						});
 
+	[Fact(DisplayName = "Empty resource attribute and service name values resolve as missing")]
+	public void EmptyResourceAttributeAndServiceNameValuesResolveAsMissing() =>
+		WithEnvironment("", "", () =>
+								{
+									var attributes = GetAttributes(ObservabilityResource.Create(ObservabilityHostProfile.Api, "Contoso.Api", "Development"));
+
+									Assert.Equal("Contoso.Api", attributes["service.name"]);
+									Assert.Equal("Contoso", attributes["service.namespace"]);
+									Assert.DoesNotContain("service.version", attributes.Keys);
+								});
+
 	[Fact(DisplayName = "Shared logging composition retains Console and adds one OpenTelemetry provider")]
 	public void SharedLoggingCompositionRetainsConsoleAndAddsOneOpenTelemetryProvider()
 	{
-		lock (EnvironmentLock)
+		lock (ObservabilityTestEnvironment.SharedLock)
 		{
 			var builder = Host.CreateApplicationBuilder();
-			builder.Services.AddApiObservabilityProfile();
+			builder.AddApiObservability();
 
 			using var host = builder.Build();
 			var providers = host.Services.GetServices<ILoggerProvider>().ToArray();
@@ -89,7 +98,7 @@ public sealed class ObservabilityResourceTests
 
 	private static void WithEnvironment(string? resourceAttributes, string? serviceName, Action action)
 	{
-		lock (EnvironmentLock)
+		lock (ObservabilityTestEnvironment.SharedLock)
 		{
 			var previousAttributes = Environment.GetEnvironmentVariable("OTEL_RESOURCE_ATTRIBUTES");
 			var previousServiceName = Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME");
@@ -108,6 +117,6 @@ public sealed class ObservabilityResourceTests
 		}
 	}
 
-	private static IReadOnlyDictionary<string, object> GetAttributes(OpenTelemetry.Resources.Resource resource) =>
+	private static Dictionary<string, object> GetAttributes(OpenTelemetry.Resources.Resource resource) =>
 		resource.Attributes.ToDictionary(attribute => attribute.Key, attribute => attribute.Value, StringComparer.Ordinal);
 }

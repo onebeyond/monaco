@@ -5,6 +5,13 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
+  <!--#if (templateDebug)-->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);massTransitIntegration</DefineConstants>
+  </PropertyGroup>
+
+  <!--#endif-->
+
   <ItemGroup>
     <PackageReference Include="AwesomeAssertions" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />

@@ -83,7 +83,7 @@ builder.Services
 	   .AddCorsPolicies(configuration);
 
 #if (commonLibraries)
-builder.Services.AddApiObservabilityProfile();
+builder.AddApiObservability();
 #endif
 
 var app = builder.Build();

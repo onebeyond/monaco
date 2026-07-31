@@ -59,7 +59,7 @@ builder.Services
 	   .AddHostedService<Worker>();
 
 #if (commonLibraries)
-builder.Services.AddWorkerObservabilityProfile();
+builder.AddWorkerObservability();
 #endif
 
 var host = builder.Build();

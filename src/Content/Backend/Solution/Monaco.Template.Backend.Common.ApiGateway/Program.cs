@@ -21,7 +21,7 @@ builder.Services
 	   .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
 #if (commonLibraries)
-builder.Services.AddGatewayObservabilityProfile();
+builder.AddGatewayObservability();
 #endif
 
 var app = builder.Build();

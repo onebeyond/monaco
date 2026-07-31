@@ -245,7 +245,8 @@
 				"condition": "(!commonLibraries || (!apiService && !workerService && !apiGateway))",
 				"exclude": [
 					"Monaco.Template.Backend.Common.Observability/**/*",
-					"Monaco.Template.Backend.ArchitectureTests/ObservabilityResourceTests.cs"
+					"Monaco.Template.Backend.ArchitectureTests/ObservabilityResourceTests.cs",
+					"Monaco.Template.Backend.ArchitectureTests/ObservabilityConfigurationTests.cs"
 				]
 			},
 				{
