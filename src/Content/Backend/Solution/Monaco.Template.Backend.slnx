@@ -50,7 +50,9 @@
     <Project Path="Monaco.Template.Backend.Application.Tests/Monaco.Template.Backend.Application.Tests.csproj" />
     <Project Path="Monaco.Template.Backend.ArchitectureTests/Monaco.Template.Backend.ArchitectureTests.csproj" />
     <Project Path="Monaco.Template.Backend.Domain.Tests/Monaco.Template.Backend.Domain.Tests.csproj" />
+    <!--#if (apiService || workerService) -->
     <Project Path="Monaco.Template.Backend.IntegrationTests/Monaco.Template.Backend.IntegrationTests.csproj" />
+    <!--#endif -->
   </Folder>
   <!--#endif -->
   <!--#if (apiService) -->

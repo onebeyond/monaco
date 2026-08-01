@@ -68,7 +68,7 @@ The following deterministic insertion points reserve sequence and ownership for 
 |---|---|
 | Runtime host profiles below | 1.4 |
 | Configuration and routing below | 1.5 |
-| `<!-- OBSERVABILITY: 1.6 SUCCESSFUL-COMPANIES -->` | 1.6 |
+| Successful company creations below | 1.6 |
 | `<!-- OBSERVABILITY: 1.7 LOCAL-FIRST-RUN -->` | 1.7 |
 | `<!-- OBSERVABILITY: 2.1 FAILURE-ISOLATION -->` | 2.1 |
 | `<!-- OBSERVABILITY: 2.2-2.3 DATA-BOUNDARIES -->` | 2.2-2.3 |
@@ -104,6 +104,16 @@ Supported operational root keys are `OTEL_SERVICE_NAME`, `OTEL_RESOURCE_ATTRIBUT
 
 Do not configure exporter selection, propagators, auto-instrumentation, YAML, retry/disk buffering, certificates/client keys, temporality/exemplars, attribute limits, or provider-specific logging switches. Use environment variables or Development User Secrets for any future secret-capable setting; never commit headers, credentials, authorization values, certificates, or HMAC material. The complete spelling, range, malformed-value, and characterization contract is `CONFIGURATION-MATRIX.md` in Monaco's source repository; it is not copied into generated output.
 
+<!--#if (apiService) -->
+## Successful company creations
+
+The API records one `company.successful_creations` measurement only after a Company unit of work commits successfully. Validation failures, persistence failures, rollbacks, retries before a successful commit, and unsuccessful requests record no measurement.
+
+The Counter has no dimensions: it never includes Company, user, request, trace, span, message, identity, payload, or any other attribute. It is aggregate operational evidence, not a trace-owned event or an authoritative business ledger.
+
+After a committed Company creation, open the Dashboard's Metrics view and locate `company.successful_creations`. The counter uses the same configuration-only Metrics routing as every other Metric: configure the supported OTLP Metric endpoint and protocol settings without source changes. Trace sampling and OTLP delivery do not alter the in-process post-commit recording or the committed business result.
+
+<!--#endif -->
 ## Runtime host profiles and resource identity
 
 Each generated Runtime Host emits Operational Logs, Traces, and Metrics through Monaco's shared OpenTelemetry composition and one unified OTLP exporter path. Ordinary application logging stays on the built-in DI `ILogger` route: Console logging remains enabled, and OpenTelemetry receives the same event without a second logger, custom correlation fields, or manual spans.

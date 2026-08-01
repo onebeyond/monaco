@@ -13,6 +13,8 @@ namespace Monaco.Template.Backend.Common.Observability;
 
 public static class ObservabilityHostBuilderExtensions
 {
+	private const string ApplicationMeterName = "Monaco.Template.Backend.Application";
+
 	extension(IHostApplicationBuilder builder)
 	{
 		public IHostApplicationBuilder AddApiObservability() =>
@@ -118,6 +120,9 @@ public static class ObservabilityHostBuilderExtensions
 	private static void ConfigureMetrics(MeterProviderBuilder builder, ObservabilityHostProfile profile)
 	{
 		builder.AddRuntimeInstrumentation();
+
+		if (profile is ObservabilityHostProfile.Api)
+			builder.AddMeter(ApplicationMeterName);
 
 		if (profile is ObservabilityHostProfile.Api or ObservabilityHostProfile.Gateway)
 			builder.AddAspNetCoreInstrumentation();

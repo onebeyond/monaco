@@ -72,6 +72,35 @@ public sealed class ObservabilityPackageGraphTests
 		AssertHostUsesSingleProfile("Monaco.Template.Backend.Common.ApiGateway", "AddGatewayObservability()");
 	}
 
+	[Fact(DisplayName = "Application owns the BCL successful-company counter and only the API Metric profile subscribes to it")]
+	public void ApplicationOwnsBclSuccessfulCompanyCounterAndOnlyApiMetricProfileSubscribes()
+	{
+		var diagnostics = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Application", "Diagnostics", "ApplicationDiagnostics.cs"));
+		var createCompany = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Application", "Features", "Company", "CreateCompany.cs"));
+		var profiles = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityHostBuilderExtensions.cs"));
+		var template = ReadSolutionFile(Path.Combine(".template.config", "template.json"));
+
+		Assert.Contains("using System.Diagnostics.Metrics;", diagnostics, StringComparison.Ordinal);
+		Assert.Contains("internal const string MeterName = \"Monaco.Template.Backend.Application\"", diagnostics, StringComparison.Ordinal);
+		Assert.Contains("private static readonly Meter Meter = new(MeterName)", diagnostics, StringComparison.Ordinal);
+		Assert.Contains("Counter<long>", diagnostics, StringComparison.Ordinal);
+		Assert.Contains("company.successful_creations", diagnostics, StringComparison.Ordinal);
+		Assert.Contains("{company}", diagnostics, StringComparison.Ordinal);
+		Assert.DoesNotContain("OpenTelemetry", diagnostics, StringComparison.Ordinal);
+		Assert.DoesNotContain("Common.Observability", diagnostics, StringComparison.Ordinal);
+		Assert.Contains("ApplicationDiagnostics.SuccessfulCompanyCreations.Add(1);", createCompany, StringComparison.Ordinal);
+		Assert.DoesNotContain("#if (apiService)", createCompany, StringComparison.Ordinal);
+		Assert.DoesNotContain("Monaco.Template.Backend.Application/Diagnostics/ApplicationDiagnostics.cs", template, StringComparison.Ordinal);
+
+		var metricsStart = profiles.IndexOf("private static void ConfigureMetrics", StringComparison.Ordinal);
+		var metricsEnd = profiles.IndexOf("internal enum ObservabilityHostProfile", metricsStart, StringComparison.Ordinal);
+		var metrics = profiles[metricsStart..metricsEnd];
+
+		Assert.Contains("if (profile is ObservabilityHostProfile.Api)", metrics, StringComparison.Ordinal);
+		Assert.Contains("builder.AddMeter(ApplicationMeterName);", metrics, StringComparison.Ordinal);
+		Assert.Equal(1, CountOccurrences(metrics, "AddMeter("));
+	}
+
 	[Fact(DisplayName = "Public observability composition API exposes only host-builder entry points")]
 	public void PublicObservabilityCompositionApiExposesOnlyHostBuilderEntryPoints()
 	{
@@ -243,6 +272,20 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("generated fallbacks, then `OTEL_RESOURCE_ATTRIBUTES` collisions, then `OTEL_SERVICE_NAME`", guide, StringComparison.Ordinal);
 		Assert.Contains("low-cardinality, non-secret operational metadata", guide, StringComparison.Ordinal);
 		Assert.DoesNotContain("static external-observability handoff", guide, StringComparison.Ordinal);
+	}
+
+	[Fact(DisplayName = "Generated local observability guide documents the successful-company counter only for API output")]
+	public void GeneratedLocalObservabilityGuideDocumentsSuccessfulCompanyCounterOnlyForApiOutput()
+	{
+		var guide = ReadSolutionFile("OBSERVABILITY.md").Replace("\r\n", "\n", StringComparison.Ordinal);
+
+		Assert.Contains("<!--#if (apiService) -->\n## Successful company creations", guide, StringComparison.Ordinal);
+		Assert.Contains("company.successful_creations", guide, StringComparison.Ordinal);
+		Assert.Contains("only after a Company unit of work commits successfully", guide, StringComparison.Ordinal);
+		Assert.Contains("Counter has no dimensions", guide, StringComparison.Ordinal);
+		Assert.Contains("aggregate operational evidence", guide, StringComparison.Ordinal);
+		Assert.Contains("Dashboard's Metrics view", guide, StringComparison.Ordinal);
+		Assert.Contains("configuration-only Metrics routing", guide, StringComparison.Ordinal);
 	}
 
 	private static void AssertHostUsesSingleProfile(string hostProject, string profileMethod)

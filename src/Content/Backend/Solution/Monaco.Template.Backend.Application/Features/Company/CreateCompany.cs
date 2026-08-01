@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
+using Monaco.Template.Backend.Application.Diagnostics;
 using Monaco.Template.Backend.Application.Features.Company.Extensions;
 using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Common.Application.Commands;
@@ -77,6 +78,7 @@ public sealed class CreateCompany
 					  .Add(item);
 			
 			await _dbContext.SaveEntitiesAsync(cancellationToken);
+			ApplicationDiagnostics.SuccessfulCompanyCreations.Add(1);
 
 			return CommandResult<Guid>.Success(item.Id);
 		}

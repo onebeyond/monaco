@@ -18,6 +18,8 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 		var output = _hive.Generate("GuideContractDefaultHost");
 
 		output.AssertGuidePresent();
+		output.AssertSuccessfulCompanyCounterPresent();
+		output.AssertApplicationDiagnosticsPresent();
 	}
 
 	[Fact(DisplayName = "No-host output omits the guide, the Solution Item, and the manual instructions")]
@@ -28,6 +30,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 		Assert.False(File.Exists(output.GuidePath), $"No-host output must not contain OBSERVABILITY.md: {output.GuidePath}");
 		Assert.DoesNotContain("<File Path=\"OBSERVABILITY.md\" />", output.Solution, StringComparison.Ordinal);
 		Assert.DoesNotContain(GuidePointer, output.Cli, StringComparison.Ordinal);
+		output.AssertApplicationDiagnosticsPresent();
 	}
 
 	[Fact(DisplayName = "Package delivery output keeps the complete observability guide")]
@@ -44,6 +47,19 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 		var output = _hive.Generate("GuideContractGatewayOnly", "--apiService", "false", "--workerService", "false", "--apiGateway", "true");
 
 		output.AssertGuidePresent();
+		output.AssertSuccessfulCompanyCounterAbsent();
+		Assert.DoesNotContain("IntegrationTests", output.Solution, StringComparison.Ordinal);
+		output.AssertApplicationDiagnosticsPresent();
+	}
+
+	[Fact(DisplayName = "Worker-only output omits the successful-company counter guidance")]
+	public void WorkerOnlyOutputOmitsSuccessfulCompanyCounterGuidance()
+	{
+		var output = _hive.Generate("GuideContractWorkerOnly", "--apiService", "false", "--workerService", "true", "--apiGateway", "false");
+
+		output.AssertGuidePresent();
+		output.AssertSuccessfulCompanyCounterAbsent();
+		output.AssertApplicationDiagnosticsPresent();
 	}
 
 	public sealed class GeneratedShape
@@ -64,6 +80,11 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 
 		public string Solution { get; }
 
+		public string ApplicationDiagnosticsPath => Path.Combine(OutputDirectory,
+																			 $"{Path.GetFileName(OutputDirectory)}.Application",
+																			 "Diagnostics",
+																			 "ApplicationDiagnostics.cs");
+
 		public void AssertGuidePresent()
 		{
 			Assert.True(File.Exists(GuidePath), $"Expected OBSERVABILITY.md in {OutputDirectory}.");
@@ -74,6 +95,25 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 			Assert.DoesNotContain("<!--#if", guide, StringComparison.Ordinal);
 			Assert.DoesNotContain("Static non-turnkey boundary", guide, StringComparison.Ordinal);
 		}
+
+		public void AssertSuccessfulCompanyCounterPresent()
+		{
+			var guide = File.ReadAllText(GuidePath);
+
+			Assert.Contains("## Successful company creations", guide, StringComparison.Ordinal);
+			Assert.Contains("company.successful_creations", guide, StringComparison.Ordinal);
+		}
+
+		public void AssertSuccessfulCompanyCounterAbsent()
+		{
+			var guide = File.ReadAllText(GuidePath);
+
+			Assert.DoesNotContain("## Successful company creations", guide, StringComparison.Ordinal);
+			Assert.DoesNotContain("company.successful_creations", guide, StringComparison.Ordinal);
+		}
+
+		public void AssertApplicationDiagnosticsPresent() =>
+			Assert.True(File.Exists(ApplicationDiagnosticsPath), $"Expected ApplicationDiagnostics.cs in {ApplicationDiagnosticsPath}.");
 	}
 
 	public sealed class TemplateHiveFixture : IDisposable
