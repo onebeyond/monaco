@@ -31,7 +31,7 @@
 		{
 			"id": "commonLibraries",
 			"name": {
-				"text": "Include Common projects in the solution"
+				"text": "Use source Common projects (false = compatible packages)"
 			},
 			"isVisible": true
 		},

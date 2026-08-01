@@ -10,9 +10,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Monaco.Template.Backend.Common.Api\Monaco.Template.Backend.Common.Api.csproj" />
     <!--#if (commonLibraries)-->
+    <ProjectReference Include="..\Monaco.Template.Backend.Common.Api\Monaco.Template.Backend.Common.Api.csproj" />
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Observability\Monaco.Template.Backend.Common.Observability.csproj" />
+    <!--#else-->
+    <PackageReference Include="Monaco.Template.Backend.Common.Api" />
+    <PackageReference Include="Monaco.Template.Backend.Common.Observability" />
     <!--#endif-->
   </ItemGroup>
 

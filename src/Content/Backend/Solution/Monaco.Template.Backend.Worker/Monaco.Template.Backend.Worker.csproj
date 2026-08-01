@@ -25,6 +25,8 @@
     <ProjectReference Include="..\Monaco.Template.Backend.Application\Monaco.Template.Backend.Application.csproj" />
     <!--#if (commonLibraries)-->
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Observability\Monaco.Template.Backend.Common.Observability.csproj" />
+    <!--#else-->
+    <PackageReference Include="Monaco.Template.Backend.Common.Observability" />
     <!--#endif-->
     <!--#if (massTransitIntegration)-->
     <ProjectReference Include="..\Monaco.Template.Backend.Messages\Monaco.Template.Backend.Messages.csproj" />

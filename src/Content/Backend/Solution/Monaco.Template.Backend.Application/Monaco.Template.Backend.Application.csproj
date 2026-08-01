@@ -11,31 +11,43 @@
 
   <!--#endif-->
   <ItemGroup>
+    <!--#if (commonLibraries)-->
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Application\Monaco.Template.Backend.Common.Application.csproj" />
+    <!--#else-->
+    <PackageReference Include="Monaco.Template.Backend.Common.Application" />
+    <!--#endif-->
     <!--#if (massTransitIntegration)-->
     <ProjectReference Include="..\Monaco.Template.Backend.Messages\Monaco.Template.Backend.Messages.csproj" />
     <!--#endif-->
     <!--#if (filesSupport)-->
+    <!--#if (commonLibraries)-->
     <ProjectReference Include="..\Monaco.Template.Backend.Common.BlobStorage\Monaco.Template.Backend.Common.BlobStorage.csproj" />
+    <!--#else-->
+    <PackageReference Include="Monaco.Template.Backend.Common.BlobStorage" />
     <!--#endif-->
+    <!--#endif-->
+    <!--#if (commonLibraries)-->
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Infrastructure\Monaco.Template.Backend.Common.Infrastructure.csproj" />
+    <!--#else-->
+    <PackageReference Include="Monaco.Template.Backend.Common.Infrastructure" />
+    <!--#endif-->
     <ProjectReference Include="..\Monaco.Template.Backend.Domain\Monaco.Template.Backend.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-	<!--#if (filesSupport)-->
+    <!--#if (filesSupport)-->
     <PackageReference Include="AsyncEnumerator" />
     <PackageReference Include="ExifLibNet" />
-	<!--#endif-->
+    <!--#endif-->
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <!--#if (massTransitIntegration)-->
     <PackageReference Include="MassTransit" />
     <PackageReference Include="MassTransit.EntityFrameworkCore" />
     <!--#endif-->
-	<!--#if (filesSupport)-->
+    <!--#if (filesSupport)-->
     <PackageReference Include="SkiaSharp" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
-	<!--#endif-->
+    <!--#endif-->
   </ItemGroup>
 
   <ItemGroup>

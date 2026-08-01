@@ -17,7 +17,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 	{
 		var output = _hive.Generate("GuideContractDefaultHost");
 
-		output.AssertGuidePresent(expectStaticBoundary: false);
+		output.AssertGuidePresent();
 	}
 
 	[Fact(DisplayName = "No-host output omits the guide, the Solution Item, and the manual instructions")]
@@ -30,12 +30,12 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 		Assert.DoesNotContain(GuidePointer, output.Cli, StringComparison.Ordinal);
 	}
 
-	[Fact(DisplayName = "E1 output keeps the guide and renders only the static non-turnkey boundary")]
-	public void E1OutputKeepsTheGuideWithStaticBoundary()
+	[Fact(DisplayName = "Package delivery output keeps the complete observability guide")]
+	public void PackageDeliveryOutputKeepsTheGuideContract()
 	{
-		var output = _hive.Generate("GuideContractE1", "--commonLibraries", "false");
+		var output = _hive.Generate("GuideContractPackages", "--commonLibraries", "false");
 
-		output.AssertGuidePresent(expectStaticBoundary: true);
+		output.AssertGuidePresent();
 	}
 
 	[Fact(DisplayName = "Gateway-only output contains the guide, the Solution Item, and the manual instructions")]
@@ -43,7 +43,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 	{
 		var output = _hive.Generate("GuideContractGatewayOnly", "--apiService", "false", "--workerService", "false", "--apiGateway", "true");
 
-		output.AssertGuidePresent(expectStaticBoundary: false);
+		output.AssertGuidePresent();
 	}
 
 	public sealed class GeneratedShape
@@ -64,7 +64,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 
 		public string Solution { get; }
 
-		public void AssertGuidePresent(bool expectStaticBoundary)
+		public void AssertGuidePresent()
 		{
 			Assert.True(File.Exists(GuidePath), $"Expected OBSERVABILITY.md in {OutputDirectory}.");
 			var guide = File.ReadAllText(GuidePath);
@@ -72,11 +72,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 			Assert.Contains("<File Path=\"OBSERVABILITY.md\" />", Solution, StringComparison.Ordinal);
 			Assert.Contains(GuidePointer, Cli, StringComparison.Ordinal);
 			Assert.DoesNotContain("<!--#if", guide, StringComparison.Ordinal);
-
-			if (expectStaticBoundary)
-				Assert.Contains("Static non-turnkey boundary", guide, StringComparison.Ordinal);
-			else
-				Assert.DoesNotContain("Static non-turnkey boundary", guide, StringComparison.Ordinal);
+			Assert.DoesNotContain("Static non-turnkey boundary", guide, StringComparison.Ordinal);
 		}
 	}
 
@@ -127,11 +123,14 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 								RedirectStandardOutput = true,
 								RedirectStandardError = true,
 								UseShellExecute = false,
-								CreateNoWindow = true
+								CreateNoWindow = true,
+								Environment =
+								{
+									["DOTNET_CLI_TELEMETRY_OPTOUT"] = "1",
+									["DOTNET_NOLOGO"] = "1",
+									["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "1"
+								}
 							};
-			startInfo.Environment["DOTNET_CLI_TELEMETRY_OPTOUT"] = "1";
-			startInfo.Environment["DOTNET_NOLOGO"] = "1";
-			startInfo.Environment["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "1";
 
 			using var process = Process.Start(startInfo)!;
 			var standardOutput = process.StandardOutput.ReadToEndAsync();

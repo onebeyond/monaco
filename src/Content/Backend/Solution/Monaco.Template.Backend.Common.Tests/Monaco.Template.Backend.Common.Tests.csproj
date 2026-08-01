@@ -1,5 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <PackageVersion>0.0.1-alpha1</PackageVersion>
+    <Title>Monaco.Template.Backend.Common.Tests</Title>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>One Beyond</Authors>
+    <Company>One Beyond</Company>
+    <Copyright>One Beyond</Copyright>
+    <PackageProjectUrl>https://github.com/onebeyond/monaco</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/onebeyond/monaco.git</RepositoryUrl>
+    <Description>Shared test infrastructure and helpers for the solution test projects.</Description>
+    <RepositoryType>Git</RepositoryType>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+  </PropertyGroup>
+
   <!--#if (templateDebug)-->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>$(DefineConstants);auth;commonLibraries;filesSupport</DefineConstants>
@@ -11,7 +25,7 @@
     <PackageReference Include="AutoFixture.Xunit2" />
     <PackageReference Include="AwesomeAssertions" />
     <PackageReference Include="Moq" />
-	<PackageReference Include="MockQueryable.Moq" />
+    <PackageReference Include="MockQueryable.Moq" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Domain\Monaco.Template.Backend.Common.Domain.csproj" />

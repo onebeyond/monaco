@@ -56,8 +56,8 @@
 			"type": "parameter",
 			"datatype": "bool",
 			"defaultValue": "true",
-			"displayName": "Include Common projects in the solution",
-			"description": "Include all the Common.* projects in the solution generated"
+			"displayName": "Use source Common projects (false = compatible packages)",
+			"description": "Use source Common projects when true, or the declared compatible Common packages when false. Package IDs embed the solution name; stock your own feed by packing the Common projects from a same-named source-mode generation. Monaco does not provide a feed."
 		},
 		"filesSupport": {
 			"type": "parameter",
@@ -230,9 +230,16 @@
 				{
 					"condition": "(!commonLibraries)",
 					"exclude": [
-						"nuget.config",
-						"realm-export-template.json",
-						"Monaco.Template.Backend.Common.*/**/*"
+						"Monaco.Template.Backend.Common.Api/**/*",
+						"Monaco.Template.Backend.Common.Api.Application/**/*",
+						"Monaco.Template.Backend.Common.Application/**/*",
+						"Monaco.Template.Backend.Common.BlobStorage/**/*",
+						"Monaco.Template.Backend.Common.BlobStorage.Tests/**/*",
+						"Monaco.Template.Backend.Common.Domain/**/*",
+						"Monaco.Template.Backend.Common.Domain.Tests/**/*",
+						"Monaco.Template.Backend.Common.Infrastructure/**/*",
+						"Monaco.Template.Backend.Common.Observability/**/*",
+						"Monaco.Template.Backend.Common.Tests/**/*"
 					]
 				},
 				{

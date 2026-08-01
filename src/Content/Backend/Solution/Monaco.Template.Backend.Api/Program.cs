@@ -11,9 +11,7 @@ using Monaco.Template.Backend.Common.Api.Cors;
 using Monaco.Template.Backend.Api.Endpoints.Extensions;
 using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Common.Api.OpenApi;
-#if (commonLibraries)
 using Monaco.Template.Backend.Common.Observability;
-#endif
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,9 +80,7 @@ builder.Services
 builder.Services
 	   .AddCorsPolicies(configuration);
 
-#if (commonLibraries)
 builder.AddApiObservability();
-#endif
 
 var app = builder.Build();
 

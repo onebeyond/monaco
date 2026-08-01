@@ -10,44 +10,39 @@
     <!--#if (apiService) -->
     <Project Path="Monaco.Template.Backend.Common.Api.Application/Monaco.Template.Backend.Common.Api.Application.csproj" />
     <!--#endif -->
-    <!--#if (apiGateway) -->
-    <Project Path="Monaco.Template.Backend.Common.ApiGateway/Monaco.Template.Backend.Common.ApiGateway.csproj" />
-    <!--#endif -->
     <Project Path="Monaco.Template.Backend.Common.Application/Monaco.Template.Backend.Common.Application.csproj" />
     <!--#if (filesSupport) -->
     <Project Path="Monaco.Template.Backend.Common.BlobStorage/Monaco.Template.Backend.Common.BlobStorage.csproj" />
     <!--#endif -->
     <Project Path="Monaco.Template.Backend.Common.Domain/Monaco.Template.Backend.Common.Domain.csproj" />
     <Project Path="Monaco.Template.Backend.Common.Infrastructure/Monaco.Template.Backend.Common.Infrastructure.csproj" />
-	<!--#if (apiService || workerService || apiGateway) -->
+    <!--#if (apiService || workerService || apiGateway) -->
     <Project Path="Monaco.Template.Backend.Common.Observability/Monaco.Template.Backend.Common.Observability.csproj" />
-	<!--#endif -->
-	<!--#if (tests) -->
+    <!--#endif -->
+    <!--#if (tests) -->
     <Project Path="Monaco.Template.Backend.Common.Tests/Monaco.Template.Backend.Common.Tests.csproj" />
-	<!--#endif -->
+    <!--#endif -->
   </Folder>
   <!--#if (tests) -->
   <Folder Name="/Common/Tests/">
     <!--#if (filesSupport) -->
     <Project Path="Monaco.Template.Backend.Common.BlobStorage.Tests/Monaco.Template.Backend.Common.BlobStorage.Tests.csproj" />
-	<!--#endif -->
+    <!--#endif -->
     <Project Path="Monaco.Template.Backend.Common.Domain.Tests/Monaco.Template.Backend.Common.Domain.Tests.csproj" />
-  </Folder>
-  <!--#endif -->
-  <!--#if (keycloakConfig) -->
-  <Folder Name="/KeyCloak/">
-    <File Path="realm-export-template.json" />
   </Folder>
   <!--#endif -->
   <!--#endif -->
   <Folder Name="/Solution Items/">
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
-	<!--#if (apiService || workerService || apiGateway) -->
+    <!--#if (apiService || workerService || apiGateway) -->
     <File Path="OBSERVABILITY.md" />
-	<!--#endif -->
-	<!--#if (apiService) -->
+    <!--#endif -->
+    <!--#if (apiService) -->
     <File Path="Monaco.Template.Backend.Api.http" />
+    <!--#endif -->
+    <!--#if (keycloakConfig) -->
+    <File Path="realm-export-template.json" />
     <!--#endif -->
   </Folder>
   <!--#if (tests) -->
@@ -68,5 +63,8 @@
   <!--#endif -->
   <!--#if (workerService) -->
   <Project Path="Monaco.Template.Backend.Worker/Monaco.Template.Backend.Worker.csproj" />
+  <!--#endif -->
+  <!--#if (apiGateway) -->
+  <Project Path="Monaco.Template.Backend.Common.ApiGateway/Monaco.Template.Backend.Common.ApiGateway.csproj" />
   <!--#endif -->
 </Solution>

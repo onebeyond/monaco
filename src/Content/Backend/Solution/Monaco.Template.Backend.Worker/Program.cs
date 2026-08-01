@@ -3,9 +3,7 @@ using MassTransit;
 using Monaco.Template.Backend.Application.Persistence;
 #endif
 using Monaco.Template.Backend.Application.DependencyInjection;
-#if (commonLibraries)
 using Monaco.Template.Backend.Common.Observability;
-#endif
 using Monaco.Template.Backend.Worker;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -58,9 +56,7 @@ builder.Services
 #endif
 	   .AddHostedService<Worker>();
 
-#if (commonLibraries)
 builder.AddWorkerObservability();
-#endif
 
 var host = builder.Build();
 host.Run();

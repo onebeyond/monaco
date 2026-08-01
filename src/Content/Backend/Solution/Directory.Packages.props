@@ -22,8 +22,20 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
-    <!--#if (commonLibraries && (apiService || workerService || apiGateway))-->
+    <!--#if (commonLibraries)-->
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.2" />
+    <!--#endif-->
+    <!--#if (!commonLibraries)-->
+    <PackageVersion Include="Monaco.Template.Backend.Common.Api" Version="0.0.1-alpha1" />
+    <PackageVersion Include="Monaco.Template.Backend.Common.Api.Application" Version="0.0.1-alpha1" />
+    <PackageVersion Include="Monaco.Template.Backend.Common.Application" Version="0.0.1-alpha1" />
+    <PackageVersion Include="Monaco.Template.Backend.Common.BlobStorage" Version="0.0.1-alpha1" />
+    <PackageVersion Include="Monaco.Template.Backend.Common.Domain" Version="0.0.1-alpha1" />
+    <PackageVersion Include="Monaco.Template.Backend.Common.Infrastructure" Version="0.0.1-alpha1" />
+    <PackageVersion Include="Monaco.Template.Backend.Common.Observability" Version="0.0.1-alpha1" />
+    <PackageVersion Include="Monaco.Template.Backend.Common.Tests" Version="0.0.1-alpha1" />
+    <!--#endif-->
+    <!--#if (commonLibraries && (apiService || workerService || apiGateway))-->
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.2" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.17.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.17.0" />

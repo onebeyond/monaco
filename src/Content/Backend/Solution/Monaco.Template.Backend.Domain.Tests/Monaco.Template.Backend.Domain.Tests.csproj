@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
-	<IsTestProject>true</IsTestProject>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <!--#if (templateDebug)-->
@@ -25,7 +25,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!--#if (commonLibraries)-->
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Tests\Monaco.Template.Backend.Common.Tests.csproj" />
+    <!--#else-->
+    <PackageReference Include="Monaco.Template.Backend.Common.Tests" />
+    <!--#endif-->
     <ProjectReference Include="..\Monaco.Template.Backend.Domain\Monaco.Template.Backend.Domain.csproj" />
   </ItemGroup>
 

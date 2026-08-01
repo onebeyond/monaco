@@ -27,7 +27,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Monaco.Template.Backend.Application\Monaco.Template.Backend.Application.csproj" />
+    <!--#if (commonLibraries)-->
     <ProjectReference Include="..\Monaco.Template.Backend.Common.Tests\Monaco.Template.Backend.Common.Tests.csproj" />
+    <!--#else-->
+    <PackageReference Include="Monaco.Template.Backend.Common.Tests" />
+    <!--#endif-->
     <ProjectReference Include="..\Monaco.Template.Backend.Domain.Tests\Monaco.Template.Backend.Domain.Tests.csproj" />
   </ItemGroup>
 

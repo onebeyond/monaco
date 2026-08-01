@@ -116,14 +116,18 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("ConfigureMetrics", profiles, StringComparison.Ordinal);
 	}
 
-	[Fact(DisplayName = "Template excludes observability from E1 and no-host output")]
-	public void TemplateExcludesObservabilityFromE1AndNoHostOutput()
+	[Fact(DisplayName = "Template separates Common delivery from host observability")]
+	public void TemplateSeparatesCommonDeliveryFromHostObservability()
 	{
 		var template = ReadSolutionFile(Path.Combine(".template.config", "template.json"));
 
+		Assert.Contains("\"commonLibraries\"", template, StringComparison.Ordinal);
+		Assert.Contains("\"datatype\": \"bool\"", template, StringComparison.Ordinal);
+		Assert.Contains("\"defaultValue\": \"true\"", template, StringComparison.Ordinal);
+		Assert.Contains("\"condition\": \"(!commonLibraries)\"", template, StringComparison.Ordinal);
 		Assert.Contains("(!commonLibraries || (!apiService && !workerService && !apiGateway))", template, StringComparison.Ordinal);
-		Assert.Contains("Monaco.Template.Backend.Common.Observability/**/*", template, StringComparison.Ordinal);
 		Assert.Contains("(!commonLibraries || !apiService || !workerService || !apiGateway)", template, StringComparison.Ordinal);
+		Assert.Contains("Monaco.Template.Backend.Common.Observability/**/*", template, StringComparison.Ordinal);
 		Assert.Contains("Monaco.Template.Backend.ArchitectureTests/ObservabilityPackageGraphTests.cs", template, StringComparison.Ordinal);
 		Assert.Contains("Monaco.Template.Backend.ArchitectureTests/ObservabilityResourceTests.cs", template, StringComparison.Ordinal);
 		Assert.DoesNotContain("Monaco.Template.Backend.*.Api*/**/*", template, StringComparison.Ordinal);
@@ -133,7 +137,8 @@ public sealed class ObservabilityPackageGraphTests
 		{
 			var program = ReadSolutionFile(Path.Combine(hostProject, "Program.cs"));
 
-			Assert.Equal(2, CountOccurrences(program, "#if (commonLibraries)"));
+			Assert.DoesNotContain("#if (commonLibraries)", program, StringComparison.Ordinal);
+			Assert.DoesNotContain("#if (!commonLibraries)", program, StringComparison.Ordinal);
 		}
 	}
 
@@ -163,8 +168,9 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("only telemetry-specific prerequisite", guide, StringComparison.Ordinal);
 		Assert.Contains("SQL Server, RabbitMQ, Blob/Azurite, identity/Keycloak, migrations", guide, StringComparison.Ordinal);
 		Assert.Contains("provision and verify them separately", guide, StringComparison.Ordinal);
-		Assert.Contains("<!--#if (!commonLibraries) -->", guide, StringComparison.Ordinal);
-		Assert.Contains("static external-observability handoff only", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("<!--#if (commonLibraries)", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("<!--#if (!commonLibraries)", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("static external-observability handoff", guide, StringComparison.Ordinal);
 		Assert.DoesNotContain("--allow-anonymous", guide, StringComparison.Ordinal);
 		Assert.Equal(CountOccurrences(guide, "<!--#if"), CountOccurrences(guide, "<!--#endif -->"));
 
@@ -191,18 +197,52 @@ public sealed class ObservabilityPackageGraphTests
 					"The OBSERVABILITY.md Solution Item must sit inside its own Runtime Host conditional within /Solution Items/.");
 	}
 
+	[Fact(DisplayName = "Common delivery keeps source references and emits package references for every runtime edge")]
+	public void CommonDeliveryKeepsSourceReferencesAndEmitsPackageReferencesForEveryRuntimeEdge()
+	{
+		var centralPackages = ReadSolutionFile("Directory.Packages.props");
+
+		Assert.Contains("<!--#if (!commonLibraries)-->", centralPackages, StringComparison.Ordinal);
+
+		AssertDeliveryEdge("Monaco.Template.Backend.Domain", "Monaco.Template.Backend.Common.Domain");
+		AssertDeliveryEdge("Monaco.Template.Backend.Application", "Monaco.Template.Backend.Common.Application");
+		AssertDeliveryEdge("Monaco.Template.Backend.Application", "Monaco.Template.Backend.Common.Infrastructure");
+		AssertDeliveryEdge("Monaco.Template.Backend.Application", "Monaco.Template.Backend.Common.BlobStorage");
+		AssertDeliveryEdge("Monaco.Template.Backend.Api", "Monaco.Template.Backend.Common.Api.Application");
+		AssertDeliveryEdge("Monaco.Template.Backend.Api", "Monaco.Template.Backend.Common.Api");
+		AssertDeliveryEdge("Monaco.Template.Backend.Api", "Monaco.Template.Backend.Common.Observability");
+		AssertDeliveryEdge("Monaco.Template.Backend.Worker", "Monaco.Template.Backend.Common.Observability");
+		AssertDeliveryEdge("Monaco.Template.Backend.Common.ApiGateway", "Monaco.Template.Backend.Common.Api");
+		AssertDeliveryEdge("Monaco.Template.Backend.Common.ApiGateway", "Monaco.Template.Backend.Common.Observability");
+		AssertDeliveryEdge("Monaco.Template.Backend.Application.Tests", "Monaco.Template.Backend.Common.Tests");
+		AssertDeliveryEdge("Monaco.Template.Backend.Domain.Tests", "Monaco.Template.Backend.Common.Tests");
+
+		foreach (var package in new[]
+				 {
+					 "Monaco.Template.Backend.Common.Domain",
+					 "Monaco.Template.Backend.Common.Application",
+					 "Monaco.Template.Backend.Common.Infrastructure",
+					 "Monaco.Template.Backend.Common.BlobStorage",
+					 "Monaco.Template.Backend.Common.Api.Application",
+					 "Monaco.Template.Backend.Common.Api",
+					 "Monaco.Template.Backend.Common.Observability",
+					 "Monaco.Template.Backend.Common.Tests"
+				 })
+			Assert.Contains($"<PackageVersion Include=\"{package}\" Version=\"0.0.1-alpha1\" />", centralPackages, StringComparison.Ordinal);
+	}
+
 	[Fact(DisplayName = "Generated local observability guide documents only applicable Story 1.4 host profiles")]
 	public void GeneratedLocalObservabilityGuideDocumentsOnlyApplicableStory14HostProfiles()
 	{
 		var guide = ReadSolutionFile("OBSERVABILITY.md").Replace("\r\n", "\n", StringComparison.Ordinal);
 
-		Assert.Contains("<!--#if (commonLibraries) -->\n## Runtime host profiles and resource identity", guide, StringComparison.Ordinal);
+		Assert.Contains("## Runtime host profiles and resource identity", guide, StringComparison.Ordinal);
 		Assert.Contains("<!--#if (apiService) -->\n### API profile", guide, StringComparison.Ordinal);
 		Assert.Contains("<!--#if (workerService) -->\n### Worker profile", guide, StringComparison.Ordinal);
 		Assert.Contains("<!--#if (apiGateway) -->\n### Gateway profile", guide, StringComparison.Ordinal);
 		Assert.Contains("generated fallbacks, then `OTEL_RESOURCE_ATTRIBUTES` collisions, then `OTEL_SERVICE_NAME`", guide, StringComparison.Ordinal);
 		Assert.Contains("low-cardinality, non-secret operational metadata", guide, StringComparison.Ordinal);
-		Assert.Contains("static external-observability handoff only", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("static external-observability handoff", guide, StringComparison.Ordinal);
 	}
 
 	private static void AssertHostUsesSingleProfile(string hostProject, string profileMethod)
@@ -211,7 +251,16 @@ public sealed class ObservabilityPackageGraphTests
 		var program = ReadSolutionFile(Path.Combine(hostProject, "Program.cs"));
 
 		Assert.Equal(1, CountOccurrences(project, "Monaco.Template.Backend.Common.Observability.csproj"));
+		Assert.Equal(1, CountOccurrences(project, "PackageReference Include=\"Monaco.Template.Backend.Common.Observability\""));
 		Assert.Equal(1, CountOccurrences(program, profileMethod));
+	}
+
+	private static void AssertDeliveryEdge(string projectName, string commonProjectName)
+	{
+		var project = ReadSolutionFile(Path.Combine(projectName, $"{projectName}.csproj"));
+
+		Assert.Contains($"ProjectReference Include=\"..\\{commonProjectName}\\{commonProjectName}.csproj\"", project, StringComparison.Ordinal);
+		Assert.Contains($"PackageReference Include=\"{commonProjectName}\"", project, StringComparison.Ordinal);
 	}
 
 	private static string ReadSolutionFile(string relativePath) => File.ReadAllText(Path.Combine(FindSolutionDirectory(), relativePath));
