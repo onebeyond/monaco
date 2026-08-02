@@ -20,6 +20,8 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 		output.AssertGuidePresent();
 		output.AssertSuccessfulCompanyCounterPresent();
 		output.AssertApplicationDiagnosticsPresent();
+		output.AssertCanonicalLocalFirstRunTask("GuideContractDefaultHost.Api", "GuideContractDefaultHost.Worker");
+		output.AssertGuideDoesNotContain("GuideContractDefaultHost.Common.ApiGateway");
 	}
 
 	[Fact(DisplayName = "No-host output omits the guide, the Solution Item, and the manual instructions")]
@@ -60,6 +62,45 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 		output.AssertGuidePresent();
 		output.AssertSuccessfulCompanyCounterAbsent();
 		output.AssertApplicationDiagnosticsPresent();
+	}
+
+	[Fact(DisplayName = "Full output with Gateway contains the local observability walkthrough")]
+	public void FullOutputWithGatewayContainsCanonicalLocalFirstRunTask()
+	{
+		var output = _hive.Generate("GuideContractFullGateway", "--apiGateway", "true");
+
+		output.AssertCanonicalLocalFirstRunTask("GuideContractFullGateway.Api", "GuideContractFullGateway.Worker", "GuideContractFullGateway.Common.ApiGateway");
+	}
+
+	[Fact(DisplayName = "Full output without tests contains the local observability walkthrough")]
+	public void FullOutputWithoutTestsContainsCanonicalLocalFirstRunTask()
+	{
+		var output = _hive.Generate("GuideContractFullWithoutTests", "--tests", "false");
+
+		output.AssertCanonicalLocalFirstRunTask("GuideContractFullWithoutTests.Api", "GuideContractFullWithoutTests.Worker");
+		output.AssertGuideDoesNotContain("GuideContractFullWithoutTests.Common.ApiGateway");
+	}
+
+	[Fact(DisplayName = "Worker-only output states the local walkthrough boundary")]
+	public void WorkerOnlyOutputStatesLocalWalkthroughBoundary()
+	{
+		var r5Output = _hive.Generate("GuideContractWorkerR5",
+			"--apiService", "false",
+			"--workerService", "true",
+			"--apiGateway", "false",
+			"--massTransitIntegration", "true",
+			"--filesSupport", "true",
+			"--tests", "false");
+		var r6Output = _hive.Generate("GuideContractWorkerR6",
+			"--apiService", "false",
+			"--workerService", "true",
+			"--apiGateway", "false",
+			"--massTransitIntegration", "false",
+			"--filesSupport", "false",
+			"--tests", "false");
+
+		r5Output.AssertWorkerOnlyFirstRunBoundary();
+		r6Output.AssertWorkerOnlyFirstRunBoundary();
 	}
 
 	public sealed class GeneratedShape
@@ -111,6 +152,46 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 			Assert.DoesNotContain("## Successful company creations", guide, StringComparison.Ordinal);
 			Assert.DoesNotContain("company.successful_creations", guide, StringComparison.Ordinal);
 		}
+
+		public void AssertCanonicalLocalFirstRunTask(params string[] expectedServiceNames)
+		{
+			var guide = File.ReadAllText(GuidePath);
+			var taskStart = guide.IndexOf("## Create a Company and inspect local observability", StringComparison.Ordinal);
+			Assert.True(taskStart >= 0, "Expected the canonical local first-run task in the generated guide.");
+			var nextSection = guide.IndexOf("\n## ", taskStart + 1, StringComparison.Ordinal);
+			var task = guide[taskStart..(nextSection >= 0 ? nextSection : guide.Length)];
+
+			Assert.Contains("prerequisites selected for this solution", task, StringComparison.Ordinal);
+			Assert.Contains("generated `Init` migration", task, StringComparison.Ordinal);
+			Assert.Contains("participating Runtime Host", task, StringComparison.Ordinal);
+			Assert.Contains("Authenticate in Scalar", task, StringComparison.Ordinal);
+			Assert.Contains("create a Company", task, StringComparison.Ordinal);
+			Assert.Contains("Dashboard's Logs", task, StringComparison.Ordinal);
+			Assert.Contains("correlated Trace", task, StringComparison.Ordinal);
+			Assert.Contains("applicable automatic Metric", task, StringComparison.Ordinal);
+			Assert.Contains("company.successful_creations", task, StringComparison.Ordinal);
+			Assert.Contains("exactly one", task, StringComparison.Ordinal);
+			Assert.Contains("no attributes", task, StringComparison.Ordinal);
+			Assert.Contains("validation or persistence failure", task, StringComparison.Ordinal);
+			foreach (var serviceName in expectedServiceNames)
+				Assert.Contains(serviceName, task, StringComparison.Ordinal);
+		}
+
+		public void AssertWorkerOnlyFirstRunBoundary()
+		{
+			var guide = File.ReadAllText(GuidePath);
+
+			Assert.Contains("## Worker-only solutions", guide, StringComparison.Ordinal);
+			Assert.Contains("no interactive API/Scalar Company walkthrough", guide, StringComparison.Ordinal);
+			Assert.Contains("no generated sample fixture or walkthrough task", guide, StringComparison.Ordinal);
+			Assert.DoesNotContain("LOCAL-FULL-UJ1", guide, StringComparison.Ordinal);
+			Assert.DoesNotContain("REPO-R", guide, StringComparison.Ordinal);
+			Assert.DoesNotContain("## Successful company creations", guide, StringComparison.Ordinal);
+			Assert.DoesNotContain("company.successful_creations", guide, StringComparison.Ordinal);
+		}
+
+		public void AssertGuideDoesNotContain(string text) =>
+			Assert.DoesNotContain(text, File.ReadAllText(GuidePath), StringComparison.Ordinal);
 
 		public void AssertApplicationDiagnosticsPresent() =>
 			Assert.True(File.Exists(ApplicationDiagnosticsPath), $"Expected ApplicationDiagnostics.cs in {ApplicationDiagnosticsPath}.");

@@ -69,7 +69,7 @@ The following deterministic insertion points reserve sequence and ownership for 
 | Runtime host profiles below | 1.4 |
 | Configuration and routing below | 1.5 |
 | Successful company creations below | 1.6 |
-| `<!-- OBSERVABILITY: 1.7 LOCAL-FIRST-RUN -->` | 1.7 |
+| Local first run below | 1.7 |
 | `<!-- OBSERVABILITY: 2.1 FAILURE-ISOLATION -->` | 2.1 |
 | `<!-- OBSERVABILITY: 2.2-2.3 DATA-BOUNDARIES -->` | 2.2-2.3 |
 | `<!-- OBSERVABILITY: 2.4 PRODUCTION-ROUTING -->` | 2.4 |
@@ -82,6 +82,33 @@ The following deterministic insertion points reserve sequence and ownership for 
 | `<!-- OBSERVABILITY: 5.3 REDUCED-API-VERIFICATION -->` | 5.3 |
 | `<!-- OBSERVABILITY: 5.4 STATIC-SHAPE-BOUNDARIES -->` | 5.4 |
 | `<!-- OBSERVABILITY: 5.5 CONSOLIDATION -->` | 5.5 |
+
+<!--#if (apiService && workerService) -->
+## Create a Company and inspect local observability
+
+Use this walkthrough when your generated solution includes both an API and a Worker. It needs no application-code edits and no developer-defined local environment variables.
+
+1. Provision only the prerequisites selected for this solution. Apply the generated `Init` migration using this solution's normal migration procedure, then start the standalone viewer as described above.
+2. Start every participating Runtime Host with its checked-in Development configuration. Confirm the fallback `service.name` of each emitted host in the Dashboard:
+   - `Monaco.Template.Backend.Api`
+   - `Monaco.Template.Backend.Worker`
+<!--#if (apiGateway) -->
+   - `Monaco.Template.Backend.Common.ApiGateway`
+<!--#endif -->
+
+   Do not look for or infer an unselected host.
+3. Authenticate in Scalar, then create a Company through the API. This is the only interactive business action in this task.
+4. In the Dashboard's Logs view, find an Operational Log from a participating host and open its correlated Trace. In Traces, verify the same trace identifies that host's fallback `service.name`. In Metrics, find one applicable automatic Metric from the selected Runtime Hosts.
+5. After the Company commit, find `company.successful_creations` in Metrics. It is an aggregate Counter with no attributes and must show exactly one increment for the committed Company. For a validation or persistence failure through an existing normal path, confirm no Company is committed and the Counter has no increment; do not add an endpoint, fixture, request, or Worker workload just to demonstrate this check.
+
+The Dashboard only retains volatile in-memory history. A visible signal is viewer evidence, while the Company commit and the post-commit Counter semantics remain the application facts.
+<!--#endif -->
+
+<!--#if (workerService && !apiService && !apiGateway && !tests) -->
+## Worker-only solutions
+
+This Worker-only solution has no interactive API/Scalar Company walkthrough and no generated sample fixture or walkthrough task.
+<!--#endif -->
 
 ## Configuration and routing
 

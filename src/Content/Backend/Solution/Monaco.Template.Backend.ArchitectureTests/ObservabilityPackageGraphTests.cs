@@ -10,6 +10,9 @@ namespace Monaco.Template.Backend.ArchitectureTests;
 [Trait("Architecture Tests", "Observability")]
 public sealed class ObservabilityPackageGraphTests
 {
+	private const string TemplateDirectiveIf = "#" + "if";
+	private const string TemplateDirectiveEndIf = "#" + "endif";
+
 	private static readonly string[] OpenTelemetryPackages =
 	[
 		"OpenTelemetry.Extensions.Hosting",
@@ -89,7 +92,7 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.DoesNotContain("OpenTelemetry", diagnostics, StringComparison.Ordinal);
 		Assert.DoesNotContain("Common.Observability", diagnostics, StringComparison.Ordinal);
 		Assert.Contains("ApplicationDiagnostics.SuccessfulCompanyCreations.Add(1);", createCompany, StringComparison.Ordinal);
-		Assert.DoesNotContain("#if (apiService)", createCompany, StringComparison.Ordinal);
+		Assert.DoesNotContain(TemplateDirectiveIf + " (apiService)", createCompany, StringComparison.Ordinal);
 		Assert.DoesNotContain("Monaco.Template.Backend.Application/Diagnostics/ApplicationDiagnostics.cs", template, StringComparison.Ordinal);
 
 		var metricsStart = profiles.IndexOf("private static void ConfigureMetrics", StringComparison.Ordinal);
@@ -166,8 +169,8 @@ public sealed class ObservabilityPackageGraphTests
 		{
 			var program = ReadSolutionFile(Path.Combine(hostProject, "Program.cs"));
 
-			Assert.DoesNotContain("#if (commonLibraries)", program, StringComparison.Ordinal);
-			Assert.DoesNotContain("#if (!commonLibraries)", program, StringComparison.Ordinal);
+			Assert.DoesNotContain(TemplateDirectiveIf + " (commonLibraries)", program, StringComparison.Ordinal);
+			Assert.DoesNotContain(TemplateDirectiveIf + " (!commonLibraries)", program, StringComparison.Ordinal);
 		}
 	}
 
@@ -197,11 +200,11 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("only telemetry-specific prerequisite", guide, StringComparison.Ordinal);
 		Assert.Contains("SQL Server, RabbitMQ, Blob/Azurite, identity/Keycloak, migrations", guide, StringComparison.Ordinal);
 		Assert.Contains("provision and verify them separately", guide, StringComparison.Ordinal);
-		Assert.DoesNotContain("<!--#if (commonLibraries)", guide, StringComparison.Ordinal);
-		Assert.DoesNotContain("<!--#if (!commonLibraries)", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("<!--" + TemplateDirectiveIf + " (commonLibraries)", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("<!--" + TemplateDirectiveIf + " (!commonLibraries)", guide, StringComparison.Ordinal);
 		Assert.DoesNotContain("static external-observability handoff", guide, StringComparison.Ordinal);
 		Assert.DoesNotContain("--allow-anonymous", guide, StringComparison.Ordinal);
-		Assert.Equal(CountOccurrences(guide, "<!--#if"), CountOccurrences(guide, "<!--#endif -->"));
+		Assert.Equal(CountOccurrences(guide, "<!--" + TemplateDirectiveIf), CountOccurrences(guide, "<!--" + TemplateDirectiveEndIf + " -->"));
 
 		using var templateDocument = JsonDocument.Parse(template);
 		var root = templateDocument.RootElement;
@@ -219,9 +222,9 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Equal("Monaco.Template.Backend.slnx", primaryOutput.GetProperty("path").GetString());
 
 		var solutionItems = solution.IndexOf("<Folder Name=\"/Solution Items/\">", StringComparison.Ordinal);
-		var guideGate = solution.IndexOf("<!--#if (apiService || workerService || apiGateway) -->", solutionItems, StringComparison.Ordinal);
+		var guideGate = solution.IndexOf("<!--" + TemplateDirectiveIf + " (apiService || workerService || apiGateway) -->", solutionItems, StringComparison.Ordinal);
 		var guideEntry = solution.IndexOf("<File Path=\"OBSERVABILITY.md\" />", solutionItems, StringComparison.Ordinal);
-		var guideGateEnd = solution.IndexOf("<!--#endif -->", guideGate, StringComparison.Ordinal);
+		var guideGateEnd = solution.IndexOf("<!--" + TemplateDirectiveEndIf + " -->", guideGate, StringComparison.Ordinal);
 		Assert.True(solutionItems >= 0 && guideGate > solutionItems && guideEntry > guideGate && guideGateEnd > guideEntry,
 					"The OBSERVABILITY.md Solution Item must sit inside its own Runtime Host conditional within /Solution Items/.");
 	}
@@ -231,7 +234,7 @@ public sealed class ObservabilityPackageGraphTests
 	{
 		var centralPackages = ReadSolutionFile("Directory.Packages.props");
 
-		Assert.Contains("<!--#if (!commonLibraries)-->", centralPackages, StringComparison.Ordinal);
+		Assert.Contains("<!--" + TemplateDirectiveIf + " (!commonLibraries)-->", centralPackages, StringComparison.Ordinal);
 
 		AssertDeliveryEdge("Monaco.Template.Backend.Domain", "Monaco.Template.Backend.Common.Domain");
 		AssertDeliveryEdge("Monaco.Template.Backend.Application", "Monaco.Template.Backend.Common.Application");
@@ -266,9 +269,9 @@ public sealed class ObservabilityPackageGraphTests
 		var guide = ReadSolutionFile("OBSERVABILITY.md").Replace("\r\n", "\n", StringComparison.Ordinal);
 
 		Assert.Contains("## Runtime host profiles and resource identity", guide, StringComparison.Ordinal);
-		Assert.Contains("<!--#if (apiService) -->\n### API profile", guide, StringComparison.Ordinal);
-		Assert.Contains("<!--#if (workerService) -->\n### Worker profile", guide, StringComparison.Ordinal);
-		Assert.Contains("<!--#if (apiGateway) -->\n### Gateway profile", guide, StringComparison.Ordinal);
+		Assert.Contains("<!--" + TemplateDirectiveIf + " (apiService) -->\n### API profile", guide, StringComparison.Ordinal);
+		Assert.Contains("<!--" + TemplateDirectiveIf + " (workerService) -->\n### Worker profile", guide, StringComparison.Ordinal);
+		Assert.Contains("<!--" + TemplateDirectiveIf + " (apiGateway) -->\n### Gateway profile", guide, StringComparison.Ordinal);
 		Assert.Contains("generated fallbacks, then `OTEL_RESOURCE_ATTRIBUTES` collisions, then `OTEL_SERVICE_NAME`", guide, StringComparison.Ordinal);
 		Assert.Contains("low-cardinality, non-secret operational metadata", guide, StringComparison.Ordinal);
 		Assert.DoesNotContain("static external-observability handoff", guide, StringComparison.Ordinal);
@@ -279,7 +282,7 @@ public sealed class ObservabilityPackageGraphTests
 	{
 		var guide = ReadSolutionFile("OBSERVABILITY.md").Replace("\r\n", "\n", StringComparison.Ordinal);
 
-		Assert.Contains("<!--#if (apiService) -->\n## Successful company creations", guide, StringComparison.Ordinal);
+		Assert.Contains("<!--" + TemplateDirectiveIf + " (apiService) -->\n## Successful company creations", guide, StringComparison.Ordinal);
 		Assert.Contains("company.successful_creations", guide, StringComparison.Ordinal);
 		Assert.Contains("only after a Company unit of work commits successfully", guide, StringComparison.Ordinal);
 		Assert.Contains("Counter has no dimensions", guide, StringComparison.Ordinal);
