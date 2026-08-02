@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Monaco.Template.Backend.Common.Observability;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using System.Diagnostics.Tracing;
 
 namespace Monaco.Template.Backend.ArchitectureTests;
 
@@ -13,6 +14,8 @@ namespace Monaco.Template.Backend.ArchitectureTests;
 [Trait("Architecture Tests", "Observability")]
 public sealed class ObservabilityConfigurationTests
 {
+	private const string TestExporterEventSourceName = "Monaco.Template.Backend.Tests.OtlpExporter";
+
 	[Fact(DisplayName = "Startup configuration resolves strict Signal defaults and safe neutral fallbacks")]
 	public void StartupConfigurationResolvesStrictSignalDefaultsAndSafeNeutralFallbacks()
 	{
@@ -95,6 +98,8 @@ public sealed class ObservabilityConfigurationTests
 	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "x-auth=a%0Ab")]
 	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "x-a=b\tc")]
 	[InlineData("OTEL_TRACES_SAMPLER", "jaeger")]
+	[InlineData("OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY", "in_memory")]
+	[InlineData("OTEL_DOTNET_EXPERIMENTAL_OTLP_DISK_RETRY_DIRECTORY_PATH", "c:\\telemetry")]
 	[InlineData("OTEL_BSP_SCHEDULE_DELAY", "0")]
 	[InlineData("OTEL_BSP_EXPORT_TIMEOUT", "5001")]
 	[InlineData("OTEL_BSP_MAX_QUEUE_SIZE", "2049")]
@@ -300,11 +305,90 @@ public sealed class ObservabilityConfigurationTests
 																	using var host = builder.Build();
 																	var options = host.Services.GetRequiredService<IOptions<ObservabilityStartupOptions>>().Value;
 
-																	Assert.False(options.TracesEnabled);
+											Assert.False(options.TracesEnabled);
+										});
+
+	[Fact(DisplayName = "Enabled composition registers one bounded shutdown coordinator for all enabled providers")]
+	public void EnabledCompositionRegistersOneBoundedShutdownCoordinatorForAllEnabledProviders() =>
+		ObservabilityTestEnvironment.WithClearedOtelEnvironment(() =>
+																{
+																	var builder = Host.CreateApplicationBuilder();
+																	builder.AddApiObservability();
+
+																	using var host = builder.Build();
+																	var coordinator = Assert.Single(host.Services.GetServices<IHostedService>().OfType<ObservabilityShutdownFlushService>());
+
+																	Assert.Equal(3, coordinator.ProviderCount);
 																});
+
+	[Fact(DisplayName = "Configuration and exporter diagnostics are throttled per code and host role")]
+	public void ConfigurationAndExporterDiagnosticsAreThrottledPerCodeAndHostRole()
+	{
+		var timeProvider = new AdjustableTimeProvider(new DateTimeOffset(2026, 8, 2, 0, 0, 0, TimeSpan.Zero));
+		var logger = new CapturingLogger();
+		ObservabilityConfigurationDiagnosticThrottle.Reset();
+
+		ObservabilityConfigurationDiagnosticThrottle.Report(logger, ObservabilityConfigurationDiagnosticCodes.OtlpExportFailure, ObservabilityHostProfile.Api, timeProvider);
+		ObservabilityConfigurationDiagnosticThrottle.Report(logger, ObservabilityConfigurationDiagnosticCodes.OtlpExportFailure, ObservabilityHostProfile.Api, timeProvider);
+		ObservabilityConfigurationDiagnosticThrottle.Report(logger, ObservabilityConfigurationDiagnosticCodes.OtlpExportFailure, ObservabilityHostProfile.Api, timeProvider);
+
+		timeProvider.Advance(TimeSpan.FromMinutes(5));
+		ObservabilityConfigurationDiagnosticThrottle.Report(logger, ObservabilityConfigurationDiagnosticCodes.OtlpExportFailure, ObservabilityHostProfile.Api, timeProvider);
+
+		Assert.Equal(2, logger.Messages.Count);
+		Assert.Contains("OBS_OTLP_EXPORT_FAILURE", logger.Messages[0], StringComparison.Ordinal);
+		Assert.Contains("Api", logger.Messages[0], StringComparison.Ordinal);
+		Assert.Contains("suppressedCount 2", logger.Messages[1], StringComparison.Ordinal);
+	}
+
+	[Fact(DisplayName = "Exporter error events use the safe diagnostic seam")]
+	public void ExporterErrorEventsUseTheSafeDiagnosticSeam()
+	{
+		var reports = 0;
+		using var listener = new OtlpExporterFailureListener(TestExporterEventSourceName);
+		listener.Start(() => reports++);
+		using var exporter = new TestOtlpExporterEventSource();
+
+		exporter.ExportFailed();
+
+		SpinWait.SpinUntil(() => reports == 1, TimeSpan.FromSeconds(1));
+
+		Assert.Equal(1, reports);
+	}
+
+	[Fact(DisplayName = "Positive sub-millisecond flush timeout rounds up for ForceFlush")]
+	public void PositiveSubMillisecondFlushTimeoutRoundsUpForForceFlush() =>
+		Assert.Equal(1, ObservabilityShutdownFlushService.GetFlushTimeoutMilliseconds(TimeSpan.FromTicks(1)));
 
 	private static IConfiguration CreateConfiguration(params (string Key, string? Value)[] values) =>
 		new ConfigurationBuilder().AddInMemoryCollection(values.ToDictionary(value => value.Key, value => value.Value)).Build();
+
+	private sealed class AdjustableTimeProvider(DateTimeOffset now) : TimeProvider
+	{
+		public override DateTimeOffset GetUtcNow() => now;
+
+		public void Advance(TimeSpan duration) => now = now.Add(duration);
+	}
+
+	private sealed class CapturingLogger : ILogger
+	{
+		public List<string> Messages { get; } = [];
+
+		public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+		public bool IsEnabled(LogLevel logLevel) => true;
+
+		public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
+			Messages.Add(formatter(state, exception));
+	}
+
+	[EventSource(Name = TestExporterEventSourceName)]
+	private sealed class TestOtlpExporterEventSource : EventSource
+	{
+		[Event(1, Level = EventLevel.Error)]
+		public void ExportFailed() =>
+			WriteEvent(1);
+	}
 }
 
 internal static class ObservabilityTestEnvironment
@@ -347,7 +431,9 @@ internal static class ObservabilityTestEnvironment
 		"OTEL_BLRP_SCHEDULE_DELAY",
 		"OTEL_BLRP_EXPORT_TIMEOUT",
 		"OTEL_BLRP_MAX_QUEUE_SIZE",
-		"OTEL_BLRP_MAX_EXPORT_BATCH_SIZE"
+		"OTEL_BLRP_MAX_EXPORT_BATCH_SIZE",
+		"OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY",
+		"OTEL_DOTNET_EXPERIMENTAL_OTLP_DISK_RETRY_DIRECTORY_PATH"
 	];
 
 	internal static void WithClearedOtelEnvironment(Action action)

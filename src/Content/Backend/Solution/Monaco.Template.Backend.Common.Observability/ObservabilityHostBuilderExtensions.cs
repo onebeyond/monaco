@@ -57,6 +57,11 @@ public static class ObservabilityHostBuilderExtensions
 				telemetryBuilder.WithTracing(providerBuilder => ConfigureTracing(providerBuilder, profile));
 			if (options.MetricsEnabled)
 				telemetryBuilder.WithMetrics(providerBuilder => ConfigureMetrics(providerBuilder, profile));
+
+			// IHostedService stops in reverse registration order. Insert this coordinator first so
+			// business hosted services stop before the one bounded, concurrent telemetry flush.
+			services.Insert(0, ServiceDescriptor.Singleton<IHostedService, ObservabilityShutdownFlushService>());
+			services.Insert(1, ServiceDescriptor.Singleton<IHostedService, ObservabilityExporterDiagnosticListener>());
 		}
 
 		services.Add(ServiceDescriptor.Singleton(new ObservabilityProfileRegistration(profile)));

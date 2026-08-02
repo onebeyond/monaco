@@ -78,6 +78,9 @@ internal static class OtelConfigurationPreflightValidator
 
 	private static void ValidateProcessorSettings(IConfiguration configuration)
 	{
+		ValidateAbsent(configuration, "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY");
+		ValidateAbsent(configuration, "OTEL_DOTNET_EXPERIMENTAL_OTLP_DISK_RETRY_DIRECTORY_PATH");
+
 		var sampler = configuration["OTEL_TRACES_SAMPLER"];
 		if (string.IsNullOrEmpty(sampler))
 			sampler = "parentbased_always_on";
@@ -150,6 +153,12 @@ internal static class OtelConfigurationPreflightValidator
 		int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var parsed) && parsed >= minimum && parsed <= maximum
 			? parsed
 			: throw Invalid(key);
+
+	private static void ValidateAbsent(IConfiguration configuration, string key)
+	{
+		if (!string.IsNullOrEmpty(configuration[key]))
+			throw Invalid(key);
+	}
 
 	private static void ValidateEndpoint(string value, string key)
 	{

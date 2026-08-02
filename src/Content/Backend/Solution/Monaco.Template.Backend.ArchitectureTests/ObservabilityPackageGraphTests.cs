@@ -148,6 +148,43 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("ConfigureMetrics", profiles, StringComparison.Ordinal);
 	}
 
+	[Fact(DisplayName = "Failure isolation keeps bounded queues, one coordinated flush, and no retry or disk storage path")]
+	public void FailureIsolationKeepsBoundedQueuesOneCoordinatedFlushAndNoRetryOrDiskStoragePath()
+	{
+		var profiles = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityHostBuilderExtensions.cs"));
+		var lifecycle = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityShutdownFlushService.cs"));
+		var preflight = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "OtelConfigurationPreflightValidator.cs"));
+
+		Assert.Contains("2048", profiles, StringComparison.Ordinal);
+		Assert.Contains("512", profiles, StringComparison.Ordinal);
+		Assert.Contains("5000", profiles, StringComparison.Ordinal);
+		Assert.Contains("60000", profiles, StringComparison.Ordinal);
+		Assert.Contains("Task.WhenAll", lifecycle, StringComparison.Ordinal);
+		Assert.Contains("options.FlushTimeout", lifecycle, StringComparison.Ordinal);
+		Assert.Contains("services.Insert(0", profiles, StringComparison.Ordinal);
+		Assert.Contains("traceBatch > traceQueue", preflight, StringComparison.Ordinal);
+		Assert.Contains("logBatch > logQueue", preflight, StringComparison.Ordinal);
+		Assert.Contains("OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY", preflight, StringComparison.Ordinal);
+		Assert.Contains("OTEL_DOTNET_EXPERIMENTAL_OTLP_DISK_RETRY_DIRECTORY_PATH", preflight, StringComparison.Ordinal);
+		Assert.DoesNotContain("Retry", profiles + lifecycle, StringComparison.Ordinal);
+		Assert.DoesNotContain("Disk", profiles + lifecycle, StringComparison.Ordinal);
+	}
+
+	[Fact(DisplayName = "Generated local observability guide truthfully documents Story 2.1 failure isolation")]
+	public void GeneratedLocalObservabilityGuideTruthfullyDocumentsStory21FailureIsolation()
+	{
+		var guide = ReadSolutionFile("OBSERVABILITY.md");
+
+		Assert.Contains("## Telemetry failure isolation", guide, StringComparison.Ordinal);
+		Assert.Contains("best-effort diagnostic evidence", guide, StringComparison.Ordinal);
+		Assert.Contains("drops new telemetry", guide, StringComparison.Ordinal);
+		Assert.Contains("one concurrent flush", guide, StringComparison.Ordinal);
+		Assert.Contains("without restarting the Runtime Host", guide, StringComparison.Ordinal);
+		Assert.Contains("environment-sensitive hosted characterization only", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("OBSERVABILITY: 2.1 FAILURE-ISOLATION", guide, StringComparison.Ordinal);
+		Assert.Contains("OBSERVABILITY: 2.2-2.3 DATA-BOUNDARIES", guide, StringComparison.Ordinal);
+	}
+
 	[Fact(DisplayName = "Template separates Common delivery from host observability")]
 	public void TemplateSeparatesCommonDeliveryFromHostObservability()
 	{

@@ -9,6 +9,7 @@ internal static class ObservabilityConfigurationDiagnosticCodes
 	internal const string InvalidSdkDisableValue = "OBS_CONFIG_INVALID_SDK_DISABLE";
 	internal const string InvalidQueryTextMode = "OBS_CONFIG_INVALID_QUERY_TEXT_MODE";
 	internal const string InvalidIdentityMode = "OBS_CONFIG_INVALID_IDENTITY_MODE";
+	internal const string OtlpExportFailure = "OBS_OTLP_EXPORT_FAILURE";
 }
 
 internal sealed class ObservabilityConfigurationDiagnosticReporter(ObservabilityStartupOptions options,
@@ -30,10 +31,10 @@ internal static class ObservabilityConfigurationDiagnosticThrottle
 {
 	private static readonly ConcurrentDictionary<(string Code, ObservabilityHostProfile Profile), DiagnosticState> States = [];
 
-	internal static void Report(ILogger logger, string code, ObservabilityHostProfile profile)
+	internal static void Report(ILogger logger, string code, ObservabilityHostProfile profile, TimeProvider? timeProvider = null)
 	{
 		var state = States.GetOrAdd((code, profile), static _ => new DiagnosticState());
-		var now = DateTimeOffset.UtcNow;
+		var now = (timeProvider ?? TimeProvider.System).GetUtcNow();
 
 		lock (state)
 		{
@@ -58,6 +59,9 @@ internal static class ObservabilityConfigurationDiagnosticThrottle
 			state.NextSummaryAt = now.AddMinutes(5);
 		}
 	}
+
+	internal static void Reset() =>
+		States.Clear();
 
 	private sealed class DiagnosticState
 	{

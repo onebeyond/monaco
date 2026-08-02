@@ -8,7 +8,7 @@ root = true
 
 # Indentation and spacing
 indent_size = 4
-indent_style = space
+indent_style = tab
 tab_width = 4
 
 # New line preferences
@@ -317,7 +317,7 @@ indent_size = tab
 tab_width = 4
 
 [*.{asax,ascx,aspx,axaml,cshtml,css,htm,html,js,jsx,master,paml,razor,skin,ts,tsx,vb,xaml,xamlx,xoml}]
-indent_style = space
+indent_style = tab
 indent_size = 4
 tab_width = 4
 

@@ -70,7 +70,7 @@ The following deterministic insertion points reserve sequence and ownership for 
 | Configuration and routing below | 1.5 |
 | Successful company creations below | 1.6 |
 | Local first run below | 1.7 |
-| `<!-- OBSERVABILITY: 2.1 FAILURE-ISOLATION -->` | 2.1 |
+| Failure isolation below | 2.1 |
 | `<!-- OBSERVABILITY: 2.2-2.3 DATA-BOUNDARIES -->` | 2.2-2.3 |
 | `<!-- OBSERVABILITY: 2.4 PRODUCTION-ROUTING -->` | 2.4 |
 | `<!-- OBSERVABILITY: 2.5 IDENTITY -->` | 2.5 |
@@ -130,6 +130,16 @@ The common OTLP controls are `OTEL_EXPORTER_OTLP_{ENDPOINT,PROTOCOL,HEADERS,TIME
 Supported operational root keys are `OTEL_SERVICE_NAME`, `OTEL_RESOURCE_ATTRIBUTES`, `OTEL_TRACES_SAMPLER`, `OTEL_TRACES_SAMPLER_ARG`, `OTEL_BSP_*`, `OTEL_BLRP_*`, `OTEL_METRIC_EXPORT_{INTERVAL,TIMEOUT}`, and applicable `Logging:LogLevel` categories. Logs and Traces default to queue `2048`, batch `512`, delay/timeout `5000` ms; Metrics default to interval `60000` ms and timeout `5000` ms. Explicit values are validated at startup, including `batch <= queue`.
 
 Do not configure exporter selection, propagators, auto-instrumentation, YAML, retry/disk buffering, certificates/client keys, temporality/exemplars, attribute limits, or provider-specific logging switches. Use environment variables or Development User Secrets for any future secret-capable setting; never commit headers, credentials, authorization values, certificates, or HMAC material. The complete spelling, range, malformed-value, and characterization contract is `CONFIGURATION-MATRIX.md` in Monaco's source repository; it is not copied into generated output.
+
+## Telemetry failure isolation
+
+Operational Telemetry is best-effort diagnostic evidence. After valid startup, an unavailable or impaired OTLP receiver does not control Company commit, in-process business Counter recording, readiness, or host startup. Connection refusal, receiver timeout, authorization or throttling responses, malformed receiver responses, and queue saturation can lose telemetry, while Console logging remains available through the normal DI `ILogger` route.
+
+Logs and Traces use finite queues of `2048` records and batches of `512`, with `5`-second scheduled delay and export timeout. Metrics export every `60` seconds with a `5`-second timeout. A full queue drops new telemetry rather than waiting for capacity. Monaco provides no disk buffering, unbounded retry, or offline telemetry storage.
+
+On graceful shutdown, business hosted services stop first and the enabled telemetry providers receive one concurrent flush bounded by `Observability:Shutdown:FlushTimeout` (greater than zero and no more than five seconds). Flush or export failure remains nonfatal. When the receiver recovers, normal exporting resumes without restarting the Runtime Host. Abrupt termination can lose in-flight telemetry.
+
+The equal healthy and fault controls, bounded settings, queue-loss policy, diagnostics, bounded shutdown flush, and restart-free recovery are deterministic behavior. Latency, memory/RSS, and exact recovery duration are environment-sensitive hosted characterization only; they are not generated-service guarantees or release thresholds.
 
 <!--#if (apiService) -->
 ## Successful company creations
