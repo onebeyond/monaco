@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
@@ -54,7 +55,7 @@ public static class ObservabilityHostBuilderExtensions
 			if (options.LogsEnabled)
 				telemetryBuilder.WithLogging(_ => { }, ConfigureLogging);
 			if (options.TracesEnabled)
-				telemetryBuilder.WithTracing(providerBuilder => ConfigureTracing(providerBuilder, profile));
+				telemetryBuilder.WithTracing(providerBuilder => ConfigureTracing(providerBuilder, builder.Configuration, profile, options.QueryTextMode));
 			if (options.MetricsEnabled)
 				telemetryBuilder.WithMetrics(providerBuilder => ConfigureMetrics(providerBuilder, profile));
 
@@ -106,21 +107,61 @@ public static class ObservabilityHostBuilderExtensions
 
 	private static void ConfigureLogging(OpenTelemetryLoggerOptions options)
 	{
-		options.IncludeFormattedMessage = true;
-		options.IncludeScopes = true;
+		options.IncludeFormattedMessage = false;
+		options.IncludeScopes = false;
 		options.ParseStateValues = false;
+		options.AddProcessor(new LogTelemetryPrivacyProcessor());
 	}
 
-	private static void ConfigureTracing(TracerProviderBuilder builder, ObservabilityHostProfile profile)
+	private static void ConfigureTracing(TracerProviderBuilder builder,
+										 IConfiguration configuration,
+										 ObservabilityHostProfile profile,
+										 ObservabilityQueryTextMode queryTextMode)
 	{
-		if (profile is ObservabilityHostProfile.Api or ObservabilityHostProfile.Gateway)
-			builder.AddAspNetCoreInstrumentation();
+		var traceExportEndpoint = GetTraceExportEndpoint(configuration);
+		builder.AddProcessor(new HttpTelemetryPrivacyProcessor());
 
-		builder.AddHttpClientInstrumentation();
+		if (profile is ObservabilityHostProfile.Api or ObservabilityHostProfile.Gateway)
+			builder.AddAspNetCoreInstrumentation(options => { options.RecordException = false; });
+
+		builder.AddHttpClientInstrumentation(options =>
+											 {
+												 options.FilterHttpRequestMessage = request => !IsOtlpExportRequest(request.RequestUri, traceExportEndpoint);
+												 options.RecordException = false;
+											 });
 
 		if (profile is ObservabilityHostProfile.Api or ObservabilityHostProfile.Worker)
-			builder.AddSqlClientInstrumentation();
+		{
+			builder.AddProcessor(serviceProvider => new SqlClientTelemetryPrivacyProcessor(queryTextMode,
+																						   profile,
+																						   serviceProvider.GetRequiredService<ILogger<SqlClientTelemetryPrivacyProcessor>>()));
+			builder.AddSqlClientInstrumentation(options => { options.RecordException = false; });
+		}
 	}
+
+	private static Uri GetTraceExportEndpoint(IConfiguration configuration)
+	{
+		var endpoint = OtelConfigurationPreflightValidator.GetSignalValue(configuration, "TRACES_", "ENDPOINT").Value;
+		return new Uri(string.IsNullOrEmpty(endpoint)
+						   ? "http://localhost:4317"
+						   : endpoint,
+					   UriKind.Absolute);
+	}
+
+	internal static bool IsOtlpExportRequest(Uri? requestUri, Uri exportEndpoint) =>
+		requestUri is not null &&
+		requestUri.Scheme.Equals(exportEndpoint.Scheme, StringComparison.OrdinalIgnoreCase) &&
+		requestUri.Host.Equals(exportEndpoint.Host, StringComparison.OrdinalIgnoreCase) &&
+		requestUri.Port == exportEndpoint.Port &&
+		IsOtlpExportPath(requestUri.AbsolutePath);
+
+	private static bool IsOtlpExportPath(string path) =>
+		path is "/v1/traces" or
+			"/v1/metrics" or
+			"/v1/logs" or
+			"/opentelemetry.proto.collector.trace.v1.TraceService/Export" or
+			"/opentelemetry.proto.collector.metrics.v1.MetricsService/Export" or
+			"/opentelemetry.proto.collector.logs.v1.LogsService/Export";
 
 	private static void ConfigureMetrics(MeterProviderBuilder builder, ObservabilityHostProfile profile)
 	{

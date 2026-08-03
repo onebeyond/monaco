@@ -141,6 +141,23 @@ On graceful shutdown, business hosted services stop first and the enabled teleme
 
 The equal healthy and fault controls, bounded settings, queue-loss policy, diagnostics, bounded shutdown flush, and restart-free recovery are deterministic behavior. Latency, memory/RSS, and exact recovery duration are environment-sensitive hosted characterization only; they are not generated-service guarantees or release thresholds.
 
+<!-- OBSERVABILITY: 2.2-2.3 DATA-BOUNDARIES -->
+## Data-minimizing telemetry
+
+Telemetry is data-minimizing by fixed code policy. It never captures request or response bodies, authorization or cookie headers, tokens, credentials or OTLP headers, connection strings, SQL parameter or literal values, Company email or address data, persistence stamps, or unbounded Metric dimensions. Do not place those categories in resource attributes, logs, Baggage, span names, or custom telemetry.
+
+HTTP query operands are redacted. Permitted concrete route values, including approved GUID values, may remain only in trace `url.path`; span names and every Metric dimension use the bounded `http.route` template. Metrics never use concrete paths, query values, identities, payloads, or database data.
+
+<!--#if (apiService || workerService) -->
+API and Worker SQL telemetry accepts only `SanitizedText` (the default) or `SummaryOnly` through `Observability:SqlClient:QueryTextMode`. `SanitizedText` emits, only on trace spans, at most 4 KiB of deliberately noncanonical diagnostic text; it excludes literals and parameter values. If safe sanitization is uncertain, Monaco omits query text entirely rather than emitting or hashing raw SQL. `SummaryOnly` omits both `db.query.text` and legacy `db.statement`.
+<!--#endif -->
+
+<!--#if (apiGateway) -->
+Gateway has no SQL instrumentation.
+<!--#endif -->
+
+<!-- OBSERVABILITY: 2.3 EXCEPTION-BOUNDARIES -->
+
 <!--#if (apiService) -->
 ## Successful company creations
 

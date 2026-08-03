@@ -141,11 +141,68 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("WithLogging", profiles, StringComparison.Ordinal);
 		Assert.Contains("WithTracing", profiles, StringComparison.Ordinal);
 		Assert.Contains("WithMetrics", profiles, StringComparison.Ordinal);
-		Assert.Contains("IncludeFormattedMessage = true", profiles, StringComparison.Ordinal);
-		Assert.Contains("IncludeScopes = true", profiles, StringComparison.Ordinal);
+		Assert.Contains("IncludeFormattedMessage = false", profiles, StringComparison.Ordinal);
+		Assert.Contains("IncludeScopes = false", profiles, StringComparison.Ordinal);
 		Assert.Contains("ParseStateValues = false", profiles, StringComparison.Ordinal);
+		Assert.Contains("LogTelemetryPrivacyProcessor", profiles, StringComparison.Ordinal);
 		Assert.Contains("ConfigureTracing", profiles, StringComparison.Ordinal);
 		Assert.Contains("ConfigureMetrics", profiles, StringComparison.Ordinal);
+	}
+
+	[Fact(DisplayName = "Shared observability composition fixes privacy safeguards and removes the EF sensitive-data escape hatch")]
+	public void SharedObservabilityCompositionFixesPrivacySafeguardsAndRemovesTheEfSensitiveDataEscapeHatch()
+	{
+		var profiles = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityHostBuilderExtensions.cs"));
+		var sqlPrivacy = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "SqlClientTelemetryPrivacyProcessor.cs"));
+		var httpPrivacy = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "HttpTelemetryPrivacyProcessor.cs"));
+		var logPrivacy = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "LogTelemetryPrivacyProcessor.cs"));
+		var preflight = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "OtelConfigurationPreflightValidator.cs"));
+		var diagnostics = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityConfigurationDiagnostics.cs"));
+		var applicationOptions = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Application", "DependencyInjection", "ApplicationOptions.cs"));
+		var applicationServices = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Application", "DependencyInjection", "ServiceCollectionExtensions.cs"));
+		var apiProgram = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Api", "Program.cs"));
+		var workerProgram = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Worker", "Program.cs"));
+		var apiSettings = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Api", "appsettings.Development.json"));
+		var workerSettings = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Worker", "appsettings.Development.json"));
+
+		Assert.Contains("FilterHttpRequestMessage", profiles, StringComparison.Ordinal);
+		Assert.Contains("HttpTelemetryPrivacyProcessor", profiles, StringComparison.Ordinal);
+		Assert.Contains("SqlClientTelemetryPrivacyProcessor", profiles, StringComparison.Ordinal);
+		Assert.Contains("RecordException = false", profiles, StringComparison.Ordinal);
+		Assert.DoesNotContain("EnrichWithSqlCommand", profiles, StringComparison.Ordinal);
+		Assert.Contains("db.query.parameter.", sqlPrivacy, StringComparison.Ordinal);
+		Assert.Contains("db.system", sqlPrivacy, StringComparison.Ordinal);
+		Assert.Contains("db.connection_string", sqlPrivacy, StringComparison.Ordinal);
+		Assert.Contains("MaximumQueryTextLength", sqlPrivacy, StringComparison.Ordinal);
+		Assert.Contains("SqlSanitizationRejected", sqlPrivacy, StringComparison.Ordinal);
+		Assert.Contains("OBS_SQL_SANITIZATION_REJECTED", diagnostics, StringComparison.Ordinal);
+		Assert.Contains("http.url", httpPrivacy, StringComparison.Ordinal);
+		Assert.Contains("http.target", httpPrivacy, StringComparison.Ordinal);
+		Assert.Contains("data.FormattedMessage = null", logPrivacy, StringComparison.Ordinal);
+		Assert.Contains("data.Attributes = null", logPrivacy, StringComparison.Ordinal);
+		Assert.Contains("OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_DB_QUERY_PARAMETERS", preflight, StringComparison.Ordinal);
+		Assert.Contains("OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_CONTEXT_PROPAGATION", preflight, StringComparison.Ordinal);
+		Assert.DoesNotContain("EnableEFSensitiveLogging", string.Concat(applicationOptions, applicationServices, apiProgram, workerProgram, apiSettings, workerSettings), StringComparison.Ordinal);
+	}
+
+	[Fact(DisplayName = "Generated local observability guide documents Story 2.2 data boundaries only for applicable hosts")]
+	public void GeneratedLocalObservabilityGuideDocumentsStory22DataBoundariesOnlyForApplicableHosts()
+	{
+		var guide = ReadSolutionFile("OBSERVABILITY.md").Replace("\r\n", "\n", StringComparison.Ordinal);
+
+		Assert.Contains("<!-- OBSERVABILITY: 2.2-2.3 DATA-BOUNDARIES -->\n## Data-minimizing telemetry", guide, StringComparison.Ordinal);
+		Assert.Contains("request or response bodies", guide, StringComparison.Ordinal);
+		Assert.Contains("authorization or cookie headers", guide, StringComparison.Ordinal);
+		Assert.Contains("connection strings", guide, StringComparison.Ordinal);
+		Assert.Contains("Company email or address data", guide, StringComparison.Ordinal);
+		Assert.Contains("trace `url.path`", guide, StringComparison.Ordinal);
+		Assert.Contains("bounded `http.route`", guide, StringComparison.Ordinal);
+		Assert.Contains("SanitizedText", guide, StringComparison.Ordinal);
+		Assert.Contains("4 KiB", guide, StringComparison.Ordinal);
+		Assert.Contains("rather than emitting or hashing raw SQL", guide, StringComparison.Ordinal);
+		Assert.Contains("<!--" + TemplateDirectiveIf + " (apiService || workerService) -->", guide, StringComparison.Ordinal);
+		Assert.Contains("Gateway has no SQL instrumentation", guide, StringComparison.Ordinal);
+		Assert.Contains("<!-- OBSERVABILITY: 2.3 EXCEPTION-BOUNDARIES -->", guide, StringComparison.Ordinal);
 	}
 
 	[Fact(DisplayName = "Failure isolation keeps bounded queues, one coordinated flush, and no retry or disk storage path")]
@@ -287,16 +344,16 @@ public sealed class ObservabilityPackageGraphTests
 		AssertDeliveryEdge("Monaco.Template.Backend.Domain.Tests", "Monaco.Template.Backend.Common.Tests");
 
 		foreach (var package in new[]
-				 {
-					 "Monaco.Template.Backend.Common.Domain",
-					 "Monaco.Template.Backend.Common.Application",
-					 "Monaco.Template.Backend.Common.Infrastructure",
-					 "Monaco.Template.Backend.Common.BlobStorage",
-					 "Monaco.Template.Backend.Common.Api.Application",
-					 "Monaco.Template.Backend.Common.Api",
-					 "Monaco.Template.Backend.Common.Observability",
-					 "Monaco.Template.Backend.Common.Tests"
-				 })
+								{
+									"Monaco.Template.Backend.Common.Domain",
+									"Monaco.Template.Backend.Common.Application",
+									"Monaco.Template.Backend.Common.Infrastructure",
+									"Monaco.Template.Backend.Common.BlobStorage",
+									"Monaco.Template.Backend.Common.Api.Application",
+									"Monaco.Template.Backend.Common.Api",
+									"Monaco.Template.Backend.Common.Observability",
+									"Monaco.Template.Backend.Common.Tests"
+								})
 			Assert.Contains($"<PackageVersion Include=\"{package}\" Version=\"0.0.1-alpha1\" />", centralPackages, StringComparison.Ordinal);
 	}
 

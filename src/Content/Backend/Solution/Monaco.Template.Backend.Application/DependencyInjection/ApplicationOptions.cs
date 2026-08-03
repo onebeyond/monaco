@@ -10,7 +10,6 @@ public class ApplicationOptions
 	public class EntityFrameworkOptions
 	{
 		public string ConnectionString { get; set; } = string.Empty;
-		public bool EnableEfSensitiveLogging { get; set; }
 	}
 #if (filesSupport)
 

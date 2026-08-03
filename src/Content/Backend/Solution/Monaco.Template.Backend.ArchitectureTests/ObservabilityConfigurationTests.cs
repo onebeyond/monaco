@@ -4,8 +4,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Monaco.Template.Backend.Common.Observability;
+using OpenTelemetry;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using System.Diagnostics;
 using System.Diagnostics.Tracing;
 
 namespace Monaco.Template.Backend.ArchitectureTests;
@@ -78,6 +81,127 @@ public sealed class ObservabilityConfigurationTests
 		Assert.True(options.TracesEnabled);
 	}
 
+	[Fact(DisplayName = "SQL telemetry removes raw statements and emits only a bounded trace-safe summary")]
+	public void SqlTelemetryRemovesRawStatementsAndEmitsOnlyABoundedTraceSafeSummary()
+	{
+		using var activity = new Activity("sql").Start();
+		activity.SetTag("db.system.name", "mssql");
+		activity.SetTag("db.operation.name", "SELECT");
+		activity.SetTag("db.query.text", "SELECT Email FROM Company WHERE Id = @companyId");
+		activity.SetTag("db.statement", "SELECT Email FROM Company WHERE Id = @companyId");
+		activity.SetTag("db.query.parameter.companyId", "3fa85f64-5717-4562-b3fc-2c963f66afa6");
+		activity.SetTag("db.connection_string", "Server=sql.example;Password=secret");
+
+		new SqlClientTelemetryPrivacyProcessor(ObservabilityQueryTextMode.SanitizedText).OnEnd(activity);
+
+		Assert.Equal("SELECT statement", activity.GetTagItem("db.query.text"));
+		Assert.Null(activity.GetTagItem("db.statement"));
+		Assert.Null(activity.GetTagItem("db.query.parameter.companyId"));
+		Assert.Null(activity.GetTagItem("db.connection_string"));
+	}
+
+	[Fact(DisplayName = "SQL SummaryOnly and uncertain operations omit all query text")]
+	public void SqlSummaryOnlyAndUncertainOperationsOmitAllQueryText()
+	{
+		using var activity = new Activity("sql").Start();
+		activity.SetTag("db.system.name", "mssql");
+		activity.SetTag("db.operation.name", "SELECT; DROP TABLE Company");
+		activity.SetTag("db.query.text", "SELECT Email FROM Company WHERE Id = @companyId");
+		activity.SetTag("db.statement", "SELECT Email FROM Company WHERE Id = @companyId");
+
+		new SqlClientTelemetryPrivacyProcessor(ObservabilityQueryTextMode.SanitizedText).OnEnd(activity);
+
+		Assert.Null(activity.GetTagItem("db.query.text"));
+		Assert.Null(activity.GetTagItem("db.statement"));
+	}
+
+	[Fact(DisplayName = "Legacy SQL telemetry is scrubbed and fail-closed sanitization reports a fixed diagnostic")]
+	public void LegacySqlTelemetryIsScrubbedAndFailClosedSanitizationReportsAFixedDiagnostic()
+	{
+		using var activity = new Activity("sql").Start();
+		activity.SetTag("db.system", "mssql");
+		activity.SetTag("db.statement", "SELECT Email FROM Company WHERE Id = @companyId");
+		activity.SetTag("db.connection_string", "Server=sql.example;Password=secret");
+		activity.SetTag("db.query.parameter.companyId", "3fa85f64-5717-4562-b3fc-2c963f66afa6");
+		var logger = new CapturingLogger();
+		ObservabilityConfigurationDiagnosticThrottle.Reset();
+
+		new SqlClientTelemetryPrivacyProcessor(ObservabilityQueryTextMode.SanitizedText, ObservabilityHostProfile.Worker, logger).OnEnd(activity);
+
+		Assert.Null(activity.GetTagItem("db.statement"));
+		Assert.Null(activity.GetTagItem("db.connection_string"));
+		Assert.Null(activity.GetTagItem("db.query.parameter.companyId"));
+		Assert.Single(logger.Messages);
+		Assert.Contains(ObservabilityConfigurationDiagnosticCodes.SqlSanitizationRejected, logger.Messages[0], StringComparison.Ordinal);
+		Assert.Contains("Worker", logger.Messages[0], StringComparison.Ordinal);
+	}
+
+	[Fact(DisplayName = "Missing and explicit SQL query modes retain the only supported privacy contract")]
+	public void SqlQueryModesRetainTheOnlySupportedPrivacyContract()
+	{
+		var defaultOptions = ObservabilityOptionsBinder.Bind(CreateConfiguration(), ObservabilityHostProfile.Api);
+		var explicitOptions = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:SqlClient:QueryTextMode", "sUmMaRyOnLy")), ObservabilityHostProfile.Api);
+
+		Assert.Equal(ObservabilityQueryTextMode.SanitizedText, defaultOptions.QueryTextMode);
+		Assert.Equal(ObservabilityQueryTextMode.SummaryOnly, explicitOptions.QueryTextMode);
+		Assert.Equal(2, System.Enum.GetValues<ObservabilityQueryTextMode>().Length);
+	}
+
+	[Fact(DisplayName = "HTTP telemetry removes query operands and header values while preserving the path")]
+	public void HttpTelemetryRemovesQueryOperandsAndHeaderValuesWhilePreservingThePath()
+	{
+		using var activity = new Activity("http").Start();
+		activity.SetTag("url.path", "/companies/3fa85f64-5717-4562-b3fc-2c963f66afa6");
+		activity.SetTag("url.query", "?email=ceo@example.test");
+		activity.SetTag("url.full", "https://example.test/companies/3fa85f64-5717-4562-b3fc-2c963f66afa6?email=ceo@example.test");
+		activity.SetTag("http.url", "https://example.test/companies/3fa85f64-5717-4562-b3fc-2c963f66afa6?email=ceo@example.test");
+		activity.SetTag("http.target", "/companies/3fa85f64-5717-4562-b3fc-2c963f66afa6?email=ceo@example.test");
+		activity.SetTag("http.request.header.authorization", "Bearer token");
+
+		new HttpTelemetryPrivacyProcessor().OnEnd(activity);
+
+		Assert.Equal("/companies/3fa85f64-5717-4562-b3fc-2c963f66afa6", activity.GetTagItem("url.path"));
+		Assert.Null(activity.GetTagItem("url.query"));
+		Assert.Null(activity.GetTagItem("url.full"));
+		Assert.Null(activity.GetTagItem("http.url"));
+		Assert.Null(activity.GetTagItem("http.target"));
+		Assert.Null(activity.GetTagItem("http.request.header.authorization"));
+	}
+
+	[Fact(DisplayName = "OTLP self-traffic suppression matches the configured collector only")]
+	public void OtlpSelfTrafficSuppressionMatchesTheConfiguredCollectorOnly()
+	{
+		var collector = new Uri("https://collector.example:4318");
+
+		Assert.True(ObservabilityHostBuilderExtensions.IsOtlpExportRequest(new Uri("https://collector.example:4318/v1/traces"), collector));
+		Assert.False(ObservabilityHostBuilderExtensions.IsOtlpExportRequest(new Uri("https://downstream.example:4318/v1/traces"), collector));
+	}
+
+	[Fact(DisplayName = "Log telemetry removes message, exception, and structured privacy canaries")]
+	public void LogTelemetryRemovesMessageExceptionAndStructuredPrivacyCanaries()
+	{
+		var capture = new CapturingLogRecordProcessor();
+		using var loggerFactory = LoggerFactory.Create(builder => builder.AddOpenTelemetry(options =>
+		{
+			options.IncludeFormattedMessage = true;
+			options.ParseStateValues = true;
+			options.AddProcessor(new LogTelemetryPrivacyProcessor());
+			options.AddProcessor(capture);
+		}));
+		var logger = loggerFactory.CreateLogger("PrivacyCanary");
+
+		logger.LogError(new InvalidOperationException("Connection string Server=sql.example;Password=secret"),
+						"Company email {Email} at {Address} with Authorization {Token}",
+						"ceo@example.test",
+						"1 Privacy Lane",
+						"Bearer token");
+
+		Assert.Null(capture.Body);
+		Assert.Null(capture.FormattedMessage);
+		Assert.Null(capture.Exception);
+		Assert.Null(capture.Attributes);
+	}
+
 	[Theory(DisplayName = "Malformed strict Signal and shutdown settings fail before providers are created")]
 	[InlineData("Observability:Signals:Traces:Enabled", "yes")]
 	[InlineData("Observability:Signals:Metrics:Enabled", "no")]
@@ -100,6 +224,8 @@ public sealed class ObservabilityConfigurationTests
 	[InlineData("OTEL_TRACES_SAMPLER", "jaeger")]
 	[InlineData("OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY", "in_memory")]
 	[InlineData("OTEL_DOTNET_EXPERIMENTAL_OTLP_DISK_RETRY_DIRECTORY_PATH", "c:\\telemetry")]
+	[InlineData("OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_DB_QUERY_PARAMETERS", "true")]
+	[InlineData("OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_CONTEXT_PROPAGATION", "true")]
 	[InlineData("OTEL_BSP_SCHEDULE_DELAY", "0")]
 	[InlineData("OTEL_BSP_EXPORT_TIMEOUT", "5001")]
 	[InlineData("OTEL_BSP_MAX_QUEUE_SIZE", "2049")]
@@ -305,8 +431,8 @@ public sealed class ObservabilityConfigurationTests
 																	using var host = builder.Build();
 																	var options = host.Services.GetRequiredService<IOptions<ObservabilityStartupOptions>>().Value;
 
-											Assert.False(options.TracesEnabled);
-										});
+																	Assert.False(options.TracesEnabled);
+																});
 
 	[Fact(DisplayName = "Enabled composition registers one bounded shutdown coordinator for all enabled providers")]
 	public void EnabledCompositionRegistersOneBoundedShutdownCoordinatorForAllEnabledProviders() =>
@@ -382,6 +508,25 @@ public sealed class ObservabilityConfigurationTests
 			Messages.Add(formatter(state, exception));
 	}
 
+	private sealed class CapturingLogRecordProcessor : BaseProcessor<LogRecord>
+	{
+		internal string? Body { get; private set; }
+
+		internal string? FormattedMessage { get; private set; }
+
+		internal Exception? Exception { get; private set; }
+
+		internal IReadOnlyList<KeyValuePair<string, object?>>? Attributes { get; private set; }
+
+		public override void OnEnd(LogRecord data)
+		{
+			Body = data.Body;
+			FormattedMessage = data.FormattedMessage;
+			Exception = data.Exception;
+			Attributes = data.Attributes;
+		}
+	}
+
 	[EventSource(Name = TestExporterEventSourceName)]
 	private sealed class TestOtlpExporterEventSource : EventSource
 	{
@@ -433,7 +578,9 @@ internal static class ObservabilityTestEnvironment
 		"OTEL_BLRP_MAX_QUEUE_SIZE",
 		"OTEL_BLRP_MAX_EXPORT_BATCH_SIZE",
 		"OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY",
-		"OTEL_DOTNET_EXPERIMENTAL_OTLP_DISK_RETRY_DIRECTORY_PATH"
+		"OTEL_DOTNET_EXPERIMENTAL_OTLP_DISK_RETRY_DIRECTORY_PATH",
+		"OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_DB_QUERY_PARAMETERS",
+		"OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_CONTEXT_PROPAGATION"
 	];
 
 	internal static void WithClearedOtelEnvironment(Action action)

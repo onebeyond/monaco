@@ -80,6 +80,8 @@ internal static class OtelConfigurationPreflightValidator
 	{
 		ValidateAbsent(configuration, "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY");
 		ValidateAbsent(configuration, "OTEL_DOTNET_EXPERIMENTAL_OTLP_DISK_RETRY_DIRECTORY_PATH");
+		ValidateAbsent(configuration, "OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_DB_QUERY_PARAMETERS");
+		ValidateAbsent(configuration, "OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_CONTEXT_PROPAGATION");
 
 		var sampler = configuration["OTEL_TRACES_SAMPLER"];
 		if (string.IsNullOrEmpty(sampler))

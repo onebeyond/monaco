@@ -45,8 +45,7 @@ public static class ServiceCollectionExtensions
 					.AddDbContext<AppDbContext>(opts => opts.UseSqlServer(optionsValue.EntityFramework.ConnectionString,
 																		  sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(3), null)
 																								  .UseCompatibilityLevel(160))	// SQL Server 2022 = 160 - SQL Server 2025 = 170
-															.UseLazyLoadingProxies()
-															.EnableSensitiveDataLogging(optionsValue.EntityFramework.EnableEfSensitiveLogging))
+															.UseLazyLoadingProxies())
 					.AddScoped<BaseDbContext, AppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
 #if (filesSupport)
 			services.RegisterBlobStorageService(opts =>

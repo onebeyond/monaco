@@ -10,6 +10,7 @@ internal static class ObservabilityConfigurationDiagnosticCodes
 	internal const string InvalidQueryTextMode = "OBS_CONFIG_INVALID_QUERY_TEXT_MODE";
 	internal const string InvalidIdentityMode = "OBS_CONFIG_INVALID_IDENTITY_MODE";
 	internal const string OtlpExportFailure = "OBS_OTLP_EXPORT_FAILURE";
+	internal const string SqlSanitizationRejected = "OBS_SQL_SANITIZATION_REJECTED";
 }
 
 internal sealed class ObservabilityConfigurationDiagnosticReporter(ObservabilityStartupOptions options,
