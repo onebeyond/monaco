@@ -77,16 +77,14 @@ builder.Services
 	   .AddDbContextCheck<AppDbContext>(nameof(AppDbContext));
 
 builder.Services
-	   .AddCorsPolicies(configuration);
+	   .AddCorsPolicies(configuration)
+	   .AddExceptionHandler<BoundaryExceptionHandler>();
 
 builder.AddApiObservability();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-	app.UseDeveloperExceptionPage();
-
 app.UseExceptionHandler()
    .UseStatusCodePages();
 

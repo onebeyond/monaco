@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -200,6 +201,49 @@ public sealed class ObservabilityConfigurationTests
 		Assert.Null(capture.FormattedMessage);
 		Assert.Null(capture.Exception);
 		Assert.Null(capture.Attributes);
+	}
+
+	[Fact(DisplayName = "Boundary diagnostics emit the single fixed exception log and sanitize the native span")]
+	public void BoundaryDiagnosticsEmitTheSingleFixedExceptionLogAndSanitizeTheNativeSpan()
+	{
+		var loggerFactory = new CapturingLoggerFactory();
+		using var activity = new Activity("http.request").Start();
+		activity.SetTag("error.code", "unsafe-code");
+		activity.SetTag("exception.message", "failure");
+		activity.SetTag("exception.stacktrace", "stack");
+		var exception = new InvalidOperationException("failure");
+
+		BoundaryExceptionDiagnostics.Record(loggerFactory, exception);
+
+		var entry = loggerFactory.Entries.Should().ContainSingle().Which;
+		entry.Category.Should().Be(BoundaryExceptionDiagnostics.Category);
+		entry.LogLevel.Should().Be(LogLevel.Error);
+		entry.EventId.Should().Be(BoundaryExceptionDiagnostics.EventId);
+		entry.Exception.Should().BeSameAs(exception);
+		var state = entry.State.Should().BeAssignableTo<IReadOnlyList<KeyValuePair<string, object?>>>().Which;
+		state[^1].Value.Should().Be(BoundaryExceptionDiagnostics.MessageTemplate);
+		state.Select(field => field.Key).Should().Equal(["BoundaryKind", "ExceptionType", "TraceId", "SpanId", "{OriginalFormat}"]);
+		state[0].Value.Should().Be(BoundaryExceptionDiagnostics.HttpRequestBoundaryKind);
+		state[1].Value.Should().Be(typeof(InvalidOperationException).FullName);
+		state[2].Value.Should().Be(activity.TraceId.ToString());
+		state[3].Value.Should().Be(activity.SpanId.ToString());
+		activity.Status.Should().Be(ActivityStatusCode.Error);
+		activity.StatusDescription.Should().BeEmpty();
+		activity.GetTagItem("error.category").Should().Be("unhandled");
+		activity.GetTagItem("error.type").Should().Be(typeof(InvalidOperationException).FullName);
+		activity.GetTagItem("error.code").Should().BeNull();
+		activity.GetTagItem("exception.message").Should().BeNull();
+		activity.GetTagItem("exception.stacktrace").Should().BeNull();
+		activity.Events.Should().BeEmpty();
+	}
+
+	[Fact(DisplayName = "Boundary exception type names are bounded without splitting UTF-8 characters")]
+	public void BoundaryExceptionTypeNamesAreBoundedWithoutSplittingUtf8Characters()
+	{
+		var bounded = BoundaryExceptionDiagnostics.GetBoundedExceptionTypeName(new string('é', 129));
+
+		System.Text.Encoding.UTF8.GetByteCount(bounded).Should().Be(256);
+		bounded.Should().Be(new string('é', 128));
 	}
 
 	[Theory(DisplayName = "Malformed strict Signal and shutdown settings fail before providers are created")]
@@ -506,6 +550,34 @@ public sealed class ObservabilityConfigurationTests
 
 		public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
 			Messages.Add(formatter(state, exception));
+	}
+
+	private sealed class CapturingLoggerFactory : ILoggerFactory
+	{
+		internal List<CapturedLogEntry> Entries { get; } = [];
+
+		public void AddProvider(ILoggerProvider provider)
+		{
+		}
+
+		public ILogger CreateLogger(string categoryName) =>
+			new CapturingLoggerEntry(categoryName, Entries);
+
+		public void Dispose()
+		{
+		}
+	}
+
+	private sealed record CapturedLogEntry(string Category, LogLevel LogLevel, EventId EventId, object State, Exception? Exception);
+
+	private sealed class CapturingLoggerEntry(string category, List<CapturedLogEntry> entries) : ILogger
+	{
+		public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+		public bool IsEnabled(LogLevel logLevel) => true;
+
+		public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
+			entries.Add(new CapturedLogEntry(category, logLevel, eventId, state!, exception));
 	}
 
 	private sealed class CapturingLogRecordProcessor : BaseProcessor<LogRecord>

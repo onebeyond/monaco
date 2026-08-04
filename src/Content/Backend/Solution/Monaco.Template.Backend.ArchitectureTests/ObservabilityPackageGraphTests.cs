@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Reflection;
+using AwesomeAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Monaco.Template.Backend.Common.Observability;
@@ -52,6 +53,9 @@ public sealed class ObservabilityPackageGraphTests
 
 		Assert.DoesNotContain("ProjectReference", project, StringComparison.Ordinal);
 		Assert.DoesNotContain("PrivateAssets", project, StringComparison.Ordinal);
+		Assert.Contains("<Project Sdk=\"Microsoft.NET.Sdk\">", project, StringComparison.Ordinal);
+		Assert.DoesNotContain("PackageReference Include=\"Microsoft.AspNetCore", project, StringComparison.Ordinal);
+		Assert.DoesNotContain("FrameworkReference Include=\"Microsoft.AspNetCore.App\"", project, StringComparison.Ordinal);
 		Assert.Equal(OpenTelemetryPackages.Length, CountOccurrences(project, "PackageReference Include=\"OpenTelemetry."));
 	}
 
@@ -73,6 +77,35 @@ public sealed class ObservabilityPackageGraphTests
 		AssertHostUsesSingleProfile("Monaco.Template.Backend.Api", "AddApiObservability()");
 		AssertHostUsesSingleProfile("Monaco.Template.Backend.Worker", "AddWorkerObservability()");
 		AssertHostUsesSingleProfile("Monaco.Template.Backend.Common.ApiGateway", "AddGatewayObservability()");
+	}
+
+	[Fact(DisplayName = "API and Gateway install one shared HTTP boundary diagnostics handler while Worker remains outside the boundary")]
+	public void HttpHostsInstallTheSharedBoundaryDiagnosticsHandler()
+	{
+		var boundaryDiagnostics = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "BoundaryExceptionDiagnostics.cs"));
+		var boundaryHandler = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "BoundaryExceptionHandler.cs"));
+		var apiProgram = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Api", "Program.cs"));
+		var gatewayProgram = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.ApiGateway", "Program.cs"));
+		var workerProgram = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Worker", "Program.cs"));
+
+		boundaryDiagnostics.Should().Contain("EventId = new(1000, \"UnhandledBoundaryException\")");
+		boundaryDiagnostics.Should().Contain("Unhandled {BoundaryKind} failure ({ExceptionType}); TraceId={TraceId}; SpanId={SpanId}");
+		boundaryDiagnostics.Should().Contain("HttpRequestBoundaryKind = \"http.request\"");
+		boundaryDiagnostics.Should().Contain("SetStatus(ActivityStatusCode.Error, string.Empty)");
+		boundaryDiagnostics.Should().Contain("error.category");
+		boundaryDiagnostics.Should().Contain("error.type");
+		apiProgram.Should().Contain("AddExceptionHandler<BoundaryExceptionHandler>()");
+		gatewayProgram.Should().Contain("AddExceptionHandler<BoundaryExceptionHandler>()");
+		apiProgram.Should().Contain("app.UseExceptionHandler()");
+		gatewayProgram.Should().Contain("app.UseExceptionHandler()");
+		boundaryHandler.Should().Contain("public sealed class BoundaryExceptionHandler");
+		boundaryHandler.Should().Contain("ValueTask.FromResult(true)");
+		boundaryHandler.Should().Contain("BoundaryExceptionDiagnostics.Record");
+		File.Exists(Path.Combine(FindSolutionDirectory(), "Monaco.Template.Backend.Api", "BoundaryExceptionHandler.cs")).Should().BeFalse();
+		File.Exists(Path.Combine(FindSolutionDirectory(), "Monaco.Template.Backend.Common.ApiGateway", "BoundaryExceptionHandler.cs")).Should().BeFalse();
+		apiProgram.Should().NotContain("UseDeveloperExceptionPage");
+		gatewayProgram.Should().NotContain("UseDeveloperExceptionPage");
+		workerProgram.Should().NotContain("BoundaryExceptionDiagnostics.Record");
 	}
 
 	[Fact(DisplayName = "Application owns the BCL successful-company counter and only the API Metric profile subscribes to it")]
@@ -185,8 +218,8 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.DoesNotContain("EnableEFSensitiveLogging", string.Concat(applicationOptions, applicationServices, apiProgram, workerProgram, apiSettings, workerSettings), StringComparison.Ordinal);
 	}
 
-	[Fact(DisplayName = "Generated local observability guide documents Story 2.2 data boundaries only for applicable hosts")]
-	public void GeneratedLocalObservabilityGuideDocumentsStory22DataBoundariesOnlyForApplicableHosts()
+	[Fact(DisplayName = "Generated local observability guide documents Story 2.2 data boundaries and Story 2.3 HTTP boundaries only for applicable hosts")]
+	public void GeneratedLocalObservabilityGuideDocumentsStory22DataBoundariesAndStory23HttpBoundariesOnlyForApplicableHosts()
 	{
 		var guide = ReadSolutionFile("OBSERVABILITY.md").Replace("\r\n", "\n", StringComparison.Ordinal);
 
@@ -202,7 +235,10 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("rather than emitting or hashing raw SQL", guide, StringComparison.Ordinal);
 		Assert.Contains("<!--" + TemplateDirectiveIf + " (apiService || workerService) -->", guide, StringComparison.Ordinal);
 		Assert.Contains("Gateway has no SQL instrumentation", guide, StringComparison.Ordinal);
-		Assert.Contains("<!-- OBSERVABILITY: 2.3 EXCEPTION-BOUNDARIES -->", guide, StringComparison.Ordinal);
+		guide.Should().Contain("<!--" + TemplateDirectiveIf + " (apiService || apiGateway) -->\n## HTTP exception boundaries");
+		guide.Should().Contain("exactly one authoritative Operational Log");
+		guide.Should().Contain("exception message, stack, and inner chain remain only on that single boundary log");
+		guide.Should().Contain("opaque third-party exception prose");
 	}
 
 	[Fact(DisplayName = "Failure isolation keeps bounded queues, one coordinated flush, and no retry or disk storage path")]

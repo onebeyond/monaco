@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using AwesomeAssertions;
 
 namespace Monaco.Template.Backend.ArchitectureTests;
 
@@ -20,6 +21,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 		output.AssertGuidePresent();
 		output.AssertSuccessfulCompanyCounterPresent();
 		output.AssertApplicationDiagnosticsPresent();
+		output.AssertHttpExceptionBoundaryGuidePresent();
 		output.AssertCanonicalLocalFirstRunTask("GuideContractDefaultHost.Api", "GuideContractDefaultHost.Worker");
 		output.AssertGuideDoesNotContain("GuideContractDefaultHost.Common.ApiGateway");
 	}
@@ -41,6 +43,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 		var output = _hive.Generate("GuideContractPackages", "--commonLibraries", "false");
 
 		output.AssertGuidePresent();
+		output.AssertHttpExceptionBoundaryGuidePresent();
 	}
 
 	[Fact(DisplayName = "Gateway-only output contains the guide, the Solution Item, and the manual instructions")]
@@ -52,6 +55,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 		output.AssertSuccessfulCompanyCounterAbsent();
 		Assert.DoesNotContain("IntegrationTests", output.Solution, StringComparison.Ordinal);
 		output.AssertApplicationDiagnosticsPresent();
+		output.AssertHttpExceptionBoundaryGuidePresent();
 	}
 
 	[Fact(DisplayName = "Worker-only output omits the successful-company counter guidance")]
@@ -62,6 +66,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 		output.AssertGuidePresent();
 		output.AssertSuccessfulCompanyCounterAbsent();
 		output.AssertApplicationDiagnosticsPresent();
+		output.AssertHttpExceptionBoundaryGuideAbsent();
 	}
 
 	[Fact(DisplayName = "Full output with Gateway contains the local observability walkthrough")]
@@ -152,6 +157,18 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 			Assert.DoesNotContain("## Successful company creations", guide, StringComparison.Ordinal);
 			Assert.DoesNotContain("company.successful_creations", guide, StringComparison.Ordinal);
 		}
+
+		public void AssertHttpExceptionBoundaryGuidePresent()
+		{
+			var guide = File.ReadAllText(GuidePath);
+
+			guide.Should().Contain("## HTTP exception boundaries");
+			guide.Should().Contain("exactly one authoritative Operational Log");
+			guide.Should().Contain("opaque third-party exception prose");
+		}
+
+		public void AssertHttpExceptionBoundaryGuideAbsent() =>
+			File.ReadAllText(GuidePath).Should().NotContain("## HTTP exception boundaries");
 
 		public void AssertCanonicalLocalFirstRunTask(params string[] expectedServiceNames)
 		{

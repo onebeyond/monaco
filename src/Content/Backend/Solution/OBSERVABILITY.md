@@ -156,7 +156,13 @@ API and Worker SQL telemetry accepts only `SanitizedText` (the default) or `Summ
 Gateway has no SQL instrumentation.
 <!--#endif -->
 
-<!-- OBSERVABILITY: 2.3 EXCEPTION-BOUNDARIES -->
+<!--#if (apiService || apiGateway) -->
+## HTTP exception boundaries
+
+For an unexpected API or Gateway request failure, Monaco writes exactly one authoritative Operational Log at the HTTP boundary. Its category is `<solution>.Common.Observability.Boundary`, EventId `1000` (`UnhandledBoundaryException`), and its bounded fields identify `http.request`, the CLR exception type, and the native TraceId and SpanId.
+
+The exception message, stack, and inner chain remain only on that single boundary log; they are not copied into span events, Baggage, Metrics, or other Monaco-owned logs. The residual risk is opaque third-party exception prose in that log, so treat access to log data appropriately.
+<!--#endif -->
 
 <!--#if (apiService) -->
 ## Successful company creations

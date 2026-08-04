@@ -7,34 +7,34 @@
 
   <!--#if (templateDebug)-->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>$(DefineConstants);apiService;auth;commonLibraries;filesSupport;massTransitIntegration;workerService</DefineConstants>
+    <DefineConstants>$(DefineConstants);apiGateway;apiService;auth;commonLibraries;filesSupport;massTransitIntegration;workerService</DefineConstants>
   </PropertyGroup>
 
   <!--#endif-->
   <ItemGroup>
-	<PackageReference Include="AutoFixture.Xunit2" />
-	<PackageReference Include="AwesomeAssertions" />
-	<PackageReference Include="Flurl" />
-	  <!--#if (auth)-->
-	<PackageReference Include="Keycloak.Net.Core" />
-	<!--#endif-->
-	<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
-	<PackageReference Include="Microsoft.NET.Test.Sdk" />
-	<!--#if (apiService)-->
-	<PackageReference Include="Refit" />
-	<!--#endif-->
-	<PackageReference Include="Respawn" />
+    <PackageReference Include="AutoFixture.Xunit2" />
+    <PackageReference Include="AwesomeAssertions" />
+    <PackageReference Include="Flurl" />
+      <!--#if (auth)-->
+    <PackageReference Include="Keycloak.Net.Core" />
+    <!--#endif-->
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <!--#if (apiService)-->
+    <PackageReference Include="Refit" />
+    <!--#endif-->
+    <PackageReference Include="Respawn" />
     <PackageReference Include="Testcontainers" />
     <!--#if (filesSupport)-->
     <PackageReference Include="Testcontainers.Azurite" />
-	<!--#endif-->
+    <!--#endif-->
     <!--#if (auth)-->
     <PackageReference Include="Testcontainers.Keycloak" />
-	<!--#endif-->
+    <!--#endif-->
     <PackageReference Include="Testcontainers.MsSql" />
     <!--#if (massTransitIntegration)-->
     <PackageReference Include="Testcontainers.RabbitMq" />
-	<!--#endif-->
+    <!--#endif-->
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -49,6 +49,9 @@
   <ItemGroup>
     <!--#if (apiService)-->
     <ProjectReference Include="..\Monaco.Template.Backend.Api\Monaco.Template.Backend.Api.csproj" />
+    <!--#endif-->
+    <!--#if (apiGateway)-->
+    <ProjectReference Include="..\Monaco.Template.Backend.Common.ApiGateway\Monaco.Template.Backend.Common.ApiGateway.csproj" />
     <!--#endif-->
     <!--#if (workerService)-->
     <ProjectReference Include="..\Monaco.Template.Backend.Worker\Monaco.Template.Backend.Worker.csproj" />
