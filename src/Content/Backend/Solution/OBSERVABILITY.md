@@ -129,7 +129,7 @@ The common OTLP controls are `OTEL_EXPORTER_OTLP_{ENDPOINT,PROTOCOL,HEADERS,TIME
 
 Supported operational root keys are `OTEL_SERVICE_NAME`, `OTEL_RESOURCE_ATTRIBUTES`, `OTEL_TRACES_SAMPLER`, `OTEL_TRACES_SAMPLER_ARG`, `OTEL_BSP_*`, `OTEL_BLRP_*`, `OTEL_METRIC_EXPORT_{INTERVAL,TIMEOUT}`, and applicable `Logging:LogLevel` categories. Logs and Traces default to queue `2048`, batch `512`, delay/timeout `5000` ms; Metrics default to interval `60000` ms and timeout `5000` ms. Explicit values are validated at startup, including `batch <= queue`.
 
-Do not configure exporter selection, propagators, auto-instrumentation, YAML, retry/disk buffering, certificates/client keys, temporality/exemplars, attribute limits, or provider-specific logging switches. Use environment variables or Development User Secrets for any future secret-capable setting; never commit headers, credentials, authorization values, certificates, or HMAC material. The complete spelling, range, malformed-value, and characterization contract is `CONFIGURATION-MATRIX.md` in Monaco's source repository; it is not copied into generated output.
+Do not configure exporter selection, propagators, auto-instrumentation, YAML, retry/disk buffering, certificates/client keys, temporality/exemplars, attribute limits, or provider-specific logging switches. The complete spelling, range, malformed-value, and characterization contract is `CONFIGURATION-MATRIX.md` in Monaco's source repository; it is not copied into generated output.
 
 ## Telemetry failure isolation
 
