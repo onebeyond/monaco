@@ -182,6 +182,46 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("ConfigureMetrics", profiles, StringComparison.Ordinal);
 	}
 
+	[Fact(DisplayName = "Routing keeps no Collector or vendor artifacts, no duplicate exporter, and no secret-provider trust seam")]
+	public void RoutingKeepsNoCollectorVendorArtifactsDuplicateExporterOrSecretProviderTrustSeam()
+	{
+		var solutionDirectory = FindSolutionDirectory();
+		var observabilitySources = string.Concat(Directory.EnumerateFiles(Path.Combine(solutionDirectory, "Monaco.Template.Backend.Common.Observability"), "*.cs")
+														 .Select(File.ReadAllText));
+		var preflight = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "OtelConfigurationPreflightValidator.cs"));
+		var centralPackages = ReadSolutionFile("Directory.Packages.props");
+
+		Assert.DoesNotContain("IObservabilitySecretProviderTrust", observabilitySources, StringComparison.Ordinal);
+		Assert.DoesNotContain("OBS_CONFIG_SECRET_SOURCE_REJECTED", observabilitySources, StringComparison.Ordinal);
+		Assert.DoesNotContain("SecretProvider", observabilitySources, StringComparison.Ordinal);
+		Assert.DoesNotContain("GetProviders", observabilitySources, StringComparison.Ordinal);
+
+		Assert.Equal(OpenTelemetryPackages.Length, CountOccurrences(centralPackages, "PackageVersion Include=\"OpenTelemetry."));
+		Assert.DoesNotContain("OpenTelemetry.Exporter.Jaeger", centralPackages, StringComparison.Ordinal);
+		Assert.DoesNotContain("OpenTelemetry.Exporter.Prometheus", centralPackages, StringComparison.Ordinal);
+		Assert.DoesNotContain("OpenTelemetry.Exporter.InMemory", centralPackages, StringComparison.Ordinal);
+
+		Assert.DoesNotContain("OTEL_EXPORTER_OTLP_CERTIFICATE", preflight, StringComparison.Ordinal);
+		Assert.DoesNotContain("OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE", preflight, StringComparison.Ordinal);
+		Assert.DoesNotContain("OTEL_EXPORTER_OTLP_CLIENT_KEY", preflight, StringComparison.Ordinal);
+		Assert.DoesNotContain("OTEL_TRACES_EXPORTER", preflight, StringComparison.Ordinal);
+		Assert.DoesNotContain("OTEL_METRICS_EXPORTER", preflight, StringComparison.Ordinal);
+		Assert.DoesNotContain("OTEL_LOGS_EXPORTER", preflight, StringComparison.Ordinal);
+		Assert.DoesNotContain("OTEL_PROPAGATORS", preflight, StringComparison.Ordinal);
+		Assert.DoesNotContain("OTEL_CONFIG_FILE", preflight, StringComparison.Ordinal);
+
+		Assert.DoesNotContain(Directory.EnumerateFiles(solutionDirectory, "*", SearchOption.AllDirectories).Where(path => !IsBuildArtifact(path)),
+							  path =>
+							  {
+								  var fileName = Path.GetFileName(path);
+								  return fileName.Contains("collector", StringComparison.OrdinalIgnoreCase) ||
+										 fileName.StartsWith("docker-compose", StringComparison.OrdinalIgnoreCase) ||
+										 fileName.Equals("Dockerfile", StringComparison.OrdinalIgnoreCase) ||
+										 fileName.EndsWith(".yml", StringComparison.OrdinalIgnoreCase) ||
+										 fileName.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase);
+							  });
+	}
+
 	[Fact(DisplayName = "Shared observability composition fixes privacy safeguards and removes the EF sensitive-data escape hatch")]
 	public void SharedObservabilityCompositionFixesPrivacySafeguardsAndRemovesTheEfSensitiveDataEscapeHatch()
 	{
@@ -239,6 +279,43 @@ public sealed class ObservabilityPackageGraphTests
 		guide.Should().Contain("exactly one authoritative Operational Log");
 		guide.Should().Contain("exception message, stack, and inner chain remain only on that single boundary log");
 		guide.Should().Contain("opaque third-party exception prose");
+	}
+
+	[Fact(DisplayName = "Generated local observability guide documents Story 2.4 production routing and preserves later placeholders")]
+	public void GeneratedLocalObservabilityGuideDocumentsStory24ProductionRoutingAndPreservesLaterPlaceholders()
+	{
+		var guide = ReadSolutionFile("OBSERVABILITY.md").Replace("\r\n", "\n", StringComparison.Ordinal);
+
+		Assert.Contains("| Production routing below | 2.4 |", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("OBSERVABILITY: 2.4 PRODUCTION-ROUTING", guide, StringComparison.Ordinal);
+
+		var sectionStart = guide.IndexOf("## Production signal routing", StringComparison.Ordinal);
+		Assert.True(sectionStart >= 0, "Expected the Story 2.4 production-routing section in the guide.");
+		var nextSection = guide.IndexOf("\n## ", sectionStart + 1, StringComparison.Ordinal);
+		var section = guide[sectionStart..(nextSection >= 0 ? nextSection : guide.Length)];
+
+		Assert.Contains("configuration-only", section, StringComparison.Ordinal);
+		Assert.Contains("unchanged binaries", section, StringComparison.Ordinal);
+		Assert.Contains("OpenTelemetry Collector or compatible OTLP receiver", section, StringComparison.Ordinal);
+		Assert.Contains("wins over its common counterpart", section, StringComparison.Ordinal);
+		Assert.Contains("are not treated as credentials", section, StringComparison.Ordinal);
+		Assert.Contains("/v1/traces", section, StringComparison.Ordinal);
+		Assert.Contains("route, filter, transform, authenticate, or forward", section, StringComparison.Ordinal);
+		Assert.Contains("divergent destinations", section, StringComparison.Ordinal);
+		Assert.Contains("does not deploy or configure a production Collector", section, StringComparison.Ordinal);
+		Assert.Contains("encrypted, authenticated transport or a secured local Collector hop", section, StringComparison.Ordinal);
+		Assert.DoesNotContain("localhost", section, StringComparison.Ordinal);
+		Assert.DoesNotContain("User Secrets", section, StringComparison.Ordinal);
+
+		Assert.Contains("OBSERVABILITY: 2.5 IDENTITY", guide, StringComparison.Ordinal);
+		Assert.Contains("OBSERVABILITY: 3.1-3.3 CAUSAL-DIAGNOSIS", guide, StringComparison.Ordinal);
+		Assert.Contains("OBSERVABILITY: 3.4 HOST-METRICS", guide, StringComparison.Ordinal);
+		Assert.Contains("OBSERVABILITY: 3.5 INSTRUMENTATION-GOVERNANCE", guide, StringComparison.Ordinal);
+		Assert.Contains("OBSERVABILITY: 4.5 PERSISTENCE-ATTRIBUTION", guide, StringComparison.Ordinal);
+		Assert.Contains("OBSERVABILITY: 5.1 MIGRATIONS", guide, StringComparison.Ordinal);
+		Assert.Contains("OBSERVABILITY: 5.3 REDUCED-API-VERIFICATION", guide, StringComparison.Ordinal);
+		Assert.Contains("OBSERVABILITY: 5.4 STATIC-SHAPE-BOUNDARIES", guide, StringComparison.Ordinal);
+		Assert.Contains("OBSERVABILITY: 5.5 CONSOLIDATION", guide, StringComparison.Ordinal);
 	}
 
 	[Fact(DisplayName = "Failure isolation keeps bounded queues, one coordinated flush, and no retry or disk storage path")]

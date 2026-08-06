@@ -183,12 +183,12 @@ public sealed class ObservabilityConfigurationTests
 	{
 		var capture = new CapturingLogRecordProcessor();
 		using var loggerFactory = LoggerFactory.Create(builder => builder.AddOpenTelemetry(options =>
-		{
-			options.IncludeFormattedMessage = true;
-			options.ParseStateValues = true;
-			options.AddProcessor(new LogTelemetryPrivacyProcessor());
-			options.AddProcessor(capture);
-		}));
+																						   {
+																							   options.IncludeFormattedMessage = true;
+																							   options.ParseStateValues = true;
+																							   options.AddProcessor(new LogTelemetryPrivacyProcessor());
+																							   options.AddProcessor(capture);
+																						   }));
 		var logger = loggerFactory.CreateLogger("PrivacyCanary");
 
 		logger.LogError(new InvalidOperationException("Connection string Server=sql.example;Password=secret"),
@@ -265,6 +265,12 @@ public sealed class ObservabilityConfigurationTests
 	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "x-auth=a%0db")]
 	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "x-auth=a%0Ab")]
 	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "x-a=b\tc")]
+	[InlineData("OTEL_EXPORTER_OTLP_TRACES_HEADERS", "x-api-key=TopSecret%ZZ")]
+	[InlineData("OTEL_EXPORTER_OTLP_METRICS_HEADERS", "x-auth=secret\tvalue")]
+	[InlineData("OTEL_EXPORTER_OTLP_LOGS_HEADERS", "=no-header-name")]
+	[InlineData("OTEL_EXPORTER_OTLP_LOGS_ENDPOINT", "https://user:secret-password@collector.example:4317")]
+	[InlineData("OTEL_EXPORTER_OTLP_TRACES_PROTOCOL", "http/json")]
+	[InlineData("OTEL_EXPORTER_OTLP_TRACES_TIMEOUT", "5001")]
 	[InlineData("OTEL_TRACES_SAMPLER", "jaeger")]
 	[InlineData("OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY", "in_memory")]
 	[InlineData("OTEL_DOTNET_EXPERIMENTAL_OTLP_DISK_RETRY_DIRECTORY_PATH", "c:\\telemetry")]
@@ -393,6 +399,191 @@ public sealed class ObservabilityConfigurationTests
 		var metricsEndpoint = OtelConfigurationPreflightValidator.GetSignalValue(configuration, "METRICS_", "ENDPOINT");
 		Assert.Equal("OTEL_EXPORTER_OTLP_ENDPOINT", metricsEndpoint.Key);
 		Assert.Equal("http://command-line.example:4317", metricsEndpoint.Value);
+	}
+
+	[Fact(DisplayName = "JSON, environment, and command-line providers resolve common and per-Signal OTLP settings with normal precedence")]
+	public void JsonEnvironmentAndCommandLineProvidersResolveCommonAndPerSignalOtlpSettingsWithNormalPrecedence() =>
+		ObservabilityTestEnvironment.WithClearedOtelEnvironment(() =>
+																{
+																	Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", "http://environment.example:4317");
+																	Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_HEADERS", "x-environment=environment-value");
+																	Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_TIMEOUT", "2500");
+
+																	var configuration = new ConfigurationBuilder().AddJsonStream(CreateJsonStream(new
+																																				  {
+																																					  OTEL_EXPORTER_OTLP_ENDPOINT = "http://json.example:4317",
+																																					  OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf",
+																																					  OTEL_EXPORTER_OTLP_HEADERS = "x-json=json-value",
+																																					  OTEL_EXPORTER_OTLP_TIMEOUT = "1000",
+																																					  OTEL_EXPORTER_OTLP_COMPRESSION = "gzip",
+																																					  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT = "http://traces.json.example:4317",
+																																					  OTEL_EXPORTER_OTLP_TRACES_TIMEOUT = "1500",
+																																					  OTEL_EXPORTER_OTLP_METRICS_PROTOCOL = "http/protobuf",
+																																					  OTEL_EXPORTER_OTLP_LOGS_HEADERS = "x-logs=json-value",
+																																					  OTEL_EXPORTER_OTLP_LOGS_COMPRESSION = "none"
+																																				  }))
+																												  .AddEnvironmentVariables()
+																												  .AddCommandLine([
+																													  "--OTEL_EXPORTER_OTLP_ENDPOINT=http://command-line.example:4317",
+																													  "--OTEL_EXPORTER_OTLP_PROTOCOL=grpc"
+																												  ])
+																												  .Build();
+
+																	var options = ObservabilityOptionsBinder.Bind(configuration, ObservabilityHostProfile.Api);
+
+																	Assert.False(options.SdkDisabled);
+																	Assert.True(options.TracesEnabled);
+																	Assert.True(options.MetricsEnabled);
+																	Assert.True(options.LogsEnabled);
+
+																	// Same-key provider precedence: command line beats environment, and environment beats JSON.
+																	AssertSignalValue(configuration, "METRICS_", "ENDPOINT", "OTEL_EXPORTER_OTLP_ENDPOINT", "http://command-line.example:4317");
+																	AssertSignalValue(configuration, "LOGS_", "TIMEOUT", "OTEL_EXPORTER_OTLP_TIMEOUT", "2500");
+																	AssertSignalValue(configuration, "TRACES_", "COMPRESSION", "OTEL_EXPORTER_OTLP_COMPRESSION", "gzip");
+
+																	// A populated signal-specific key wins over its common key even when the common value comes from a higher-precedence provider.
+																	AssertSignalValue(configuration, "TRACES_", "ENDPOINT", "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://traces.json.example:4317");
+																	AssertSignalValue(configuration, "TRACES_", "TIMEOUT", "OTEL_EXPORTER_OTLP_TRACES_TIMEOUT", "1500");
+																	AssertSignalValue(configuration, "METRICS_", "PROTOCOL", "OTEL_EXPORTER_OTLP_METRICS_PROTOCOL", "http/protobuf");
+																	AssertSignalValue(configuration, "LOGS_", "HEADERS", "OTEL_EXPORTER_OTLP_LOGS_HEADERS", "x-logs=json-value");
+																	AssertSignalValue(configuration, "LOGS_", "COMPRESSION", "OTEL_EXPORTER_OTLP_LOGS_COMPRESSION", "none");
+																});
+
+	[Theory(DisplayName = "Every host profile keeps one unified exporter topology and its applicable instrumentations")]
+	[InlineData(nameof(ObservabilityHostProfile.Api))]
+	[InlineData(nameof(ObservabilityHostProfile.Worker))]
+	[InlineData(nameof(ObservabilityHostProfile.Gateway))]
+	public void EveryHostProfileKeepsOneUnifiedExporterTopologyAndItsApplicableInstrumentations(string profileName) =>
+		ObservabilityTestEnvironment.WithClearedOtelEnvironment(() =>
+																{
+																	var profile = System.Enum.Parse<ObservabilityHostProfile>(profileName);
+																	var builder = Host.CreateApplicationBuilder();
+																	builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] = "http://common.receiver.example:4317";
+																	builder.Configuration["OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"] = "http://traces.receiver.example:4317";
+																	builder.Configuration["OTEL_EXPORTER_OTLP_METRICS_ENDPOINT"] = "http://metrics.receiver.example:4318";
+																	builder.Configuration["OTEL_EXPORTER_OTLP_METRICS_PROTOCOL"] = "http/protobuf";
+																	builder.Configuration["OTEL_EXPORTER_OTLP_LOGS_HEADERS"] = "x-logs-routing=enabled";
+																	AddProfileObservability(builder, profile);
+
+																	using var host = builder.Build();
+
+																	Assert.Single(host.Services.GetServices<TracerProvider>());
+																	Assert.Single(host.Services.GetServices<MeterProvider>());
+																	Assert.Single(host.Services.GetServices<ILoggerProvider>(), provider => provider.GetType().Name == "OpenTelemetryLoggerProvider");
+																	var coordinator = Assert.Single(host.Services.GetServices<IHostedService>().OfType<ObservabilityShutdownFlushService>());
+																	Assert.Equal(3, coordinator.ProviderCount);
+
+																	var registration = host.Services.GetRequiredService<ObservabilityProfileRegistration>();
+																	Assert.Equal(profile, registration.Profile);
+
+																	var (expectedInstrumentations, applicableInstrumentations) = profile switch
+																																 {
+																																	 ObservabilityHostProfile.Api => (new[]
+																																												 {
+																																													 ObservabilityInstrumentation.Runtime,
+																																													 ObservabilityInstrumentation.AspNetCore,
+																																													 ObservabilityInstrumentation.Http,
+																																													 ObservabilityInstrumentation.SqlClient
+																																												 },
+																																											 ObservabilityProfileRegistration.ApiInstrumentations),
+																																	 ObservabilityHostProfile.Worker => (new[]
+																																						 {
+																																							 ObservabilityInstrumentation.Runtime,
+																																							 ObservabilityInstrumentation.Http,
+																																							 ObservabilityInstrumentation.SqlClient
+																																						 },
+																																					 ObservabilityProfileRegistration.WorkerInstrumentations),
+																																	 _ => ([
+																																			   ObservabilityInstrumentation.Runtime,
+																																			   ObservabilityInstrumentation.AspNetCore,
+																																			   ObservabilityInstrumentation.Http
+																																		   ],
+																																		   ObservabilityProfileRegistration.GatewayInstrumentations)
+																																 };
+
+																	Assert.Equal(expectedInstrumentations, applicableInstrumentations);
+																});
+
+	[Theory(DisplayName = "Valid OTLP header grammar is accepted for common and per-Signal settings")]
+	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "x-api-key=abc123")]
+	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "x-first=1,x-second=2")]
+	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "x-encoded=a%3Db%2Cc")]
+	[InlineData("OTEL_EXPORTER_OTLP_TRACES_HEADERS", "Authorization=Bearer%20token")]
+	[InlineData("OTEL_EXPORTER_OTLP_METRICS_HEADERS", "x-metrics=metric-value")]
+	[InlineData("OTEL_EXPORTER_OTLP_LOGS_HEADERS", "x-logs=log-value")]
+	public void ValidOtlpHeaderGrammarIsAcceptedForCommonAndPerSignalSettings(string key, string value)
+	{
+		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration((key, value)), ObservabilityHostProfile.Api);
+
+		Assert.False(options.SdkDisabled);
+		Assert.True(options.TracesEnabled);
+		Assert.True(options.MetricsEnabled);
+		Assert.True(options.LogsEnabled);
+	}
+
+	[Fact(DisplayName = "Identity mode resolves through normal provider precedence without source restrictions")]
+	public void IdentityModeResolvesThroughNormalProviderPrecedenceWithoutSourceRestrictions() =>
+		ObservabilityTestEnvironment.WithClearedOtelEnvironment(() =>
+																{
+																	Environment.SetEnvironmentVariable("Observability__Identity__Mode", "HmacSha256");
+																	try
+																	{
+																		var commandLineWins = new ConfigurationBuilder()
+																							  .AddJsonStream(CreateJsonStream(new
+																															  {
+																																  Observability = new
+																																				  {
+																																					  Identity = new
+																																								 {
+																																									 Mode = "Subject"
+																																								 }
+																																				  }
+																															  }))
+																							  .AddEnvironmentVariables()
+																							  .AddCommandLine(["--Observability:Identity:Mode=Disabled"])
+																							  .Build();
+
+																		Assert.Equal(ObservabilityIdentityMode.Disabled, ObservabilityOptionsBinder.Bind(commandLineWins, ObservabilityHostProfile.Api).IdentityMode);
+
+																		var environmentWins = new ConfigurationBuilder()
+																							  .AddJsonStream(CreateJsonStream(new
+																															  {
+																																  Observability = new
+																																				  {
+																																					  Identity = new
+																																								 {
+																																									 Mode = "Subject"
+																																								 }
+																																				  }
+																															  }))
+																							  .AddEnvironmentVariables()
+																							  .Build();
+
+																		Assert.Equal(ObservabilityIdentityMode.HmacSha256, ObservabilityOptionsBinder.Bind(environmentWins, ObservabilityHostProfile.Api).IdentityMode);
+																	}
+																	finally
+																	{
+																		Environment.SetEnvironmentVariable("Observability__Identity__Mode", null);
+																	}
+																});
+
+	[Fact(DisplayName = "Unsupported exporter and certificate settings remain outside the validated routing surface")]
+	public void UnsupportedExporterAndCertificateSettingsRemainOutsideTheValidatedRoutingSurface()
+	{
+		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration(("OTEL_EXPORTER_OTLP_CERTIFICATE", "/etc/ssl/ca.crt"),
+																		  ("OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE", "/etc/ssl/client.crt"),
+																		  ("OTEL_EXPORTER_OTLP_CLIENT_KEY", "/etc/ssl/client.key"),
+																		  ("OTEL_TRACES_EXPORTER", "otlp"),
+																		  ("OTEL_METRICS_EXPORTER", "otlp"),
+																		  ("OTEL_LOGS_EXPORTER", "otlp"),
+																		  ("OTEL_PROPAGATORS", "b3")),
+													  ObservabilityHostProfile.Api);
+
+		Assert.False(options.SdkDisabled);
+		Assert.True(options.TracesEnabled);
+		Assert.True(options.MetricsEnabled);
+		Assert.True(options.LogsEnabled);
+		Assert.Empty(options.DiagnosticCodes);
 	}
 
 	[Fact(DisplayName = "Global disable leaves Console logging available without an OpenTelemetry provider")]
@@ -532,6 +723,24 @@ public sealed class ObservabilityConfigurationTests
 
 	private static IConfiguration CreateConfiguration(params (string Key, string? Value)[] values) =>
 		new ConfigurationBuilder().AddInMemoryCollection(values.ToDictionary(value => value.Key, value => value.Value)).Build();
+
+	private static MemoryStream CreateJsonStream(object values) => new(System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(values));
+
+	private static void AssertSignalValue(IConfiguration configuration, string signalPrefix, string suffix, string expectedKey, string expectedValue)
+	{
+		var setting = OtelConfigurationPreflightValidator.GetSignalValue(configuration, signalPrefix, suffix);
+
+		Assert.Equal(expectedKey, setting.Key);
+		Assert.Equal(expectedValue, setting.Value);
+	}
+
+	private static IHostApplicationBuilder AddProfileObservability(IHostApplicationBuilder builder, ObservabilityHostProfile profile) =>
+		profile switch
+		{
+			ObservabilityHostProfile.Api => builder.AddApiObservability(),
+			ObservabilityHostProfile.Worker => builder.AddWorkerObservability(),
+			_ => builder.AddGatewayObservability()
+		};
 
 	private sealed class AdjustableTimeProvider(DateTimeOffset now) : TimeProvider
 	{

@@ -72,7 +72,7 @@ The following deterministic insertion points reserve sequence and ownership for 
 | Local first run below | 1.7 |
 | Failure isolation below | 2.1 |
 | `<!-- OBSERVABILITY: 2.2-2.3 DATA-BOUNDARIES -->` | 2.2-2.3 |
-| `<!-- OBSERVABILITY: 2.4 PRODUCTION-ROUTING -->` | 2.4 |
+| Production routing below | 2.4 |
 | `<!-- OBSERVABILITY: 2.5 IDENTITY -->` | 2.5 |
 | `<!-- OBSERVABILITY: 3.1-3.3 CAUSAL-DIAGNOSIS -->` | 3.1-3.3 |
 | `<!-- OBSERVABILITY: 3.4 HOST-METRICS -->` | 3.4 |
@@ -163,6 +163,16 @@ For an unexpected API or Gateway request failure, Monaco writes exactly one auth
 
 The exception message, stack, and inner chain remain only on that single boundary log; they are not copied into span events, Baggage, Metrics, or other Monaco-owned logs. The residual risk is opaque third-party exception prose in that log, so treat access to log data appropriately.
 <!--#endif -->
+
+## Production signal routing
+
+Every enabled Signal leaves each Runtime Host through the same single unified OTLP exporter path, and production routing is configuration-only: unchanged binaries send Traces, Metrics, and Logs to any OpenTelemetry Collector or compatible OTLP receiver supplied through the standard common and per-Signal OTLP keys above. No exporter selection, package change, or code change redirects Signals.
+
+Per-Signal settings override common settings after each key resolves normal provider precedence, so a populated `OTEL_EXPORTER_OTLP_TRACES_*`, `..._METRICS_*`, or `..._LOGS_*` value wins over its common counterpart even when the common value comes from a higher-precedence provider. Endpoint, protocol, Signal enablement, sampling, cadence, filtering, queue/batch/timeout, and the other non-secret controls above follow normal appsettings/environment/command-line precedence and are not treated as credentials. For `http/protobuf`, a common base endpoint is expanded to `/v1/traces`, `/v1/metrics`, and `/v1/logs`; a signal-specific endpoint is used exactly as supplied.
+
+A single compatible receiver that accepts every enabled Signal is sufficient: one Collector hop may independently route, filter, transform, authenticate, or forward each Signal onward. When enabled Signals must reach divergent destinations, provide consumer-owned routing such as your own Collector pipeline or equivalent infrastructure. Monaco does not deploy or configure a production Collector, backend, dashboard, retention policy, alerting system, or vendor-specific topology; destination clarity and production receiver infrastructure remain consumer-owned.
+
+Route production Signals only over encrypted, authenticated transport or a secured local Collector hop that terminates transport security on your behalf.
 
 <!--#if (apiService) -->
 ## Successful company creations

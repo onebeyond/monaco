@@ -22,6 +22,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 		output.AssertSuccessfulCompanyCounterPresent();
 		output.AssertApplicationDiagnosticsPresent();
 		output.AssertHttpExceptionBoundaryGuidePresent();
+		output.AssertProductionRoutingGuidePresent();
 		output.AssertCanonicalLocalFirstRunTask("GuideContractDefaultHost.Api", "GuideContractDefaultHost.Worker");
 		output.AssertGuideDoesNotContain("GuideContractDefaultHost.Common.ApiGateway");
 	}
@@ -44,6 +45,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 
 		output.AssertGuidePresent();
 		output.AssertHttpExceptionBoundaryGuidePresent();
+		output.AssertProductionRoutingGuidePresent();
 	}
 
 	[Fact(DisplayName = "Gateway-only output contains the guide, the Solution Item, and the manual instructions")]
@@ -56,6 +58,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 		Assert.DoesNotContain("IntegrationTests", output.Solution, StringComparison.Ordinal);
 		output.AssertApplicationDiagnosticsPresent();
 		output.AssertHttpExceptionBoundaryGuidePresent();
+		output.AssertProductionRoutingGuidePresent();
 	}
 
 	[Fact(DisplayName = "Worker-only output omits the successful-company counter guidance")]
@@ -67,6 +70,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 		output.AssertSuccessfulCompanyCounterAbsent();
 		output.AssertApplicationDiagnosticsPresent();
 		output.AssertHttpExceptionBoundaryGuideAbsent();
+		output.AssertProductionRoutingGuidePresent();
 	}
 
 	[Fact(DisplayName = "Full output with Gateway contains the local observability walkthrough")]
@@ -169,6 +173,19 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 
 		public void AssertHttpExceptionBoundaryGuideAbsent() =>
 			File.ReadAllText(GuidePath).Should().NotContain("## HTTP exception boundaries");
+
+		public void AssertProductionRoutingGuidePresent()
+		{
+			var guide = File.ReadAllText(GuidePath);
+
+			guide.Should().Contain("## Production signal routing");
+			guide.Should().Contain("configuration-only");
+			guide.Should().Contain("OpenTelemetry Collector or compatible OTLP receiver");
+			guide.Should().Contain("wins over its common counterpart");
+			guide.Should().Contain("does not deploy or configure a production Collector");
+			guide.Should().Contain("encrypted, authenticated transport or a secured local Collector hop");
+			guide.Should().NotContain("OBSERVABILITY: 2.4 PRODUCTION-ROUTING");
+		}
 
 		public void AssertCanonicalLocalFirstRunTask(params string[] expectedServiceNames)
 		{
