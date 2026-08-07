@@ -721,6 +721,185 @@ public sealed class ObservabilityConfigurationTests
 	public void PositiveSubMillisecondFlushTimeoutRoundsUpForForceFlush() =>
 		Assert.Equal(1, ObservabilityShutdownFlushService.GetFlushTimeoutMilliseconds(TimeSpan.FromTicks(1)));
 
+	[Fact(DisplayName = "HMAC conformance vector produces the exact preimage and unpadded Base64URL digest")]
+	public void HmacConformanceVectorProducesExactPreimageAndUnpaddedBase64UrlDigest()
+	{
+		var keyBytes = Enumerable.Range(0, 32).Select(i => (byte)i).ToArray();
+		var keyBase64 = "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=";
+		var iss = "https://identity.example/realms/acme";
+		var sub = "248289761001";
+
+		Assert.Equal(keyBytes, Convert.FromBase64String(keyBase64));
+
+		var digest = HmacSha256Identity.Compute(keyBytes, iss, sub);
+
+		Assert.Equal("8_qChW4TmKfjDc45QADmS9iN87w1UkEN7xsGY8tZOnM", digest);
+		Assert.Equal(43, digest.Length);
+		Assert.DoesNotContain("=", digest, StringComparison.Ordinal);
+		Assert.DoesNotContain("+", digest, StringComparison.Ordinal);
+		Assert.DoesNotContain("/", digest, StringComparison.Ordinal);
+	}
+
+	[Fact(DisplayName = "Valid standard-Base64 HMAC key with sufficient length resolves correctly")]
+	public void ValidStandardBase64HmacKeyWithSufficientLengthResolvesCorrectly()
+	{
+		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:Identity:Mode", "HmacSha256"),
+																		  ("Observability:Identity:HmacSha256Key", "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=")),
+													  ObservabilityHostProfile.Api);
+
+		Assert.Equal(ObservabilityIdentityMode.HmacSha256, options.IdentityMode);
+		Assert.NotNull(options.HmacSha256KeyBytes);
+		Assert.Equal(32, options.HmacSha256KeyBytes.Length);
+		Assert.Empty(options.DiagnosticCodes);
+	}
+
+	[Theory(DisplayName = "Invalid HMAC keys disable enrichment without raw-subject fallback")]
+	[InlineData(null)]
+	[InlineData("")]
+	[InlineData("not-base64")]
+	[InlineData("AAAA")]
+	[InlineData("AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8")]
+	[InlineData("AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh-")]
+	public void InvalidHmacKeysDisableEnrichmentWithoutRawSubjectFallback(string? key)
+	{
+		var pairs = new List<(string Key, string? Value)>
+					{
+						("Observability:Identity:Mode", "HmacSha256")
+					};
+		if (key is not null)
+			pairs.Add(("Observability:Identity:HmacSha256Key", key));
+
+		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration(pairs.ToArray()), ObservabilityHostProfile.Api);
+
+		Assert.Equal(ObservabilityIdentityMode.HmacSha256, options.IdentityMode);
+		Assert.Null(options.HmacSha256KeyBytes);
+		Assert.Contains(ObservabilityConfigurationDiagnosticCodes.InvalidHmacKey, options.DiagnosticCodes);
+	}
+
+	[Fact(DisplayName = "HMAC key with trailing junk bytes fails complete consumption")]
+	public void HmacKeyWithTrailingJunkFailsCompleteConsumption()
+	{
+		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:Identity:Mode", "HmacSha256"),
+																		  ("Observability:Identity:HmacSha256Key", "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=junk")),
+													  ObservabilityHostProfile.Api);
+
+		Assert.Null(options.HmacSha256KeyBytes);
+		Assert.Contains(ObservabilityConfigurationDiagnosticCodes.InvalidHmacKey, options.DiagnosticCodes);
+	}
+
+	[Fact(DisplayName = "Base64URL-encoded HMAC key is rejected in favor of strict standard Base64")]
+	public void Base64UrlEncodedHmacKeyIsRejected()
+	{
+		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:Identity:Mode", "HmacSha256"),
+																		  ("Observability:Identity:HmacSha256Key", "_________________________________________8")),
+													  ObservabilityHostProfile.Api);
+
+		Assert.Null(options.HmacSha256KeyBytes);
+		Assert.Contains(ObservabilityConfigurationDiagnosticCodes.InvalidHmacKey, options.DiagnosticCodes);
+	}
+
+	[Fact(DisplayName = "Identity mode and HMAC key resolve through JSON, environment, and command-line provider precedence")]
+	public void IdentityModeAndHmacKeyResolveThroughProviderPrecedence() =>
+		ObservabilityTestEnvironment.WithClearedOtelEnvironment(() =>
+																{
+																	Environment.SetEnvironmentVariable("Observability__Identity__Mode", "HmacSha256");
+																	Environment.SetEnvironmentVariable("Observability__Identity__HmacSha256Key", "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=");
+																	try
+																	{
+																		var commandLineWins = new ConfigurationBuilder()
+																							  .AddJsonStream(CreateJsonStream(new
+																															  {
+																																  Observability = new
+																																				  {
+																																					  Identity = new
+																																								 {
+																																									 Mode = "Subject",
+																																									 HmacSha256Key = "not-a-key"
+																																								 }
+																																				  }
+																															  }))
+																							  .AddEnvironmentVariables()
+																							  .AddCommandLine(["--Observability:Identity:Mode=Disabled"])
+																							  .Build();
+
+																		var disabledOptions = ObservabilityOptionsBinder.Bind(commandLineWins, ObservabilityHostProfile.Api);
+																		Assert.Equal(ObservabilityIdentityMode.Disabled, disabledOptions.IdentityMode);
+																		Assert.Null(disabledOptions.HmacSha256KeyBytes);
+
+																		var environmentWins = new ConfigurationBuilder()
+																							  .AddJsonStream(CreateJsonStream(new
+																															  {
+																																  Observability = new
+																																				  {
+																																					  Identity = new
+																																								 {
+																																									 Mode = "Subject",
+																																									 HmacSha256Key = "not-a-key"
+																																								 }
+																																				  }
+																															  }))
+																							  .AddEnvironmentVariables()
+																							  .Build();
+
+																		var hmacOptions = ObservabilityOptionsBinder.Bind(environmentWins, ObservabilityHostProfile.Api);
+																		Assert.Equal(ObservabilityIdentityMode.HmacSha256, hmacOptions.IdentityMode);
+																		Assert.NotNull(hmacOptions.HmacSha256KeyBytes);
+																		Assert.Equal(32, hmacOptions.HmacSha256KeyBytes.Length);
+																	}
+																	finally
+																	{
+																		Environment.SetEnvironmentVariable("Observability__Identity__Mode", null);
+																		Environment.SetEnvironmentVariable("Observability__Identity__HmacSha256Key", null);
+																	}
+																});
+
+	[Fact(DisplayName = "Identity mode change does not alter Metric recording or business persistence")]
+	public void IdentityModeChangeDoesNotAlterMetricRecordingOrBusinessPersistence()
+	{
+		var subjectOptions = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:Identity:Mode", "Subject")),
+															  ObservabilityHostProfile.Api);
+		var disabledOptions = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:Identity:Mode", "Disabled")),
+															   ObservabilityHostProfile.Api);
+
+		Assert.True(subjectOptions.MetricsEnabled);
+		Assert.True(disabledOptions.MetricsEnabled);
+		Assert.Equal(subjectOptions.TracesEnabled, disabledOptions.TracesEnabled);
+		Assert.Equal(subjectOptions.LogsEnabled, disabledOptions.LogsEnabled);
+	}
+
+	[Fact(DisplayName = "API and Gateway SSO:Authority values are byte-for-byte equal in the checked-in source")]
+	public void ApiAndGatewaySsoAuthorityValuesAreByteForByteEqual()
+	{
+		var solutionDirectory = FindSolutionDirectory();
+		var apiSettings = File.ReadAllText(Path.Combine(solutionDirectory, "Monaco.Template.Backend.Api", "appsettings.json"));
+		var gatewaySettings = File.ReadAllText(Path.Combine(solutionDirectory, "Monaco.Template.Backend.Common.ApiGateway", "appsettings.json"));
+
+		var apiAuthority = ExtractSsoAuthority(apiSettings);
+		var gatewayAuthority = ExtractSsoAuthority(gatewaySettings);
+
+		Assert.NotNull(apiAuthority);
+		Assert.NotNull(gatewayAuthority);
+		Assert.Equal(apiAuthority, gatewayAuthority);
+		Assert.Equal("http://localhost:8080/realms/monaco-template", apiAuthority);
+	}
+
+	private static string? ExtractSsoAuthority(string jsonContent)
+	{
+		using var document = System.Text.Json.JsonDocument.Parse(jsonContent, new System.Text.Json.JsonDocumentOptions { CommentHandling = System.Text.Json.JsonCommentHandling.Skip });
+		return document.RootElement.TryGetProperty("SSO", out var sso) && sso.TryGetProperty("Authority", out var authority)
+				   ? authority.GetString()
+				   : null;
+	}
+
+	private static string FindSolutionDirectory()
+	{
+		for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
+			if (File.Exists(Path.Combine(directory.FullName, "Monaco.Template.Backend.slnx")))
+				return directory.FullName;
+
+		throw new DirectoryNotFoundException("Could not locate Monaco.Template.Backend.slnx from the test output directory.");
+	}
+
 	private static IConfiguration CreateConfiguration(params (string Key, string? Value)[] values) =>
 		new ConfigurationBuilder().AddInMemoryCollection(values.ToDictionary(value => value.Key, value => value.Value)).Build();
 

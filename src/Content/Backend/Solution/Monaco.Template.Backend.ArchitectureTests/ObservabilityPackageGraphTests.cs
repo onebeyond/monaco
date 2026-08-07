@@ -307,7 +307,7 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.DoesNotContain("localhost", section, StringComparison.Ordinal);
 		Assert.DoesNotContain("User Secrets", section, StringComparison.Ordinal);
 
-		Assert.Contains("OBSERVABILITY: 2.5 IDENTITY", guide, StringComparison.Ordinal);
+		Assert.Contains("## Authenticated request identity", guide, StringComparison.Ordinal);
 		Assert.Contains("OBSERVABILITY: 3.1-3.3 CAUSAL-DIAGNOSIS", guide, StringComparison.Ordinal);
 		Assert.Contains("OBSERVABILITY: 3.4 HOST-METRICS", guide, StringComparison.Ordinal);
 		Assert.Contains("OBSERVABILITY: 3.5 INSTRUMENTATION-GOVERNANCE", guide, StringComparison.Ordinal);
@@ -496,6 +496,79 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("aggregate operational evidence", guide, StringComparison.Ordinal);
 		Assert.Contains("Dashboard's Metrics view", guide, StringComparison.Ordinal);
 		Assert.Contains("configuration-only Metrics routing", guide, StringComparison.Ordinal);
+	}
+
+	[Fact(DisplayName = "Identity enrichment uses only BCL cryptography and System.Diagnostics without new OpenTelemetry packages")]
+	public void IdentityEnrichmentUsesOnlyBclCryptographyWithoutNewOpenTelemetryPackages()
+	{
+		var centralPackages = ReadSolutionFile("Directory.Packages.props");
+		var identityTransform = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "HmacSha256Identity.cs"));
+		var middleware = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "IdentityEnrichmentMiddleware.cs"));
+
+		Assert.Equal(OpenTelemetryPackages.Length, CountOccurrences(centralPackages, "PackageVersion Include=\"OpenTelemetry."));
+		Assert.Contains("System.Security.Cryptography", identityTransform, StringComparison.Ordinal);
+		Assert.Contains("System.Diagnostics", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("System.IdentityModel", identityTransform + middleware, StringComparison.Ordinal);
+	}
+
+	[Fact(DisplayName = "API and Gateway Program.cs wire identity enrichment between authentication and authorization")]
+	public void ApiAndGatewayProgramWireIdentityEnrichmentBetweenAuthenticationAndAuthorization()
+	{
+		var apiProgram = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Api", "Program.cs"));
+		var gatewayProgram = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.ApiGateway", "Program.cs"));
+		var workerProgram = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Worker", "Program.cs"));
+
+		Assert.Contains("UseAuthentication()", apiProgram, StringComparison.Ordinal);
+		Assert.Contains("UseIdentityEnrichment()", apiProgram, StringComparison.Ordinal);
+		Assert.Contains("UseAuthentication()", gatewayProgram, StringComparison.Ordinal);
+		Assert.Contains("UseIdentityEnrichment()", gatewayProgram, StringComparison.Ordinal);
+		Assert.DoesNotContain("UseIdentityEnrichment", workerProgram, StringComparison.Ordinal);
+		Assert.DoesNotContain("UseAuthentication", workerProgram, StringComparison.Ordinal);
+
+		var apiAuthIndex = apiProgram.IndexOf("UseAuthentication()", StringComparison.Ordinal);
+		var apiIdentityIndex = apiProgram.IndexOf("UseIdentityEnrichment()", StringComparison.Ordinal);
+		var apiAuthzIndex = apiProgram.IndexOf("UseAuthorization()", StringComparison.Ordinal);
+		Assert.True(apiAuthIndex < apiIdentityIndex && apiIdentityIndex < apiAuthzIndex,
+					"API middleware order must be: UseAuthentication → UseIdentityEnrichment → UseAuthorization.");
+
+		var gwAuthIndex = gatewayProgram.IndexOf("UseAuthentication()", StringComparison.Ordinal);
+		var gwIdentityIndex = gatewayProgram.IndexOf("UseIdentityEnrichment()", StringComparison.Ordinal);
+		var gwAuthzIndex = gatewayProgram.IndexOf("UseAuthorization()", StringComparison.Ordinal);
+		Assert.True(gwAuthIndex < gwIdentityIndex && gwIdentityIndex < gwAuthzIndex,
+					"Gateway middleware order must be: UseAuthentication → UseIdentityEnrichment → UseAuthorization.");
+	}
+
+	[Fact(DisplayName = "Generated local observability guide documents Story 2.5 identity section only for auth-enabled shapes")]
+	public void GeneratedLocalObservabilityGuideDocumentsStory25IdentitySectionOnlyForAuthEnabledShapes()
+	{
+		var guide = ReadSolutionFile("OBSERVABILITY.md").Replace("\r\n", "\n", StringComparison.Ordinal);
+
+		Assert.DoesNotContain("<!-- OBSERVABILITY: 2.5 IDENTITY -->", guide, StringComparison.Ordinal);
+		Assert.Contains("## Authenticated request identity", guide, StringComparison.Ordinal);
+		Assert.Contains("Subject", guide, StringComparison.Ordinal);
+		Assert.Contains("HmacSha256", guide, StringComparison.Ordinal);
+		Assert.Contains("Disabled", guide, StringComparison.Ordinal);
+	}
+
+	[Fact(DisplayName = "Identity enrichment middleware writes user.id only to the entry span and logging scope")]
+	public void IdentityEnrichmentWritesOnlyToEntrySpanAndLoggingScope()
+	{
+		var middleware = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "IdentityEnrichmentMiddleware.cs"));
+
+		Assert.Contains("Activity.Current?.SetTag", middleware, StringComparison.Ordinal);
+		Assert.Contains("BeginScope", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("Baggage", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("AddBaggage", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("RecordObservable", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("AddEvent", middleware, StringComparison.Ordinal);
+	}
+
+	[Fact(DisplayName = "Observability resource attributes do not include user.id")]
+	public void ObservabilityResourceAttributesDoNotIncludeUserId()
+	{
+		var resource = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityResource.cs"));
+
+		Assert.DoesNotContain("user.id", resource, StringComparison.Ordinal);
 	}
 
 	private static void AssertHostUsesSingleProfile(string hostProject, string profileMethod)

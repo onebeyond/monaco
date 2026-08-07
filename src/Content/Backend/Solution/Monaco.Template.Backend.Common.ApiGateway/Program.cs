@@ -29,6 +29,7 @@ app.UseExceptionHandler()
    .UseCors()
    .UseHttpsRedirection()
    .UseAuthentication()
+   .UseIdentityEnrichment()
    .UseAuthorization();
 
 app.MapReverseProxy();

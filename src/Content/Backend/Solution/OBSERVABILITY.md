@@ -73,7 +73,6 @@ The following deterministic insertion points reserve sequence and ownership for 
 | Failure isolation below | 2.1 |
 | `<!-- OBSERVABILITY: 2.2-2.3 DATA-BOUNDARIES -->` | 2.2-2.3 |
 | Production routing below | 2.4 |
-| `<!-- OBSERVABILITY: 2.5 IDENTITY -->` | 2.5 |
 | `<!-- OBSERVABILITY: 3.1-3.3 CAUSAL-DIAGNOSIS -->` | 3.1-3.3 |
 | `<!-- OBSERVABILITY: 3.4 HOST-METRICS -->` | 3.4 |
 | `<!-- OBSERVABILITY: 3.5 INSTRUMENTATION-GOVERNANCE -->` | 3.5 |
@@ -173,6 +172,24 @@ Per-Signal settings override common settings after each key resolves normal prov
 A single compatible receiver that accepts every enabled Signal is sufficient: one Collector hop may independently route, filter, transform, authenticate, or forward each Signal onward. When enabled Signals must reach divergent destinations, provide consumer-owned routing such as your own Collector pipeline or equivalent infrastructure. Monaco does not deploy or configure a production Collector, backend, dashboard, retention policy, alerting system, or vendor-specific topology; destination clarity and production receiver infrastructure remain consumer-owned.
 
 Route production Signals only over encrypted, authenticated transport or a secured local Collector hop that terminates transport security on your behalf.
+
+<!--#if (auth) -->
+## Authenticated request identity
+
+When authentication is enabled, the API and Gateway may emit a single narrow subject identifier (`user.id`) on the entry server span and correlated request-scoped Operational Logs. The Worker profile never emits `user.id`. Configure the mode through `Observability:Identity:Mode`:
+
+- **`Subject`** (default) — The validated OIDC `sub` claim, used as-is without transformation.
+- **`HmacSha256`** — A 43-character unpadded Base64URL HMAC-SHA256 of the framed `(iss, sub)` pair.
+- **`Disabled`** — No `user.id` is emitted.
+
+For `HmacSha256` mode, provide the HMAC key through `Observability:Identity:HmacSha256Key` as a strict standard-Base64 value that decodes to at least 32 bytes. Base64URL-encoded, malformed, partially consumed, or shorter key material disables enrichment without falling back to the raw subject. The byte contract is `UTF8("user.id:v1") || UInt32BE(byteLength(UTF8(iss))) || UTF8(iss) || UInt32BE(byteLength(UTF8(sub))) || UTF8(sub)` with no trimming, case folding, Unicode normalization, or escaping of either validated string.
+
+Username, email, display name, roles, tokens, arbitrary claims, and other human-readable identity are never emitted by default. `user.id` never appears in Resource attributes, Metrics, Baggage, child or outbound spans, messaging telemetry, or Worker telemetry.
+
+A correlated Operational Log may reference a Trace that sampling did not export. Changing identity mode or Trace sampling does not alter Metric recording or business persistence.
+
+Identity is linkable personal data. Even an opaque subject or HMAC pseudonym requires appropriate access, retention, deletion, transport, and storage controls per your data-protection obligations.
+<!--#endif -->
 
 <!--#if (apiService) -->
 ## Successful company creations

@@ -90,6 +90,30 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 		output.AssertGuideDoesNotContain("GuideContractFullWithoutTests.Common.ApiGateway");
 	}
 
+	[Fact(DisplayName = "Generated Gateway and API shapes have equal SSO:Authority values")]
+	public void GeneratedGatewayAndApiShapesHaveEqualSsoAuthorityValues()
+	{
+		var output = _hive.Generate("IssuerEquality", "--apiGateway", "true");
+
+		var apiSettings = File.ReadAllText(Path.Combine(output.OutputDirectory, "IssuerEquality.Api", "appsettings.json"));
+		var gatewaySettings = File.ReadAllText(Path.Combine(output.OutputDirectory, "IssuerEquality.Common.ApiGateway", "appsettings.json"));
+
+		var apiAuthority = ExtractSsoAuthority(apiSettings);
+		var gatewayAuthority = ExtractSsoAuthority(gatewaySettings);
+
+		Assert.NotNull(apiAuthority);
+		Assert.NotNull(gatewayAuthority);
+		Assert.Equal(apiAuthority, gatewayAuthority);
+	}
+
+	private static string? ExtractSsoAuthority(string jsonContent)
+	{
+		using var document = System.Text.Json.JsonDocument.Parse(jsonContent, new System.Text.Json.JsonDocumentOptions { CommentHandling = System.Text.Json.JsonCommentHandling.Skip });
+		return document.RootElement.TryGetProperty("SSO", out var sso) && sso.TryGetProperty("Authority", out var authority)
+				   ? authority.GetString()
+				   : null;
+	}
+
 	[Fact(DisplayName = "Worker-only output states the local walkthrough boundary")]
 	public void WorkerOnlyOutputStatesLocalWalkthroughBoundary()
 	{

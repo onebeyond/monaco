@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -26,6 +27,12 @@ public static class ObservabilityHostBuilderExtensions
 
 		public IHostApplicationBuilder AddGatewayObservability() =>
 			AddProfile(builder, ObservabilityHostProfile.Gateway);
+	}
+
+	extension(IApplicationBuilder app)
+	{
+		public IApplicationBuilder UseIdentityEnrichment() =>
+			app.UseMiddleware<IdentityEnrichmentMiddleware>();
 	}
 
 	private static IHostApplicationBuilder AddProfile(IHostApplicationBuilder builder, ObservabilityHostProfile profile)

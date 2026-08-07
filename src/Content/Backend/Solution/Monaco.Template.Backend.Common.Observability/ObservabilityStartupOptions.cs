@@ -10,6 +10,7 @@ internal sealed record ObservabilityStartupOptions(bool SdkDisabled,
 												   bool LogsEnabled,
 												   ObservabilityQueryTextMode QueryTextMode,
 												   ObservabilityIdentityMode IdentityMode,
+												   byte[]? HmacSha256KeyBytes,
 												   TimeSpan FlushTimeout,
 												   IReadOnlyList<string> DiagnosticCodes)
 {
@@ -19,6 +20,7 @@ internal sealed record ObservabilityStartupOptions(bool SdkDisabled,
 																		false,
 																		ObservabilityQueryTextMode.SanitizedText,
 																		ObservabilityIdentityMode.Disabled,
+																		null,
 																		TimeSpan.FromSeconds(5),
 																		[]);
 }
@@ -37,12 +39,16 @@ internal static class ObservabilityOptionsBinder
 		Validate(sectionOptions);
 
 		var diagnosticCodes = new List<string>(preflight.DiagnosticCodes);
+		var identityMode = ParseIdentityMode(sectionOptions.Identity.Mode, diagnosticCodes);
+		var hmacKeyBytes = ParseHmacSha256Key(sectionOptions.Identity.HmacSha256Key, identityMode, diagnosticCodes);
+
 		return new(false,
 				   ParseToggle(sectionOptions.Signals.Traces.Enabled),
 				   ParseToggle(sectionOptions.Signals.Metrics.Enabled),
 				   ParseToggle(sectionOptions.Signals.Logs.Enabled),
 				   ParseQueryTextMode(sectionOptions.SqlClient.QueryTextMode, diagnosticCodes),
-				   ParseIdentityMode(sectionOptions.Identity.Mode, diagnosticCodes),
+				   identityMode,
+				   hmacKeyBytes,
 				   ParseFlushTimeout(sectionOptions.Shutdown.FlushTimeout),
 				   diagnosticCodes);
 	}
@@ -98,6 +104,20 @@ internal static class ObservabilityOptionsBinder
 		diagnosticCodes.Add(ObservabilityConfigurationDiagnosticCodes.InvalidIdentityMode);
 		return ObservabilityIdentityMode.Disabled;
 	}
+
+	private static byte[]? ParseHmacSha256Key(string? keyValue, ObservabilityIdentityMode mode, List<string> diagnosticCodes)
+	{
+		if (mode != ObservabilityIdentityMode.HmacSha256)
+			return null;
+
+		if (HmacSha256Identity.TryDecodeKey(keyValue, out var keyBytes, out var diagnosticCode))
+			return keyBytes;
+
+		if (diagnosticCode is not null)
+			diagnosticCodes.Add(diagnosticCode);
+
+		return null;
+	}
 }
 
 internal sealed class ObservabilitySectionOptions
@@ -135,6 +155,8 @@ internal sealed class ObservabilitySqlClientOptions
 internal sealed class ObservabilityIdentityOptions
 {
 	public string? Mode { get; set; }
+
+	public string? HmacSha256Key { get; set; }
 }
 
 internal sealed class ObservabilityShutdownOptions

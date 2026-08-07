@@ -103,6 +103,8 @@ app.UseCors()
    .UseRouting()
    .UseHttpsRedirection()
 #if (auth)
+   .UseAuthentication()
+   .UseIdentityEnrichment()
    .UseAuthorization()
 #endif
    .UseEndpoints(b => b.RegisterEndpoints());

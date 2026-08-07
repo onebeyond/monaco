@@ -9,6 +9,7 @@ internal static class ObservabilityConfigurationDiagnosticCodes
 	internal const string InvalidSdkDisableValue = "OBS_CONFIG_INVALID_SDK_DISABLE";
 	internal const string InvalidQueryTextMode = "OBS_CONFIG_INVALID_QUERY_TEXT_MODE";
 	internal const string InvalidIdentityMode = "OBS_CONFIG_INVALID_IDENTITY_MODE";
+	internal const string InvalidHmacKey = "OBS_CONFIG_INVALID_HMAC_KEY";
 	internal const string OtlpExportFailure = "OBS_OTLP_EXPORT_FAILURE";
 	internal const string SqlSanitizationRejected = "OBS_SQL_SANITIZATION_REJECTED";
 }
