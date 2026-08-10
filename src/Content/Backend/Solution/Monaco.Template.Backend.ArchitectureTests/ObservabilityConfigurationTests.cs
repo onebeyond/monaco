@@ -504,6 +504,34 @@ public sealed class ObservabilityConfigurationTests
 																	Assert.Equal(expectedInstrumentations, applicableInstrumentations);
 																});
 
+	[Theory(DisplayName = "Only Gateway enables the native YARP activity source")]
+	[InlineData(nameof(ObservabilityHostProfile.Api))]
+	[InlineData(nameof(ObservabilityHostProfile.Worker))]
+	[InlineData(nameof(ObservabilityHostProfile.Gateway))]
+	public void OnlyGatewayEnablesNativeYarpActivitySource(string profileName)
+	{
+		ObservabilityTestEnvironment.WithClearedOtelEnvironment(() =>
+																{
+																	var profile = System.Enum.Parse<ObservabilityHostProfile>(profileName);
+																	var builder = Host.CreateApplicationBuilder();
+																	AddProfileObservability(builder, profile);
+																	var processor = new CapturingActivityProcessor();
+																	builder.Services
+																		   .AddOpenTelemetry()
+																		   .WithTracing(providerBuilder => providerBuilder.AddProcessor(processor));
+
+																	using var host = builder.Build();
+																	_ = host.Services.GetRequiredService<TracerProvider>();
+																	using var source = new ActivitySource("Yarp.ReverseProxy");
+																	using (source.StartActivity("runtime-test"))
+																	{
+																	}
+
+																	Assert.Equal(profile is ObservabilityHostProfile.Gateway,
+																				 processor.CompletedActivities.Any(activity => activity.Source.Name == source.Name));
+																});
+	}
+
 	[Theory(DisplayName = "Valid OTLP header grammar is accepted for common and per-Signal settings")]
 	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "x-api-key=abc123")]
 	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "x-first=1,x-second=2")]
@@ -857,9 +885,9 @@ public sealed class ObservabilityConfigurationTests
 	public void IdentityModeChangeDoesNotAlterMetricRecordingOrBusinessPersistence()
 	{
 		var subjectOptions = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:Identity:Mode", "Subject")),
-															  ObservabilityHostProfile.Api);
+															 ObservabilityHostProfile.Api);
 		var disabledOptions = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:Identity:Mode", "Disabled")),
-															   ObservabilityHostProfile.Api);
+															  ObservabilityHostProfile.Api);
 
 		Assert.True(subjectOptions.MetricsEnabled);
 		Assert.True(disabledOptions.MetricsEnabled);
@@ -985,6 +1013,14 @@ public sealed class ObservabilityConfigurationTests
 			Exception = data.Exception;
 			Attributes = data.Attributes;
 		}
+	}
+
+	private sealed class CapturingActivityProcessor : BaseProcessor<Activity>
+	{
+		internal List<Activity> CompletedActivities { get; } = [];
+
+		public override void OnEnd(Activity data) =>
+			CompletedActivities.Add(data);
 	}
 
 	[EventSource(Name = TestExporterEventSourceName)]

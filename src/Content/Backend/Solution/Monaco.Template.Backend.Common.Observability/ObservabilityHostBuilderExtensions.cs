@@ -131,6 +131,9 @@ public static class ObservabilityHostBuilderExtensions
 		if (profile is ObservabilityHostProfile.Api or ObservabilityHostProfile.Gateway)
 			builder.AddAspNetCoreInstrumentation(options => { options.RecordException = false; });
 
+		if (profile is ObservabilityHostProfile.Gateway)
+			builder.AddSource("Yarp.ReverseProxy");
+
 		builder.AddHttpClientInstrumentation(options =>
 											 {
 												 options.FilterHttpRequestMessage = request => !IsOtlpExportRequest(request.RequestUri, traceExportEndpoint);
