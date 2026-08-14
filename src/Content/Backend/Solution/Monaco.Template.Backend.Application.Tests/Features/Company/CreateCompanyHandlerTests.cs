@@ -7,6 +7,7 @@ using Monaco.Template.Backend.Common.Application.Commands;
 using Monaco.Template.Backend.Common.Tests;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Metrics;
 using Xunit;
@@ -43,7 +44,7 @@ public class CreateCompanyHandlerTests
 		_dbContextMock.CreateAndSetupDbSetMock(new List<Domain.Model.Entities.Company>(), out var companyDbSetMock)
 					  .CreateAndSetupDbSetMock([country]);
 
-		var sut = new CreateCompany.Handler(_dbContextMock.Object);
+		var sut = new CreateCompany.Handler(_dbContextMock.Object, NullLogger<CreateCompany.Handler>.Instance);
 		var result = await sut.Handle(Command, CancellationToken.None);
 
 		companyDbSetMock.Verify(x => x.Add(It.IsAny<Domain.Model.Entities.Company>()), Times.Once);
@@ -68,16 +69,16 @@ public class CreateCompanyHandlerTests
 	{
 		Instrument? publishedInstrument = null;
 		using var listener = new MeterListener
-							 {
-								 InstrumentPublished = (instrument, meterListener) =>
-											   {
-												   if (instrument.Meter.Name == ApplicationDiagnostics.MeterName && instrument.Name == "company.successful_creations")
-												   {
-													   publishedInstrument = instrument;
-													   meterListener.EnableMeasurementEvents(instrument);
-												   }
-											   }
-							 };
+		{
+			InstrumentPublished = (instrument, meterListener) =>
+						  {
+							  if (instrument.Meter.Name == ApplicationDiagnostics.MeterName && instrument.Name == "company.successful_creations")
+							  {
+								  publishedInstrument = instrument;
+								  meterListener.EnableMeasurementEvents(instrument);
+							  }
+						  }
+		};
 
 		listener.Start();
 		_ = ApplicationDiagnostics.SuccessfulCompanyCreations;
@@ -102,7 +103,7 @@ public class CreateCompanyHandlerTests
 		_dbContextMock.Setup(context => context.SaveEntitiesAsync(It.IsAny<CancellationToken>()))
 					  .ThrowsAsync(new InvalidOperationException("Persistence failed."));
 
-		var sut = new CreateCompany.Handler(_dbContextMock.Object);
+		var sut = new CreateCompany.Handler(_dbContextMock.Object, NullLogger<CreateCompany.Handler>.Instance);
 
 		await Assert.ThrowsAsync<InvalidOperationException>(() => sut.Handle(Command, CancellationToken.None));
 
@@ -112,13 +113,13 @@ public class CreateCompanyHandlerTests
 	private static MeterListener CreateSuccessfulCompanyListener(List<(long Value, int TagCount)> measurements)
 	{
 		var listener = new MeterListener
-					   {
-						   InstrumentPublished = (instrument, meterListener) =>
-												 {
-													 if (instrument.Meter.Name == ApplicationDiagnostics.MeterName && instrument.Name == "company.successful_creations")
-														 meterListener.EnableMeasurementEvents(instrument);
-												 }
-					   };
+		{
+			InstrumentPublished = (instrument, meterListener) =>
+								  {
+									  if (instrument.Meter.Name == ApplicationDiagnostics.MeterName && instrument.Name == "company.successful_creations")
+										  meterListener.EnableMeasurementEvents(instrument);
+								  }
+		};
 
 		listener.SetMeasurementEventCallback<long>((_, value, tags, _) => measurements.Add((value, tags.Length)));
 		listener.Start();

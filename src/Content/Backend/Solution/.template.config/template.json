@@ -208,6 +208,7 @@
 						"Monaco.Template.Backend.Common.Api.Application/**/*",
 						"Monaco.Template.Backend.IntegrationTests/Apis/**/*",
 						"Monaco.Template.Backend.IntegrationTests/Factories/ApiWebApplicationFactory.cs",
+						"Monaco.Template.Backend.IntegrationTests/Tests/CompanyDependencyCorrelationTests.cs",
 						"Monaco.Template.Backend.IntegrationTests/Tests/CompaniesTests.cs",
 						"Monaco.Template.Backend.IntegrationTests/Tests/CountriesTests.cs",
 						"Monaco.Template.Backend.IntegrationTests/Tests/FilesTests.cs",
@@ -239,6 +240,7 @@
 						"Monaco.Template.Backend.Common.Domain.Tests/**/*",
 						"Monaco.Template.Backend.Common.Infrastructure/**/*",
 						"Monaco.Template.Backend.Common.Observability/**/*",
+						"Monaco.Template.Backend.IntegrationTests/Tests/CompanyDependencyCorrelationTests.cs",
 						"Monaco.Template.Backend.Common.Tests/**/*"
 					]
 				},

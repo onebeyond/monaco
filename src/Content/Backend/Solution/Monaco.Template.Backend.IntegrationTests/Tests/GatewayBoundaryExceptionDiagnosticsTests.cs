@@ -36,29 +36,29 @@ public sealed class GatewayBoundaryExceptionDiagnosticsTests
 										 ActivityStopped = activity => activities.Enqueue(new CapturedActivity(activity.Source.Name,
 																											   activity.TraceId,
 																											   activity.SpanId,
-																											   activity.ParentSpanId))
+																											   activity.ParentSpanId,
+																											   activity.Status,
+																											   activity.TagObjects.ToArray()))
 									 };
 		ActivitySource.AddActivityListener(activityListener);
-		await using var factory = new WebApplicationFactory<GatewayProgram>().WithWebHostBuilder(builder =>
-																								 {
-																									 builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
-																																		   {
-																																			   ["OTEL_EXPORTER_OTLP_ENDPOINT"] = collector.Endpoint,
-																																			   ["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/protobuf",
-																																			   ["OTEL_BSP_SCHEDULE_DELAY"] = "1",
-																																			   ["ReverseProxy:Clusters:api:Destinations:Template.Api:Address"] = downstream.Endpoint
-																																		   }));
-																									 builder.ConfigureServices(services =>
-																															   {
-																																   services.AddAuthorization(options =>
-																																							 {
-																																								 options.AddPolicy("files:write", policy => policy.RequireAssertion(_ => true));
-																																								 options.AddPolicy("products:write", policy => policy.RequireAssertion(_ => true));
-																																							 });
-																																   services.PostConfigure<AuthorizationOptions>(options => options.DefaultPolicy = new AuthorizationPolicyBuilder()
-																																	   .RequireAssertion(_ => true).Build());
-																															   });
-																								 });
+		await using var factory = new WebApplicationFactory<GatewayProgram>()
+			.WithWebHostBuilder(builder =>
+								{
+									builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
+																																{
+																																	["OTEL_EXPORTER_OTLP_ENDPOINT"] = collector.Endpoint,
+																																	["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/protobuf",
+																																	["OTEL_BSP_SCHEDULE_DELAY"] = "1",
+																																	["ReverseProxy:Clusters:api:Destinations:Template.Api:Address"] = downstream.Endpoint
+																																}));
+									builder.ConfigureServices(services => services.AddAuthorization(options =>
+																									{
+																										options.AddPolicy("files:write", policy => policy.RequireAssertion(_ => true));
+																										options.AddPolicy("products:write", policy => policy.RequireAssertion(_ => true));
+																									})
+																				  .PostConfigure<AuthorizationOptions>(options => options.DefaultPolicy = new AuthorizationPolicyBuilder()
+																																						  .RequireAssertion(_ => true).Build()));
+								});
 		using var client = factory.CreateDefaultClient(new UriBuilder(factory.Server.BaseAddress) { Scheme = Uri.UriSchemeHttps, Port = -1 }.Uri);
 
 		const string traceparent = "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01";
@@ -84,6 +84,84 @@ public sealed class GatewayBoundaryExceptionDiagnosticsTests
 		exportedServiceNames.Should().Contain(serviceName => serviceName != "Monaco.Template.Backend.Api");
 	}
 
+	[Fact(DisplayName = "Gateway records a native HttpClient dependency when its test downstream returns 503")]
+	public async Task GatewayRecordsNativeHttpClientDependencyWhenTestDownstreamReturns503()
+	{
+		await using var collector = await OtlpCollector.StartAsync();
+		await using var downstream = await DownstreamApi.StartAsync(collector.Endpoint, StatusCodes.Status503ServiceUnavailable);
+		var loggerProvider = new CapturingLoggerProvider();
+		var activities = new ConcurrentQueue<CapturedActivity>();
+		using var activityListener = new ActivityListener
+									 {
+										 ShouldListenTo = source => source.Name is "Microsoft.AspNetCore" or "System.Net.Http" or "Yarp.ReverseProxy",
+										 Sample = static (ref _) => ActivitySamplingResult.AllDataAndRecorded,
+										 ActivityStopped = activity => activities.Enqueue(new CapturedActivity(activity.Source.Name,
+																											   activity.TraceId,
+																											   activity.SpanId,
+																											   activity.ParentSpanId,
+																											   activity.Status,
+																											   activity.TagObjects.ToArray()))
+									 };
+		ActivitySource.AddActivityListener(activityListener);
+		await using var factory = new WebApplicationFactory<GatewayProgram>()
+			.WithWebHostBuilder(builder =>
+								{
+									builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
+																																{
+																																	["OTEL_EXPORTER_OTLP_ENDPOINT"] = collector.Endpoint,
+																																	["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/protobuf",
+																																	["OTEL_BSP_SCHEDULE_DELAY"] = "1",
+																																	["ReverseProxy:Clusters:api:Destinations:Template.Api:Address"] = downstream.Endpoint
+																																}));
+									builder.ConfigureLogging(logging => logging.AddProvider(loggerProvider));
+									builder.ConfigureServices(services => services.AddAuthorization(options =>
+																									{
+																										options.AddPolicy("files:write", policy => policy.RequireAssertion(_ => true));
+																										options.AddPolicy("products:write",
+																														  policy => policy.RequireAssertion(_ => true));
+																									})
+																				  .PostConfigure<AuthorizationOptions>(options => options.DefaultPolicy =
+																																	  new AuthorizationPolicyBuilder()
+																																		  .RequireAssertion(_ => true).Build()));
+								});
+		using var client = factory.CreateDefaultClient(new UriBuilder(factory.Server.BaseAddress) { Scheme = Uri.UriSchemeHttps, Port = -1 }.Uri);
+
+		const string traceparent = "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01";
+		ActivityContext.TryParse(traceparent, null, out var incomingContext).Should().BeTrue();
+		using var request = new HttpRequestMessage(HttpMethod.Get, "/api/observability-test");
+		request.Headers.TryAddWithoutValidation("traceparent", traceparent);
+
+		var response = await client.SendAsync(request);
+
+		response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
+		var trace = activities.Where(activity => activity.TraceId == incomingContext.TraceId).ToArray();
+		var gatewayServer = trace.Should().ContainSingle(activity => activity.SourceName == "Microsoft.AspNetCore" && activity.ParentSpanId == incomingContext.SpanId).Which;
+		var yarpForward = trace.Should().ContainSingle(activity => activity.SourceName == "Yarp.ReverseProxy" && activity.ParentSpanId == gatewayServer.SpanId).Which;
+		var gatewayClient = trace.Should().ContainSingle(activity => activity.SourceName == "System.Net.Http" && activity.ParentSpanId == yarpForward.SpanId).Which;
+		gatewayClient.Status.Should().Be(ActivityStatusCode.Error);
+		Convert.ToString(gatewayClient.Tags.Single(tag => tag.Key == "http.response.status_code").Value).Should().Be("503");
+		trace.Select(activity => activity.SourceName)
+			 .Except(["Microsoft.AspNetCore", "System.Net.Http", "Yarp.ReverseProxy"])
+			 .Should()
+			 .BeEmpty();
+		trace.Count(activity => activity.SourceName == "System.Net.Http").Should().Be(1);
+		trace.Count(activity => activity.SourceName == "Yarp.ReverseProxy").Should().Be(1);
+		var propagatedTraceparent = downstream.Traceparents.Should().ContainSingle().Which;
+		ActivityContext.TryParse(propagatedTraceparent, null, out var downstreamContext).Should().BeTrue();
+		downstreamContext.TraceId.Should().Be(incomingContext.TraceId);
+		downstreamContext.SpanId.Should().Be(gatewayClient.SpanId);
+		loggerProvider.Entries.Should().NotContain(entry => entry.Category.StartsWith("Monaco.Template.Backend", StringComparison.Ordinal));
+		trace.SelectMany(activity => activity.Tags)
+			 .Where(tag => tag.Key == "url.query" ||
+						   tag.Key == "url.full" ||
+						   tag.Key == "http.url" ||
+						   tag.Key == "http.target" ||
+						   tag.Key.StartsWith("http.request.header.", StringComparison.Ordinal) ||
+						   tag.Key.StartsWith("http.response.header.", StringComparison.Ordinal))
+			 .Should()
+			 .BeEmpty();
+	}
+
 	[Fact(DisplayName = "An escaping Gateway request receives the authoritative safe boundary response")]
 	public async Task EscapingGatewayRequestReceivesTheAuthoritativeSafeBoundaryResponse()
 	{
@@ -97,33 +175,30 @@ public sealed class GatewayBoundaryExceptionDiagnosticsTests
 										 ActivityStopped = activities.Enqueue
 									 };
 		ActivitySource.AddActivityListener(activityListener);
-		await using var factory = new WebApplicationFactory<GatewayProgram>().WithWebHostBuilder(builder =>
-																								 {
-																									 builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
-																																		   {
-																																			   ["OTEL_EXPORTER_OTLP_ENDPOINT"] = collector.Endpoint,
-																																			   ["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/protobuf",
-																																			   ["OTEL_BSP_SCHEDULE_DELAY"] = "1",
-																																			   ["OTEL_BLRP_SCHEDULE_DELAY"] = "1",
-																																			   ["OTEL_METRIC_EXPORT_INTERVAL"] = "1"
-																																		   }));
-																									 builder.ConfigureLogging(logging => logging.AddFilter("Microsoft.AspNetCore.Authentication.JwtBearer", LogLevel.None)
-																																				.AddProvider(loggerProvider));
-																									 builder.ConfigureServices(services =>
-																															   {
-																																   services.AddAuthorization(options =>
-																																							 {
-																																								 options.AddPolicy("files:write", policy => policy.RequireAssertion(_ => true));
-																																								 options.AddPolicy("products:write", policy => policy.RequireAssertion(_ => true));
-																																							 });
-																																   services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme,
-																																	options => options.Events = new JwtBearerEvents
-																																								{
-																																									OnMessageReceived =
-																																										_ => throw new InvalidOperationException("Boundary test failure.")
-																																								});
-																															   });
-																								 });
+		await using var factory = new WebApplicationFactory<GatewayProgram>()
+			.WithWebHostBuilder(builder =>
+								{
+									builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
+																																{
+																																	["OTEL_EXPORTER_OTLP_ENDPOINT"] = collector.Endpoint,
+																																	["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/protobuf",
+																																	["OTEL_BSP_SCHEDULE_DELAY"] = "1",
+																																	["OTEL_BLRP_SCHEDULE_DELAY"] = "1",
+																																	["OTEL_METRIC_EXPORT_INTERVAL"] = "1"
+																																}));
+									builder.ConfigureLogging(logging => logging.AddFilter("Microsoft.AspNetCore.Authentication.JwtBearer", LogLevel.None)
+																			   .AddProvider(loggerProvider));
+									builder.ConfigureServices(services => services.AddAuthorization(options =>
+																									{
+																										options.AddPolicy("files:write", policy => policy.RequireAssertion(_ => true));
+																										options.AddPolicy("products:write", policy => policy.RequireAssertion(_ => true));
+																									})
+																				  .PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme,
+																												   options => options.Events = new JwtBearerEvents
+																																			   {
+																																				   OnMessageReceived = _ => throw new InvalidOperationException("Boundary test failure.")
+																																			   }));
+								});
 		using var client = factory.CreateDefaultClient(new UriBuilder(factory.Server.BaseAddress) { Scheme = Uri.UriSchemeHttps, Port = -1 }.Uri);
 
 		const string canary = "gateway-request-canary";
@@ -167,7 +242,12 @@ public sealed class GatewayBoundaryExceptionDiagnosticsTests
 
 	private sealed record CapturedLogEntry(string Category, LogLevel LogLevel, EventId EventId, object State, Exception? Exception);
 
-	private sealed record CapturedActivity(string SourceName, ActivityTraceId TraceId, ActivitySpanId SpanId, ActivitySpanId ParentSpanId);
+	private sealed record CapturedActivity(string SourceName,
+										   ActivityTraceId TraceId,
+										   ActivitySpanId SpanId,
+										   ActivitySpanId ParentSpanId,
+										   ActivityStatusCode Status,
+										   IReadOnlyCollection<KeyValuePair<string, object?>> Tags);
 
 	private sealed class CapturingLogger(string category, ConcurrentQueue<CapturedLogEntry> entries) : ILogger
 	{
@@ -181,7 +261,7 @@ public sealed class GatewayBoundaryExceptionDiagnosticsTests
 
 	private sealed class OtlpCollector(WebApplication application, ConcurrentQueue<OtlpEntry> entries) : IAsyncDisposable
 	{
-		private static readonly byte[] ServiceNameKey = Encoding.UTF8.GetBytes("service.name");
+		private static readonly byte[] ServiceNameKey = "service.name"u8.ToArray();
 
 		internal string Endpoint => application.Urls.Single();
 		internal IReadOnlyCollection<OtlpEntry> Entries => entries;
@@ -282,7 +362,7 @@ public sealed class GatewayBoundaryExceptionDiagnosticsTests
 		internal string Endpoint => application.Urls.Single();
 		internal IReadOnlyCollection<string?> Traceparents => traceparents;
 
-		internal static async Task<DownstreamApi> StartAsync(string collectorEndpoint)
+		internal static async Task<DownstreamApi> StartAsync(string collectorEndpoint, int responseStatus = StatusCodes.Status204NoContent)
 		{
 			var traceparents = new ConcurrentQueue<string?>();
 			var builder = WebApplication.CreateBuilder();
@@ -300,7 +380,7 @@ public sealed class GatewayBoundaryExceptionDiagnosticsTests
 			application.MapGet("/api/observability-test", (HttpRequest request) =>
 														  {
 															  traceparents.Enqueue(request.Headers.TraceParent.SingleOrDefault());
-															  return Results.NoContent();
+															  return Results.StatusCode(responseStatus);
 														  });
 			await application.StartAsync();
 			return new DownstreamApi(application, traceparents);

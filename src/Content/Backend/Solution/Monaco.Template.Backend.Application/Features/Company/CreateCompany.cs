@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using Monaco.Template.Backend.Application.Diagnostics;
 using Monaco.Template.Backend.Application.Features.Company.Extensions;
 using Monaco.Template.Backend.Application.Persistence;
@@ -63,10 +64,12 @@ public sealed class CreateCompany
 	internal sealed class Handler : IRequestHandler<Command, CommandResult<Guid>>
 	{
 		private readonly AppDbContext _dbContext;
+		private readonly ILogger<Handler> _logger;
 
-		public Handler(AppDbContext dbContext)
+		public Handler(AppDbContext dbContext, ILogger<Handler> logger)
 		{
 			_dbContext = dbContext;
+			_logger = logger;
 		}
 
 		public async Task<CommandResult<Guid>> Handle(Command request, CancellationToken cancellationToken)
@@ -76,9 +79,10 @@ public sealed class CreateCompany
 
 			_dbContext.Set<Domain.Model.Entities.Company>()
 					  .Add(item);
-			
+
 			await _dbContext.SaveEntitiesAsync(cancellationToken);
 			ApplicationDiagnostics.SuccessfulCompanyCreations.Add(1);
+			_logger.LogInformation(new EventId(2001, "CompanyCreated"), "Company creation completed.");
 
 			return CommandResult<Guid>.Success(item.Id);
 		}
