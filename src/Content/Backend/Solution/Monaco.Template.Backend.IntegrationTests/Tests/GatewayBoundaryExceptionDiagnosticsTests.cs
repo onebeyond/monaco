@@ -1,12 +1,12 @@
 #if (apiGateway)
-using AwesomeAssertions;
-using System.Diagnostics.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
-using Microsoft.AspNetCore.Authorization;
+using AwesomeAssertions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -15,6 +15,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Monaco.Template.Backend.Common.Observability;
+using OpenTelemetry;
+using OpenTelemetry.Trace;
 using GatewayProgram = Monaco.Template.Backend.Common.ApiGateway.Program;
 
 namespace Monaco.Template.Backend.IntegrationTests.Tests;
@@ -151,28 +153,25 @@ public sealed class GatewayBoundaryExceptionDiagnosticsTests
 		downstreamContext.TraceId.Should().Be(incomingContext.TraceId);
 		downstreamContext.SpanId.Should().Be(gatewayClient.SpanId);
 		loggerProvider.Entries.Should().NotContain(entry => entry.Category.StartsWith("Monaco.Template.Backend", StringComparison.Ordinal));
-		trace.SelectMany(activity => activity.Tags)
-			 .Where(tag => tag.Key == "url.query" ||
-						   tag.Key == "url.full" ||
-						   tag.Key == "http.url" ||
-						   tag.Key == "http.target" ||
-						   tag.Key.StartsWith("http.request.header.", StringComparison.Ordinal) ||
-						   tag.Key.StartsWith("http.response.header.", StringComparison.Ordinal))
-			 .Should()
-			 .BeEmpty();
 	}
 
-	[Fact(DisplayName = "An escaping Gateway request receives the authoritative safe boundary response")]
-	public async Task EscapingGatewayRequestReceivesTheAuthoritativeSafeBoundaryResponse()
+	[Fact(DisplayName = "An escaping Gateway request receives HTTP 500 with ordinary exception telemetry")]
+	public async Task EscapingGatewayRequestReceivesHttp500WithOrdinaryExceptionTelemetry()
 	{
 		await using var collector = await OtlpCollector.StartAsync();
 		var loggerProvider = new CapturingLoggerProvider();
-		var activities = new ConcurrentQueue<Activity>();
+		var activities = new ConcurrentQueue<CapturedActivity>();
+		var pipelineActivities = new ConcurrentQueue<CapturedActivity>();
 		using var activityListener = new ActivityListener
 									 {
 										 ShouldListenTo = source => source.Name == "Microsoft.AspNetCore",
 										 Sample = static (ref _) => ActivitySamplingResult.AllDataAndRecorded,
-										 ActivityStopped = activities.Enqueue
+										 ActivityStopped = activity => activities.Enqueue(new CapturedActivity(activity.Source.Name,
+																											   activity.TraceId,
+																											   activity.SpanId,
+																											   activity.ParentSpanId,
+																											   activity.Status,
+																											   activity.TagObjects.ToArray()))
 									 };
 		ActivitySource.AddActivityListener(activityListener);
 		await using var factory = new WebApplicationFactory<GatewayProgram>()
@@ -198,35 +197,46 @@ public sealed class GatewayBoundaryExceptionDiagnosticsTests
 																																			   {
 																																				   OnMessageReceived = _ => throw new InvalidOperationException("Boundary test failure.")
 																																			   }));
+									builder.ConfigureServices(services => services.ConfigureOpenTelemetryTracerProvider(providerBuilder =>
+																															providerBuilder.AddProcessor(new CapturingActivityProcessor(pipelineActivities))));
 								});
 		using var client = factory.CreateDefaultClient(new UriBuilder(factory.Server.BaseAddress) { Scheme = Uri.UriSchemeHttps, Port = -1 }.Uri);
 
-		const string canary = "gateway-request-canary";
-		var response = await client.GetAsync($"/api/observability-test?probe={canary}");
+		var response = await client.GetAsync("/api/observability-test?probe=boundary-request");
 
 		response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
 		var log = loggerProvider.Entries
 								.Should()
-								.ContainSingle(entry => entry.Category == "Monaco.Template.Backend.Common.Observability.Boundary")
+								.ContainSingle(entry => entry.Category == "Monaco.Template.Backend.Common.Observability.BoundaryExceptionHandler")
 								.Which;
 		log.LogLevel.Should().Be(LogLevel.Error);
-		log.EventId.Should().Be(new EventId(1000, "UnhandledBoundaryException"));
 		log.Exception.Should().BeOfType<InvalidOperationException>();
 		loggerProvider.Entries.Where(entry => entry.Exception is not null).Should().ContainSingle();
 		var state = log.State.Should().BeAssignableTo<IReadOnlyList<KeyValuePair<string, object?>>>().Which;
-		state[^1].Value.Should().Be("Unhandled {BoundaryKind} failure ({ExceptionType}); TraceId={TraceId}; SpanId={SpanId}");
-		state.Select(field => field.Key).Should().Equal("BoundaryKind", "ExceptionType", "TraceId", "SpanId", "{OriginalFormat}");
-		var span = activities.Should().ContainSingle(activity => activity.Status == ActivityStatusCode.Error).Which;
-		span.StatusDescription.Should().BeEmpty();
-		span.GetTagItem("error.category").Should().Be("unhandled");
-		span.GetTagItem("error.type").Should().Be(typeof(InvalidOperationException).FullName);
-		span.GetTagItem("error.code").Should().BeNull();
-		span.Events.Should().BeEmpty();
+		state[^1].Value.Should().Be("Unhandled HTTP request failure.");
+		state.Select(field => field.Key).Should().Equal("{OriginalFormat}");
+		activities.Should().ContainSingle(activity => activity.SourceName == "Microsoft.AspNetCore" && activity.Status == ActivityStatusCode.Error);
 		await collector.WaitForSignalsAsync();
 		collector.Entries.Should().Contain(entry => entry.Path == "/v1/logs");
 		collector.Entries.Should().Contain(entry => entry.Path == "/v1/traces");
 		collector.Entries.Should().Contain(entry => entry.Path == "/v1/metrics");
-		collector.Entries.Select(entry => Encoding.UTF8.GetString(entry.Payload)).Should().NotContain(text => text.Contains(canary, StringComparison.Ordinal));
+		pipelineActivities.Should().Contain(activity => activity.SourceName == "Microsoft.AspNetCore");
+		pipelineActivities.Should().NotContain(activity => TargetsEndpoint(activity, collector.Endpoint));
+	}
+
+	private static bool TargetsEndpoint(CapturedActivity activity, string endpoint)
+	{
+		if (activity.SourceName != "System.Net.Http")
+			return false;
+
+		var target = new Uri(endpoint);
+		var requestUrl = activity.Tags.FirstOrDefault(tag => tag.Key is "url.full" or "http.url").Value?.ToString();
+		if (Uri.TryCreate(requestUrl, UriKind.Absolute, out var requestUri))
+			return requestUri.Scheme == target.Scheme && requestUri.Host == target.Host && requestUri.Port == target.Port;
+
+		var address = activity.Tags.FirstOrDefault(tag => tag.Key is "server.address" or "net.peer.name").Value?.ToString();
+		var port = activity.Tags.FirstOrDefault(tag => tag.Key is "server.port" or "net.peer.port").Value?.ToString();
+		return address == target.Host && port == target.Port.ToString();
 	}
 
 	private sealed class CapturingLoggerProvider : ILoggerProvider
@@ -242,12 +252,24 @@ public sealed class GatewayBoundaryExceptionDiagnosticsTests
 
 	private sealed record CapturedLogEntry(string Category, LogLevel LogLevel, EventId EventId, object State, Exception? Exception);
 
-	private sealed record CapturedActivity(string SourceName,
-										   ActivityTraceId TraceId,
-										   ActivitySpanId SpanId,
-										   ActivitySpanId ParentSpanId,
-										   ActivityStatusCode Status,
-										   IReadOnlyCollection<KeyValuePair<string, object?>> Tags);
+	private sealed record CapturedActivity(
+		string SourceName,
+		ActivityTraceId TraceId,
+		ActivitySpanId SpanId,
+		ActivitySpanId ParentSpanId,
+		ActivityStatusCode Status,
+		IReadOnlyCollection<KeyValuePair<string, object?>> Tags);
+
+	private sealed class CapturingActivityProcessor(ConcurrentQueue<CapturedActivity> activities) : BaseProcessor<Activity>
+	{
+		public override void OnEnd(Activity activity) =>
+			activities.Enqueue(new CapturedActivity(activity.Source.Name,
+													activity.TraceId,
+													activity.SpanId,
+													activity.ParentSpanId,
+													activity.Status,
+													activity.TagObjects.ToArray()));
+	}
 
 	private sealed class CapturingLogger(string category, ConcurrentQueue<CapturedLogEntry> entries) : ILogger
 	{

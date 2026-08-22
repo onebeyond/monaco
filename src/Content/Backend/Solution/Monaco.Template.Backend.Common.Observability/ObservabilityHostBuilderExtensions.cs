@@ -1,14 +1,10 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
 namespace Monaco.Template.Backend.Common.Observability;
@@ -43,135 +39,51 @@ public static class ObservabilityHostBuilderExtensions
 		if (services.Any(descriptor => descriptor.ServiceType == typeof(ObservabilityProfileRegistration)))
 			throw new InvalidOperationException("Observability profile is already registered for this host.");
 
-		var options = ObservabilityOptionsBinder.Bind(builder.Configuration, profile);
+		var options = ObservabilityOptionsBinder.Bind(builder.Configuration);
 		services.Add(ServiceDescriptor.Singleton(options));
 		services.AddSingleton(Options.Create(options));
-
-		if (!options.SdkDisabled && (options.TracesEnabled || options.MetricsEnabled || options.LogsEnabled))
-		{
-			// The configuration matrix adopts bounded defaults that diverge from the pinned SDK's own
-			// defaults; supply them once at startup so unset keys resolve deterministically while
-			// explicit operator values keep winning.
-			ApplyAdoptedDefaults(builder.Configuration, options);
-
-			var resource = ObservabilityResource.Create(profile, builder.Configuration);
-			var telemetryBuilder = services.AddOpenTelemetry()
-										   .ConfigureResource(resourceBuilder => resourceBuilder.AddAttributes(resource.Attributes))
-										   .UseOtlpExporter();
-
-			if (options.LogsEnabled)
-				telemetryBuilder.WithLogging(_ => { }, ConfigureLogging);
-			if (options.TracesEnabled)
-				telemetryBuilder.WithTracing(providerBuilder => ConfigureTracing(providerBuilder, builder.Configuration, profile, options.QueryTextMode));
-			if (options.MetricsEnabled)
-				telemetryBuilder.WithMetrics(providerBuilder => ConfigureMetrics(providerBuilder, profile));
-
-			// IHostedService stops in reverse registration order. Insert this coordinator first so
-			// business hosted services stop before the one bounded, concurrent telemetry flush.
-			services.Insert(0, ServiceDescriptor.Singleton<IHostedService, ObservabilityShutdownFlushService>());
-			services.Insert(1, ServiceDescriptor.Singleton<IHostedService, ObservabilityExporterDiagnosticListener>());
-		}
-
 		services.Add(ServiceDescriptor.Singleton(new ObservabilityProfileRegistration(profile)));
-		if (options.DiagnosticCodes.Count > 0)
-			services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, ObservabilityConfigurationDiagnosticReporter>());
+
+		if (options.SdkDisabled || options is { TracesEnabled: false, MetricsEnabled: false, LogsEnabled: false })
+			return builder;
+
+		var telemetryBuilder = services.AddOpenTelemetry()
+									   .ConfigureResource(resourceBuilder => ObservabilityResource.Configure(resourceBuilder,
+																											 profile,
+																											 builder.Environment.ApplicationName,
+																											 builder.Environment.EnvironmentName))
+									   .UseOtlpExporter();
+
+		if (options.LogsEnabled)
+			telemetryBuilder.WithLogging(_ => { }, ConfigureLogging);
+		if (options.TracesEnabled)
+			telemetryBuilder.WithTracing(providerBuilder => ConfigureTracing(providerBuilder, profile));
+		if (options.MetricsEnabled)
+			telemetryBuilder.WithMetrics(providerBuilder => ConfigureMetrics(providerBuilder, profile));
 
 		return builder;
 	}
 
-	private static void ApplyAdoptedDefaults(IConfiguration configuration, ObservabilityStartupOptions options)
-	{
-		SetMissing(configuration, "OTEL_EXPORTER_OTLP_TIMEOUT", "5000");
-
-		if (options.TracesEnabled)
-		{
-			SetMissing(configuration, "OTEL_BSP_SCHEDULE_DELAY", "5000");
-			SetMissing(configuration, "OTEL_BSP_EXPORT_TIMEOUT", "5000");
-			SetMissing(configuration, "OTEL_BSP_MAX_QUEUE_SIZE", "2048");
-			SetMissing(configuration, "OTEL_BSP_MAX_EXPORT_BATCH_SIZE", "512");
-		}
-
-		if (options.MetricsEnabled)
-		{
-			SetMissing(configuration, "OTEL_METRIC_EXPORT_INTERVAL", "60000");
-			SetMissing(configuration, "OTEL_METRIC_EXPORT_TIMEOUT", "5000");
-		}
-
-		if (options.LogsEnabled)
-		{
-			SetMissing(configuration, "OTEL_BLRP_SCHEDULE_DELAY", "5000");
-			SetMissing(configuration, "OTEL_BLRP_EXPORT_TIMEOUT", "5000");
-			SetMissing(configuration, "OTEL_BLRP_MAX_QUEUE_SIZE", "2048");
-			SetMissing(configuration, "OTEL_BLRP_MAX_EXPORT_BATCH_SIZE", "512");
-		}
-	}
-
-	private static void SetMissing(IConfiguration configuration, string key, string adoptedDefault)
-	{
-		if (string.IsNullOrEmpty(configuration[key]))
-			configuration[key] = adoptedDefault;
-	}
-
 	private static void ConfigureLogging(OpenTelemetryLoggerOptions options)
 	{
-		options.IncludeFormattedMessage = false;
-		options.IncludeScopes = false;
-		options.ParseStateValues = false;
-		options.AddProcessor(new LogTelemetryPrivacyProcessor());
+		options.IncludeFormattedMessage = true;
+		options.IncludeScopes = true;
+		options.ParseStateValues = true;
 	}
 
-	private static void ConfigureTracing(TracerProviderBuilder builder,
-										 IConfiguration configuration,
-										 ObservabilityHostProfile profile,
-										 ObservabilityQueryTextMode queryTextMode)
+	private static void ConfigureTracing(TracerProviderBuilder builder, ObservabilityHostProfile profile)
 	{
-		var traceExportEndpoint = GetTraceExportEndpoint(configuration);
-		builder.AddProcessor(new HttpTelemetryPrivacyProcessor());
-
 		if (profile is ObservabilityHostProfile.Api or ObservabilityHostProfile.Gateway)
-			builder.AddAspNetCoreInstrumentation(options => { options.RecordException = false; });
+			builder.AddAspNetCoreInstrumentation();
 
 		if (profile is ObservabilityHostProfile.Gateway)
 			builder.AddSource("Yarp.ReverseProxy");
 
-		builder.AddHttpClientInstrumentation(options =>
-											 {
-												 options.FilterHttpRequestMessage = request => !IsOtlpExportRequest(request.RequestUri, traceExportEndpoint);
-												 options.RecordException = false;
-											 });
+		builder.AddHttpClientInstrumentation();
 
 		if (profile is ObservabilityHostProfile.Api or ObservabilityHostProfile.Worker)
-		{
-			builder.AddProcessor(serviceProvider => new SqlClientTelemetryPrivacyProcessor(queryTextMode,
-																						   profile,
-																						   serviceProvider.GetRequiredService<ILogger<SqlClientTelemetryPrivacyProcessor>>()));
-			builder.AddSqlClientInstrumentation(options => { options.RecordException = false; });
-		}
+			builder.AddSqlClientInstrumentation();
 	}
-
-	private static Uri GetTraceExportEndpoint(IConfiguration configuration)
-	{
-		var endpoint = OtelConfigurationPreflightValidator.GetSignalValue(configuration, "TRACES_", "ENDPOINT").Value;
-		return new Uri(string.IsNullOrEmpty(endpoint)
-						   ? "http://localhost:4317"
-						   : endpoint,
-					   UriKind.Absolute);
-	}
-
-	internal static bool IsOtlpExportRequest(Uri? requestUri, Uri exportEndpoint) =>
-		requestUri is not null &&
-		requestUri.Scheme.Equals(exportEndpoint.Scheme, StringComparison.OrdinalIgnoreCase) &&
-		requestUri.Host.Equals(exportEndpoint.Host, StringComparison.OrdinalIgnoreCase) &&
-		requestUri.Port == exportEndpoint.Port &&
-		IsOtlpExportPath(requestUri.AbsolutePath);
-
-	private static bool IsOtlpExportPath(string path) =>
-		path is "/v1/traces" or
-			"/v1/metrics" or
-			"/v1/logs" or
-			"/opentelemetry.proto.collector.trace.v1.TraceService/Export" or
-			"/opentelemetry.proto.collector.metrics.v1.MetricsService/Export" or
-			"/opentelemetry.proto.collector.logs.v1.LogsService/Export";
 
 	private static void ConfigureMetrics(MeterProviderBuilder builder, ObservabilityHostProfile profile)
 	{

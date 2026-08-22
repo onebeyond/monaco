@@ -118,19 +118,19 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 	public void WorkerOnlyOutputStatesLocalWalkthroughBoundary()
 	{
 		var r5Output = _hive.Generate("GuideContractWorkerR5",
-			"--apiService", "false",
-			"--workerService", "true",
-			"--apiGateway", "false",
-			"--massTransitIntegration", "true",
-			"--filesSupport", "true",
-			"--tests", "false");
+									  "--apiService", "false",
+									  "--workerService", "true",
+									  "--apiGateway", "false",
+									  "--massTransitIntegration", "true",
+									  "--filesSupport", "true",
+									  "--tests", "false");
 		var r6Output = _hive.Generate("GuideContractWorkerR6",
-			"--apiService", "false",
-			"--workerService", "true",
-			"--apiGateway", "false",
-			"--massTransitIntegration", "false",
-			"--filesSupport", "false",
-			"--tests", "false");
+									  "--apiService", "false",
+									  "--workerService", "true",
+									  "--apiGateway", "false",
+									  "--massTransitIntegration", "false",
+									  "--filesSupport", "false",
+									  "--tests", "false");
 
 		r5Output.AssertWorkerOnlyFirstRunBoundary();
 		r6Output.AssertWorkerOnlyFirstRunBoundary();
@@ -155,9 +155,9 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 		public string Solution { get; }
 
 		public string ApplicationDiagnosticsPath => Path.Combine(OutputDirectory,
-																			 $"{Path.GetFileName(OutputDirectory)}.Application",
-																			 "Diagnostics",
-																			 "ApplicationDiagnostics.cs");
+																 $"{Path.GetFileName(OutputDirectory)}.Application",
+																 "Diagnostics",
+																 "ApplicationDiagnostics.cs");
 
 		public void AssertGuidePresent()
 		{
@@ -166,6 +166,8 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 
 			Assert.Contains("<File Path=\"OBSERVABILITY.md\" />", Solution, StringComparison.Ordinal);
 			Assert.Contains(GuidePointer, Cli, StringComparison.Ordinal);
+			Assert.Contains("| High-fidelity telemetry boundary below | 2.6 |", guide, StringComparison.Ordinal);
+			Assert.DoesNotContain("OBSERVABILITY: 2.6 HIGH-FIDELITY-BOUNDARY", guide, StringComparison.Ordinal);
 			Assert.DoesNotContain("<!--#if", guide, StringComparison.Ordinal);
 			Assert.DoesNotContain("Static non-turnkey boundary", guide, StringComparison.Ordinal);
 		}
@@ -191,8 +193,8 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 			var guide = File.ReadAllText(GuidePath);
 
 			guide.Should().Contain("## HTTP exception boundaries");
-			guide.Should().Contain("exactly one authoritative Operational Log");
-			guide.Should().Contain("opaque third-party exception prose");
+			guide.Should().Contain("ordinary structured error log");
+			guide.Should().Contain("normal ASP.NET Core and selected instrumentation behavior");
 		}
 
 		public void AssertHttpExceptionBoundaryGuideAbsent() =>
@@ -205,9 +207,9 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 			guide.Should().Contain("## Production signal routing");
 			guide.Should().Contain("configuration-only");
 			guide.Should().Contain("OpenTelemetry Collector or compatible OTLP receiver");
-			guide.Should().Contain("wins over its common counterpart");
+			guide.Should().Contain("selected-SDK precedence");
 			guide.Should().Contain("does not deploy or configure a production Collector");
-			guide.Should().Contain("encrypted, authenticated transport or a secured local Collector hop");
+			guide.Should().Contain("Consumers own production transport security");
 			guide.Should().NotContain("OBSERVABILITY: 2.4 PRODUCTION-ROUTING");
 		}
 

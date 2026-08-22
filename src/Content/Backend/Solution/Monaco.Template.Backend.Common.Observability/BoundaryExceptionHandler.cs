@@ -6,16 +6,16 @@ namespace Monaco.Template.Backend.Common.Observability;
 
 public sealed class BoundaryExceptionHandler : IExceptionHandler
 {
-	private readonly ILoggerFactory _loggerFactory;
+	private readonly ILogger<BoundaryExceptionHandler> _logger;
 
-	public BoundaryExceptionHandler(ILoggerFactory loggerFactory)
+	public BoundaryExceptionHandler(ILogger<BoundaryExceptionHandler> logger)
 	{
-		_loggerFactory = loggerFactory;
+		_logger = logger;
 	}
 
 	public ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken _)
 	{
-		BoundaryExceptionDiagnostics.Record(_loggerFactory, exception);
+		_logger.LogError(exception, "Unhandled HTTP request failure.");
 		httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
 		return ValueTask.FromResult(true);
 	}

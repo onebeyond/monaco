@@ -1,5 +1,5 @@
-using System.Text.Json;
 using System.Reflection;
+using System.Text.Json;
 using AwesomeAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -79,33 +79,27 @@ public sealed class ObservabilityPackageGraphTests
 		AssertHostUsesSingleProfile("Monaco.Template.Backend.Common.ApiGateway", "AddGatewayObservability()");
 	}
 
-	[Fact(DisplayName = "API and Gateway install one shared HTTP boundary diagnostics handler while Worker remains outside the boundary")]
-	public void HttpHostsInstallTheSharedBoundaryDiagnosticsHandler()
+	[Fact(DisplayName = "API and Gateway install one ordinary HTTP exception handler while Worker remains outside the boundary")]
+	public void HttpHostsInstallTheSharedBoundaryExceptionHandler()
 	{
-		var boundaryDiagnostics = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "BoundaryExceptionDiagnostics.cs"));
 		var boundaryHandler = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "BoundaryExceptionHandler.cs"));
 		var apiProgram = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Api", "Program.cs"));
 		var gatewayProgram = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.ApiGateway", "Program.cs"));
 		var workerProgram = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Worker", "Program.cs"));
 
-		boundaryDiagnostics.Should().Contain("EventId = new(1000, \"UnhandledBoundaryException\")");
-		boundaryDiagnostics.Should().Contain("Unhandled {BoundaryKind} failure ({ExceptionType}); TraceId={TraceId}; SpanId={SpanId}");
-		boundaryDiagnostics.Should().Contain("HttpRequestBoundaryKind = \"http.request\"");
-		boundaryDiagnostics.Should().Contain("SetStatus(ActivityStatusCode.Error, string.Empty)");
-		boundaryDiagnostics.Should().Contain("error.category");
-		boundaryDiagnostics.Should().Contain("error.type");
 		apiProgram.Should().Contain("AddExceptionHandler<BoundaryExceptionHandler>()");
 		gatewayProgram.Should().Contain("AddExceptionHandler<BoundaryExceptionHandler>()");
 		apiProgram.Should().Contain("app.UseExceptionHandler()");
 		gatewayProgram.Should().Contain("app.UseExceptionHandler()");
 		boundaryHandler.Should().Contain("public sealed class BoundaryExceptionHandler");
 		boundaryHandler.Should().Contain("ValueTask.FromResult(true)");
-		boundaryHandler.Should().Contain("BoundaryExceptionDiagnostics.Record");
+		boundaryHandler.Should().Contain("LogError(exception, \"Unhandled HTTP request failure.\")");
+		boundaryHandler.Should().NotContain("Activity");
 		File.Exists(Path.Combine(FindSolutionDirectory(), "Monaco.Template.Backend.Api", "BoundaryExceptionHandler.cs")).Should().BeFalse();
 		File.Exists(Path.Combine(FindSolutionDirectory(), "Monaco.Template.Backend.Common.ApiGateway", "BoundaryExceptionHandler.cs")).Should().BeFalse();
 		apiProgram.Should().NotContain("UseDeveloperExceptionPage");
 		gatewayProgram.Should().NotContain("UseDeveloperExceptionPage");
-		workerProgram.Should().NotContain("BoundaryExceptionDiagnostics.Record");
+		workerProgram.Should().NotContain("BoundaryExceptionHandler");
 	}
 
 	[Fact(DisplayName = "Application owns the BCL successful-company counter and only the API Metric profile subscribes to it")]
@@ -174,10 +168,10 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("WithLogging", profiles, StringComparison.Ordinal);
 		Assert.Contains("WithTracing", profiles, StringComparison.Ordinal);
 		Assert.Contains("WithMetrics", profiles, StringComparison.Ordinal);
-		Assert.Contains("IncludeFormattedMessage = false", profiles, StringComparison.Ordinal);
-		Assert.Contains("IncludeScopes = false", profiles, StringComparison.Ordinal);
-		Assert.Contains("ParseStateValues = false", profiles, StringComparison.Ordinal);
-		Assert.Contains("LogTelemetryPrivacyProcessor", profiles, StringComparison.Ordinal);
+		Assert.Contains("IncludeFormattedMessage = true", profiles, StringComparison.Ordinal);
+		Assert.Contains("IncludeScopes = true", profiles, StringComparison.Ordinal);
+		Assert.Contains("ParseStateValues = true", profiles, StringComparison.Ordinal);
+		Assert.DoesNotContain("AddProcessor", profiles, StringComparison.Ordinal);
 		Assert.Contains("ConfigureTracing", profiles, StringComparison.Ordinal);
 		Assert.Contains("ConfigureMetrics", profiles, StringComparison.Ordinal);
 	}
@@ -187,8 +181,7 @@ public sealed class ObservabilityPackageGraphTests
 	{
 		var solutionDirectory = FindSolutionDirectory();
 		var observabilitySources = string.Concat(Directory.EnumerateFiles(Path.Combine(solutionDirectory, "Monaco.Template.Backend.Common.Observability"), "*.cs")
-														 .Select(File.ReadAllText));
-		var preflight = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "OtelConfigurationPreflightValidator.cs"));
+														  .Select(File.ReadAllText));
 		var centralPackages = ReadSolutionFile("Directory.Packages.props");
 
 		Assert.DoesNotContain("IObservabilitySecretProviderTrust", observabilitySources, StringComparison.Ordinal);
@@ -200,15 +193,6 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.DoesNotContain("OpenTelemetry.Exporter.Jaeger", centralPackages, StringComparison.Ordinal);
 		Assert.DoesNotContain("OpenTelemetry.Exporter.Prometheus", centralPackages, StringComparison.Ordinal);
 		Assert.DoesNotContain("OpenTelemetry.Exporter.InMemory", centralPackages, StringComparison.Ordinal);
-
-		Assert.DoesNotContain("OTEL_EXPORTER_OTLP_CERTIFICATE", preflight, StringComparison.Ordinal);
-		Assert.DoesNotContain("OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE", preflight, StringComparison.Ordinal);
-		Assert.DoesNotContain("OTEL_EXPORTER_OTLP_CLIENT_KEY", preflight, StringComparison.Ordinal);
-		Assert.DoesNotContain("OTEL_TRACES_EXPORTER", preflight, StringComparison.Ordinal);
-		Assert.DoesNotContain("OTEL_METRICS_EXPORTER", preflight, StringComparison.Ordinal);
-		Assert.DoesNotContain("OTEL_LOGS_EXPORTER", preflight, StringComparison.Ordinal);
-		Assert.DoesNotContain("OTEL_PROPAGATORS", preflight, StringComparison.Ordinal);
-		Assert.DoesNotContain("OTEL_CONFIG_FILE", preflight, StringComparison.Ordinal);
 
 		Assert.DoesNotContain(Directory.EnumerateFiles(solutionDirectory, "*", SearchOption.AllDirectories).Where(path => !IsBuildArtifact(path)),
 							  path =>
@@ -222,15 +206,13 @@ public sealed class ObservabilityPackageGraphTests
 							  });
 	}
 
-	[Fact(DisplayName = "Shared observability composition fixes privacy safeguards and removes the EF sensitive-data escape hatch")]
-	public void SharedObservabilityCompositionFixesPrivacySafeguardsAndRemovesTheEfSensitiveDataEscapeHatch()
+	[Fact(DisplayName = "Shared observability composition contains no Monaco telemetry governance surface")]
+	public void SharedObservabilityCompositionContainsNoMonacoTelemetryGovernanceSurface()
 	{
+		var solutionDirectory = FindSolutionDirectory();
+		var observabilityDirectory = Path.Combine(solutionDirectory, "Monaco.Template.Backend.Common.Observability");
 		var profiles = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityHostBuilderExtensions.cs"));
-		var sqlPrivacy = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "SqlClientTelemetryPrivacyProcessor.cs"));
-		var httpPrivacy = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "HttpTelemetryPrivacyProcessor.cs"));
-		var logPrivacy = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "LogTelemetryPrivacyProcessor.cs"));
-		var preflight = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "OtelConfigurationPreflightValidator.cs"));
-		var diagnostics = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityConfigurationDiagnostics.cs"));
+		var sources = string.Concat(Directory.EnumerateFiles(observabilityDirectory, "*.cs").Select(File.ReadAllText));
 		var applicationOptions = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Application", "DependencyInjection", "ApplicationOptions.cs"));
 		var applicationServices = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Application", "DependencyInjection", "ServiceCollectionExtensions.cs"));
 		var apiProgram = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Api", "Program.cs"));
@@ -238,47 +220,49 @@ public sealed class ObservabilityPackageGraphTests
 		var apiSettings = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Api", "appsettings.Development.json"));
 		var workerSettings = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Worker", "appsettings.Development.json"));
 
-		Assert.Contains("FilterHttpRequestMessage", profiles, StringComparison.Ordinal);
-		Assert.Contains("HttpTelemetryPrivacyProcessor", profiles, StringComparison.Ordinal);
-		Assert.Contains("SqlClientTelemetryPrivacyProcessor", profiles, StringComparison.Ordinal);
-		Assert.Contains("RecordException = false", profiles, StringComparison.Ordinal);
-		Assert.DoesNotContain("EnrichWithSqlCommand", profiles, StringComparison.Ordinal);
-		Assert.Contains("db.query.parameter.", sqlPrivacy, StringComparison.Ordinal);
-		Assert.Contains("db.system", sqlPrivacy, StringComparison.Ordinal);
-		Assert.Contains("db.connection_string", sqlPrivacy, StringComparison.Ordinal);
-		Assert.Contains("MaximumQueryTextLength", sqlPrivacy, StringComparison.Ordinal);
-		Assert.Contains("SqlSanitizationRejected", sqlPrivacy, StringComparison.Ordinal);
-		Assert.Contains("OBS_SQL_SANITIZATION_REJECTED", diagnostics, StringComparison.Ordinal);
-		Assert.Contains("http.url", httpPrivacy, StringComparison.Ordinal);
-		Assert.Contains("http.target", httpPrivacy, StringComparison.Ordinal);
-		Assert.Contains("data.FormattedMessage = null", logPrivacy, StringComparison.Ordinal);
-		Assert.Contains("data.Attributes = null", logPrivacy, StringComparison.Ordinal);
-		Assert.Contains("OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_DB_QUERY_PARAMETERS", preflight, StringComparison.Ordinal);
-		Assert.Contains("OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_CONTEXT_PROPAGATION", preflight, StringComparison.Ordinal);
+		Assert.Contains("AddHttpClientInstrumentation()", profiles, StringComparison.Ordinal);
+		Assert.DoesNotContain("FilterHttpRequestMessage", profiles, StringComparison.Ordinal);
+		Assert.DoesNotContain("BaseProcessor", sources, StringComparison.Ordinal);
+		Assert.DoesNotContain("AddProcessor", sources, StringComparison.Ordinal);
+		Assert.DoesNotContain("Sanitiz", sources, StringComparison.OrdinalIgnoreCase);
+		Assert.DoesNotContain("Redact", sources, StringComparison.OrdinalIgnoreCase);
+		Assert.DoesNotContain("Hmac", sources, StringComparison.OrdinalIgnoreCase);
+		Assert.DoesNotContain("QueryTextMode", sources, StringComparison.Ordinal);
+		Assert.DoesNotContain("FlushTimeout", sources, StringComparison.Ordinal);
+		Assert.DoesNotContain("Preflight", sources, StringComparison.OrdinalIgnoreCase);
+		Assert.DoesNotContain("EnableSensitiveDataLogging", sources, StringComparison.Ordinal);
 		Assert.DoesNotContain("EnableEFSensitiveLogging", string.Concat(applicationOptions, applicationServices, apiProgram, workerProgram, apiSettings, workerSettings), StringComparison.Ordinal);
+		Assert.DoesNotContain("EnableSensitiveDataLogging", string.Concat(applicationOptions, applicationServices, apiProgram, workerProgram, apiSettings, workerSettings), StringComparison.Ordinal);
+
+		foreach (var policyUnit in new[]
+								   {
+									   "BoundaryExceptionDiagnostics.cs",
+									   "HmacSha256Identity.cs",
+									   "HttpTelemetryPrivacyProcessor.cs",
+									   "LogTelemetryPrivacyProcessor.cs",
+									   "ObservabilityConfigurationDiagnostics.cs",
+									   "ObservabilityExporterDiagnosticListener.cs",
+									   "ObservabilityShutdownFlushService.cs",
+									   "OtelConfigurationPreflightValidator.cs",
+									   "SqlClientTelemetryPrivacyProcessor.cs"
+								   })
+			Assert.False(File.Exists(Path.Combine(observabilityDirectory, policyUnit)), $"{policyUnit} must remain absent.");
 	}
 
-	[Fact(DisplayName = "Generated local observability guide documents Story 2.2 data boundaries and Story 2.3 HTTP boundaries only for applicable hosts")]
-	public void GeneratedLocalObservabilityGuideDocumentsStory22DataBoundariesAndStory23HttpBoundariesOnlyForApplicableHosts()
+	[Fact(DisplayName = "Generated guide documents the high-fidelity producer and ordinary HTTP exception boundary")]
+	public void GeneratedGuideDocumentsHighFidelityProducerAndOrdinaryHttpExceptionBoundary()
 	{
 		var guide = ReadSolutionFile("OBSERVABILITY.md").Replace("\r\n", "\n", StringComparison.Ordinal);
 
-		Assert.Contains("<!-- OBSERVABILITY: 2.2-2.3 DATA-BOUNDARIES -->\n## Data-minimizing telemetry", guide, StringComparison.Ordinal);
-		Assert.Contains("request or response bodies", guide, StringComparison.Ordinal);
-		Assert.Contains("authorization or cookie headers", guide, StringComparison.Ordinal);
-		Assert.Contains("connection strings", guide, StringComparison.Ordinal);
-		Assert.Contains("Company email or address data", guide, StringComparison.Ordinal);
-		Assert.Contains("trace `url.path`", guide, StringComparison.Ordinal);
-		Assert.Contains("bounded `http.route`", guide, StringComparison.Ordinal);
-		Assert.Contains("SanitizedText", guide, StringComparison.Ordinal);
-		Assert.Contains("4 KiB", guide, StringComparison.Ordinal);
-		Assert.Contains("rather than emitting or hashing raw SQL", guide, StringComparison.Ordinal);
-		Assert.Contains("<!--" + TemplateDirectiveIf + " (apiService || workerService) -->", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("OBSERVABILITY: 2.6 HIGH-FIDELITY-BOUNDARY", guide, StringComparison.Ordinal);
+		Assert.Contains("## High-fidelity telemetry boundary", guide, StringComparison.Ordinal);
+		Assert.Contains("does not filter, redact, sanitize, transform, sample, or bound", guide, StringComparison.Ordinal);
+		Assert.Contains("consumer-owned Collector", guide, StringComparison.Ordinal);
+		Assert.Contains("filtering, redaction, transformation, sampling, cardinality controls, routing, storage, access, retention, and alerting", guide, StringComparison.Ordinal);
 		Assert.Contains("Gateway has no SQL instrumentation", guide, StringComparison.Ordinal);
 		guide.Should().Contain("<!--" + TemplateDirectiveIf + " (apiService || apiGateway) -->\n## HTTP exception boundaries");
-		guide.Should().Contain("exactly one authoritative Operational Log");
-		guide.Should().Contain("exception message, stack, and inner chain remain only on that single boundary log");
-		guide.Should().Contain("opaque third-party exception prose");
+		guide.Should().Contain("ordinary structured error log");
+		guide.Should().Contain("normal ASP.NET Core and selected instrumentation behavior");
 	}
 
 	[Fact(DisplayName = "Generated local observability guide documents Story 2.4 production routing and preserves later placeholders")]
@@ -297,13 +281,12 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("configuration-only", section, StringComparison.Ordinal);
 		Assert.Contains("unchanged binaries", section, StringComparison.Ordinal);
 		Assert.Contains("OpenTelemetry Collector or compatible OTLP receiver", section, StringComparison.Ordinal);
-		Assert.Contains("wins over its common counterpart", section, StringComparison.Ordinal);
-		Assert.Contains("are not treated as credentials", section, StringComparison.Ordinal);
+		Assert.Contains("selected-SDK precedence", section, StringComparison.Ordinal);
 		Assert.Contains("/v1/traces", section, StringComparison.Ordinal);
 		Assert.Contains("route, filter, transform, authenticate, or forward", section, StringComparison.Ordinal);
 		Assert.Contains("divergent destinations", section, StringComparison.Ordinal);
 		Assert.Contains("does not deploy or configure a production Collector", section, StringComparison.Ordinal);
-		Assert.Contains("encrypted, authenticated transport or a secured local Collector hop", section, StringComparison.Ordinal);
+		Assert.Contains("Consumers own production transport security", section, StringComparison.Ordinal);
 		Assert.DoesNotContain("localhost", section, StringComparison.Ordinal);
 		Assert.DoesNotContain("User Secrets", section, StringComparison.Ordinal);
 
@@ -318,26 +301,19 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("OBSERVABILITY: 5.5 CONSOLIDATION", guide, StringComparison.Ordinal);
 	}
 
-	[Fact(DisplayName = "Failure isolation keeps bounded queues, one coordinated flush, and no retry or disk storage path")]
-	public void FailureIsolationKeepsBoundedQueuesOneCoordinatedFlushAndNoRetryOrDiskStoragePath()
+	[Fact(DisplayName = "Failure isolation uses the ordinary SDK lifecycle without Monaco policy services")]
+	public void FailureIsolationUsesOrdinarySdkLifecycleWithoutMonacoPolicyServices()
 	{
+		var observabilityDirectory = Path.Combine(FindSolutionDirectory(), "Monaco.Template.Backend.Common.Observability");
 		var profiles = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityHostBuilderExtensions.cs"));
-		var lifecycle = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityShutdownFlushService.cs"));
-		var preflight = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "OtelConfigurationPreflightValidator.cs"));
 
-		Assert.Contains("2048", profiles, StringComparison.Ordinal);
-		Assert.Contains("512", profiles, StringComparison.Ordinal);
-		Assert.Contains("5000", profiles, StringComparison.Ordinal);
-		Assert.Contains("60000", profiles, StringComparison.Ordinal);
-		Assert.Contains("Task.WhenAll", lifecycle, StringComparison.Ordinal);
-		Assert.Contains("options.FlushTimeout", lifecycle, StringComparison.Ordinal);
-		Assert.Contains("services.Insert(0", profiles, StringComparison.Ordinal);
-		Assert.Contains("traceBatch > traceQueue", preflight, StringComparison.Ordinal);
-		Assert.Contains("logBatch > logQueue", preflight, StringComparison.Ordinal);
-		Assert.Contains("OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY", preflight, StringComparison.Ordinal);
-		Assert.Contains("OTEL_DOTNET_EXPERIMENTAL_OTLP_DISK_RETRY_DIRECTORY_PATH", preflight, StringComparison.Ordinal);
-		Assert.DoesNotContain("Retry", profiles + lifecycle, StringComparison.Ordinal);
-		Assert.DoesNotContain("Disk", profiles + lifecycle, StringComparison.Ordinal);
+		Assert.DoesNotContain("IHostedService", profiles, StringComparison.Ordinal);
+		Assert.DoesNotContain("ForceFlush", profiles, StringComparison.Ordinal);
+		Assert.DoesNotContain("SetMissing", profiles, StringComparison.Ordinal);
+		Assert.DoesNotContain("ApplyAdoptedDefaults", profiles, StringComparison.Ordinal);
+		Assert.False(File.Exists(Path.Combine(observabilityDirectory, "ObservabilityShutdownFlushService.cs")));
+		Assert.False(File.Exists(Path.Combine(observabilityDirectory, "ObservabilityExporterDiagnosticListener.cs")));
+		Assert.False(File.Exists(Path.Combine(observabilityDirectory, "ObservabilityConfigurationDiagnostics.cs")));
 	}
 
 	[Fact(DisplayName = "Generated local observability guide truthfully documents Story 2.1 failure isolation")]
@@ -347,12 +323,11 @@ public sealed class ObservabilityPackageGraphTests
 
 		Assert.Contains("## Telemetry failure isolation", guide, StringComparison.Ordinal);
 		Assert.Contains("best-effort diagnostic evidence", guide, StringComparison.Ordinal);
-		Assert.Contains("drops new telemetry", guide, StringComparison.Ordinal);
-		Assert.Contains("one concurrent flush", guide, StringComparison.Ordinal);
+		Assert.Contains("selected OpenTelemetry SDK", guide, StringComparison.Ordinal);
+		Assert.Contains("ordinary SDK lifecycle", guide, StringComparison.Ordinal);
 		Assert.Contains("without restarting the Runtime Host", guide, StringComparison.Ordinal);
-		Assert.Contains("environment-sensitive hosted characterization only", guide, StringComparison.Ordinal);
 		Assert.DoesNotContain("OBSERVABILITY: 2.1 FAILURE-ISOLATION", guide, StringComparison.Ordinal);
-		Assert.Contains("OBSERVABILITY: 2.2-2.3 DATA-BOUNDARIES", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("OBSERVABILITY: 2.6 HIGH-FIDELITY-BOUNDARY", guide, StringComparison.Ordinal);
 	}
 
 	[Fact(DisplayName = "Template separates Common delivery from host observability")]
@@ -416,10 +391,12 @@ public sealed class ObservabilityPackageGraphTests
 		using var templateDocument = JsonDocument.Parse(template);
 		var root = templateDocument.RootElement;
 
-		Assert.Contains(root.GetProperty("sources")[0].GetProperty("modifiers").EnumerateArray(), modifier =>
-																									  modifier.TryGetProperty("condition", out var condition) &&
-																									  condition.GetString() == "(!apiService && !workerService && !apiGateway)" &&
-																									  modifier.GetProperty("exclude").EnumerateArray().Any(excluded => excluded.GetString() == "OBSERVABILITY.md"));
+		Assert.Contains(root.GetProperty("sources")[0]
+							.GetProperty("modifiers")
+							.EnumerateArray(),
+						modifier => modifier.TryGetProperty("condition", out var condition) &&
+									condition.GetString() == "(!apiService && !workerService && !apiGateway)" &&
+									modifier.GetProperty("exclude").EnumerateArray().Any(excluded => excluded.GetString() == "OBSERVABILITY.md"));
 
 		var postAction = Assert.Single(root.GetProperty("postActions").EnumerateArray());
 		Assert.Equal("AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C", postAction.GetProperty("actionId").GetString());
@@ -480,7 +457,8 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("<!--" + TemplateDirectiveIf + " (workerService) -->\n### Worker profile", guide, StringComparison.Ordinal);
 		Assert.Contains("<!--" + TemplateDirectiveIf + " (apiGateway) -->\n### Gateway profile", guide, StringComparison.Ordinal);
 		Assert.Contains("generated fallbacks, then `OTEL_RESOURCE_ATTRIBUTES` collisions, then `OTEL_SERVICE_NAME`", guide, StringComparison.Ordinal);
-		Assert.Contains("low-cardinality, non-secret operational metadata", guide, StringComparison.Ordinal);
+		Assert.Contains("selected OpenTelemetry SDK detector without Monaco validation or content filtering", guide, StringComparison.Ordinal);
+		Assert.Contains("Consumer deployment is responsible", guide, StringComparison.Ordinal);
 		Assert.DoesNotContain("static external-observability handoff", guide, StringComparison.Ordinal);
 	}
 
@@ -498,17 +476,19 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("configuration-only Metrics routing", guide, StringComparison.Ordinal);
 	}
 
-	[Fact(DisplayName = "Identity enrichment uses only BCL cryptography and System.Diagnostics without new OpenTelemetry packages")]
-	public void IdentityEnrichmentUsesOnlyBclCryptographyWithoutNewOpenTelemetryPackages()
+	[Fact(DisplayName = "Identity enrichment attaches the raw validated subject without transformation policy")]
+	public void IdentityEnrichmentAttachesRawValidatedSubjectWithoutTransformationPolicy()
 	{
 		var centralPackages = ReadSolutionFile("Directory.Packages.props");
-		var identityTransform = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "HmacSha256Identity.cs"));
 		var middleware = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "IdentityEnrichmentMiddleware.cs"));
 
 		Assert.Equal(OpenTelemetryPackages.Length, CountOccurrences(centralPackages, "PackageVersion Include=\"OpenTelemetry."));
-		Assert.Contains("System.Security.Cryptography", identityTransform, StringComparison.Ordinal);
 		Assert.Contains("System.Diagnostics", middleware, StringComparison.Ordinal);
-		Assert.DoesNotContain("System.IdentityModel", identityTransform + middleware, StringComparison.Ordinal);
+		Assert.Contains("SetTag(UserIdTag, sub)", middleware, StringComparison.Ordinal);
+		Assert.Contains("BeginScope", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("Hmac", middleware, StringComparison.OrdinalIgnoreCase);
+		Assert.DoesNotContain("IdentityMode", middleware, StringComparison.Ordinal);
+		Assert.False(File.Exists(Path.Combine(FindSolutionDirectory(), "Monaco.Template.Backend.Common.Observability", "HmacSha256Identity.cs")));
 	}
 
 	[Fact(DisplayName = "API and Gateway Program.cs wire identity enrichment between authentication and authorization")]
@@ -538,16 +518,16 @@ public sealed class ObservabilityPackageGraphTests
 					"Gateway middleware order must be: UseAuthentication → UseIdentityEnrichment → UseAuthorization.");
 	}
 
-	[Fact(DisplayName = "Generated local observability guide documents Story 2.5 identity section only for auth-enabled shapes")]
-	public void GeneratedLocalObservabilityGuideDocumentsStory25IdentitySectionOnlyForAuthEnabledShapes()
+	[Fact(DisplayName = "Generated local observability guide documents raw validated subject correlation for auth-enabled shapes")]
+	public void GeneratedLocalObservabilityGuideDocumentsRawValidatedSubjectCorrelationForAuthEnabledShapes()
 	{
 		var guide = ReadSolutionFile("OBSERVABILITY.md").Replace("\r\n", "\n", StringComparison.Ordinal);
 
 		Assert.DoesNotContain("<!-- OBSERVABILITY: 2.5 IDENTITY -->", guide, StringComparison.Ordinal);
 		Assert.Contains("## Authenticated request identity", guide, StringComparison.Ordinal);
-		Assert.Contains("Subject", guide, StringComparison.Ordinal);
-		Assert.Contains("HmacSha256", guide, StringComparison.Ordinal);
-		Assert.Contains("Disabled", guide, StringComparison.Ordinal);
+		Assert.Contains("raw validated `sub`", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("HmacSha256", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("Observability:Identity", guide, StringComparison.Ordinal);
 	}
 
 	[Fact(DisplayName = "Identity enrichment middleware writes user.id only to the entry span and logging scope")]

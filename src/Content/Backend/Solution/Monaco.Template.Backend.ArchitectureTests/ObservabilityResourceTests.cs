@@ -1,7 +1,11 @@
-using Monaco.Template.Backend.Common.Observability;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Monaco.Template.Backend.Common.Observability;
+using OpenTelemetry;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 namespace Monaco.Template.Backend.ArchitectureTests;
 
@@ -19,7 +23,7 @@ public sealed class ObservabilityResourceTests
 
 	private static void AssertFallback(ObservabilityHostProfile profile, string applicationName, string expectedNamespace, string expectedServiceName)
 	{
-		var attributes = GetAttributes(ObservabilityResource.Create(profile, applicationName, "Development"));
+		var attributes = GetAttributes(CreateResource(profile, applicationName, "Development"));
 
 		Assert.Equal(expectedServiceName, attributes["service.name"]);
 		Assert.Equal(expectedNamespace, attributes["service.namespace"]);
@@ -30,9 +34,11 @@ public sealed class ObservabilityResourceTests
 
 	[Fact(DisplayName = "Resource attributes override fallbacks and service name has final precedence")]
 	public void ResourceAttributesOverrideFallbacksAndServiceNameHasFinalPrecedence() =>
-		WithEnvironment("service.name=attribute-name,service.namespace=attribute-namespace,service.version=1.2.3,service.instance.id=instance-1,deployment.environment.name=Staging", "service-name", () =>
+		WithEnvironment("service.name=attribute-name,service.namespace=attribute-namespace,service.version=1.2.3,service.instance.id=instance-1,deployment.environment.name=Staging",
+						"service-name",
+						() =>
 						{
-							var attributes = GetAttributes(ObservabilityResource.Create(ObservabilityHostProfile.Api, "Contoso.Api", "Development"));
+							var attributes = GetAttributes(CreateResource(ObservabilityHostProfile.Api, "Contoso.Api", "Development"));
 
 							Assert.Equal("service-name", attributes["service.name"]);
 							Assert.Equal("attribute-namespace", attributes["service.namespace"]);
@@ -41,41 +47,92 @@ public sealed class ObservabilityResourceTests
 							Assert.Equal("Staging", attributes["deployment.environment.name"]);
 						});
 
-	[Fact(DisplayName = "Malformed resource input fails without exposing supplied values")]
-	public void MalformedResourceInputFailsWithoutExposingSuppliedValues()
+	[Fact(DisplayName = "Resource attributes use native SDK parsing without Monaco content filtering")]
+	public void ResourceAttributesUseNativeSdkParsingWithoutMonacoContentFiltering()
 	{
-		const string rawValue = "authorization=never-log-this";
+		const string rawValue = "consumer.attribute=consumer-supplied-value";
 
-		WithEnvironment(rawValue, null, () =>
-										{
-											var exception = Assert.Throws<InvalidOperationException>(() => ObservabilityResource.Create(ObservabilityHostProfile.Api, "Contoso.Api", "Development"));
-
-											Assert.Contains("OTEL_RESOURCE_ATTRIBUTES", exception.Message, StringComparison.Ordinal);
-											Assert.DoesNotContain(rawValue, exception.Message, StringComparison.Ordinal);
-										});
-	}
-
-	[Fact(DisplayName = "Uppercase resource attribute keys are rejected")]
-	public void UppercaseResourceAttributeKeysAreRejected() =>
-		WithEnvironment("Service.Name=uppercase-name",
+		WithEnvironment(rawValue,
 						null,
 						() =>
 						{
-							var exception = Assert.Throws<InvalidOperationException>(() => ObservabilityResource.Create(ObservabilityHostProfile.Api, "Contoso.Api", "Development"));
+							var attributes = GetAttributes(CreateResource(ObservabilityHostProfile.Api, "Contoso.Api", "Development"));
 
-							Assert.Contains("OTEL_RESOURCE_ATTRIBUTES", exception.Message, StringComparison.Ordinal);
+							Assert.Equal("consumer-supplied-value", attributes["consumer.attribute"]);
+						});
+	}
+
+	[Fact(DisplayName = "Malformed resource attributes defer to native SDK behavior without failing composition")]
+	public void MalformedResourceAttributesDeferToNativeSdkBehaviorWithoutFailingComposition() =>
+		WithEnvironment("malformed-resource-attribute",
+						null,
+						() =>
+						{
+							var attributes = GetAttributes(CreateResource(ObservabilityHostProfile.Api, "Contoso.Api", "Development"));
+
+							Assert.Equal("Contoso.Api", attributes["service.name"]);
 						});
 
 	[Fact(DisplayName = "Empty resource attribute and service name values resolve as missing")]
 	public void EmptyResourceAttributeAndServiceNameValuesResolveAsMissing() =>
-		WithEnvironment("", "", () =>
-								{
-									var attributes = GetAttributes(ObservabilityResource.Create(ObservabilityHostProfile.Api, "Contoso.Api", "Development"));
+		WithEnvironment("",
+						"",
+						() =>
+						{
+							var attributes = GetAttributes(CreateResource(ObservabilityHostProfile.Api, "Contoso.Api", "Development"));
 
-									Assert.Equal("Contoso.Api", attributes["service.name"]);
-									Assert.Equal("Contoso", attributes["service.namespace"]);
-									Assert.DoesNotContain("service.version", attributes.Keys);
-								});
+							Assert.Equal("Contoso.Api", attributes["service.name"]);
+							Assert.Equal("Contoso", attributes["service.namespace"]);
+							Assert.DoesNotContain("service.version", attributes.Keys);
+						});
+
+	[Fact(DisplayName = "Resource attributes follow final Generic Host configuration precedence")]
+	public void ResourceAttributesFollowFinalGenericHostConfigurationPrecedence() =>
+		WithEnvironment("service.name=environment-name,service.namespace=environment-namespace,environment.attribute=environment-value",
+						"environment-name",
+						() =>
+						{
+							var builder = Host.CreateApplicationBuilder();
+							builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+																		{
+																			["OTEL_RESOURCE_ATTRIBUTES"] = "service.name=configured-attribute-name,service.namespace=configured-namespace,configuration.attribute=configured-value",
+																			["OTEL_SERVICE_NAME"] = "configured-service-name"
+																		});
+							builder.AddApiObservability();
+
+							using var host = builder.Build();
+							var resource = host.Services.GetRequiredService<TracerProvider>().GetResource();
+							var attributes = GetAttributes(resource);
+
+							Assert.Equal("configured-service-name", attributes["service.name"]);
+							Assert.Equal("configured-namespace", attributes["service.namespace"]);
+							Assert.Equal("configured-value", attributes["configuration.attribute"]);
+							Assert.DoesNotContain("environment.attribute", attributes.Keys);
+						});
+
+	[Fact(DisplayName = "Empty final resource values do not reveal lower-priority environment values")]
+	public void EmptyFinalResourceValuesDoNotRevealLowerPriorityEnvironmentValues() =>
+		WithEnvironment("service.name=environment-name,service.namespace=environment-namespace,environment.attribute=environment-value",
+						"environment-name",
+						() =>
+						{
+							var builder = Host.CreateApplicationBuilder();
+							builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+																		{
+																			["OTEL_RESOURCE_ATTRIBUTES"] = "",
+																			["OTEL_SERVICE_NAME"] = ""
+																		});
+							var applicationName = builder.Environment.ApplicationName;
+							builder.AddApiObservability();
+
+							using var host = builder.Build();
+							var resource = host.Services.GetRequiredService<TracerProvider>().GetResource();
+							var attributes = GetAttributes(resource);
+
+							Assert.Equal(applicationName, attributes["service.name"]);
+							Assert.Equal(ObservabilityResource.GetSolutionName(ObservabilityHostProfile.Api, applicationName), attributes["service.namespace"]);
+							Assert.DoesNotContain("environment.attribute", attributes.Keys);
+						});
 
 	[Fact(DisplayName = "Shared logging composition retains Console and adds one OpenTelemetry provider")]
 	public void SharedLoggingCompositionRetainsConsoleAndAddsOneOpenTelemetryProvider()
@@ -119,4 +176,7 @@ public sealed class ObservabilityResourceTests
 
 	private static Dictionary<string, object> GetAttributes(OpenTelemetry.Resources.Resource resource) =>
 		resource.Attributes.ToDictionary(attribute => attribute.Key, attribute => attribute.Value, StringComparer.Ordinal);
+
+	private static Resource CreateResource(ObservabilityHostProfile profile, string applicationName, string environmentName) =>
+		ObservabilityResource.Configure(ResourceBuilder.CreateEmpty(), profile, applicationName, environmentName).Build();
 }

@@ -1,4 +1,8 @@
 #if (apiService)
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using AwesomeAssertions;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -9,11 +13,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Monaco.Template.Backend.IntegrationTests.Apis;
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Net;
-using System.Text;
+using OpenTelemetry;
+using OpenTelemetry.Trace;
 
 namespace Monaco.Template.Backend.IntegrationTests.Tests;
 
@@ -34,20 +35,20 @@ public sealed class BoundaryExceptionDiagnosticsTests(AppFixture fixture) : Inte
 #endif
 	}
 
-	[Fact(DisplayName = "An escaping API request receives the authoritative safe boundary response")]
-	public async Task EscapingApiRequestReceivesTheAuthoritativeSafeBoundaryResponse()
+	[Fact(DisplayName = "An escaping API request receives HTTP 500 with ordinary exception telemetry")]
+	public async Task EscapingApiRequestReceivesHttp500WithOrdinaryExceptionTelemetry()
 	{
 		await using var collector = await OtlpCollector.StartAsync();
 		var loggerProvider = new CapturingLoggerProvider();
 		var activities = new ConcurrentQueue<CapturedActivity>();
+		var pipelineActivities = new ConcurrentQueue<CapturedActivity>();
 		using var activityListener = new ActivityListener
 									 {
 										 ShouldListenTo = source => source.Name == "Microsoft.AspNetCore",
 										 Sample = static (ref _) => ActivitySamplingResult.AllDataAndRecorded,
-										 ActivityStopped = activity => activities.Enqueue(new CapturedActivity(activity.Status,
-																											   activity.StatusDescription,
-																											   activity.Tags.ToArray(),
-																											   activity.Events.ToArray()))
+										 ActivityStopped = activity => activities.Enqueue(new CapturedActivity(activity.Source.Name,
+																											   activity.Status,
+																											   [.. activity.TagObjects]))
 									 };
 		ActivitySource.AddActivityListener(activityListener);
 		await using var factory = Fixture.WebAppFactory
@@ -66,31 +67,43 @@ public sealed class BoundaryExceptionDiagnosticsTests(AppFixture fixture) : Inte
 																						 {
 																							 services.RemoveAll<ISender>();
 																							 services.AddSingleton<ISender, ThrowingSender>();
+																							 services.ConfigureOpenTelemetryTracerProvider(providerBuilder =>
+																																			   providerBuilder.AddProcessor(new CapturingActivityProcessor(pipelineActivities)));
 																						 });
 														   });
 		var api = GetApi<ICountriesApi>(factory);
 
-		const string canary = "boundary-request-canary";
-		var response = await api.Query([canary]);
+		var response = await api.Query(["boundary-request"]);
 
 		response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
 		var log = loggerProvider.Entries
 								.Should()
-								.ContainSingle(entry => entry.Category == "Monaco.Template.Backend.Common.Observability.Boundary")
+								.ContainSingle(entry => entry.Category == "Monaco.Template.Backend.Common.Observability.BoundaryExceptionHandler")
 								.Which;
 		log.Exception.Should().BeOfType<InvalidOperationException>();
 		loggerProvider.Entries.Where(entry => entry.Exception is not null).Should().ContainSingle();
-		var span = activities.Should().ContainSingle(activity => activity.Status == ActivityStatusCode.Error).Which;
-		span.StatusDescription.Should().BeEmpty();
-		span.Tags.Should().Contain(new KeyValuePair<string, string?>("error.category", "unhandled"));
-		span.Tags.Should().Contain(new KeyValuePair<string, string?>("error.type", typeof(InvalidOperationException).FullName));
-		span.Tags.Should().NotContain(tag => tag.Key.StartsWith("exception.", StringComparison.Ordinal) || tag.Key == "error.code");
-		span.Events.Should().BeEmpty();
+		activities.Should().ContainSingle(activity => activity.SourceName == "Microsoft.AspNetCore" && activity.Status == ActivityStatusCode.Error);
 		await collector.WaitForSignalsAsync();
 		collector.Entries.Should().Contain(entry => entry.Path == "/v1/logs");
 		collector.Entries.Should().Contain(entry => entry.Path == "/v1/traces");
 		collector.Entries.Should().Contain(entry => entry.Path == "/v1/metrics");
-		collector.Entries.Select(entry => Encoding.UTF8.GetString(entry.Payload)).Should().NotContain(text => text.Contains(canary, StringComparison.Ordinal));
+		pipelineActivities.Should().Contain(activity => activity.SourceName == "Microsoft.AspNetCore");
+		pipelineActivities.Should().NotContain(activity => TargetsEndpoint(activity, collector.Endpoint));
+	}
+
+	private static bool TargetsEndpoint(CapturedActivity activity, string endpoint)
+	{
+		if (activity.SourceName != "System.Net.Http")
+			return false;
+
+		var target = new Uri(endpoint);
+		var requestUrl = activity.Tags.FirstOrDefault(tag => tag.Key is "url.full" or "http.url").Value?.ToString();
+		if (Uri.TryCreate(requestUrl, UriKind.Absolute, out var requestUri))
+			return requestUri.Scheme == target.Scheme && requestUri.Host == target.Host && requestUri.Port == target.Port;
+
+		var address = activity.Tags.FirstOrDefault(tag => tag.Key is "server.address" or "net.peer.name").Value?.ToString();
+		var port = activity.Tags.FirstOrDefault(tag => tag.Key is "server.port" or "net.peer.port").Value?.ToString();
+		return address == target.Host && port == target.Port.ToString();
 	}
 
 	private sealed class ThrowingSender : ISender
@@ -112,10 +125,15 @@ public sealed class BoundaryExceptionDiagnosticsTests(AppFixture fixture) : Inte
 	}
 
 	private sealed record CapturedActivity(
+		string SourceName,
 		ActivityStatusCode Status,
-		string? StatusDescription,
-		IReadOnlyList<KeyValuePair<string, string?>> Tags,
-		IReadOnlyList<ActivityEvent> Events);
+		IReadOnlyCollection<KeyValuePair<string, object?>> Tags);
+
+	private sealed class CapturingActivityProcessor(ConcurrentQueue<CapturedActivity> activities) : BaseProcessor<Activity>
+	{
+		public override void OnEnd(Activity activity) =>
+			activities.Enqueue(new CapturedActivity(activity.Source.Name, activity.Status, activity.TagObjects.ToArray()));
+	}
 
 	private sealed class CapturingLoggerProvider : ILoggerProvider
 	{

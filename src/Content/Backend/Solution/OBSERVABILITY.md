@@ -71,7 +71,7 @@ The following deterministic insertion points reserve sequence and ownership for 
 | Successful company creations below | 1.6 |
 | Local first run below | 1.7 |
 | Failure isolation below | 2.1 |
-| `<!-- OBSERVABILITY: 2.2-2.3 DATA-BOUNDARIES -->` | 2.2-2.3 |
+| High-fidelity telemetry boundary below | 2.6 |
 | Production routing below | 2.4 |
 | `<!-- OBSERVABILITY: 3.1-3.3 CAUSAL-DIAGNOSIS -->` | 3.1-3.3 |
 | `<!-- OBSERVABILITY: 3.4 HOST-METRICS -->` | 3.4 |
@@ -118,37 +118,29 @@ Use only the neutral `Observability` section for Monaco-owned controls:
 | Key | Default | Accepted value | Malformed behavior |
 |---|---|---|---|
 | `Observability:Signals:{Traces,Metrics,Logs}:Enabled` | `true` | `true` or `false` (case-insensitive) | Startup fails |
-| `Observability:SqlClient:QueryTextMode` | `SanitizedText` | `SanitizedText` or `SummaryOnly` | Safely resolves to `SummaryOnly` |
-| `Observability:Identity:Mode` | `Subject` | `Subject`, `HmacSha256`, or `Disabled` | Safely resolves to `Disabled` |
-| `Observability:Shutdown:FlushTimeout` | `00:00:05` | constant-format `TimeSpan`, greater than zero and at most five seconds | Startup fails |
 
-Standard OpenTelemetry controls remain root keys, not `Monaco:*` aliases. `OTEL_SDK_DISABLED=true` dominates every Signal/exporter setting and creates no OpenTelemetry providers; Console and DI `ILogger` remain available. Any other non-empty value does not disable the SDK and emits a safe startup diagnostic.
+Standard OpenTelemetry controls remain root keys, not `Monaco:*` aliases. `OTEL_SDK_DISABLED=true` dominates every Signal/exporter setting and creates no OpenTelemetry providers; Console and DI `ILogger` remain available. Other values and settings follow the selected OpenTelemetry SDK's behavior without Monaco validation or reinterpretation.
 
-The common OTLP controls are `OTEL_EXPORTER_OTLP_{ENDPOINT,PROTOCOL,HEADERS,TIMEOUT,COMPRESSION}`. Each Signal may override its common value through `OTEL_EXPORTER_OTLP_TRACES_*`, `..._METRICS_*`, or `..._LOGS_*`; signal-specific values win after each key has resolved normal .NET-provider precedence. Development defaults use `http://localhost:4317` and `grpc`.
+The common OTLP controls include `OTEL_EXPORTER_OTLP_{ENDPOINT,PROTOCOL,HEADERS,TIMEOUT,COMPRESSION}`. Signal-specific `OTEL_EXPORTER_OTLP_TRACES_*`, `..._METRICS_*`, and `..._LOGS_*` settings retain their normal SDK precedence. Development defaults use `http://localhost:4317` and `grpc`.
 
-Supported operational root keys are `OTEL_SERVICE_NAME`, `OTEL_RESOURCE_ATTRIBUTES`, `OTEL_TRACES_SAMPLER`, `OTEL_TRACES_SAMPLER_ARG`, `OTEL_BSP_*`, `OTEL_BLRP_*`, `OTEL_METRIC_EXPORT_{INTERVAL,TIMEOUT}`, and applicable `Logging:LogLevel` categories. Logs and Traces default to queue `2048`, batch `512`, delay/timeout `5000` ms; Metrics default to interval `60000` ms and timeout `5000` ms. Explicit values are validated at startup, including `batch <= queue`.
-
-Do not configure exporter selection, propagators, auto-instrumentation, YAML, retry/disk buffering, certificates/client keys, temporality/exemplars, attribute limits, or provider-specific logging switches. The complete spelling, range, malformed-value, and characterization contract is `CONFIGURATION-MATRIX.md` in Monaco's source repository; it is not copied into generated output.
+Resource, sampling, batching, retry, timeout, header, transport, logging, and other standard settings use the pinned SDK and instrumentation packages directly. Monaco does not publish an exhaustive supported-key list, impose fixed ranges, validate destination security, or certify a resulting telemetry stream for any consumer.
 
 ## Telemetry failure isolation
 
-Operational Telemetry is best-effort diagnostic evidence. After valid startup, an unavailable or impaired OTLP receiver does not control Company commit, in-process business Counter recording, readiness, or host startup. Connection refusal, receiver timeout, authorization or throttling responses, malformed receiver responses, and queue saturation can lose telemetry, while Console logging remains available through the normal DI `ILogger` route.
+Operational Telemetry is best-effort diagnostic evidence. An unavailable or impaired OTLP receiver does not control Company commit, in-process business Counter recording, readiness, or host startup. Connection refusal, receiver timeout, authorization or throttling responses, malformed receiver responses, and saturation can lose telemetry, while Console logging remains available through the normal DI `ILogger` route.
 
-Logs and Traces use finite queues of `2048` records and batches of `512`, with `5`-second scheduled delay and export timeout. Metrics export every `60` seconds with a `5`-second timeout. A full queue drops new telemetry rather than waiting for capacity. Monaco provides no disk buffering, unbounded retry, or offline telemetry storage.
+Queueing, batching, retry, timeout, export, and shutdown behavior come from the selected OpenTelemetry SDK and its standard configuration. Monaco adds no preflight, retry or queue policy, exporter diagnostic throttle, hosted policy service, or custom flush coordinator. Graceful shutdown uses the ordinary SDK lifecycle, and abrupt termination can lose in-flight telemetry.
 
-On graceful shutdown, business hosted services stop first and the enabled telemetry providers receive one concurrent flush bounded by `Observability:Shutdown:FlushTimeout` (greater than zero and no more than five seconds). Flush or export failure remains nonfatal. When the receiver recovers, normal exporting resumes without restarting the Runtime Host. Abrupt termination can lose in-flight telemetry.
+When the receiver recovers, normal SDK exporting resumes without restarting the Runtime Host. Telemetry receipt and exact recovery timing are not business correctness conditions.
 
-The equal healthy and fault controls, bounded settings, queue-loss policy, diagnostics, bounded shutdown flush, and restart-free recovery are deterministic behavior. Latency, memory/RSS, and exact recovery duration are environment-sensitive hosted characterization only; they are not generated-service guarantees or release thresholds.
+## High-fidelity telemetry boundary
 
-<!-- OBSERVABILITY: 2.2-2.3 DATA-BOUNDARIES -->
-## Data-minimizing telemetry
+Monaco publishes applicable native instrumentation, ordinary structured log state and scopes, formatted messages, exception information, and application instruments without a Monaco content-governance layer. It does not filter, redact, sanitize, transform, sample, or bound telemetry through processors, SQL modes, identity modes, Metric Views, attribute policies, or cardinality ceilings. High-fidelity telemetry can therefore contain information that is sensitive in a consumer's environment.
 
-Telemetry is data-minimizing by fixed code policy. It never captures request or response bodies, authorization or cookie headers, tokens, credentials or OTLP headers, connection strings, SQL parameter or literal values, Company email or address data, persistence stamps, or unbounded Metric dimensions. Do not place those categories in resource attributes, logs, Baggage, span names, or custom telemetry.
-
-HTTP query operands are redacted. Permitted concrete route values, including approved GUID values, may remain only in trace `url.path`; span names and every Metric dimension use the bounded `http.route` template. Metrics never use concrete paths, query values, identities, payloads, or database data.
+A consumer-owned Collector or compatible downstream pipeline is the enforcement point for filtering, redaction, transformation, sampling, cardinality controls, routing, storage, access, retention, and alerting. Assess and configure that pipeline for its recipients and compliance requirements; Monaco does not certify consumer outcomes.
 
 <!--#if (apiService || workerService) -->
-API and Worker SQL telemetry accepts only `SanitizedText` (the default) or `SummaryOnly` through `Observability:SqlClient:QueryTextMode`. `SanitizedText` emits, only on trace spans, at most 4 KiB of deliberately noncanonical diagnostic text; it excludes literals and parameter values. If safe sanitization is uncertain, Monaco omits query text entirely rather than emitting or hashing raw SQL. `SummaryOnly` omits both `db.query.text` and legacy `db.statement`.
+API and Worker use the selected native SQL Client instrumentation without Monaco query-text rewriting or suppression. Monaco does not enable EF Core sensitive-data logging; consumers remain responsible for evaluating the telemetry their selected SDK and runtime configuration produce.
 <!--#endif -->
 
 <!--#if (apiGateway) -->
@@ -158,37 +150,25 @@ Gateway has no SQL instrumentation.
 <!--#if (apiService || apiGateway) -->
 ## HTTP exception boundaries
 
-For an unexpected API or Gateway request failure, Monaco writes exactly one authoritative Operational Log at the HTTP boundary. Its category is `<solution>.Common.Observability.Boundary`, EventId `1000` (`UnhandledBoundaryException`), and its bounded fields identify `http.request`, the CLR exception type, and the native TraceId and SpanId.
-
-The exception message, stack, and inner chain remain only on that single boundary log; they are not copied into span events, Baggage, Metrics, or other Monaco-owned logs. The residual risk is opaque third-party exception prose in that log, so treat access to log data appropriately.
+For an unexpected API or Gateway request failure, Monaco writes an ordinary structured error log with the original exception and returns HTTP 500. Span status, exception events, and exported exception fields follow normal ASP.NET Core and selected instrumentation behavior; Monaco does not reshape or suppress them.
 <!--#endif -->
 
 ## Production signal routing
 
 Every enabled Signal leaves each Runtime Host through the same single unified OTLP exporter path, and production routing is configuration-only: unchanged binaries send Traces, Metrics, and Logs to any OpenTelemetry Collector or compatible OTLP receiver supplied through the standard common and per-Signal OTLP keys above. No exporter selection, package change, or code change redirects Signals.
 
-Per-Signal settings override common settings after each key resolves normal provider precedence, so a populated `OTEL_EXPORTER_OTLP_TRACES_*`, `..._METRICS_*`, or `..._LOGS_*` value wins over its common counterpart even when the common value comes from a higher-precedence provider. Endpoint, protocol, Signal enablement, sampling, cadence, filtering, queue/batch/timeout, and the other non-secret controls above follow normal appsettings/environment/command-line precedence and are not treated as credentials. For `http/protobuf`, a common base endpoint is expanded to `/v1/traces`, `/v1/metrics`, and `/v1/logs`; a signal-specific endpoint is used exactly as supplied.
+Per-Signal settings and common settings follow their selected-SDK precedence after .NET configuration providers resolve each key. For `http/protobuf`, the SDK expands a common base endpoint to `/v1/traces`, `/v1/metrics`, and `/v1/logs`; a signal-specific endpoint is used according to SDK behavior.
 
 A single compatible receiver that accepts every enabled Signal is sufficient: one Collector hop may independently route, filter, transform, authenticate, or forward each Signal onward. When enabled Signals must reach divergent destinations, provide consumer-owned routing such as your own Collector pipeline or equivalent infrastructure. Monaco does not deploy or configure a production Collector, backend, dashboard, retention policy, alerting system, or vendor-specific topology; destination clarity and production receiver infrastructure remain consumer-owned.
 
-Route production Signals only over encrypted, authenticated transport or a secured local Collector hop that terminates transport security on your behalf.
+Consumers own production transport security, receiver authentication, credentials, topology, and destination validation.
 
 <!--#if (auth) -->
 ## Authenticated request identity
 
-When authentication is enabled, the API and Gateway may emit a single narrow subject identifier (`user.id`) on the entry server span and correlated request-scoped Operational Logs. The Worker profile never emits `user.id`. Configure the mode through `Observability:Identity:Mode`:
+When authentication is enabled, the API and Gateway attach the raw validated `sub` claim as `user.id` to the entry server span and correlated request-scoped Operational Logs. Enrichment reads only the post-authentication validated principal; it does not inspect raw tokens, headers, cookies, queries, bodies, authentication tickets, client credentials, or client certificates. Unauthenticated requests and authenticated principals without `sub` continue without identity enrichment. The Worker profile does not perform request identity enrichment.
 
-- **`Subject`** (default) — The validated OIDC `sub` claim, used as-is without transformation.
-- **`HmacSha256`** — A 43-character unpadded Base64URL HMAC-SHA256 of the framed `(iss, sub)` pair.
-- **`Disabled`** — No `user.id` is emitted.
-
-For `HmacSha256` mode, provide the HMAC key through `Observability:Identity:HmacSha256Key` as a strict standard-Base64 value that decodes to at least 32 bytes. Base64URL-encoded, malformed, partially consumed, or shorter key material disables enrichment without falling back to the raw subject. The byte contract is `UTF8("user.id:v1") || UInt32BE(byteLength(UTF8(iss))) || UTF8(iss) || UInt32BE(byteLength(UTF8(sub))) || UTF8(sub)` with no trimming, case folding, Unicode normalization, or escaping of either validated string.
-
-Username, email, display name, roles, tokens, arbitrary claims, and other human-readable identity are never emitted by default. `user.id` never appears in Resource attributes, Metrics, Baggage, child or outbound spans, messaging telemetry, or Worker telemetry.
-
-A correlated Operational Log may reference a Trace that sampling did not export. Changing identity mode or Trace sampling does not alter Metric recording or business persistence.
-
-Identity is linkable personal data. Even an opaque subject or HMAC pseudonym requires appropriate access, retention, deletion, transport, and storage controls per your data-protection obligations.
+`user.id` is linkable personal data. Consumer infrastructure owns filtering, access, retention, deletion, transport, and storage controls. Telemetry enrichment does not alter authentication, authorization, Metric recording, or persistence attribution.
 <!--#endif -->
 
 <!--#if (apiService) -->
@@ -227,4 +207,4 @@ The Gateway profile registers Runtime, ASP.NET Core, and HttpClient instrumentat
 
 Every enabled Signal in one process uses the same startup-immutable resource. Its generated `service.name` fallback is `<solution>.Api`, `<solution>.Worker`, or `<solution>.Common.ApiGateway` for the applicable host, and `service.namespace` falls back to `<solution>`. Precedence is exact: generated fallbacks, then `OTEL_RESOURCE_ATTRIBUTES` collisions, then `OTEL_SERVICE_NAME` for final `service.name` precedence.
 
-Use only low-cardinality, non-secret operational metadata. Standard `service.version`, `service.instance.id`, `service.namespace`, and `deployment.environment.name` attributes are supported. Never provide credentials, secrets, personal data, tenant or customer identifiers, request or payload data, or user identity. Passing resource validation is not a privacy certification.
+Resource environment overrides use the selected OpenTelemetry SDK detector without Monaco validation or content filtering. Consumer deployment is responsible for the attributes it supplies and for downstream governance.

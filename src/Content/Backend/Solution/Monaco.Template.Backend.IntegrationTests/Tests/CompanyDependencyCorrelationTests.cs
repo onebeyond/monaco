@@ -1,3 +1,8 @@
+using System.Collections.Concurrent;
+using System.Data.Common;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using AutoFixture.Xunit2;
 using AwesomeAssertions;
 using Microsoft.AspNetCore.Hosting;
@@ -10,11 +15,6 @@ using Monaco.Template.Backend.Api.DTOs;
 using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Domain.Model.Entities;
 using Monaco.Template.Backend.IntegrationTests.Apis;
-using System.Collections.Concurrent;
-using System.Data.Common;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Net;
 
 namespace Monaco.Template.Backend.IntegrationTests.Tests;
 
@@ -44,18 +44,18 @@ public sealed class CompanyDependencyCorrelationTests(AppFixture fixture) : Inte
 		var loggerProvider = new CapturingLoggerProvider();
 		var activities = new ConcurrentQueue<CapturedActivity>();
 		using var listener = new ActivityListener
-							 {
-								 ShouldListenTo = static _ => true,
-								 Sample = static (ref _) => ActivitySamplingResult.AllDataAndRecorded,
-								 ActivityStopped = activity => activities.Enqueue(new CapturedActivity(activity.Source.Name,
-																									   activity.TraceId,
-																									   activity.SpanId,
-																									   activity.ParentSpanId,
-																									   activity.GetTagItem("db.system.name") as string,
-																									   activity.Status,
-																									   activity.TagObjects.ToArray(),
-																									   activity.Events.Select(@event => @event.Name).ToArray()))
-							 };
+		{
+			ShouldListenTo = static _ => true,
+			Sample = static (ref _) => ActivitySamplingResult.AllDataAndRecorded,
+			ActivityStopped = activity => activities.Enqueue(new CapturedActivity(activity.Source.Name,
+																				  activity.TraceId,
+																				  activity.SpanId,
+																				  activity.ParentSpanId,
+																				  activity.GetTagItem("db.system.name") as string,
+																				  activity.Status,
+																				  activity.TagObjects.ToArray(),
+																				  activity.Events.Select(@event => @event.Name).ToArray()))
+		};
 		ActivitySource.AddActivityListener(listener);
 		await using var factory = Fixture.WebAppFactory.GetCustomFactory(builder => builder.ConfigureLogging(logging => logging.AddProvider(loggerProvider)));
 		var api = GetApi<ICompaniesApi>(factory);
@@ -88,27 +88,27 @@ public sealed class CompanyDependencyCorrelationTests(AppFixture fixture) : Inte
 		var serverActivity = trace.Should().ContainSingle(activity => activity.SourceName == "Microsoft.AspNetCore" && activity.SpanId == applicationLog.SpanId).Which;
 		var sqlActivities = GetSqlActivities(trace);
 		sqlActivities.Should().OnlyContain(activity => activity.ParentSpanId == serverActivity.SpanId);
-		AssertSafeNativeSqlActivities(sqlActivities);
+		AssertNativeSqlActivities(sqlActivities);
 	}
 
-	[Fact(DisplayName = "Company persistence failure retains native SQL attribution and one boundary diagnostic")]
-	public async Task CompanyPersistenceFailureRetainsNativeSqlAttributionAndOneBoundaryDiagnostic()
+	[Fact(DisplayName = "Company persistence failure retains native SQL attribution and one boundary exception log")]
+	public async Task CompanyPersistenceFailureRetainsNativeSqlAttributionAndOneBoundaryExceptionLog()
 	{
 		var loggerProvider = new CapturingLoggerProvider();
 		var activities = new ConcurrentQueue<CapturedActivity>();
 		using var listener = new ActivityListener
-							 {
-								 ShouldListenTo = static _ => true,
-								 Sample = static (ref _) => ActivitySamplingResult.AllDataAndRecorded,
-								 ActivityStopped = activity => activities.Enqueue(new CapturedActivity(activity.Source.Name,
-																									   activity.TraceId,
-																									   activity.SpanId,
-																									   activity.ParentSpanId,
-																									   activity.GetTagItem("db.system.name") as string,
-																									   activity.Status,
-																									   activity.TagObjects.ToArray(),
-																									   activity.Events.Select(@event => @event.Name).ToArray()))
-							 };
+		{
+			ShouldListenTo = static _ => true,
+			Sample = static (ref _) => ActivitySamplingResult.AllDataAndRecorded,
+			ActivityStopped = activity => activities.Enqueue(new CapturedActivity(activity.Source.Name,
+																				  activity.TraceId,
+																				  activity.SpanId,
+																				  activity.ParentSpanId,
+																				  activity.GetTagItem("db.system.name") as string,
+																				  activity.Status,
+																				  activity.TagObjects.ToArray(),
+																				  activity.Events.Select(@event => @event.Name).ToArray()))
+		};
 		ActivitySource.AddActivityListener(listener);
 		await using var factory = Fixture.WebAppFactory
 										 .GetCustomFactory(builder => builder.ConfigureLogging(logging => logging.AddProvider(loggerProvider))
@@ -130,21 +130,20 @@ public sealed class CompanyDependencyCorrelationTests(AppFixture fixture) : Inte
 																 null));
 
 		response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
-		var boundaryLog = loggerProvider.Entries.Should().ContainSingle(entry => entry.Category == "Monaco.Template.Backend.Common.Observability.Boundary").Which;
+		var boundaryLog = loggerProvider.Entries.Should().ContainSingle(entry => entry.Category == "Monaco.Template.Backend.Common.Observability.BoundaryExceptionHandler").Which;
 		boundaryLog.LogLevel.Should().Be(LogLevel.Error);
-		boundaryLog.EventId.Should().Be(new EventId(1000, "UnhandledBoundaryException"));
 		boundaryLog.Exception.Should().NotBeNull();
 		loggerProvider.Entries.Where(entry => entry.Category.StartsWith("Monaco.Template.Backend", StringComparison.Ordinal) && entry.Exception is not null)
 					  .Should()
 					  .ContainSingle();
 		var state = boundaryLog.State.Should().BeAssignableTo<IReadOnlyList<KeyValuePair<string, object?>>>().Which;
-		state[^1].Value.Should().Be("Unhandled {BoundaryKind} failure ({ExceptionType}); TraceId={TraceId}; SpanId={SpanId}");
-		state.Select(field => field.Key).Should().Equal("BoundaryKind", "ExceptionType", "TraceId", "SpanId", "{OriginalFormat}");
+		state[^1].Value.Should().Be("Unhandled HTTP request failure.");
+		state.Select(field => field.Key).Should().Equal("{OriginalFormat}");
 		loggerProvider.Entries.Should().NotContain(entry => entry.EventId == new EventId(2001, "CompanyCreated"));
 		var trace = activities.Where(activity => activity.TraceId == boundaryLog.TraceId).ToArray();
 		var sqlActivities = GetSqlActivities(trace);
 		sqlActivities.Should().ContainSingle(activity => activity.Status == ActivityStatusCode.Error);
-		AssertSafeNativeSqlActivities(sqlActivities);
+		AssertNativeSqlActivities(sqlActivities);
 		var companyExists = await Fixture.GetDbContext(Fixture.WebAppFactory.Services).Set<Company>().AnyAsync(company => company.Name == name);
 		companyExists.Should().BeFalse();
 	}
@@ -156,24 +155,10 @@ public sealed class CompanyDependencyCorrelationTests(AppFixture fixture) : Inte
 		return sqlActivities;
 	}
 
-	private static void AssertSafeNativeSqlActivities(IReadOnlyCollection<CapturedActivity> sqlActivities)
+	private static void AssertNativeSqlActivities(IReadOnlyCollection<CapturedActivity> sqlActivities)
 	{
 		sqlActivities.Should().OnlyContain(activity => activity.SourceName == "OpenTelemetry.Instrumentation.SqlClient" &&
-													   activity.DatabaseSystemName == "microsoft.sql_server");
-		sqlActivities.SelectMany(activity => activity.Tags)
-					 .Where(tag => tag.Key == "db.statement" ||
-								   tag.Key == "db.connection_string" ||
-								   tag.Key == "db.user" ||
-								   tag.Key.StartsWith("db.query.parameter.", StringComparison.Ordinal))
-					 .Should()
-					 .BeEmpty();
-		sqlActivities.SelectMany(activity => activity.Tags)
-					 .Where(tag => tag.Key == "db.query.text")
-					 .Select(tag => Convert.ToString(tag.Value))
-					 .Except(["SELECT statement", "INSERT statement", "UPDATE statement", "DELETE statement", "EXEC statement"])
-					 .Should()
-					 .BeEmpty();
-		sqlActivities.Should().OnlyContain(activity => activity.EventNames.Count == 0);
+														   activity.DatabaseSystemName == "microsoft.sql_server");
 	}
 
 	private sealed record CapturedActivity(string SourceName,

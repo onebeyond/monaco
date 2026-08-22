@@ -1,16 +1,16 @@
+using System.Diagnostics;
+using System.Security.Claims;
 using AwesomeAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Monaco.Template.Backend.Common.Observability;
-using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
-using System.Diagnostics;
-using System.Diagnostics.Tracing;
 
 namespace Monaco.Template.Backend.ArchitectureTests;
 
@@ -18,1017 +18,206 @@ namespace Monaco.Template.Backend.ArchitectureTests;
 [Trait("Architecture Tests", "Observability")]
 public sealed class ObservabilityConfigurationTests
 {
-	private const string TestExporterEventSourceName = "Monaco.Template.Backend.Tests.OtlpExporter";
-
-	[Fact(DisplayName = "Startup configuration resolves strict Signal defaults and safe neutral fallbacks")]
-	public void StartupConfigurationResolvesStrictSignalDefaultsAndSafeNeutralFallbacks()
+	[Fact(DisplayName = "Signals are enabled by default without telemetry policy options")]
+	public void SignalsAreEnabledByDefaultWithoutTelemetryPolicyOptions()
 	{
-		var configuration = CreateConfiguration(("Observability:Signals:Traces:Enabled", "FALSE"),
-												("Observability:SqlClient:QueryTextMode", "not-a-mode"),
-												("Observability:Identity:Mode", "not-a-mode"));
+		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration());
 
-		var options = ObservabilityOptionsBinder.Bind(configuration, ObservabilityHostProfile.Api);
-
-		Assert.False(options.TracesEnabled);
-		Assert.True(options.MetricsEnabled);
-		Assert.True(options.LogsEnabled);
-		Assert.Equal(ObservabilityQueryTextMode.SummaryOnly, options.QueryTextMode);
-		Assert.Equal(ObservabilityIdentityMode.Disabled, options.IdentityMode);
-		Assert.Equal(TimeSpan.FromSeconds(5), options.FlushTimeout);
+		options.SdkDisabled.Should().BeFalse();
+		options.TracesEnabled.Should().BeTrue();
+		options.MetricsEnabled.Should().BeTrue();
+		options.LogsEnabled.Should().BeTrue();
 	}
 
-	[Theory(DisplayName = "Numeric QueryTextMode and IdentityMode values fall back safely with a diagnostic")]
-	[InlineData("42")]
-	[InlineData("-1")]
-	[InlineData("0")]
-	public void NumericNeutralModesFallBackSafelyWithDiagnostics(string value)
-	{
-		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:SqlClient:QueryTextMode", value),
-																		  ("Observability:Identity:Mode", value)),
-													  ObservabilityHostProfile.Api);
-
-		Assert.Equal(ObservabilityQueryTextMode.SummaryOnly, options.QueryTextMode);
-		Assert.Equal(ObservabilityIdentityMode.Disabled, options.IdentityMode);
-		Assert.Contains(ObservabilityConfigurationDiagnosticCodes.InvalidQueryTextMode, options.DiagnosticCodes);
-		Assert.Contains(ObservabilityConfigurationDiagnosticCodes.InvalidIdentityMode, options.DiagnosticCodes);
-	}
-
-	[Fact(DisplayName = "Empty neutral values resolve as missing and keep their defaults")]
-	public void EmptyNeutralValuesResolveAsMissingAndKeepTheirDefaults()
-	{
-		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:Signals:Traces:Enabled", ""),
-																		  ("Observability:Signals:Metrics:Enabled", ""),
-																		  ("Observability:Signals:Logs:Enabled", ""),
-																		  ("Observability:Shutdown:FlushTimeout", "")),
-													  ObservabilityHostProfile.Api);
-
-		Assert.True(options.TracesEnabled);
-		Assert.True(options.MetricsEnabled);
-		Assert.True(options.LogsEnabled);
-		Assert.Equal(TimeSpan.FromSeconds(5), options.FlushTimeout);
-	}
-
-	[Fact(DisplayName = "Empty common OTLP, sampler, and timeout values resolve as missing")]
-	public void EmptyCommonRootValuesResolveAsMissing()
-	{
-		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration(("OTEL_EXPORTER_OTLP_ENDPOINT", ""),
-																		  ("OTEL_EXPORTER_OTLP_PROTOCOL", ""),
-																		  ("OTEL_EXPORTER_OTLP_TIMEOUT", ""),
-																		  ("OTEL_EXPORTER_OTLP_COMPRESSION", ""),
-																		  ("OTEL_TRACES_SAMPLER", "")),
-													  ObservabilityHostProfile.Api);
-
-		Assert.False(options.SdkDisabled);
-		Assert.True(options.TracesEnabled);
-	}
-
-	[Fact(DisplayName = "SQL telemetry removes raw statements and emits only a bounded trace-safe summary")]
-	public void SqlTelemetryRemovesRawStatementsAndEmitsOnlyABoundedTraceSafeSummary()
-	{
-		using var activity = new Activity("sql").Start();
-		activity.SetTag("db.system.name", "mssql");
-		activity.SetTag("db.operation.name", "SELECT");
-		activity.SetTag("db.query.text", "SELECT Email FROM Company WHERE Id = @companyId");
-		activity.SetTag("db.statement", "SELECT Email FROM Company WHERE Id = @companyId");
-		activity.SetTag("db.query.parameter.companyId", "3fa85f64-5717-4562-b3fc-2c963f66afa6");
-		activity.SetTag("db.connection_string", "Server=sql.example;Password=secret");
-
-		new SqlClientTelemetryPrivacyProcessor(ObservabilityQueryTextMode.SanitizedText).OnEnd(activity);
-
-		Assert.Equal("SELECT statement", activity.GetTagItem("db.query.text"));
-		Assert.Null(activity.GetTagItem("db.statement"));
-		Assert.Null(activity.GetTagItem("db.query.parameter.companyId"));
-		Assert.Null(activity.GetTagItem("db.connection_string"));
-	}
-
-	[Fact(DisplayName = "SQL SummaryOnly and uncertain operations omit all query text")]
-	public void SqlSummaryOnlyAndUncertainOperationsOmitAllQueryText()
-	{
-		using var activity = new Activity("sql").Start();
-		activity.SetTag("db.system.name", "mssql");
-		activity.SetTag("db.operation.name", "SELECT; DROP TABLE Company");
-		activity.SetTag("db.query.text", "SELECT Email FROM Company WHERE Id = @companyId");
-		activity.SetTag("db.statement", "SELECT Email FROM Company WHERE Id = @companyId");
-
-		new SqlClientTelemetryPrivacyProcessor(ObservabilityQueryTextMode.SanitizedText).OnEnd(activity);
-
-		Assert.Null(activity.GetTagItem("db.query.text"));
-		Assert.Null(activity.GetTagItem("db.statement"));
-	}
-
-	[Fact(DisplayName = "Legacy SQL telemetry is scrubbed and fail-closed sanitization reports a fixed diagnostic")]
-	public void LegacySqlTelemetryIsScrubbedAndFailClosedSanitizationReportsAFixedDiagnostic()
-	{
-		using var activity = new Activity("sql").Start();
-		activity.SetTag("db.system", "mssql");
-		activity.SetTag("db.statement", "SELECT Email FROM Company WHERE Id = @companyId");
-		activity.SetTag("db.connection_string", "Server=sql.example;Password=secret");
-		activity.SetTag("db.query.parameter.companyId", "3fa85f64-5717-4562-b3fc-2c963f66afa6");
-		var logger = new CapturingLogger();
-		ObservabilityConfigurationDiagnosticThrottle.Reset();
-
-		new SqlClientTelemetryPrivacyProcessor(ObservabilityQueryTextMode.SanitizedText, ObservabilityHostProfile.Worker, logger).OnEnd(activity);
-
-		Assert.Null(activity.GetTagItem("db.statement"));
-		Assert.Null(activity.GetTagItem("db.connection_string"));
-		Assert.Null(activity.GetTagItem("db.query.parameter.companyId"));
-		Assert.Single(logger.Messages);
-		Assert.Contains(ObservabilityConfigurationDiagnosticCodes.SqlSanitizationRejected, logger.Messages[0], StringComparison.Ordinal);
-		Assert.Contains("Worker", logger.Messages[0], StringComparison.Ordinal);
-	}
-
-	[Fact(DisplayName = "Missing and explicit SQL query modes retain the only supported privacy contract")]
-	public void SqlQueryModesRetainTheOnlySupportedPrivacyContract()
-	{
-		var defaultOptions = ObservabilityOptionsBinder.Bind(CreateConfiguration(), ObservabilityHostProfile.Api);
-		var explicitOptions = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:SqlClient:QueryTextMode", "sUmMaRyOnLy")), ObservabilityHostProfile.Api);
-
-		Assert.Equal(ObservabilityQueryTextMode.SanitizedText, defaultOptions.QueryTextMode);
-		Assert.Equal(ObservabilityQueryTextMode.SummaryOnly, explicitOptions.QueryTextMode);
-		Assert.Equal(2, System.Enum.GetValues<ObservabilityQueryTextMode>().Length);
-	}
-
-	[Fact(DisplayName = "HTTP telemetry removes query operands and header values while preserving the path")]
-	public void HttpTelemetryRemovesQueryOperandsAndHeaderValuesWhilePreservingThePath()
-	{
-		using var activity = new Activity("http").Start();
-		activity.SetTag("url.path", "/companies/3fa85f64-5717-4562-b3fc-2c963f66afa6");
-		activity.SetTag("url.query", "?email=ceo@example.test");
-		activity.SetTag("url.full", "https://example.test/companies/3fa85f64-5717-4562-b3fc-2c963f66afa6?email=ceo@example.test");
-		activity.SetTag("http.url", "https://example.test/companies/3fa85f64-5717-4562-b3fc-2c963f66afa6?email=ceo@example.test");
-		activity.SetTag("http.target", "/companies/3fa85f64-5717-4562-b3fc-2c963f66afa6?email=ceo@example.test");
-		activity.SetTag("http.request.header.authorization", "Bearer token");
-
-		new HttpTelemetryPrivacyProcessor().OnEnd(activity);
-
-		Assert.Equal("/companies/3fa85f64-5717-4562-b3fc-2c963f66afa6", activity.GetTagItem("url.path"));
-		Assert.Null(activity.GetTagItem("url.query"));
-		Assert.Null(activity.GetTagItem("url.full"));
-		Assert.Null(activity.GetTagItem("http.url"));
-		Assert.Null(activity.GetTagItem("http.target"));
-		Assert.Null(activity.GetTagItem("http.request.header.authorization"));
-	}
-
-	[Fact(DisplayName = "OTLP self-traffic suppression matches the configured collector only")]
-	public void OtlpSelfTrafficSuppressionMatchesTheConfiguredCollectorOnly()
-	{
-		var collector = new Uri("https://collector.example:4318");
-
-		Assert.True(ObservabilityHostBuilderExtensions.IsOtlpExportRequest(new Uri("https://collector.example:4318/v1/traces"), collector));
-		Assert.False(ObservabilityHostBuilderExtensions.IsOtlpExportRequest(new Uri("https://downstream.example:4318/v1/traces"), collector));
-	}
-
-	[Fact(DisplayName = "Log telemetry removes message, exception, and structured privacy canaries")]
-	public void LogTelemetryRemovesMessageExceptionAndStructuredPrivacyCanaries()
-	{
-		var capture = new CapturingLogRecordProcessor();
-		using var loggerFactory = LoggerFactory.Create(builder => builder.AddOpenTelemetry(options =>
-																						   {
-																							   options.IncludeFormattedMessage = true;
-																							   options.ParseStateValues = true;
-																							   options.AddProcessor(new LogTelemetryPrivacyProcessor());
-																							   options.AddProcessor(capture);
-																						   }));
-		var logger = loggerFactory.CreateLogger("PrivacyCanary");
-
-		logger.LogError(new InvalidOperationException("Connection string Server=sql.example;Password=secret"),
-						"Company email {Email} at {Address} with Authorization {Token}",
-						"ceo@example.test",
-						"1 Privacy Lane",
-						"Bearer token");
-
-		Assert.Null(capture.Body);
-		Assert.Null(capture.FormattedMessage);
-		Assert.Null(capture.Exception);
-		Assert.Null(capture.Attributes);
-	}
-
-	[Fact(DisplayName = "Boundary diagnostics emit the single fixed exception log and sanitize the native span")]
-	public void BoundaryDiagnosticsEmitTheSingleFixedExceptionLogAndSanitizeTheNativeSpan()
-	{
-		var loggerFactory = new CapturingLoggerFactory();
-		using var activity = new Activity("http.request").Start();
-		activity.SetTag("error.code", "unsafe-code");
-		activity.SetTag("exception.message", "failure");
-		activity.SetTag("exception.stacktrace", "stack");
-		var exception = new InvalidOperationException("failure");
-
-		BoundaryExceptionDiagnostics.Record(loggerFactory, exception);
-
-		var entry = loggerFactory.Entries.Should().ContainSingle().Which;
-		entry.Category.Should().Be(BoundaryExceptionDiagnostics.Category);
-		entry.LogLevel.Should().Be(LogLevel.Error);
-		entry.EventId.Should().Be(BoundaryExceptionDiagnostics.EventId);
-		entry.Exception.Should().BeSameAs(exception);
-		var state = entry.State.Should().BeAssignableTo<IReadOnlyList<KeyValuePair<string, object?>>>().Which;
-		state[^1].Value.Should().Be(BoundaryExceptionDiagnostics.MessageTemplate);
-		state.Select(field => field.Key).Should().Equal(["BoundaryKind", "ExceptionType", "TraceId", "SpanId", "{OriginalFormat}"]);
-		state[0].Value.Should().Be(BoundaryExceptionDiagnostics.HttpRequestBoundaryKind);
-		state[1].Value.Should().Be(typeof(InvalidOperationException).FullName);
-		state[2].Value.Should().Be(activity.TraceId.ToString());
-		state[3].Value.Should().Be(activity.SpanId.ToString());
-		activity.Status.Should().Be(ActivityStatusCode.Error);
-		activity.StatusDescription.Should().BeEmpty();
-		activity.GetTagItem("error.category").Should().Be("unhandled");
-		activity.GetTagItem("error.type").Should().Be(typeof(InvalidOperationException).FullName);
-		activity.GetTagItem("error.code").Should().BeNull();
-		activity.GetTagItem("exception.message").Should().BeNull();
-		activity.GetTagItem("exception.stacktrace").Should().BeNull();
-		activity.Events.Should().BeEmpty();
-	}
-
-	[Fact(DisplayName = "Boundary exception type names are bounded without splitting UTF-8 characters")]
-	public void BoundaryExceptionTypeNamesAreBoundedWithoutSplittingUtf8Characters()
-	{
-		var bounded = BoundaryExceptionDiagnostics.GetBoundedExceptionTypeName(new string('é', 129));
-
-		System.Text.Encoding.UTF8.GetByteCount(bounded).Should().Be(256);
-		bounded.Should().Be(new string('é', 128));
-	}
-
-	[Theory(DisplayName = "Malformed strict Signal and shutdown settings fail before providers are created")]
-	[InlineData("Observability:Signals:Traces:Enabled", "yes")]
-	[InlineData("Observability:Signals:Metrics:Enabled", "no")]
-	[InlineData("Observability:Signals:Logs:Enabled", "1")]
-	[InlineData("Observability:Shutdown:FlushTimeout", "00:00:00")]
-	[InlineData("Observability:Shutdown:FlushTimeout", "-00:00:01")]
-	[InlineData("Observability:Shutdown:FlushTimeout", "not-a-timespan")]
-	[InlineData("Observability:Shutdown:FlushTimeout", "00:00:05.001")]
-	[InlineData("Observability:Shutdown:FlushTimeout", "00:00:06")]
-	[InlineData("OTEL_EXPORTER_OTLP_ENDPOINT", "https://user:pass@localhost:4317")]
-	[InlineData("OTEL_EXPORTER_OTLP_ENDPOINT", "not-a-uri")]
-	[InlineData("OTEL_EXPORTER_OTLP_PROTOCOL", "http/json")]
-	[InlineData("OTEL_EXPORTER_OTLP_TIMEOUT", "10000")]
-	[InlineData("OTEL_EXPORTER_OTLP_TIMEOUT", "abc")]
-	[InlineData("OTEL_EXPORTER_OTLP_COMPRESSION", "br")]
-	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "authorization")]
-	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "x-auth=a%0db")]
-	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "x-auth=a%0Ab")]
-	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "x-a=b\tc")]
-	[InlineData("OTEL_EXPORTER_OTLP_TRACES_HEADERS", "x-api-key=TopSecret%ZZ")]
-	[InlineData("OTEL_EXPORTER_OTLP_METRICS_HEADERS", "x-auth=secret\tvalue")]
-	[InlineData("OTEL_EXPORTER_OTLP_LOGS_HEADERS", "=no-header-name")]
-	[InlineData("OTEL_EXPORTER_OTLP_LOGS_ENDPOINT", "https://user:secret-password@collector.example:4317")]
-	[InlineData("OTEL_EXPORTER_OTLP_TRACES_PROTOCOL", "http/json")]
-	[InlineData("OTEL_EXPORTER_OTLP_TRACES_TIMEOUT", "5001")]
-	[InlineData("OTEL_TRACES_SAMPLER", "jaeger")]
-	[InlineData("OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY", "in_memory")]
-	[InlineData("OTEL_DOTNET_EXPERIMENTAL_OTLP_DISK_RETRY_DIRECTORY_PATH", "c:\\telemetry")]
-	[InlineData("OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_DB_QUERY_PARAMETERS", "true")]
-	[InlineData("OTEL_DOTNET_EXPERIMENTAL_SQLCLIENT_ENABLE_TRACE_CONTEXT_PROPAGATION", "true")]
-	[InlineData("OTEL_BSP_SCHEDULE_DELAY", "0")]
-	[InlineData("OTEL_BSP_EXPORT_TIMEOUT", "5001")]
-	[InlineData("OTEL_BSP_MAX_QUEUE_SIZE", "2049")]
-	[InlineData("OTEL_BSP_MAX_EXPORT_BATCH_SIZE", "513")]
-	[InlineData("OTEL_METRIC_EXPORT_INTERVAL", "60001")]
-	[InlineData("OTEL_METRIC_EXPORT_TIMEOUT", "0")]
-	[InlineData("OTEL_BLRP_SCHEDULE_DELAY", "5001")]
-	[InlineData("OTEL_BLRP_EXPORT_TIMEOUT", "-1")]
-	[InlineData("OTEL_BLRP_MAX_QUEUE_SIZE", "0")]
-	[InlineData("OTEL_BLRP_MAX_EXPORT_BATCH_SIZE", "513")]
-	[InlineData("Logging:LogLevel:Default", "flooble")]
-	[InlineData("Logging:LogLevel:Default", "99")]
-	[InlineData("Logging:LogLevel:Default", "0")]
-	[InlineData("Logging:LogLevel:System", "verbose")]
-	public void MalformedStrictSettingsFailBeforeProvidersAreCreated(string key, string value)
-	{
-		var exception = Assert.Throws<InvalidOperationException>(() => ObservabilityOptionsBinder.Bind(CreateConfiguration((key, value)), ObservabilityHostProfile.Api));
-
-		Assert.Contains(key.StartsWith("Observability:", StringComparison.Ordinal) ? "Observability" : key, exception.Message, StringComparison.Ordinal);
-		Assert.DoesNotContain(value, exception.Message, StringComparison.Ordinal);
-	}
-
-#if (massTransitIntegration)
-	[Theory(DisplayName = "Malformed MassTransit and generated-namespace log levels fail startup")]
-	[InlineData("Logging:LogLevel:MassTransit", "flooble")]
-	public void MalformedHostApplicableLogLevelsFailStartup(string key, string value)
-	{
-		var exception = Assert.Throws<InvalidOperationException>(() => ObservabilityOptionsBinder.Bind(CreateConfiguration((key, value)), ObservabilityHostProfile.Api));
-
-		Assert.Contains(key, exception.Message, StringComparison.Ordinal);
-		Assert.DoesNotContain(value, exception.Message, StringComparison.Ordinal);
-	}
-#endif
-
-	[Fact(DisplayName = "Malformed generated root namespace log level fails startup")]
-	public void MalformedGeneratedRootNamespaceLogLevelFailsStartup()
-	{
-		var entryAssemblyName = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name ?? "testhost";
-		var category = ObservabilityResource.GetSolutionName(ObservabilityHostProfile.Api, entryAssemblyName);
-
-		var exception = Assert.Throws<InvalidOperationException>(() => ObservabilityOptionsBinder.Bind(CreateConfiguration(($"Logging:LogLevel:{category}", "flooble")),
-																									   ObservabilityHostProfile.Api));
-
-		Assert.Contains($"Logging:LogLevel:{category}", exception.Message, StringComparison.Ordinal);
-		Assert.DoesNotContain("flooble", exception.Message, StringComparison.Ordinal);
-	}
-
-	[Fact(DisplayName = "Sampler argument for a non-ratio sampler fails startup")]
-	public void SamplerArgumentForNonRatioSamplerFailsStartup() =>
-		Assert.Throws<InvalidOperationException>(() => ObservabilityOptionsBinder.Bind(CreateConfiguration(("OTEL_TRACES_SAMPLER", "always_on"),
-																										   ("OTEL_TRACES_SAMPLER_ARG", "0.5")),
-																					   ObservabilityHostProfile.Api));
-
-	[Theory(DisplayName = "Non-finite or out-of-range sampler ratios fail startup")]
-	[InlineData("NaN")]
-	[InlineData("1.5")]
-	[InlineData("-0.1")]
-	[InlineData("abc")]
-	public void NonFiniteOrOutOfRangeSamplerRatiosFailStartup(string ratio) =>
-		Assert.Throws<InvalidOperationException>(() => ObservabilityOptionsBinder.Bind(CreateConfiguration(("OTEL_TRACES_SAMPLER", "traceidratio"),
-																										   ("OTEL_TRACES_SAMPLER_ARG", ratio)),
-																					   ObservabilityHostProfile.Api));
-
-	[Fact(DisplayName = "Batch larger than the effective queue fails startup")]
-	public void BatchLargerThanEffectiveQueueFailsStartup() =>
-		Assert.Throws<InvalidOperationException>(() => ObservabilityOptionsBinder.Bind(CreateConfiguration(("OTEL_BSP_MAX_QUEUE_SIZE", "256"),
-																										   ("OTEL_BSP_MAX_EXPORT_BATCH_SIZE", "512")),
-																					   ObservabilityHostProfile.Api));
-
-	[Fact(DisplayName = "Inclusive boundaries are accepted")]
-	public void InclusiveBoundariesAreAccepted()
-	{
-		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:Shutdown:FlushTimeout", "00:00:05"),
-																		  ("OTEL_EXPORTER_OTLP_TIMEOUT", "5000"),
-																		  ("OTEL_BSP_MAX_QUEUE_SIZE", "512"),
-																		  ("OTEL_BSP_MAX_EXPORT_BATCH_SIZE", "512"),
-																		  ("OTEL_TRACES_SAMPLER", "traceidratio"),
-																		  ("OTEL_TRACES_SAMPLER_ARG", "1")),
-													  ObservabilityHostProfile.Api);
-
-		Assert.Equal(TimeSpan.FromSeconds(5), options.FlushTimeout);
-		Assert.True(options.TracesEnabled);
-	}
-
-	[Fact(DisplayName = "Malformed SDK disable values stay enabled and schedule a safe diagnostic")]
-	public void MalformedSdkDisableValueStaysEnabledAndSchedulesSafeDiagnostic()
-	{
-		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration(("OTEL_SDK_DISABLED", "not-a-boolean")),
-													  ObservabilityHostProfile.Api);
-
-		Assert.False(options.SdkDisabled);
-		Assert.Contains(ObservabilityConfigurationDiagnosticCodes.InvalidSdkDisableValue, options.DiagnosticCodes);
-	}
-
-	[Fact(DisplayName = "OTLP preflight resolves signal-specific keys over common keys per Signal independently")]
-	public void OtlpPreflightResolvesSignalSpecificKeysOverCommonKeysPerSignalIndependently()
-	{
-		var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
-																			 {
-																				 ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "http://common.example:4317",
-																				 ["OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"] = "http://traces.example:4317"
-																			 })
-													  .AddInMemoryCollection(new Dictionary<string, string?>
-																			 {
-																				 ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "http://command-line.example:4317"
-																			 })
-													  .Build();
-
-		var options = ObservabilityOptionsBinder.Bind(configuration, ObservabilityHostProfile.Api);
-
-		Assert.False(options.SdkDisabled);
-		Assert.True(options.TracesEnabled);
-		Assert.True(options.MetricsEnabled);
-		Assert.True(options.LogsEnabled);
-
-		// A signal-specific value from a lower-priority provider beats a common value from a higher-priority provider.
-		var tracesEndpoint = OtelConfigurationPreflightValidator.GetSignalValue(configuration, "TRACES_", "ENDPOINT");
-		Assert.Equal("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", tracesEndpoint.Key);
-		Assert.Equal("http://traces.example:4317", tracesEndpoint.Value);
-
-		var metricsEndpoint = OtelConfigurationPreflightValidator.GetSignalValue(configuration, "METRICS_", "ENDPOINT");
-		Assert.Equal("OTEL_EXPORTER_OTLP_ENDPOINT", metricsEndpoint.Key);
-		Assert.Equal("http://command-line.example:4317", metricsEndpoint.Value);
-	}
-
-	[Fact(DisplayName = "JSON, environment, and command-line providers resolve common and per-Signal OTLP settings with normal precedence")]
-	public void JsonEnvironmentAndCommandLineProvidersResolveCommonAndPerSignalOtlpSettingsWithNormalPrecedence() =>
-		ObservabilityTestEnvironment.WithClearedOtelEnvironment(() =>
-																{
-																	Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", "http://environment.example:4317");
-																	Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_HEADERS", "x-environment=environment-value");
-																	Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_TIMEOUT", "2500");
-
-																	var configuration = new ConfigurationBuilder().AddJsonStream(CreateJsonStream(new
-																																				  {
-																																					  OTEL_EXPORTER_OTLP_ENDPOINT = "http://json.example:4317",
-																																					  OTEL_EXPORTER_OTLP_PROTOCOL = "http/protobuf",
-																																					  OTEL_EXPORTER_OTLP_HEADERS = "x-json=json-value",
-																																					  OTEL_EXPORTER_OTLP_TIMEOUT = "1000",
-																																					  OTEL_EXPORTER_OTLP_COMPRESSION = "gzip",
-																																					  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT = "http://traces.json.example:4317",
-																																					  OTEL_EXPORTER_OTLP_TRACES_TIMEOUT = "1500",
-																																					  OTEL_EXPORTER_OTLP_METRICS_PROTOCOL = "http/protobuf",
-																																					  OTEL_EXPORTER_OTLP_LOGS_HEADERS = "x-logs=json-value",
-																																					  OTEL_EXPORTER_OTLP_LOGS_COMPRESSION = "none"
-																																				  }))
-																												  .AddEnvironmentVariables()
-																												  .AddCommandLine([
-																													  "--OTEL_EXPORTER_OTLP_ENDPOINT=http://command-line.example:4317",
-																													  "--OTEL_EXPORTER_OTLP_PROTOCOL=grpc"
-																												  ])
-																												  .Build();
-
-																	var options = ObservabilityOptionsBinder.Bind(configuration, ObservabilityHostProfile.Api);
-
-																	Assert.False(options.SdkDisabled);
-																	Assert.True(options.TracesEnabled);
-																	Assert.True(options.MetricsEnabled);
-																	Assert.True(options.LogsEnabled);
-
-																	// Same-key provider precedence: command line beats environment, and environment beats JSON.
-																	AssertSignalValue(configuration, "METRICS_", "ENDPOINT", "OTEL_EXPORTER_OTLP_ENDPOINT", "http://command-line.example:4317");
-																	AssertSignalValue(configuration, "LOGS_", "TIMEOUT", "OTEL_EXPORTER_OTLP_TIMEOUT", "2500");
-																	AssertSignalValue(configuration, "TRACES_", "COMPRESSION", "OTEL_EXPORTER_OTLP_COMPRESSION", "gzip");
-
-																	// A populated signal-specific key wins over its common key even when the common value comes from a higher-precedence provider.
-																	AssertSignalValue(configuration, "TRACES_", "ENDPOINT", "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://traces.json.example:4317");
-																	AssertSignalValue(configuration, "TRACES_", "TIMEOUT", "OTEL_EXPORTER_OTLP_TRACES_TIMEOUT", "1500");
-																	AssertSignalValue(configuration, "METRICS_", "PROTOCOL", "OTEL_EXPORTER_OTLP_METRICS_PROTOCOL", "http/protobuf");
-																	AssertSignalValue(configuration, "LOGS_", "HEADERS", "OTEL_EXPORTER_OTLP_LOGS_HEADERS", "x-logs=json-value");
-																	AssertSignalValue(configuration, "LOGS_", "COMPRESSION", "OTEL_EXPORTER_OTLP_LOGS_COMPRESSION", "none");
-																});
-
-	[Theory(DisplayName = "Every host profile keeps one unified exporter topology and its applicable instrumentations")]
-	[InlineData(nameof(ObservabilityHostProfile.Api))]
-	[InlineData(nameof(ObservabilityHostProfile.Worker))]
-	[InlineData(nameof(ObservabilityHostProfile.Gateway))]
-	public void EveryHostProfileKeepsOneUnifiedExporterTopologyAndItsApplicableInstrumentations(string profileName) =>
-		ObservabilityTestEnvironment.WithClearedOtelEnvironment(() =>
-																{
-																	var profile = System.Enum.Parse<ObservabilityHostProfile>(profileName);
-																	var builder = Host.CreateApplicationBuilder();
-																	builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] = "http://common.receiver.example:4317";
-																	builder.Configuration["OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"] = "http://traces.receiver.example:4317";
-																	builder.Configuration["OTEL_EXPORTER_OTLP_METRICS_ENDPOINT"] = "http://metrics.receiver.example:4318";
-																	builder.Configuration["OTEL_EXPORTER_OTLP_METRICS_PROTOCOL"] = "http/protobuf";
-																	builder.Configuration["OTEL_EXPORTER_OTLP_LOGS_HEADERS"] = "x-logs-routing=enabled";
-																	AddProfileObservability(builder, profile);
-
-																	using var host = builder.Build();
-
-																	Assert.Single(host.Services.GetServices<TracerProvider>());
-																	Assert.Single(host.Services.GetServices<MeterProvider>());
-																	Assert.Single(host.Services.GetServices<ILoggerProvider>(), provider => provider.GetType().Name == "OpenTelemetryLoggerProvider");
-																	var coordinator = Assert.Single(host.Services.GetServices<IHostedService>().OfType<ObservabilityShutdownFlushService>());
-																	Assert.Equal(3, coordinator.ProviderCount);
-
-																	var registration = host.Services.GetRequiredService<ObservabilityProfileRegistration>();
-																	Assert.Equal(profile, registration.Profile);
-
-																	var (expectedInstrumentations, applicableInstrumentations) = profile switch
-																																 {
-																																	 ObservabilityHostProfile.Api => (new[]
-																																												 {
-																																													 ObservabilityInstrumentation.Runtime,
-																																													 ObservabilityInstrumentation.AspNetCore,
-																																													 ObservabilityInstrumentation.Http,
-																																													 ObservabilityInstrumentation.SqlClient
-																																												 },
-																																											 ObservabilityProfileRegistration.ApiInstrumentations),
-																																	 ObservabilityHostProfile.Worker => (new[]
-																																						 {
-																																							 ObservabilityInstrumentation.Runtime,
-																																							 ObservabilityInstrumentation.Http,
-																																							 ObservabilityInstrumentation.SqlClient
-																																						 },
-																																					 ObservabilityProfileRegistration.WorkerInstrumentations),
-																																	 _ => ([
-																																			   ObservabilityInstrumentation.Runtime,
-																																			   ObservabilityInstrumentation.AspNetCore,
-																																			   ObservabilityInstrumentation.Http
-																																		   ],
-																																		   ObservabilityProfileRegistration.GatewayInstrumentations)
-																																 };
-
-																	Assert.Equal(expectedInstrumentations, applicableInstrumentations);
-																});
-
-	[Theory(DisplayName = "Only Gateway enables the native YARP activity source")]
-	[InlineData(nameof(ObservabilityHostProfile.Api))]
-	[InlineData(nameof(ObservabilityHostProfile.Worker))]
-	[InlineData(nameof(ObservabilityHostProfile.Gateway))]
-	public void OnlyGatewayEnablesNativeYarpActivitySource(string profileName)
-	{
-		ObservabilityTestEnvironment.WithClearedOtelEnvironment(() =>
-																{
-																	var profile = System.Enum.Parse<ObservabilityHostProfile>(profileName);
-																	var builder = Host.CreateApplicationBuilder();
-																	AddProfileObservability(builder, profile);
-																	var processor = new CapturingActivityProcessor();
-																	builder.Services
-																		   .AddOpenTelemetry()
-																		   .WithTracing(providerBuilder => providerBuilder.AddProcessor(processor));
-
-																	using var host = builder.Build();
-																	_ = host.Services.GetRequiredService<TracerProvider>();
-																	using var source = new ActivitySource("Yarp.ReverseProxy");
-																	using (source.StartActivity("runtime-test"))
-																	{
-																	}
-
-																	Assert.Equal(profile is ObservabilityHostProfile.Gateway,
-																				 processor.CompletedActivities.Any(activity => activity.Source.Name == source.Name));
-																});
-	}
-
-	[Theory(DisplayName = "Valid OTLP header grammar is accepted for common and per-Signal settings")]
-	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "x-api-key=abc123")]
-	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "x-first=1,x-second=2")]
-	[InlineData("OTEL_EXPORTER_OTLP_HEADERS", "x-encoded=a%3Db%2Cc")]
-	[InlineData("OTEL_EXPORTER_OTLP_TRACES_HEADERS", "Authorization=Bearer%20token")]
-	[InlineData("OTEL_EXPORTER_OTLP_METRICS_HEADERS", "x-metrics=metric-value")]
-	[InlineData("OTEL_EXPORTER_OTLP_LOGS_HEADERS", "x-logs=log-value")]
-	public void ValidOtlpHeaderGrammarIsAcceptedForCommonAndPerSignalSettings(string key, string value)
-	{
-		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration((key, value)), ObservabilityHostProfile.Api);
-
-		Assert.False(options.SdkDisabled);
-		Assert.True(options.TracesEnabled);
-		Assert.True(options.MetricsEnabled);
-		Assert.True(options.LogsEnabled);
-	}
-
-	[Fact(DisplayName = "Identity mode resolves through normal provider precedence without source restrictions")]
-	public void IdentityModeResolvesThroughNormalProviderPrecedenceWithoutSourceRestrictions() =>
-		ObservabilityTestEnvironment.WithClearedOtelEnvironment(() =>
-																{
-																	Environment.SetEnvironmentVariable("Observability__Identity__Mode", "HmacSha256");
-																	try
-																	{
-																		var commandLineWins = new ConfigurationBuilder()
-																							  .AddJsonStream(CreateJsonStream(new
-																															  {
-																																  Observability = new
-																																				  {
-																																					  Identity = new
-																																								 {
-																																									 Mode = "Subject"
-																																								 }
-																																				  }
-																															  }))
-																							  .AddEnvironmentVariables()
-																							  .AddCommandLine(["--Observability:Identity:Mode=Disabled"])
-																							  .Build();
-
-																		Assert.Equal(ObservabilityIdentityMode.Disabled, ObservabilityOptionsBinder.Bind(commandLineWins, ObservabilityHostProfile.Api).IdentityMode);
-
-																		var environmentWins = new ConfigurationBuilder()
-																							  .AddJsonStream(CreateJsonStream(new
-																															  {
-																																  Observability = new
-																																				  {
-																																					  Identity = new
-																																								 {
-																																									 Mode = "Subject"
-																																								 }
-																																				  }
-																															  }))
-																							  .AddEnvironmentVariables()
-																							  .Build();
-
-																		Assert.Equal(ObservabilityIdentityMode.HmacSha256, ObservabilityOptionsBinder.Bind(environmentWins, ObservabilityHostProfile.Api).IdentityMode);
-																	}
-																	finally
-																	{
-																		Environment.SetEnvironmentVariable("Observability__Identity__Mode", null);
-																	}
-																});
-
-	[Fact(DisplayName = "Unsupported exporter and certificate settings remain outside the validated routing surface")]
-	public void UnsupportedExporterAndCertificateSettingsRemainOutsideTheValidatedRoutingSurface()
-	{
-		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration(("OTEL_EXPORTER_OTLP_CERTIFICATE", "/etc/ssl/ca.crt"),
-																		  ("OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE", "/etc/ssl/client.crt"),
-																		  ("OTEL_EXPORTER_OTLP_CLIENT_KEY", "/etc/ssl/client.key"),
-																		  ("OTEL_TRACES_EXPORTER", "otlp"),
-																		  ("OTEL_METRICS_EXPORTER", "otlp"),
-																		  ("OTEL_LOGS_EXPORTER", "otlp"),
-																		  ("OTEL_PROPAGATORS", "b3")),
-													  ObservabilityHostProfile.Api);
-
-		Assert.False(options.SdkDisabled);
-		Assert.True(options.TracesEnabled);
-		Assert.True(options.MetricsEnabled);
-		Assert.True(options.LogsEnabled);
-		Assert.Empty(options.DiagnosticCodes);
-	}
-
-	[Fact(DisplayName = "Global disable leaves Console logging available without an OpenTelemetry provider")]
-	public void GlobalDisableLeavesConsoleLoggingAvailableWithoutAnOpenTelemetryProvider() =>
+	[Fact(DisplayName = "SDK disablement dominates malformed Signal settings and omits every provider")]
+	public void SdkDisablementDominatesMalformedSignalSettingsAndOmitsEveryProvider() =>
 		ObservabilityTestEnvironment.WithClearedOtelEnvironment(() =>
 																{
 																	var builder = Host.CreateApplicationBuilder();
 																	builder.Configuration["OTEL_SDK_DISABLED"] = "true";
+																	builder.Configuration["Observability:Signals:Traces:Enabled"] = "not-a-boolean";
+
 																	builder.AddApiObservability();
 
 																	using var host = builder.Build();
-																	var providers = host.Services.GetServices<ILoggerProvider>().ToArray();
-
-																	Assert.Contains(providers, provider => provider.GetType().Name == "ConsoleLoggerProvider");
-																	Assert.DoesNotContain(providers, provider => provider.GetType().Name == "OpenTelemetryLoggerProvider");
-																	Assert.Empty(host.Services.GetServices<TracerProvider>());
-																	Assert.Empty(host.Services.GetServices<MeterProvider>());
-																	Assert.DoesNotContain(host.Services.GetServices<IHostedService>(),
-																						  service => service.GetType().Namespace?.StartsWith("OpenTelemetry", StringComparison.Ordinal) is true);
-																	Assert.Null(builder.Configuration["OTEL_BLRP_SCHEDULE_DELAY"]);
+																	host.Services.GetServices<TracerProvider>().Should().BeEmpty();
+																	host.Services.GetServices<MeterProvider>().Should().BeEmpty();
+																	host.Services.GetServices<LoggerProvider>().Should().BeEmpty();
 																});
 
-	[Fact(DisplayName = "All disabled Signals construct no OpenTelemetry provider and apply no defaults")]
-	public void AllDisabledSignalsConstructNoOpenTelemetryProvider() =>
+	[Fact(DisplayName = "Disabled Signals omit providers while Console logging remains available")]
+	public void DisabledSignalsOmitProvidersWhileConsoleLoggingRemainsAvailable() =>
 		ObservabilityTestEnvironment.WithClearedOtelEnvironment(() =>
 																{
 																	var builder = Host.CreateApplicationBuilder();
 																	builder.Configuration["Observability:Signals:Traces:Enabled"] = "false";
 																	builder.Configuration["Observability:Signals:Metrics:Enabled"] = "false";
 																	builder.Configuration["Observability:Signals:Logs:Enabled"] = "false";
+
 																	builder.AddApiObservability();
 
 																	using var host = builder.Build();
-
-																	Assert.DoesNotContain(host.Services.GetServices<ILoggerProvider>(), provider => provider.GetType().Name == "OpenTelemetryLoggerProvider");
-																	Assert.Empty(host.Services.GetServices<TracerProvider>());
-																	Assert.Empty(host.Services.GetServices<MeterProvider>());
-																	Assert.DoesNotContain(host.Services.GetServices<IHostedService>(),
-																						  service => service.GetType().Namespace?.StartsWith("OpenTelemetry", StringComparison.Ordinal) is true);
-																	Assert.Null(builder.Configuration["OTEL_BSP_SCHEDULE_DELAY"]);
+																	host.Services.GetServices<TracerProvider>().Should().BeEmpty();
+																	host.Services.GetServices<MeterProvider>().Should().BeEmpty();
+																	host.Services.GetServices<LoggerProvider>().Should().BeEmpty();
+																	host.Services.GetServices<ILoggerProvider>().Should().Contain(provider => provider.GetType().Name == "ConsoleLoggerProvider");
 																});
 
-	[Fact(DisplayName = "Enabled composition registers one provider per enabled Signal and applies adopted defaults")]
-	public void EnabledCompositionRegistersProvidersAndAppliesAdoptedDefaults() =>
-		ObservabilityTestEnvironment.WithClearedOtelEnvironment(() =>
-																{
-																	var builder = Host.CreateApplicationBuilder();
-																	builder.Configuration["OTEL_BSP_EXPORT_TIMEOUT"] = "2500";
-																	builder.AddApiObservability();
-
-																	using var host = builder.Build();
-
-																	Assert.Single(host.Services.GetServices<TracerProvider>());
-																	Assert.Single(host.Services.GetServices<MeterProvider>());
-																	Assert.Single(host.Services.GetServices<ILoggerProvider>(), provider => provider.GetType().Name == "OpenTelemetryLoggerProvider");
-
-																	// Operator-supplied values win; missing keys receive Monaco's adopted defaults.
-																	Assert.Equal("2500", builder.Configuration["OTEL_BSP_EXPORT_TIMEOUT"]);
-																	Assert.Equal("5000", builder.Configuration["OTEL_EXPORTER_OTLP_TIMEOUT"]);
-																	Assert.Equal("5000", builder.Configuration["OTEL_BSP_SCHEDULE_DELAY"]);
-																	Assert.Equal("2048", builder.Configuration["OTEL_BSP_MAX_QUEUE_SIZE"]);
-																	Assert.Equal("512", builder.Configuration["OTEL_BSP_MAX_EXPORT_BATCH_SIZE"]);
-																	Assert.Equal("60000", builder.Configuration["OTEL_METRIC_EXPORT_INTERVAL"]);
-																	Assert.Equal("5000", builder.Configuration["OTEL_METRIC_EXPORT_TIMEOUT"]);
-																	Assert.Equal("5000", builder.Configuration["OTEL_BLRP_SCHEDULE_DELAY"]);
-																	Assert.Equal("5000", builder.Configuration["OTEL_BLRP_EXPORT_TIMEOUT"]);
-																	Assert.Equal("2048", builder.Configuration["OTEL_BLRP_MAX_QUEUE_SIZE"]);
-																	Assert.Equal("512", builder.Configuration["OTEL_BLRP_MAX_EXPORT_BATCH_SIZE"]);
-																});
-
-	[Fact(DisplayName = "Host builder composition captures immutable startup options")]
-	public void HostBuilderCompositionCapturesImmutableStartupOptions() =>
-		ObservabilityTestEnvironment.WithClearedOtelEnvironment(() =>
-																{
-																	var builder = Host.CreateApplicationBuilder();
-																	builder.Configuration["Observability:Signals:Traces:Enabled"] = "false";
-																	builder.AddApiObservability();
-																	builder.Configuration["Observability:Signals:Traces:Enabled"] = "true";
-
-																	using var host = builder.Build();
-																	var options = host.Services.GetRequiredService<IOptions<ObservabilityStartupOptions>>().Value;
-
-																	Assert.False(options.TracesEnabled);
-																});
-
-	[Fact(DisplayName = "Enabled composition registers one bounded shutdown coordinator for all enabled providers")]
-	public void EnabledCompositionRegistersOneBoundedShutdownCoordinatorForAllEnabledProviders() =>
+	[Fact(DisplayName = "Enabled composition creates one provider for each Signal")]
+	public void EnabledCompositionCreatesOneProviderForEachSignal() =>
 		ObservabilityTestEnvironment.WithClearedOtelEnvironment(() =>
 																{
 																	var builder = Host.CreateApplicationBuilder();
 																	builder.AddApiObservability();
 
 																	using var host = builder.Build();
-																	var coordinator = Assert.Single(host.Services.GetServices<IHostedService>().OfType<ObservabilityShutdownFlushService>());
-
-																	Assert.Equal(3, coordinator.ProviderCount);
+																	host.Services.GetServices<TracerProvider>().Should().ContainSingle();
+																	host.Services.GetServices<MeterProvider>().Should().ContainSingle();
+																	host.Services.GetServices<LoggerProvider>().Should().ContainSingle();
 																});
 
-	[Fact(DisplayName = "Configuration and exporter diagnostics are throttled per code and host role")]
-	public void ConfigurationAndExporterDiagnosticsAreThrottledPerCodeAndHostRole()
+	[Fact(DisplayName = "Standard OpenTelemetry settings pass through without Monaco validation or mutation")]
+	public void StandardOpenTelemetrySettingsPassThroughWithoutMonacoValidationOrMutation()
 	{
-		var timeProvider = new AdjustableTimeProvider(new DateTimeOffset(2026, 8, 2, 0, 0, 0, TimeSpan.Zero));
-		var logger = new CapturingLogger();
-		ObservabilityConfigurationDiagnosticThrottle.Reset();
+		var builder = Host.CreateApplicationBuilder();
+		builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] = "consumer-selected-endpoint";
+		builder.Configuration["OTEL_TRACES_SAMPLER"] = "consumer-selected-sampler";
+		builder.Configuration["OTEL_BSP_MAX_QUEUE_SIZE"] = "consumer-selected-queue";
+		builder.Configuration["OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY"] = "consumer-selected-retry";
 
-		ObservabilityConfigurationDiagnosticThrottle.Report(logger, ObservabilityConfigurationDiagnosticCodes.OtlpExportFailure, ObservabilityHostProfile.Api, timeProvider);
-		ObservabilityConfigurationDiagnosticThrottle.Report(logger, ObservabilityConfigurationDiagnosticCodes.OtlpExportFailure, ObservabilityHostProfile.Api, timeProvider);
-		ObservabilityConfigurationDiagnosticThrottle.Report(logger, ObservabilityConfigurationDiagnosticCodes.OtlpExportFailure, ObservabilityHostProfile.Api, timeProvider);
+		builder.AddApiObservability();
 
-		timeProvider.Advance(TimeSpan.FromMinutes(5));
-		ObservabilityConfigurationDiagnosticThrottle.Report(logger, ObservabilityConfigurationDiagnosticCodes.OtlpExportFailure, ObservabilityHostProfile.Api, timeProvider);
-
-		Assert.Equal(2, logger.Messages.Count);
-		Assert.Contains("OBS_OTLP_EXPORT_FAILURE", logger.Messages[0], StringComparison.Ordinal);
-		Assert.Contains("Api", logger.Messages[0], StringComparison.Ordinal);
-		Assert.Contains("suppressedCount 2", logger.Messages[1], StringComparison.Ordinal);
+		builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"].Should().Be("consumer-selected-endpoint");
+		builder.Configuration["OTEL_TRACES_SAMPLER"].Should().Be("consumer-selected-sampler");
+		builder.Configuration["OTEL_BSP_MAX_QUEUE_SIZE"].Should().Be("consumer-selected-queue");
+		builder.Configuration["OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY"].Should().Be("consumer-selected-retry");
 	}
 
-	[Fact(DisplayName = "Exporter error events use the safe diagnostic seam")]
-	public void ExporterErrorEventsUseTheSafeDiagnosticSeam()
+	[Fact(DisplayName = "Host composition captures one immutable Signal snapshot")]
+	public void HostCompositionCapturesOneImmutableSignalSnapshot()
 	{
-		var reports = 0;
-		using var listener = new OtlpExporterFailureListener(TestExporterEventSourceName);
-		listener.Start(() => reports++);
-		using var exporter = new TestOtlpExporterEventSource();
+		var builder = Host.CreateApplicationBuilder();
+		builder.Configuration["Observability:Signals:Traces:Enabled"] = "false";
+		builder.AddApiObservability();
+		builder.Configuration["Observability:Signals:Traces:Enabled"] = "true";
 
-		exporter.ExportFailed();
-
-		SpinWait.SpinUntil(() => reports == 1, TimeSpan.FromSeconds(1));
-
-		Assert.Equal(1, reports);
+		using var host = builder.Build();
+		host.Services.GetRequiredService<IOptions<ObservabilityStartupOptions>>().Value.TracesEnabled.Should().BeFalse();
 	}
 
-	[Fact(DisplayName = "Positive sub-millisecond flush timeout rounds up for ForceFlush")]
-	public void PositiveSubMillisecondFlushTimeoutRoundsUpForForceFlush() =>
-		Assert.Equal(1, ObservabilityShutdownFlushService.GetFlushTimeoutMilliseconds(TimeSpan.FromTicks(1)));
-
-	[Fact(DisplayName = "HMAC conformance vector produces the exact preimage and unpadded Base64URL digest")]
-	public void HmacConformanceVectorProducesExactPreimageAndUnpaddedBase64UrlDigest()
+	[Fact(DisplayName = "A host cannot register more than one observability profile")]
+	public void HostCannotRegisterMoreThanOneObservabilityProfile()
 	{
-		var keyBytes = Enumerable.Range(0, 32).Select(i => (byte)i).ToArray();
-		var keyBase64 = "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=";
-		var iss = "https://identity.example/realms/acme";
-		var sub = "248289761001";
+		var builder = Host.CreateApplicationBuilder();
+		builder.AddApiObservability();
 
-		Assert.Equal(keyBytes, Convert.FromBase64String(keyBase64));
+		var action = builder.AddWorkerObservability;
 
-		var digest = HmacSha256Identity.Compute(keyBytes, iss, sub);
-
-		Assert.Equal("8_qChW4TmKfjDc45QADmS9iN87w1UkEN7xsGY8tZOnM", digest);
-		Assert.Equal(43, digest.Length);
-		Assert.DoesNotContain("=", digest, StringComparison.Ordinal);
-		Assert.DoesNotContain("+", digest, StringComparison.Ordinal);
-		Assert.DoesNotContain("/", digest, StringComparison.Ordinal);
+		action.Should().Throw<InvalidOperationException>();
 	}
 
-	[Fact(DisplayName = "Valid standard-Base64 HMAC key with sufficient length resolves correctly")]
-	public void ValidStandardBase64HmacKeyWithSufficientLengthResolvesCorrectly()
+	[Fact(DisplayName = "Authenticated requests attach the raw validated subject to the entry span and log scope")]
+	public async Task AuthenticatedRequestsAttachRawValidatedSubjectToEntrySpanAndLogScope()
 	{
-		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:Identity:Mode", "HmacSha256"),
-																		  ("Observability:Identity:HmacSha256Key", "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=")),
-													  ObservabilityHostProfile.Api);
+		const string subject = "raw-subject-248289761001";
+		var logger = new CapturingLogger<IdentityEnrichmentMiddleware>();
+		var context = new DefaultHttpContext
+					  {
+						  User = new ClaimsPrincipal(new ClaimsIdentity([new Claim("sub", subject)], "validated"))
+					  };
+		using var activity = new Activity("request").Start();
+		var nextCalled = false;
+		var middleware = new IdentityEnrichmentMiddleware(_ =>
+														  {
+															  nextCalled = true;
+															  return Task.CompletedTask;
+														  },
+														  logger);
 
-		Assert.Equal(ObservabilityIdentityMode.HmacSha256, options.IdentityMode);
-		Assert.NotNull(options.HmacSha256KeyBytes);
-		Assert.Equal(32, options.HmacSha256KeyBytes.Length);
-		Assert.Empty(options.DiagnosticCodes);
+		await middleware.InvokeAsync(context);
+
+		nextCalled.Should().BeTrue();
+		activity.GetTagItem("user.id").Should().Be(subject);
+		logger.Scopes.Should().ContainSingle()
+			  .Which.Should().Contain(new KeyValuePair<string, object?>("user.id", subject));
 	}
 
-	[Theory(DisplayName = "Invalid HMAC keys disable enrichment without raw-subject fallback")]
-	[InlineData(null)]
-	[InlineData("")]
-	[InlineData("not-base64")]
-	[InlineData("AAAA")]
-	[InlineData("AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8")]
-	[InlineData("AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh-")]
-	public void InvalidHmacKeysDisableEnrichmentWithoutRawSubjectFallback(string? key)
+	[Fact(DisplayName = "Unauthenticated requests continue without identity telemetry")]
+	public async Task UnauthenticatedRequestsContinueWithoutIdentityTelemetry()
 	{
-		var pairs = new List<(string Key, string? Value)>
-					{
-						("Observability:Identity:Mode", "HmacSha256")
-					};
-		if (key is not null)
-			pairs.Add(("Observability:Identity:HmacSha256Key", key));
+		var logger = new CapturingLogger<IdentityEnrichmentMiddleware>();
+		var context = new DefaultHttpContext();
+		using var activity = new Activity("request").Start();
+		var nextCalled = false;
+		var middleware = new IdentityEnrichmentMiddleware(_ =>
+														  {
+															  nextCalled = true;
+															  return Task.CompletedTask;
+														  },
+														  logger);
 
-		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration(pairs.ToArray()), ObservabilityHostProfile.Api);
+		await middleware.InvokeAsync(context);
 
-		Assert.Equal(ObservabilityIdentityMode.HmacSha256, options.IdentityMode);
-		Assert.Null(options.HmacSha256KeyBytes);
-		Assert.Contains(ObservabilityConfigurationDiagnosticCodes.InvalidHmacKey, options.DiagnosticCodes);
+		nextCalled.Should().BeTrue();
+		activity.GetTagItem("user.id").Should().BeNull();
+		logger.Scopes.Should().BeEmpty();
 	}
 
-	[Fact(DisplayName = "HMAC key with trailing junk bytes fails complete consumption")]
-	public void HmacKeyWithTrailingJunkFailsCompleteConsumption()
+	[Fact(DisplayName = "Boundary exception handling logs the original exception without mutating the Activity")]
+	public async Task BoundaryExceptionHandlingLogsOriginalExceptionWithoutMutatingActivity()
 	{
-		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:Identity:Mode", "HmacSha256"),
-																		  ("Observability:Identity:HmacSha256Key", "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=junk")),
-													  ObservabilityHostProfile.Api);
+		var logger = new CapturingLogger<BoundaryExceptionHandler>();
+		var handler = new BoundaryExceptionHandler(logger);
+		var context = new DefaultHttpContext();
+		var exception = new InvalidOperationException("native exception detail");
+		using var activity = new Activity("request").Start();
+		activity.SetTag("exception.type", "existing");
+		activity.AddEvent(new ActivityEvent("existing-event"));
 
-		Assert.Null(options.HmacSha256KeyBytes);
-		Assert.Contains(ObservabilityConfigurationDiagnosticCodes.InvalidHmacKey, options.DiagnosticCodes);
-	}
+		var handled = await handler.TryHandleAsync(context, exception, CancellationToken.None);
 
-	[Fact(DisplayName = "Base64URL-encoded HMAC key is rejected in favor of strict standard Base64")]
-	public void Base64UrlEncodedHmacKeyIsRejected()
-	{
-		var options = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:Identity:Mode", "HmacSha256"),
-																		  ("Observability:Identity:HmacSha256Key", "_________________________________________8")),
-													  ObservabilityHostProfile.Api);
-
-		Assert.Null(options.HmacSha256KeyBytes);
-		Assert.Contains(ObservabilityConfigurationDiagnosticCodes.InvalidHmacKey, options.DiagnosticCodes);
-	}
-
-	[Fact(DisplayName = "Identity mode and HMAC key resolve through JSON, environment, and command-line provider precedence")]
-	public void IdentityModeAndHmacKeyResolveThroughProviderPrecedence() =>
-		ObservabilityTestEnvironment.WithClearedOtelEnvironment(() =>
-																{
-																	Environment.SetEnvironmentVariable("Observability__Identity__Mode", "HmacSha256");
-																	Environment.SetEnvironmentVariable("Observability__Identity__HmacSha256Key", "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=");
-																	try
-																	{
-																		var commandLineWins = new ConfigurationBuilder()
-																							  .AddJsonStream(CreateJsonStream(new
-																															  {
-																																  Observability = new
-																																				  {
-																																					  Identity = new
-																																								 {
-																																									 Mode = "Subject",
-																																									 HmacSha256Key = "not-a-key"
-																																								 }
-																																				  }
-																															  }))
-																							  .AddEnvironmentVariables()
-																							  .AddCommandLine(["--Observability:Identity:Mode=Disabled"])
-																							  .Build();
-
-																		var disabledOptions = ObservabilityOptionsBinder.Bind(commandLineWins, ObservabilityHostProfile.Api);
-																		Assert.Equal(ObservabilityIdentityMode.Disabled, disabledOptions.IdentityMode);
-																		Assert.Null(disabledOptions.HmacSha256KeyBytes);
-
-																		var environmentWins = new ConfigurationBuilder()
-																							  .AddJsonStream(CreateJsonStream(new
-																															  {
-																																  Observability = new
-																																				  {
-																																					  Identity = new
-																																								 {
-																																									 Mode = "Subject",
-																																									 HmacSha256Key = "not-a-key"
-																																								 }
-																																				  }
-																															  }))
-																							  .AddEnvironmentVariables()
-																							  .Build();
-
-																		var hmacOptions = ObservabilityOptionsBinder.Bind(environmentWins, ObservabilityHostProfile.Api);
-																		Assert.Equal(ObservabilityIdentityMode.HmacSha256, hmacOptions.IdentityMode);
-																		Assert.NotNull(hmacOptions.HmacSha256KeyBytes);
-																		Assert.Equal(32, hmacOptions.HmacSha256KeyBytes.Length);
-																	}
-																	finally
-																	{
-																		Environment.SetEnvironmentVariable("Observability__Identity__Mode", null);
-																		Environment.SetEnvironmentVariable("Observability__Identity__HmacSha256Key", null);
-																	}
-																});
-
-	[Fact(DisplayName = "Identity mode change does not alter Metric recording or business persistence")]
-	public void IdentityModeChangeDoesNotAlterMetricRecordingOrBusinessPersistence()
-	{
-		var subjectOptions = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:Identity:Mode", "Subject")),
-															 ObservabilityHostProfile.Api);
-		var disabledOptions = ObservabilityOptionsBinder.Bind(CreateConfiguration(("Observability:Identity:Mode", "Disabled")),
-															  ObservabilityHostProfile.Api);
-
-		Assert.True(subjectOptions.MetricsEnabled);
-		Assert.True(disabledOptions.MetricsEnabled);
-		Assert.Equal(subjectOptions.TracesEnabled, disabledOptions.TracesEnabled);
-		Assert.Equal(subjectOptions.LogsEnabled, disabledOptions.LogsEnabled);
-	}
-
-	[Fact(DisplayName = "API and Gateway SSO:Authority values are byte-for-byte equal in the checked-in source")]
-	public void ApiAndGatewaySsoAuthorityValuesAreByteForByteEqual()
-	{
-		var solutionDirectory = FindSolutionDirectory();
-		var apiSettings = File.ReadAllText(Path.Combine(solutionDirectory, "Monaco.Template.Backend.Api", "appsettings.json"));
-		var gatewaySettings = File.ReadAllText(Path.Combine(solutionDirectory, "Monaco.Template.Backend.Common.ApiGateway", "appsettings.json"));
-
-		var apiAuthority = ExtractSsoAuthority(apiSettings);
-		var gatewayAuthority = ExtractSsoAuthority(gatewaySettings);
-
-		Assert.NotNull(apiAuthority);
-		Assert.NotNull(gatewayAuthority);
-		Assert.Equal(apiAuthority, gatewayAuthority);
-		Assert.Equal("http://localhost:8080/realms/monaco-template", apiAuthority);
-	}
-
-	private static string? ExtractSsoAuthority(string jsonContent)
-	{
-		using var document = System.Text.Json.JsonDocument.Parse(jsonContent, new System.Text.Json.JsonDocumentOptions { CommentHandling = System.Text.Json.JsonCommentHandling.Skip });
-		return document.RootElement.TryGetProperty("SSO", out var sso) && sso.TryGetProperty("Authority", out var authority)
-				   ? authority.GetString()
-				   : null;
-	}
-
-	private static string FindSolutionDirectory()
-	{
-		for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
-			if (File.Exists(Path.Combine(directory.FullName, "Monaco.Template.Backend.slnx")))
-				return directory.FullName;
-
-		throw new DirectoryNotFoundException("Could not locate Monaco.Template.Backend.slnx from the test output directory.");
+		handled.Should().BeTrue();
+		context.Response.StatusCode.Should().Be(StatusCodes.Status500InternalServerError);
+		logger.Entries.Should().ContainSingle(entry => entry.LogLevel == LogLevel.Error && ReferenceEquals(entry.Exception, exception));
+		activity.GetTagItem("exception.type").Should().Be("existing");
+		activity.Events.Should().ContainSingle(@event => @event.Name == "existing-event");
 	}
 
 	private static IConfiguration CreateConfiguration(params (string Key, string? Value)[] values) =>
 		new ConfigurationBuilder().AddInMemoryCollection(values.ToDictionary(value => value.Key, value => value.Value)).Build();
 
-	private static MemoryStream CreateJsonStream(object values) => new(System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(values));
+	private sealed record CapturedLogEntry(LogLevel LogLevel, Exception? Exception);
 
-	private static void AssertSignalValue(IConfiguration configuration, string signalPrefix, string suffix, string expectedKey, string expectedValue)
+	private sealed class CapturingLogger<T> : ILogger<T>
 	{
-		var setting = OtelConfigurationPreflightValidator.GetSignalValue(configuration, signalPrefix, suffix);
+		internal List<IReadOnlyCollection<KeyValuePair<string, object?>>> Scopes { get; } = [];
+		internal List<CapturedLogEntry> Entries { get; } = [];
 
-		Assert.Equal(expectedKey, setting.Key);
-		Assert.Equal(expectedValue, setting.Value);
-	}
-
-	private static IHostApplicationBuilder AddProfileObservability(IHostApplicationBuilder builder, ObservabilityHostProfile profile) =>
-		profile switch
+		public IDisposable? BeginScope<TState>(TState state) where TState : notnull
 		{
-			ObservabilityHostProfile.Api => builder.AddApiObservability(),
-			ObservabilityHostProfile.Worker => builder.AddWorkerObservability(),
-			_ => builder.AddGatewayObservability()
-		};
+			if (state is IReadOnlyCollection<KeyValuePair<string, object?>> fields)
+				Scopes.Add(fields);
 
-	private sealed class AdjustableTimeProvider(DateTimeOffset now) : TimeProvider
-	{
-		public override DateTimeOffset GetUtcNow() => now;
-
-		public void Advance(TimeSpan duration) => now = now.Add(duration);
-	}
-
-	private sealed class CapturingLogger : ILogger
-	{
-		public List<string> Messages { get; } = [];
-
-		public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+			return NullScope.Instance;
+		}
 
 		public bool IsEnabled(LogLevel logLevel) => true;
 
-		public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
-			Messages.Add(formatter(state, exception));
+		public void Log<TState>(LogLevel logLevel,
+								EventId eventId,
+								TState state,
+								Exception? exception,
+								Func<TState, Exception?, string> formatter) =>
+			Entries.Add(new CapturedLogEntry(logLevel, exception));
 	}
 
-	private sealed class CapturingLoggerFactory : ILoggerFactory
+	private sealed class NullScope : IDisposable
 	{
-		internal List<CapturedLogEntry> Entries { get; } = [];
-
-		public void AddProvider(ILoggerProvider provider)
-		{
-		}
-
-		public ILogger CreateLogger(string categoryName) =>
-			new CapturingLoggerEntry(categoryName, Entries);
+		internal static NullScope Instance { get; } = new();
 
 		public void Dispose()
 		{
 		}
-	}
-
-	private sealed record CapturedLogEntry(string Category, LogLevel LogLevel, EventId EventId, object State, Exception? Exception);
-
-	private sealed class CapturingLoggerEntry(string category, List<CapturedLogEntry> entries) : ILogger
-	{
-		public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
-
-		public bool IsEnabled(LogLevel logLevel) => true;
-
-		public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
-			entries.Add(new CapturedLogEntry(category, logLevel, eventId, state!, exception));
-	}
-
-	private sealed class CapturingLogRecordProcessor : BaseProcessor<LogRecord>
-	{
-		internal string? Body { get; private set; }
-
-		internal string? FormattedMessage { get; private set; }
-
-		internal Exception? Exception { get; private set; }
-
-		internal IReadOnlyList<KeyValuePair<string, object?>>? Attributes { get; private set; }
-
-		public override void OnEnd(LogRecord data)
-		{
-			Body = data.Body;
-			FormattedMessage = data.FormattedMessage;
-			Exception = data.Exception;
-			Attributes = data.Attributes;
-		}
-	}
-
-	private sealed class CapturingActivityProcessor : BaseProcessor<Activity>
-	{
-		internal List<Activity> CompletedActivities { get; } = [];
-
-		public override void OnEnd(Activity data) =>
-			CompletedActivities.Add(data);
-	}
-
-	[EventSource(Name = TestExporterEventSourceName)]
-	private sealed class TestOtlpExporterEventSource : EventSource
-	{
-		[Event(1, Level = EventLevel.Error)]
-		public void ExportFailed() =>
-			WriteEvent(1);
 	}
 }
 
