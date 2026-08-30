@@ -476,16 +476,27 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("configuration-only Metrics routing", guide, StringComparison.Ordinal);
 	}
 
-	[Fact(DisplayName = "Identity enrichment attaches the raw validated subject without transformation policy")]
-	public void IdentityEnrichmentAttachesRawValidatedSubjectWithoutTransformationPolicy()
+	[Fact(DisplayName = "Identity enrichment retains raw validated claims without Monaco policy")]
+	public void IdentityEnrichmentRetainsRawValidatedClaimsWithoutMonacoPolicy()
 	{
 		var centralPackages = ReadSolutionFile("Directory.Packages.props");
 		var middleware = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "IdentityEnrichmentMiddleware.cs"));
 
 		Assert.Equal(OpenTelemetryPackages.Length, CountOccurrences(centralPackages, "PackageVersion Include=\"OpenTelemetry."));
+		Assert.Contains("System.Collections.Immutable", middleware, StringComparison.Ordinal);
 		Assert.Contains("System.Diagnostics", middleware, StringComparison.Ordinal);
+		Assert.Contains(".ToImmutableArray()", middleware, StringComparison.Ordinal);
+		Assert.Contains("ValidatedClaimContext(string Type", middleware, StringComparison.Ordinal);
+		Assert.Contains("FirstOrDefault(claim => claim.Type == SubClaimType && !string.IsNullOrEmpty(claim.Value))?.Value", middleware, StringComparison.Ordinal);
+		Assert.Contains("if (!string.IsNullOrEmpty(sub))", middleware, StringComparison.Ordinal);
 		Assert.Contains("SetTag(UserIdTag, sub)", middleware, StringComparison.Ordinal);
+		Assert.Contains("AddEvent(CreateClaimEvent(claim))", middleware, StringComparison.Ordinal);
 		Assert.Contains("BeginScope", middleware, StringComparison.Ordinal);
+		Assert.Contains("user.claims", middleware, StringComparison.Ordinal);
+
+		foreach (var attribute in new[] { "user.claim.type", "user.claim.value", "user.claim.value_type", "user.claim.issuer", "user.claim.original_issuer" })
+			Assert.Contains(attribute, middleware, StringComparison.Ordinal);
+
 		Assert.DoesNotContain("Hmac", middleware, StringComparison.OrdinalIgnoreCase);
 		Assert.DoesNotContain("IdentityMode", middleware, StringComparison.Ordinal);
 		Assert.False(File.Exists(Path.Combine(FindSolutionDirectory(), "Monaco.Template.Backend.Common.Observability", "HmacSha256Identity.cs")));
@@ -518,29 +529,34 @@ public sealed class ObservabilityPackageGraphTests
 					"Gateway middleware order must be: UseAuthentication → UseIdentityEnrichment → UseAuthorization.");
 	}
 
-	[Fact(DisplayName = "Generated local observability guide documents raw validated subject correlation for auth-enabled shapes")]
-	public void GeneratedLocalObservabilityGuideDocumentsRawValidatedSubjectCorrelationForAuthEnabledShapes()
+	[Fact(DisplayName = "Generated local observability guide documents raw validated claim correlation for auth-enabled shapes")]
+	public void GeneratedLocalObservabilityGuideDocumentsRawValidatedClaimCorrelationForAuthEnabledShapes()
 	{
 		var guide = ReadSolutionFile("OBSERVABILITY.md").Replace("\r\n", "\n", StringComparison.Ordinal);
 
 		Assert.DoesNotContain("<!-- OBSERVABILITY: 2.5 IDENTITY -->", guide, StringComparison.Ordinal);
 		Assert.Contains("## Authenticated request identity", guide, StringComparison.Ordinal);
+		Assert.Contains("first non-empty raw validated `sub`", guide, StringComparison.Ordinal);
 		Assert.Contains("raw validated `sub`", guide, StringComparison.Ordinal);
+		Assert.Contains("`user.claim`", guide, StringComparison.Ordinal);
+		Assert.Contains("`user.claims`", guide, StringComparison.Ordinal);
+		Assert.Contains("native ASP.NET Core entry Activity", guide, StringComparison.Ordinal);
 		Assert.DoesNotContain("HmacSha256", guide, StringComparison.Ordinal);
 		Assert.DoesNotContain("Observability:Identity", guide, StringComparison.Ordinal);
 	}
 
-	[Fact(DisplayName = "Identity enrichment middleware writes user.id only to the entry span and logging scope")]
-	public void IdentityEnrichmentWritesOnlyToEntrySpanAndLoggingScope()
+	[Fact(DisplayName = "Identity enrichment middleware emits claim events only to the entry span and logging scope")]
+	public void IdentityEnrichmentEmitsClaimEventsOnlyToEntrySpanAndLoggingScope()
 	{
 		var middleware = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "IdentityEnrichmentMiddleware.cs"));
 
-		Assert.Contains("Activity.Current?.SetTag", middleware, StringComparison.Ordinal);
+		Assert.Contains("Activity.Current", middleware, StringComparison.Ordinal);
+		Assert.Contains("AddEvent", middleware, StringComparison.Ordinal);
 		Assert.Contains("BeginScope", middleware, StringComparison.Ordinal);
 		Assert.DoesNotContain("Baggage", middleware, StringComparison.Ordinal);
 		Assert.DoesNotContain("AddBaggage", middleware, StringComparison.Ordinal);
 		Assert.DoesNotContain("RecordObservable", middleware, StringComparison.Ordinal);
-		Assert.DoesNotContain("AddEvent", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("StartActivity", middleware, StringComparison.Ordinal);
 	}
 
 	[Fact(DisplayName = "Observability resource attributes do not include user.id")]

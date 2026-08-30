@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Security.Claims;
 using AwesomeAssertions;
@@ -116,21 +117,30 @@ public sealed class ObservabilityConfigurationTests
 		action.Should().Throw<InvalidOperationException>();
 	}
 
-	[Fact(DisplayName = "Authenticated requests attach the raw validated subject to the entry span and log scope")]
-	public async Task AuthenticatedRequestsAttachRawValidatedSubjectToEntrySpanAndLogScope()
+	[Fact(DisplayName = "Authenticated requests select the first non-empty validated subject and attach raw claims to the entry span and log scope")]
+	public async Task AuthenticatedRequestsSelectFirstNonEmptyValidatedSubjectAndAttachRawClaimsToEntrySpanAndLogScope()
 	{
 		const string subject = "raw-subject-248289761001";
+		Claim[] claims =
+		[
+			new("sub", string.Empty, "empty-subject-value-type", "empty-subject-issuer", "empty-subject-original-issuer"),
+			new("role", "administrator", "role-value-type", "role-issuer", "role-original-issuer"),
+			new("sub", subject, "subject-value-type", "subject-issuer", "subject-original-issuer"),
+			new("role", "administrator", "role-value-type", "role-issuer", "role-original-issuer")
+		];
+		var expectedClaims = CreateValidatedClaimContexts(claims);
 		var logger = new CapturingLogger<IdentityEnrichmentMiddleware>();
 		var context = new DefaultHttpContext
 					  {
-						  User = new ClaimsPrincipal(new ClaimsIdentity([new Claim("sub", subject)], "validated"))
+						  User = new ClaimsPrincipal(new ClaimsIdentity(claims, "validated"))
 					  };
 		using var activity = new Activity("request").Start();
 		var nextCalled = false;
 		var middleware = new IdentityEnrichmentMiddleware(_ =>
-														  {
-															  nextCalled = true;
-															  return Task.CompletedTask;
+										  {
+											  nextCalled = true;
+											  logger.LogInformation("Identity-enriched downstream request");
+											  return Task.CompletedTask;
 														  },
 														  logger);
 
@@ -138,8 +148,54 @@ public sealed class ObservabilityConfigurationTests
 
 		nextCalled.Should().BeTrue();
 		activity.GetTagItem("user.id").Should().Be(subject);
-		logger.Scopes.Should().ContainSingle()
-			  .Which.Should().Contain(new KeyValuePair<string, object?>("user.id", subject));
+		AssertClaimEvents(activity, expectedClaims);
+
+		var scope = logger.Scopes.Should().ContainSingle().Which;
+		scope.Should().Contain(new KeyValuePair<string, object?>("user.id", subject));
+		GetScopedClaims(scope).Should().Equal(expectedClaims);
+
+		var downstreamScope = logger.Entries.Should().ContainSingle().Which.Scopes.Should().ContainSingle().Which;
+		downstreamScope.Should().Contain(new KeyValuePair<string, object?>("user.id", subject));
+		GetScopedClaims(downstreamScope).Should().Equal(expectedClaims);
+	}
+
+	[Fact(DisplayName = "Authenticated client requests without subject retain raw claims without user id")]
+	public async Task AuthenticatedClientRequestsWithoutSubjectRetainRawClaimsWithoutUserId()
+	{
+		Claim[] claims =
+		[
+			new("client_id", "orders-service", "client-value-type", "client-issuer", "client-original-issuer"),
+			new("role", "reader", "role-value-type", "role-issuer", "role-original-issuer"),
+			new("role", "reader", "role-value-type", "role-issuer", "role-original-issuer")
+		];
+		var expectedClaims = CreateValidatedClaimContexts(claims);
+		var logger = new CapturingLogger<IdentityEnrichmentMiddleware>();
+		var context = new DefaultHttpContext
+					  {
+						  User = new ClaimsPrincipal(new ClaimsIdentity(claims, "validated"))
+					  };
+		using var activity = new Activity("request").Start();
+		var nextCalled = false;
+		var middleware = new IdentityEnrichmentMiddleware(_ =>
+										  {
+											  nextCalled = true;
+											  logger.LogInformation("Identity-enriched downstream request");
+											  return Task.CompletedTask;
+										  },
+										  logger);
+
+		await middleware.InvokeAsync(context);
+
+		nextCalled.Should().BeTrue();
+		activity.GetTagItem("user.id").Should().BeNull();
+		AssertClaimEvents(activity, expectedClaims);
+		var scope = logger.Scopes.Should().ContainSingle().Which;
+		scope.Should().NotContain(field => field.Key == "user.id");
+		GetScopedClaims(scope).Should().Equal(expectedClaims);
+
+		var downstreamScope = logger.Entries.Should().ContainSingle().Which.Scopes.Should().ContainSingle().Which;
+		downstreamScope.Should().NotContain(field => field.Key == "user.id");
+		GetScopedClaims(downstreamScope).Should().Equal(expectedClaims);
 	}
 
 	[Fact(DisplayName = "Unauthenticated requests continue without identity telemetry")]
@@ -160,8 +216,33 @@ public sealed class ObservabilityConfigurationTests
 
 		nextCalled.Should().BeTrue();
 		activity.GetTagItem("user.id").Should().BeNull();
+		activity.Events.Should().BeEmpty();
 		logger.Scopes.Should().BeEmpty();
 	}
+
+	private static ImmutableArray<IdentityEnrichmentMiddleware.ValidatedClaimContext> CreateValidatedClaimContexts(IEnumerable<Claim> claims) =>
+		claims.Select(claim => new IdentityEnrichmentMiddleware.ValidatedClaimContext(claim.Type, claim.Value, claim.ValueType, claim.Issuer, claim.OriginalIssuer)).ToImmutableArray();
+
+	private static void AssertClaimEvents(Activity activity, ImmutableArray<IdentityEnrichmentMiddleware.ValidatedClaimContext> expectedClaims)
+	{
+		var claimEvents = activity.Events.Where(@event => @event.Name == "user.claim").ToArray();
+		claimEvents.Should().HaveCount(expectedClaims.Length);
+		foreach (var (claim, claimEvent) in expectedClaims.Zip(claimEvents))
+		{
+			var tags = claimEvent.Tags ?? new ActivityTagsCollection();
+			tags.Should()
+				.BeEquivalentTo([
+					new KeyValuePair<string, object?>("user.claim.type", claim.Type),
+					new KeyValuePair<string, object?>("user.claim.value", claim.Value),
+					new KeyValuePair<string, object?>("user.claim.value_type", claim.ValueType),
+					new KeyValuePair<string, object?>("user.claim.issuer", claim.Issuer),
+					new KeyValuePair<string, object?>("user.claim.original_issuer", claim.OriginalIssuer)
+				]);
+		}
+	}
+
+	private static ImmutableArray<IdentityEnrichmentMiddleware.ValidatedClaimContext> GetScopedClaims(IReadOnlyCollection<KeyValuePair<string, object?>> scope) =>
+		scope.Should().ContainSingle(field => field.Key == "user.claims").Which.Value.Should().BeOfType<ImmutableArray<IdentityEnrichmentMiddleware.ValidatedClaimContext>>().Which;
 
 	[Fact(DisplayName = "Boundary exception handling logs the original exception without mutating the Activity")]
 	public async Task BoundaryExceptionHandlingLogsOriginalExceptionWithoutMutatingActivity()
@@ -186,19 +267,24 @@ public sealed class ObservabilityConfigurationTests
 	private static IConfiguration CreateConfiguration(params (string Key, string? Value)[] values) =>
 		new ConfigurationBuilder().AddInMemoryCollection(values.ToDictionary(value => value.Key, value => value.Value)).Build();
 
-	private sealed record CapturedLogEntry(LogLevel LogLevel, Exception? Exception);
+	private sealed record CapturedLogEntry(LogLevel LogLevel,
+												  Exception? Exception,
+												  IReadOnlyList<IReadOnlyCollection<KeyValuePair<string, object?>>> Scopes);
 
 	private sealed class CapturingLogger<T> : ILogger<T>
 	{
 		internal List<IReadOnlyCollection<KeyValuePair<string, object?>>> Scopes { get; } = [];
 		internal List<CapturedLogEntry> Entries { get; } = [];
+		private List<IReadOnlyCollection<KeyValuePair<string, object?>>> ActiveScopes { get; } = [];
 
 		public IDisposable? BeginScope<TState>(TState state) where TState : notnull
 		{
-			if (state is IReadOnlyCollection<KeyValuePair<string, object?>> fields)
-				Scopes.Add(fields);
+			if (state is not IReadOnlyCollection<KeyValuePair<string, object?>> fields)
+				return NullScope.Instance;
 
-			return NullScope.Instance;
+			Scopes.Add(fields);
+			ActiveScopes.Add(fields);
+			return new CapturedScope(ActiveScopes);
 		}
 
 		public bool IsEnabled(LogLevel logLevel) => true;
@@ -208,7 +294,13 @@ public sealed class ObservabilityConfigurationTests
 								TState state,
 								Exception? exception,
 								Func<TState, Exception?, string> formatter) =>
-			Entries.Add(new CapturedLogEntry(logLevel, exception));
+			Entries.Add(new CapturedLogEntry(logLevel, exception, ActiveScopes.ToArray()));
+	}
+
+	private sealed class CapturedScope(List<IReadOnlyCollection<KeyValuePair<string, object?>>> activeScopes) : IDisposable
+	{
+		public void Dispose() =>
+			activeScopes.RemoveAt(activeScopes.Count - 1);
 	}
 
 	private sealed class NullScope : IDisposable

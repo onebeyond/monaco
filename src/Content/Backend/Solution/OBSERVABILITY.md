@@ -166,9 +166,11 @@ Consumers own production transport security, receiver authentication, credential
 <!--#if (auth) -->
 ## Authenticated request identity
 
-When authentication is enabled, the API and Gateway attach the raw validated `sub` claim as `user.id` to the entry server span and correlated request-scoped Operational Logs. Enrichment reads only the post-authentication validated principal; it does not inspect raw tokens, headers, cookies, queries, bodies, authentication tickets, client credentials, or client certificates. Unauthenticated requests and authenticated principals without `sub` continue without identity enrichment. The Worker profile does not perform request identity enrichment.
+When authentication is enabled, the API and Gateway attach the first non-empty raw validated `sub` claim as `user.id`, using the native ASP.NET Core entry Activity and correlated request-scoped Operational Logs. For every validated claim, in enumeration order and including duplicates, they emit one `user.claim` event with raw `user.claim.type`, `user.claim.value`, `user.claim.value_type`, `user.claim.issuer`, and `user.claim.original_issuer`. The same ordered immutable sequence of raw claim records is carried as `user.claims` in the request log scope. Monaco enriches the native entry Activity rather than creating a wrapper span.
 
-`user.id` is linkable personal data. Consumer infrastructure owns filtering, access, retention, deletion, transport, and storage controls. Telemetry enrichment does not alter authentication, authorization, Metric recording, or persistence attribution.
+Enrichment reads only the post-authentication validated principal; it does not inspect raw tokens, headers, cookies, queries, bodies, authentication tickets, client credentials, or client certificates. An authenticated principal with no non-empty `sub` still contributes its raw claim events and `user.claims` scope without `user.id`; unauthenticated requests have no identity enrichment. The Worker profile does not perform request identity enrichment.
+
+`user.id` and raw claims can contain linkable or otherwise sensitive data. Consumer infrastructure owns filtering, access, retention, deletion, transport, storage, and other governance controls. Telemetry enrichment does not alter authentication, authorization, Metric recording, or persistence attribution.
 <!--#endif -->
 
 <!--#if (apiService) -->
