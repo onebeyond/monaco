@@ -217,8 +217,10 @@ public sealed class ObservabilityPackageGraphTests
 		var applicationServices = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Application", "DependencyInjection", "ServiceCollectionExtensions.cs"));
 		var apiProgram = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Api", "Program.cs"));
 		var workerProgram = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Worker", "Program.cs"));
+		var gatewayProgram = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.ApiGateway", "Program.cs"));
 		var apiSettings = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Api", "appsettings.Development.json"));
 		var workerSettings = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Worker", "appsettings.Development.json"));
+		var gatewaySettings = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.ApiGateway", "appsettings.Development.json"));
 
 		Assert.Contains("AddHttpClientInstrumentation()", profiles, StringComparison.Ordinal);
 		Assert.DoesNotContain("FilterHttpRequestMessage", profiles, StringComparison.Ordinal);
@@ -228,6 +230,13 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.DoesNotContain("Redact", sources, StringComparison.OrdinalIgnoreCase);
 		Assert.DoesNotContain("Hmac", sources, StringComparison.OrdinalIgnoreCase);
 		Assert.DoesNotContain("QueryTextMode", sources, StringComparison.Ordinal);
+		var hostSurface = string.Concat(applicationOptions, applicationServices, apiProgram, workerProgram, gatewayProgram, apiSettings, workerSettings, gatewaySettings);
+		Assert.DoesNotContain("AddView", sources, StringComparison.Ordinal);
+		Assert.DoesNotContain("AddView", hostSurface, StringComparison.Ordinal);
+		Assert.DoesNotContain("MetricStreamConfiguration", sources, StringComparison.Ordinal);
+		Assert.DoesNotContain("MetricStreamConfiguration", hostSurface, StringComparison.Ordinal);
+		Assert.DoesNotContain("Cardinality", sources, StringComparison.OrdinalIgnoreCase);
+		Assert.DoesNotContain("Cardinality", hostSurface, StringComparison.OrdinalIgnoreCase);
 		Assert.DoesNotContain("FlushTimeout", sources, StringComparison.Ordinal);
 		Assert.DoesNotContain("Preflight", sources, StringComparison.OrdinalIgnoreCase);
 		Assert.DoesNotContain("EnableSensitiveDataLogging", sources, StringComparison.Ordinal);
@@ -258,7 +267,9 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("## High-fidelity telemetry boundary", guide, StringComparison.Ordinal);
 		Assert.Contains("does not filter, redact, sanitize, transform, sample, or bound", guide, StringComparison.Ordinal);
 		Assert.Contains("consumer-owned Collector", guide, StringComparison.Ordinal);
-		Assert.Contains("filtering, redaction, transformation, sampling, cardinality controls, routing, storage, access, retention, and alerting", guide, StringComparison.Ordinal);
+		Assert.Contains("filtering, redaction, sanitization, identity treatment, transformation, sampling, cardinality controls, routing, transport, storage, access, retention, and alerting", guide, StringComparison.Ordinal);
+		Assert.Contains("does not certify consumer outcomes", guide, StringComparison.Ordinal);
+		Assert.Contains("compliance requirements", guide, StringComparison.Ordinal);
 		Assert.Contains("Gateway has no SQL instrumentation", guide, StringComparison.Ordinal);
 		guide.Should().Contain("<!--" + TemplateDirectiveIf + " (apiService || apiGateway) -->\n## HTTP exception boundaries");
 		guide.Should().Contain("ordinary structured error log");
@@ -499,6 +510,20 @@ public sealed class ObservabilityPackageGraphTests
 
 		Assert.DoesNotContain("Hmac", middleware, StringComparison.OrdinalIgnoreCase);
 		Assert.DoesNotContain("IdentityMode", middleware, StringComparison.Ordinal);
+		Assert.Contains("context.User", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("Request.Headers", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("Request.Cookies", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("Request.Query", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("Request.Body", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("Authorization", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("Bearer", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("JwtSecurityToken", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("GetToken", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("AccessToken", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("RefreshToken", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("ClientSecret", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("ClientCertificate", middleware, StringComparison.Ordinal);
+		Assert.DoesNotContain("AuthenticationTicket", middleware, StringComparison.Ordinal);
 		Assert.False(File.Exists(Path.Combine(FindSolutionDirectory(), "Monaco.Template.Backend.Common.Observability", "HmacSha256Identity.cs")));
 	}
 
@@ -541,6 +566,7 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("`user.claim`", guide, StringComparison.Ordinal);
 		Assert.Contains("`user.claims`", guide, StringComparison.Ordinal);
 		Assert.Contains("native ASP.NET Core entry Activity", guide, StringComparison.Ordinal);
+		Assert.Contains("Consumer infrastructure owns filtering", guide, StringComparison.Ordinal);
 		Assert.DoesNotContain("HmacSha256", guide, StringComparison.Ordinal);
 		Assert.DoesNotContain("Observability:Identity", guide, StringComparison.Ordinal);
 	}

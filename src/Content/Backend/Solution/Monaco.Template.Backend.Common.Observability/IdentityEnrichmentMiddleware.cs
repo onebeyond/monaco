@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -46,9 +47,14 @@ internal sealed class IdentityEnrichmentMiddleware
 		foreach (var claim in claims)
 			activity?.AddEvent(CreateClaimEvent(claim));
 
+		var serializedClaims = ValidatedClaimContext.FormatLogScope(claims);
 		var scope = string.IsNullOrEmpty(sub)
-						? new[] { new KeyValuePair<string, object?>(UserClaimsScopeKey, claims) }
-						: new[] { new KeyValuePair<string, object?>(UserIdTag, sub), new KeyValuePair<string, object?>(UserClaimsScopeKey, claims) };
+						? new[] { new KeyValuePair<string, object?>(UserClaimsScopeKey, serializedClaims) }
+						: new[]
+						  {
+							  new KeyValuePair<string, object?>(UserIdTag, sub),
+							  new KeyValuePair<string, object?>(UserClaimsScopeKey, serializedClaims)
+						  };
 
 		using (_logger.BeginScope(scope))
 			await _next(context);
@@ -69,5 +75,20 @@ internal sealed class IdentityEnrichmentMiddleware
 												 string Value,
 												 string ValueType,
 												 string Issuer,
-												 string OriginalIssuer);
+												 string OriginalIssuer)
+	{
+		private static readonly JsonSerializerOptions LogScopeJsonOptions = new()
+		{
+			PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+		};
+
+		internal static string FormatLogScope(IReadOnlyList<ValidatedClaimContext> claims) =>
+			JsonSerializer.Serialize<IReadOnlyList<ValidatedClaimContext>>(claims, LogScopeJsonOptions);
+
+		internal static ImmutableArray<ValidatedClaimContext> ParseLogScope(string json)
+		{
+			var parsed = JsonSerializer.Deserialize<ValidatedClaimContext[]>(json, LogScopeJsonOptions);
+			return parsed is null ? [] : [..parsed];
+		}
+	}
 }

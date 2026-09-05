@@ -5,9 +5,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using AutoFixture.Xunit2;
 using AwesomeAssertions;
+using Google.Protobuf;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -57,7 +59,12 @@ public sealed class CompanyDependencyCorrelationTests(AppFixture fixture) : Inte
 																				  activity.Events.Select(@event => @event.Name).ToArray()))
 		};
 		ActivitySource.AddActivityListener(listener);
-		await using var factory = Fixture.WebAppFactory.GetCustomFactory(builder => builder.ConfigureLogging(logging => logging.AddProvider(loggerProvider)));
+		await using var collector = await OtlpLoopback.StartAsync();
+		await using var factory = Fixture.WebAppFactory.GetCustomFactory(builder =>
+																		 {
+																			 builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(OtlpLoopback.ExporterConfiguration(collector.Endpoint)));
+																			 builder.ConfigureLogging(logging => logging.AddProvider(loggerProvider));
+																		 });
 		var api = GetApi<ICompaniesApi>(factory);
 		var company = new CompanyCreateEditDto($"{name}-{Guid.NewGuid():N}",
 											   $"{Guid.NewGuid():N}@{email.Split('@').LastOrDefault() ?? "example.test"}",
@@ -89,6 +96,35 @@ public sealed class CompanyDependencyCorrelationTests(AppFixture fixture) : Inte
 		var sqlActivities = GetSqlActivities(trace);
 		sqlActivities.Should().OnlyContain(activity => activity.ParentSpanId == serverActivity.SpanId);
 		AssertNativeSqlActivities(sqlActivities);
+
+		var expectedTraceId = applicationLog.TraceId.ToString();
+		await collector.WaitUntilAsync(() =>
+									   {
+										   try
+										   {
+											   return collector.GetSpans()
+															   .Any(span => span.TraceId == expectedTraceId &&
+																			span.GetAttribute("db.system.name") == "microsoft.sql_server") &&
+													  collector.GetLogs().Count > 0;
+										   }
+										   catch (InvalidProtocolBufferException)
+										   {
+											   return false;
+										   }
+										   catch (InvalidOperationException)
+										   {
+											   return false;
+										   }
+									   });
+		var exportedSql = collector.GetSpans()
+								   .Where(span => span.TraceId == expectedTraceId && span.GetAttribute("db.system.name") is not null)
+								   .ToArray();
+		exportedSql.Should().NotBeEmpty();
+		exportedSql.Should()
+				   .OnlyContain(span => span.ScopeName == "OpenTelemetry.Instrumentation.SqlClient" &&
+										span.GetAttribute("db.system.name") == "microsoft.sql_server" &&
+										span.Attributes.Any(attribute => attribute.Key.StartsWith("db.", StringComparison.Ordinal) && attribute.Key != "db.system.name"));
+		collector.GetLogs().Should().NotBeEmpty();
 	}
 
 	[Fact(DisplayName = "Company persistence failure retains native SQL attribution and one boundary exception log")]

@@ -14,6 +14,7 @@
   <ItemGroup>
     <PackageReference Include="AutoFixture.Xunit2" />
     <PackageReference Include="AwesomeAssertions" />
+    <PackageReference Include="Google.Protobuf" />
     <PackageReference Include="Flurl" />
       <!--#if (auth)-->
     <PackageReference Include="Keycloak.Net.Core" />

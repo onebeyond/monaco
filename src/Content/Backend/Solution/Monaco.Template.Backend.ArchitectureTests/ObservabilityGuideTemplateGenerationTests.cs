@@ -168,6 +168,9 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 			Assert.Contains(GuidePointer, Cli, StringComparison.Ordinal);
 			Assert.Contains("| High-fidelity telemetry boundary below | 2.6 |", guide, StringComparison.Ordinal);
 			Assert.DoesNotContain("OBSERVABILITY: 2.6 HIGH-FIDELITY-BOUNDARY", guide, StringComparison.Ordinal);
+			Assert.Contains("filtering, redaction, sanitization, identity treatment, transformation, sampling, cardinality controls, routing, transport, storage, access, retention, and alerting", guide, StringComparison.Ordinal);
+			Assert.Contains("does not certify consumer outcomes", guide, StringComparison.Ordinal);
+			Assert.Contains("compliance requirements", guide, StringComparison.Ordinal);
 			Assert.DoesNotContain("<!--#if", guide, StringComparison.Ordinal);
 			Assert.DoesNotContain("Static non-turnkey boundary", guide, StringComparison.Ordinal);
 		}
@@ -210,6 +213,8 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 			guide.Should().Contain("selected-SDK precedence");
 			guide.Should().Contain("does not deploy or configure a production Collector");
 			guide.Should().Contain("Consumers own production transport security");
+			guide.Should().Contain("consumer-owned routing");
+			guide.Should().Contain("receiver authentication");
 			guide.Should().NotContain("OBSERVABILITY: 2.4 PRODUCTION-ROUTING");
 		}
 

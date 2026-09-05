@@ -5,9 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using AwesomeAssertions;
 using MediatR;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -38,7 +36,7 @@ public sealed class BoundaryExceptionDiagnosticsTests(AppFixture fixture) : Inte
 	[Fact(DisplayName = "An escaping API request receives HTTP 500 with ordinary exception telemetry")]
 	public async Task EscapingApiRequestReceivesHttp500WithOrdinaryExceptionTelemetry()
 	{
-		await using var collector = await OtlpCollector.StartAsync();
+		await using var collector = await OtlpLoopback.StartAsync();
 		var loggerProvider = new CapturingLoggerProvider();
 		var activities = new ConcurrentQueue<CapturedActivity>();
 		var pipelineActivities = new ConcurrentQueue<CapturedActivity>();
@@ -54,14 +52,7 @@ public sealed class BoundaryExceptionDiagnosticsTests(AppFixture fixture) : Inte
 		await using var factory = Fixture.WebAppFactory
 										 .GetCustomFactory(builder =>
 														   {
-															   builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
-																																						   {
-																																							   ["OTEL_EXPORTER_OTLP_ENDPOINT"] = collector.Endpoint,
-																																							   ["OTEL_EXPORTER_OTLP_PROTOCOL"] = "http/protobuf",
-																																							   ["OTEL_BSP_SCHEDULE_DELAY"] = "1",
-																																							   ["OTEL_BLRP_SCHEDULE_DELAY"] = "1",
-																																							   ["OTEL_METRIC_EXPORT_INTERVAL"] = "1"
-																																						   }));
+															   builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(OtlpLoopback.ExporterConfiguration(collector.Endpoint)));
 															   builder.ConfigureLogging(logging => logging.AddProvider(loggerProvider));
 															   builder.ConfigureServices(services =>
 																						 {
@@ -157,38 +148,5 @@ public sealed class BoundaryExceptionDiagnosticsTests(AppFixture fixture) : Inte
 		public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
 			entries.Enqueue(new CapturedLogEntry(category, exception));
 	}
-
-	private sealed class OtlpCollector(WebApplication application, ConcurrentQueue<OtlpEntry> entries) : IAsyncDisposable
-	{
-		internal string Endpoint => application.Urls.Single();
-		internal IReadOnlyCollection<OtlpEntry> Entries => entries;
-
-		internal static async Task<OtlpCollector> StartAsync()
-		{
-			var entries = new ConcurrentQueue<OtlpEntry>();
-			var builder = WebApplication.CreateBuilder();
-			builder.WebHost.UseUrls("http://127.0.0.1:0");
-			var application = builder.Build();
-			application.MapPost("/{**path}", async context =>
-											 {
-												 await using var body = new MemoryStream();
-												 await context.Request.Body.CopyToAsync(body);
-												 entries.Enqueue(new OtlpEntry(context.Request.Path, body.ToArray()));
-												 context.Response.StatusCode = StatusCodes.Status200OK;
-											 });
-			await application.StartAsync();
-			return new OtlpCollector(application, entries);
-		}
-
-		internal async Task WaitForSignalsAsync()
-		{
-			for (var attempt = 0; attempt < 50 && entries.Select(entry => entry.Path).Distinct().Count() < 3; attempt++)
-				await Task.Delay(100);
-		}
-
-		public ValueTask DisposeAsync() => application.DisposeAsync();
-	}
-
-	private sealed record OtlpEntry(string Path, byte[] Payload);
 }
 #endif

@@ -241,8 +241,12 @@ public sealed class ObservabilityConfigurationTests
 		}
 	}
 
-	private static ImmutableArray<IdentityEnrichmentMiddleware.ValidatedClaimContext> GetScopedClaims(IReadOnlyCollection<KeyValuePair<string, object?>> scope) =>
-		scope.Should().ContainSingle(field => field.Key == "user.claims").Which.Value.Should().BeOfType<ImmutableArray<IdentityEnrichmentMiddleware.ValidatedClaimContext>>().Which;
+	private static ImmutableArray<IdentityEnrichmentMiddleware.ValidatedClaimContext> GetScopedClaims(IReadOnlyCollection<KeyValuePair<string, object?>> scope)
+	{
+		var value = scope.Should().ContainSingle(field => field.Key == "user.claims").Which.Value;
+		value.Should().BeOfType<string>();
+		return IdentityEnrichmentMiddleware.ValidatedClaimContext.ParseLogScope((string)value!);
+	}
 
 	[Fact(DisplayName = "Boundary exception handling logs the original exception without mutating the Activity")]
 	public async Task BoundaryExceptionHandlingLogsOriginalExceptionWithoutMutatingActivity()
