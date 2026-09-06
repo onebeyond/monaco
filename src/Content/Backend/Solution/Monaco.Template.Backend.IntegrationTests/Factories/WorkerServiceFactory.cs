@@ -1,5 +1,9 @@
 ﻿#if (massTransitIntegration)
 using MassTransit;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using Monaco.Template.Backend.Application.Features.Product;
+using System.Diagnostics.CodeAnalysis;
 #endif
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -61,6 +65,74 @@ public static class WorkerServiceFactoryExtensions
 																										   busCfg.ConfigureEndpoints(ctx, new DefaultEndpointNameFormatter(true));
 																									   });
 																			 }));
+
+		public IWebHostBuilder AddObservabilityConsumeRetry() =>
+			builder.ConfigureServices(services =>
+									  {
+										  services.AddSingleton<OneShotConsumeFailure>();
+										  services.AddSingleton<IConfigureReceiveEndpoint, ObservabilityConsumeRetryConfiguration>();
+										  services.AddTransient(typeof(IPipelineBehavior<,>), typeof(OneShotConsumeBehavior<,>));
+									  });
+	}
+}
+
+[ExcludeFromCodeCoverage]
+internal sealed class TransientConsumeException(string message) : Exception(message);
+
+[ExcludeFromCodeCoverage]
+internal sealed class OneShotConsumeFailure
+{
+	private Exception? _exception;
+	private int _thrown;
+	private Guid? _messageId;
+
+	internal Guid? ThrownMessageId => _messageId;
+
+	internal void Arm(Exception exception) =>
+		_exception = exception;
+
+	internal bool TryThrow(Guid? messageId, [NotNullWhen(true)] out Exception? exception)
+	{
+		exception = null;
+		if (_exception is null || Interlocked.CompareExchange(ref _thrown, 1, 0) != 0)
+			return false;
+
+		_messageId = messageId;
+		exception = _exception;
+		return true;
+	}
+}
+
+[ExcludeFromCodeCoverage]
+internal sealed class ObservabilityConsumeRetryConfiguration : IConfigureReceiveEndpoint
+{
+	public void Configure(string name, IReceiveEndpointConfigurator configurator)
+	{
+		if (name.Contains("_bus_", StringComparison.OrdinalIgnoreCase))
+			return;
+
+		configurator.UseMessageRetry(retry =>
+									 {
+										 retry.Immediate(1);
+										 retry.Handle<TransientConsumeException>();
+									 });
+	}
+}
+
+[ExcludeFromCodeCoverage]
+internal sealed class OneShotConsumeBehavior<TRequest, TResponse>(IServiceProvider services, OneShotConsumeFailure failure) : IPipelineBehavior<TRequest, TResponse>
+	where TRequest : notnull
+{
+	public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+	{
+		if (request is not LongRunningProcess.Command)
+			return next(cancellationToken);
+
+		var consumeContext = services.GetService<ConsumeContext>();
+		if (consumeContext is not null && failure.TryThrow(consumeContext.MessageId, out var exception))
+			throw exception;
+
+		return next(cancellationToken);
 	}
 }
 #endif

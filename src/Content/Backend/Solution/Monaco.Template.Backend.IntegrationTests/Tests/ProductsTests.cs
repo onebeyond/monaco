@@ -369,12 +369,12 @@ public class ProductsTests : IntegrationTest
 											   decimal price)
 	{
 #if (massTransitIntegration)
-		var webAppFactory = Fixture.WebAppFactory.GetCustomFactory(b => b.AddMassTransitTestHarnessForWebApp());
+		await using var webAppFactory = Fixture.WebAppFactory.GetCustomFactory(b => b.AddMassTransitTestHarnessForWebApp());
 #else
 		var webAppFactory = Fixture.WebAppFactory;
 #endif
 #if (workerService && massTransitIntegration)
-		var workerServiceFactory = Fixture.WorkerServiceFactory.GetCustomFactory(b => b.AddMassTransitTestHarnessForWorker());
+		await using var workerServiceFactory = Fixture.WorkerServiceFactory.GetCustomFactory(b => b.AddMassTransitTestHarnessForWorker());
 #elif (workerService)
 		var workerServiceFactory = Fixture.WorkerServiceFactory;
 #endif

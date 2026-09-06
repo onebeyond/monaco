@@ -17,7 +17,7 @@ public sealed class LongRunningProcess
 		{
 			//Do some long-running process here
 			logger.LogInformation(new EventId(2000, "LongRunningProcessCompleted"), "Long-running process command completed.");
-			
+
 			return Task.CompletedTask;
 		}
 	}

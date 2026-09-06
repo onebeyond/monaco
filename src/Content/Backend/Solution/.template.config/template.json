@@ -330,7 +330,14 @@
 				{
 					"condition": "(!massTransitIntegration || !workerService)",
 					"exclude": [
-						"Monaco.Template.Backend.Application/Features/Product/LongRunningProcess.cs"
+						"Monaco.Template.Backend.Application/Features/Product/LongRunningProcess.cs",
+						"Monaco.Template.Backend.Application.Tests/Features/Product/LongRunningProcessHandlerTests.cs"
+					]
+				},
+				{
+					"condition": "(!filesSupport || !massTransitIntegration || !apiService || !workerService)",
+					"exclude": [
+						"Monaco.Template.Backend.IntegrationTests/Tests/ProductMessagingCorrelationTests.cs"
 					]
 				},
 				{

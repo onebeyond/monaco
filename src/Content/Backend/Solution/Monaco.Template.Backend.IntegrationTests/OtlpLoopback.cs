@@ -165,10 +165,15 @@ internal sealed record DecodedSpan(string ScopeName,
 								   string Name,
 								   string TraceId,
 								   string SpanId,
+								   string ParentSpanId,
 								   string ServiceName,
+								   int StatusCode,
 								   IReadOnlyList<KeyValuePair<string, string>> Attributes,
-								   IReadOnlyList<DecodedSpanEvent> Events)
+								   IReadOnlyList<DecodedSpanEvent> Events,
+								   IReadOnlyList<DecodedSpanLink> Links)
 {
+	internal bool IsError => StatusCode == 2;
+
 	internal string? GetAttribute(string key) =>
 		Attributes.Where(attribute => attribute.Key == key).Select(attribute => attribute.Value).FirstOrDefault();
 }
@@ -179,6 +184,9 @@ internal sealed record DecodedSpanEvent(string Name, IReadOnlyList<KeyValuePair<
 	internal string? GetAttribute(string key) =>
 		Attributes.Where(attribute => attribute.Key == key).Select(attribute => attribute.Value).FirstOrDefault();
 }
+
+[ExcludeFromCodeCoverage]
+internal sealed record DecodedSpanLink(string TraceId, string SpanId);
 
 [ExcludeFromCodeCoverage]
 internal sealed record DecodedLogRecord(
@@ -272,8 +280,11 @@ internal static class OtlpProtobuf
 		var name = "";
 		var traceId = "";
 		var spanId = "";
+		var parentSpanId = "";
+		var statusCode = 0;
 		var attributes = new List<KeyValuePair<string, string>>();
 		var events = new List<DecodedSpanEvent>();
+		var links = new List<DecodedSpanLink>();
 		foreach (var (field, message) in ReadFields(payload))
 			switch (field)
 			{
@@ -282,6 +293,9 @@ internal static class OtlpProtobuf
 					break;
 				case 2:
 					spanId = ToId(message);
+					break;
+				case 4:
+					parentSpanId = ToId(message);
 					break;
 				case 5:
 					name = Encoding.UTF8.GetString(message);
@@ -292,9 +306,42 @@ internal static class OtlpProtobuf
 				case 11:
 					events.Add(ReadEvent(message));
 					break;
+				case 13:
+					links.Add(ReadLink(message));
+					break;
+				case 15:
+					statusCode = ReadStatusCode(message);
+					break;
 			}
 
-		return new DecodedSpan(scopeName, name, traceId, spanId, serviceName, attributes, events);
+		return new DecodedSpan(scopeName, name, traceId, spanId, parentSpanId, serviceName, statusCode, attributes, events, links);
+	}
+
+	private static int ReadStatusCode(byte[] payload)
+	{
+		foreach (var (field, message) in ReadFields(payload))
+			if (field == 3)
+				return (int)ReadVarint(message);
+
+		return 0;
+	}
+
+	private static DecodedSpanLink ReadLink(byte[] payload)
+	{
+		var traceId = "";
+		var spanId = "";
+		foreach (var (field, message) in ReadFields(payload))
+			switch (field)
+			{
+				case 1:
+					traceId = ToId(message);
+					break;
+				case 2:
+					spanId = ToId(message);
+					break;
+			}
+
+		return new DecodedSpanLink(traceId, spanId);
 	}
 
 	private static DecodedSpanEvent ReadEvent(byte[] payload)

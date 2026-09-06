@@ -176,6 +176,52 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.Contains("ConfigureMetrics", profiles, StringComparison.Ordinal);
 	}
 
+	[Fact(DisplayName = "API and Worker tracing subscribe to native MassTransit when messaging exists")]
+	public void ApiAndWorkerTracingSubscribeToNativeMassTransitWhenMessagingExists()
+	{
+		var profiles = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityHostBuilderExtensions.cs"));
+		var tracingStart = profiles.IndexOf("private static void ConfigureTracing", StringComparison.Ordinal);
+		var tracingEnd = profiles.IndexOf("private static void ConfigureMetrics", tracingStart, StringComparison.Ordinal);
+		var tracing = profiles[tracingStart..tracingEnd];
+		var massTransitGate = tracing.IndexOf(TemplateDirectiveIf + " (massTransitIntegration)", StringComparison.Ordinal);
+		Assert.True(massTransitGate >= 0, "MassTransit tracing must be gated by massTransitIntegration.");
+		var massTransitEnd = tracing.IndexOf(TemplateDirectiveEndIf, massTransitGate, StringComparison.Ordinal);
+		var massTransitBlock = tracing[massTransitGate..massTransitEnd];
+
+		Assert.Contains("builder.AddSource(\"MassTransit\")", massTransitBlock, StringComparison.Ordinal);
+		Assert.Contains("ObservabilityHostProfile.Api or ObservabilityHostProfile.Worker", massTransitBlock, StringComparison.Ordinal);
+		Assert.DoesNotContain("ObservabilityHostProfile.Gateway", massTransitBlock, StringComparison.Ordinal);
+		Assert.DoesNotContain("ObservabilityInstrumentation.MassTransit", profiles, StringComparison.Ordinal);
+		Assert.Equal(1, CountOccurrences(tracing, "AddSource(\"MassTransit\")"));
+	}
+
+	[Fact(DisplayName = "Gateway and disabled messaging stay free of MassTransit tracing and adapters")]
+	public void GatewayAndDisabledMessagingStayFreeOfMassTransitTracingAndAdapters()
+	{
+		var profiles = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityHostBuilderExtensions.cs"));
+		var observabilityProject = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "Monaco.Template.Backend.Common.Observability.csproj"));
+		var centralPackages = ReadSolutionFile("Directory.Packages.props");
+		var gatewayProgram = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.ApiGateway", "Program.cs"));
+		var tracingStart = profiles.IndexOf("private static void ConfigureTracing", StringComparison.Ordinal);
+		var tracingEnd = profiles.IndexOf("private static void ConfigureMetrics", tracingStart, StringComparison.Ordinal);
+		var tracing = profiles[tracingStart..tracingEnd];
+		var gatewayTracingStart = tracing.IndexOf("if (profile is ObservabilityHostProfile.Gateway)", StringComparison.Ordinal);
+		Assert.True(gatewayTracingStart >= 0, "ConfigureTracing must have a Gateway-only branch.");
+		var gatewayTracingEnd = tracing.IndexOf("builder.AddHttpClientInstrumentation()", gatewayTracingStart, StringComparison.Ordinal);
+		var gatewayTracing = tracing[gatewayTracingStart..gatewayTracingEnd];
+
+		Assert.Contains(TemplateDirectiveIf + " (massTransitIntegration)", profiles, StringComparison.Ordinal);
+		Assert.DoesNotContain("AddSource(\"MassTransit\")", gatewayTracing, StringComparison.Ordinal);
+		Assert.DoesNotContain("MassTransit", gatewayTracing, StringComparison.Ordinal);
+		Assert.DoesNotContain("MassTransit", gatewayProgram, StringComparison.Ordinal);
+		Assert.DoesNotContain("PackageReference Include=\"MassTransit", observabilityProject, StringComparison.Ordinal);
+		Assert.DoesNotContain("OpenTelemetry.Instrumentation.MassTransit", observabilityProject, StringComparison.Ordinal);
+		Assert.DoesNotContain("OpenTelemetry.Instrumentation.MassTransit", centralPackages, StringComparison.Ordinal);
+		Assert.DoesNotContain("AddMassTransitInstrumentation", profiles, StringComparison.Ordinal);
+		Assert.DoesNotContain("ConfigureMassTransit", profiles, StringComparison.Ordinal);
+		Assert.DoesNotContain("AddMeter(\"MassTransit\")", profiles, StringComparison.Ordinal);
+	}
+
 	[Fact(DisplayName = "Routing keeps no Collector or vendor artifacts, no duplicate exporter, and no secret-provider trust seam")]
 	public void RoutingKeepsNoCollectorVendorArtifactsDuplicateExporterOrSecretProviderTrustSeam()
 	{

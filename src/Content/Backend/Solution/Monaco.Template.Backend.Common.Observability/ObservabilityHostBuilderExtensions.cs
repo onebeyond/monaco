@@ -83,6 +83,11 @@ public static class ObservabilityHostBuilderExtensions
 
 		if (profile is ObservabilityHostProfile.Api or ObservabilityHostProfile.Worker)
 			builder.AddSqlClientInstrumentation();
+#if (massTransitIntegration)
+
+		if (profile is ObservabilityHostProfile.Api or ObservabilityHostProfile.Worker)
+			builder.AddSource("MassTransit");
+#endif
 	}
 
 	private static void ConfigureMetrics(MeterProviderBuilder builder, ObservabilityHostProfile profile)
