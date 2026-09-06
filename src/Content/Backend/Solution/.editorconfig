@@ -100,6 +100,9 @@ csharp_style_conditional_delegate_call = true
 csharp_prefer_static_local_function = true
 csharp_preferred_modifier_order = public, private, protected, internal, new, static, abstract, virtual, sealed, readonly, override, extern, unsafe, volatile, async:suggestion
 
+# Primary constructor preferences
+csharp_style_prefer_primary_constructors = false:suggestion
+
 # Code-block preferences
 csharp_prefer_braces = false
 csharp_prefer_simple_using_statement = true
