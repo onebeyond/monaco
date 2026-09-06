@@ -128,7 +128,12 @@ public sealed class ObservabilityPackageGraphTests
 
 		Assert.Contains("if (profile is ObservabilityHostProfile.Api)", metrics, StringComparison.Ordinal);
 		Assert.Contains("builder.AddMeter(ApplicationMeterName);", metrics, StringComparison.Ordinal);
-		Assert.Equal(1, CountOccurrences(metrics, "AddMeter("));
+		Assert.Equal(1, CountOccurrences(metrics, "builder.AddMeter(ApplicationMeterName);"));
+		Assert.Equal(2, CountOccurrences(metrics, "AddMeter("));
+		Assert.Contains("AddAspNetCoreInstrumentation()", metrics, StringComparison.Ordinal);
+		Assert.DoesNotContain("AddMeter(\"Microsoft.AspNetCore.Authentication\")", metrics, StringComparison.Ordinal);
+		Assert.DoesNotContain("AddMeter(\"Microsoft.AspNetCore.Authorization\")", metrics, StringComparison.Ordinal);
+		Assert.DoesNotContain(TemplateDirectiveIf + " (auth)", metrics, StringComparison.Ordinal);
 	}
 
 	[Fact(DisplayName = "Public observability composition API exposes only host-builder entry points")]
@@ -219,7 +224,29 @@ public sealed class ObservabilityPackageGraphTests
 		Assert.DoesNotContain("OpenTelemetry.Instrumentation.MassTransit", centralPackages, StringComparison.Ordinal);
 		Assert.DoesNotContain("AddMassTransitInstrumentation", profiles, StringComparison.Ordinal);
 		Assert.DoesNotContain("ConfigureMassTransit", profiles, StringComparison.Ordinal);
-		Assert.DoesNotContain("AddMeter(\"MassTransit\")", profiles, StringComparison.Ordinal);
+		Assert.DoesNotContain("AddMeter(\"Yarp", profiles, StringComparison.Ordinal);
+		Assert.DoesNotContain("AddMeter(\"Azure", profiles, StringComparison.Ordinal);
+	}
+
+	[Fact(DisplayName = "API and Worker metrics subscribe to native MassTransit when messaging exists")]
+	public void ApiAndWorkerMetricsSubscribeToNativeMassTransitWhenMessagingExists()
+	{
+		var profiles = ReadSolutionFile(Path.Combine("Monaco.Template.Backend.Common.Observability", "ObservabilityHostBuilderExtensions.cs"));
+		var metricsStart = profiles.IndexOf("private static void ConfigureMetrics", StringComparison.Ordinal);
+		var metricsEnd = profiles.IndexOf("internal enum ObservabilityHostProfile", metricsStart, StringComparison.Ordinal);
+		var metrics = profiles[metricsStart..metricsEnd];
+		var massTransitGate = metrics.IndexOf(TemplateDirectiveIf + " (massTransitIntegration)", StringComparison.Ordinal);
+		Assert.True(massTransitGate >= 0, "MassTransit metrics must be gated by massTransitIntegration.");
+		var massTransitEnd = metrics.IndexOf(TemplateDirectiveEndIf, massTransitGate, StringComparison.Ordinal);
+		var massTransitBlock = metrics[massTransitGate..massTransitEnd];
+
+		Assert.Contains("builder.AddMeter(\"MassTransit\")", massTransitBlock, StringComparison.Ordinal);
+		Assert.Contains("ObservabilityHostProfile.Api or ObservabilityHostProfile.Worker", massTransitBlock, StringComparison.Ordinal);
+		Assert.DoesNotContain("ObservabilityHostProfile.Gateway", massTransitBlock, StringComparison.Ordinal);
+		Assert.DoesNotContain("ObservabilityInstrumentation.MassTransit", profiles, StringComparison.Ordinal);
+		Assert.Equal(1, CountOccurrences(metrics, "AddMeter(\"MassTransit\")"));
+		Assert.DoesNotContain("AddView", metrics, StringComparison.Ordinal);
+		Assert.DoesNotContain("MetricStreamConfiguration", metrics, StringComparison.Ordinal);
 	}
 
 	[Fact(DisplayName = "Routing keeps no Collector or vendor artifacts, no duplicate exporter, and no secret-provider trust seam")]

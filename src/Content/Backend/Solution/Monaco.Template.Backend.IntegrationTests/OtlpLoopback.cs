@@ -119,6 +119,24 @@ internal sealed class OtlpLoopback : IAsyncDisposable
 				   .SelectMany(entry => OtlpProtobuf.ReadMetrics(entry.Payload))
 	];
 
+	internal IReadOnlyCollection<string> GetMeterNames(string? serviceName = null) =>
+	[
+		.. GetMetrics()
+		   .Where(resource => serviceName is null || string.Equals(resource.ServiceName, serviceName, StringComparison.Ordinal))
+		   .SelectMany(resource => resource.MeterNames)
+		   .Where(static name => name.Length > 0)
+		   .Distinct(StringComparer.Ordinal)
+	];
+
+	internal IReadOnlyCollection<string> GetMeterNamesByServiceSuffix(string suffix) =>
+	[
+		.. GetMetrics()
+		   .Where(resource => resource.ServiceName.EndsWith(suffix, StringComparison.Ordinal))
+		   .SelectMany(resource => resource.MeterNames)
+		   .Where(static name => name.Length > 0)
+		   .Distinct(StringComparer.Ordinal)
+	];
+
 	internal bool HasHttpClientSpanTargetingEndpoint() =>
 		HasHttpClientSpanTargeting(Endpoint);
 
@@ -200,7 +218,33 @@ internal sealed record DecodedLogRecord(
 }
 
 [ExcludeFromCodeCoverage]
-internal sealed record DecodedMetricsResource(string ServiceName);
+internal sealed record DecodedMetricsResource(string ServiceName, IReadOnlyList<string> MeterNames);
+
+[ExcludeFromCodeCoverage]
+internal static class HostMetricNames
+{
+	internal const string Runtime = "System.Runtime";
+	internal const string HttpClient = "System.Net.Http";
+	internal const string HttpClientInstrumentation = "OpenTelemetry.Instrumentation.Http";
+	internal const string Application = "Monaco.Template.Backend.Application";
+	internal const string MassTransit = "MassTransit";
+	internal const string Authentication = "Microsoft.AspNetCore.Authentication";
+	internal const string Authorization = "Microsoft.AspNetCore.Authorization";
+
+	internal static bool IsAspNetCore(string name) =>
+		name.StartsWith("Microsoft.AspNetCore", StringComparison.Ordinal);
+
+	internal static bool IsHttpClient(string name) =>
+		name is (HttpClient) or HttpClientInstrumentation;
+
+	internal static bool IsSqlClient(string name) =>
+		name.Contains("SqlClient", StringComparison.Ordinal);
+
+	internal static bool IsBlobOrYarp(string name) =>
+		name.Contains("Azure", StringComparison.Ordinal) ||
+		name.Contains("Blob", StringComparison.OrdinalIgnoreCase) ||
+		name.Contains("Yarp", StringComparison.OrdinalIgnoreCase);
+}
 
 [ExcludeFromCodeCoverage]
 internal static class OtlpProtobuf
@@ -210,7 +254,7 @@ internal static class OtlpProtobuf
 		var spans = new List<DecodedSpan>();
 		foreach (var resourceSpans in ReadRepeatedMessages(payload, fieldNumber: 1))
 		{
-			var serviceName = "";
+			var serviceName = string.Empty;
 			var scopeSpans = new List<byte[]>();
 			foreach (var (field, message) in ReadFields(resourceSpans))
 				switch (field)
@@ -225,7 +269,7 @@ internal static class OtlpProtobuf
 
 			foreach (var scopePayload in scopeSpans)
 			{
-				var scopeName = "";
+				var scopeName = string.Empty;
 				var spanPayloads = new List<byte[]>();
 				foreach (var (scopeField, scopeMessage) in ReadFields(scopePayload))
 					switch (scopeField)
@@ -238,8 +282,7 @@ internal static class OtlpProtobuf
 							break;
 					}
 
-				foreach (var spanPayload in spanPayloads)
-					spans.Add(ReadSpan(spanPayload, scopeName, serviceName));
+				spans.AddRange(spanPayloads.Select(spanPayload => ReadSpan(spanPayload, scopeName, serviceName)));
 			}
 		}
 
@@ -264,23 +307,42 @@ internal static class OtlpProtobuf
 		var resources = new List<DecodedMetricsResource>();
 		foreach (var resourceMetrics in ReadRepeatedMessages(payload, fieldNumber: 1))
 		{
-			var serviceName = "";
+			var serviceName = string.Empty;
+			var meterNames = new List<string>();
 			foreach (var (field, message) in ReadFields(resourceMetrics))
-				if (field == 1)
-					serviceName = ReadServiceName(message);
+				switch (field)
+				{
+					case 1:
+						serviceName = ReadServiceName(message);
+						break;
+					case 2:
+						var meterName = ReadScopeMetricsName(message);
+						if (meterName.Length > 0)
+							meterNames.Add(meterName);
+						break;
+				}
 
-			resources.Add(new DecodedMetricsResource(serviceName));
+			resources.Add(new DecodedMetricsResource(serviceName, meterNames));
 		}
 
 		return resources;
 	}
 
+	private static string ReadScopeMetricsName(byte[] payload)
+	{
+		foreach (var (field, message) in ReadFields(payload))
+			if (field == 1)
+				return ReadInstrumentationScopeName(message);
+
+		return string.Empty;
+	}
+
 	private static DecodedSpan ReadSpan(byte[] payload, string scopeName, string serviceName)
 	{
-		var name = "";
-		var traceId = "";
-		var spanId = "";
-		var parentSpanId = "";
+		var name = string.Empty;
+		var traceId = string.Empty;
+		var spanId = string.Empty;
+		var parentSpanId = string.Empty;
 		var statusCode = 0;
 		var attributes = new List<KeyValuePair<string, string>>();
 		var events = new List<DecodedSpanEvent>();
@@ -328,8 +390,8 @@ internal static class OtlpProtobuf
 
 	private static DecodedSpanLink ReadLink(byte[] payload)
 	{
-		var traceId = "";
-		var spanId = "";
+		var traceId = string.Empty;
+		var spanId = string.Empty;
 		foreach (var (field, message) in ReadFields(payload))
 			switch (field)
 			{
@@ -346,7 +408,7 @@ internal static class OtlpProtobuf
 
 	private static DecodedSpanEvent ReadEvent(byte[] payload)
 	{
-		var name = "";
+		var name = string.Empty;
 		var attributes = new List<KeyValuePair<string, string>>();
 		foreach (var (field, message) in ReadFields(payload))
 			switch (field)
@@ -364,9 +426,9 @@ internal static class OtlpProtobuf
 
 	private static DecodedLogRecord ReadLogRecord(byte[] payload)
 	{
-		var body = "";
-		var traceId = "";
-		var spanId = "";
+		var body = string.Empty;
+		var traceId = string.Empty;
+		var spanId = string.Empty;
 		var attributes = new List<KeyValuePair<string, string>>();
 		foreach (var (field, message) in ReadFields(payload))
 			switch (field)
@@ -398,7 +460,7 @@ internal static class OtlpProtobuf
 					return attribute.Value;
 			}
 
-		return "";
+		return string.Empty;
 	}
 
 	private static string ReadInstrumentationScopeName(byte[] payload)
@@ -407,13 +469,13 @@ internal static class OtlpProtobuf
 			if (field == 1)
 				return Encoding.UTF8.GetString(message);
 
-		return "";
+		return string.Empty;
 	}
 
 	private static KeyValuePair<string, string> ReadKeyValue(byte[] payload)
 	{
-		var key = "";
-		var value = "";
+		var key = string.Empty;
+		var value = string.Empty;
 		foreach (var (field, message) in ReadFields(payload))
 			switch (field)
 			{
@@ -443,11 +505,10 @@ internal static class OtlpProtobuf
 																									   var pair = ReadKeyValue(item);
 																									   return $"{pair.Key}={pair.Value}";
 																								   })),
-					   7 => Convert.ToHexString(message),
 					   _ => Convert.ToHexString(message)
 				   };
 
-		return "";
+		return string.Empty;
 	}
 
 	private static IEnumerable<byte[]> ReadRepeatedMessages(byte[] payload, int fieldNumber) =>

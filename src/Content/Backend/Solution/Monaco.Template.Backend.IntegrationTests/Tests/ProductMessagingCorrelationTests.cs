@@ -75,6 +75,9 @@ public sealed class ProductMessagingCorrelationTests(AppFixture fixture) : Integ
 		activities.Where(activity => activity.SourceName == "MassTransit")
 				  .Should()
 				  .Contain(activity => activity.TraceId == completionLog.TraceId);
+		await collector.WaitUntilAsync(() => HasMassTransitMeters(collector), 200);
+		collector.GetMeterNamesByServiceSuffix(".Api").Should().Contain(HostMetricNames.MassTransit);
+		collector.GetMeterNamesByServiceSuffix(".Worker").Should().Contain(HostMetricNames.MassTransit);
 	}
 
 	[Theory(DisplayName = "A one-shot consume failure retries in the same causal story without committing or faulting")]
@@ -267,6 +270,23 @@ public sealed class ProductMessagingCorrelationTests(AppFixture fixture) : Integ
 									.ToArray();
 		serviceNames.Should().Contain(name => name.EndsWith(".Api", StringComparison.Ordinal));
 		serviceNames.Should().Contain(name => name.EndsWith(".Worker", StringComparison.Ordinal));
+	}
+
+	private static bool HasMassTransitMeters(OtlpLoopback collector)
+	{
+		try
+		{
+			return collector.GetMeterNamesByServiceSuffix(".Api").Contains(HostMetricNames.MassTransit) &&
+				   collector.GetMeterNamesByServiceSuffix(".Worker").Contains(HostMetricNames.MassTransit);
+		}
+		catch (InvalidProtocolBufferException)
+		{
+			return false;
+		}
+		catch (InvalidOperationException)
+		{
+			return false;
+		}
 	}
 
 	private static void AssertCausalStory(IReadOnlyCollection<DecodedSpan> connected, string seedTraceId)

@@ -104,6 +104,11 @@ public static class ObservabilityHostBuilderExtensions
 
 		if (profile is ObservabilityHostProfile.Api or ObservabilityHostProfile.Worker)
 			builder.AddSqlClientInstrumentation();
+#if (massTransitIntegration)
+
+		if (profile is ObservabilityHostProfile.Api or ObservabilityHostProfile.Worker)
+			builder.AddMeter("MassTransit");
+#endif
 	}
 }
 

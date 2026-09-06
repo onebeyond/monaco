@@ -198,7 +198,8 @@
 				{
 					"condition": "(!apiGateway)",
 					"exclude": [
-						"Monaco.Template.Backend.Common.ApiGateway/**/*"
+						"Monaco.Template.Backend.Common.ApiGateway/**/*",
+						"Monaco.Template.Backend.IntegrationTests/Tests/GatewayHostProfileMetricsTests.cs"
 					]
 				},
 				{
@@ -208,6 +209,7 @@
 						"Monaco.Template.Backend.Common.Api.Application/**/*",
 						"Monaco.Template.Backend.IntegrationTests/Apis/**/*",
 						"Monaco.Template.Backend.IntegrationTests/Factories/ApiWebApplicationFactory.cs",
+						"Monaco.Template.Backend.IntegrationTests/Tests/ApiHostProfileMetricsTests.cs",
 						"Monaco.Template.Backend.IntegrationTests/Tests/CompanyDependencyCorrelationTests.cs",
 						"Monaco.Template.Backend.IntegrationTests/Tests/CompaniesTests.cs",
 						"Monaco.Template.Backend.IntegrationTests/Tests/CountriesTests.cs",
@@ -351,7 +353,8 @@
 					"condition": "(!workerService)",
 					"exclude": [
 						"Monaco.Template.Backend.Worker/**/*",
-						"Monaco.Template.Backend.IntegrationTests/Factories/WorkerServiceFactory.cs"
+						"Monaco.Template.Backend.IntegrationTests/Factories/WorkerServiceFactory.cs",
+						"Monaco.Template.Backend.IntegrationTests/Tests/WorkerHostProfileMetricsTests.cs"
 					]
 				},
 				{
