@@ -2,15 +2,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Monaco.Template.Backend.Common.Observability;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 
-namespace Monaco.Template.Backend.ArchitectureTests;
+namespace Monaco.Template.Backend.Common.Observability.Tests;
 
 [ExcludeFromCodeCoverage]
-[Trait("Architecture Tests", "Observability")]
+[Trait("Common Application Services", "Observability")]
 public sealed class ObservabilityResourceTests
 {
 	[Fact(DisplayName = "Generated host fallbacks identify every runtime host consistently")]
@@ -101,7 +100,9 @@ public sealed class ObservabilityResourceTests
 							builder.AddApiObservability();
 
 							using var host = builder.Build();
-							var resource = host.Services.GetRequiredService<TracerProvider>().GetResource();
+							var resource = host.Services
+											   .GetRequiredService<TracerProvider>()
+											   .GetResource();
 							var attributes = GetAttributes(resource);
 
 							Assert.Equal("configured-service-name", attributes["service.name"]);
@@ -117,16 +118,14 @@ public sealed class ObservabilityResourceTests
 						() =>
 						{
 							var builder = Host.CreateApplicationBuilder();
-							builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
-																		{
-																			["OTEL_RESOURCE_ATTRIBUTES"] = "",
-																			["OTEL_SERVICE_NAME"] = ""
-																		});
+							builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?> { ["OTEL_RESOURCE_ATTRIBUTES"] = "", ["OTEL_SERVICE_NAME"] = "" });
 							var applicationName = builder.Environment.ApplicationName;
 							builder.AddApiObservability();
 
 							using var host = builder.Build();
-							var resource = host.Services.GetRequiredService<TracerProvider>().GetResource();
+							var resource = host.Services
+											   .GetRequiredService<TracerProvider>()
+											   .GetResource();
 							var attributes = GetAttributes(resource);
 
 							Assert.Equal(applicationName, attributes["service.name"]);
@@ -143,14 +142,37 @@ public sealed class ObservabilityResourceTests
 			builder.AddApiObservability();
 
 			using var host = builder.Build();
-			var providers = host.Services.GetServices<ILoggerProvider>().ToArray();
+			var providers = host.Services
+								.GetServices<ILoggerProvider>()
+								.ToArray();
 
-			Assert.Contains(providers, provider => provider.GetType().Name == "ConsoleLoggerProvider");
-			Assert.Single(providers, provider => provider.GetType().Name == "OpenTelemetryLoggerProvider");
-			host.Services.GetRequiredService<ILoggerFactory>()
+			Assert.Contains(providers,
+							provider => provider.GetType()
+												.Name ==
+										"ConsoleLoggerProvider");
+			Assert.Single(providers,
+						  provider => provider.GetType()
+											  .Name ==
+									  "OpenTelemetryLoggerProvider");
+			host.Services
+				.GetRequiredService<ILoggerFactory>()
 				.CreateLogger("Contoso.Application.LongRunningProcess.Command")
 				.LogInformation(new EventId(2000, "LongRunningProcessCompleted"), "Long-running process command completed.");
 		}
+	}
+
+	[Fact(DisplayName = "Observability resource attributes do not include user.id")]
+	public void ObservabilityResourceAttributesDoNotIncludeUserId()
+	{
+		foreach (var (profile, applicationName) in new[]
+												   {
+													   (ObservabilityHostProfile.Api, "Contoso.Api"),
+													   (ObservabilityHostProfile.Worker, "Contoso.Worker"),
+													   (ObservabilityHostProfile.Gateway, "Contoso.Common.ApiGateway")
+												   })
+			Assert.DoesNotContain("user.id",
+								  GetAttributes(CreateResource(profile, applicationName, "Development"))
+									  .Keys);
 	}
 
 	private static void WithEnvironment(string? resourceAttributes, string? serviceName, Action action)
@@ -174,9 +196,10 @@ public sealed class ObservabilityResourceTests
 		}
 	}
 
-	private static Dictionary<string, object> GetAttributes(OpenTelemetry.Resources.Resource resource) =>
+	private static Dictionary<string, object> GetAttributes(Resource resource) =>
 		resource.Attributes.ToDictionary(attribute => attribute.Key, attribute => attribute.Value, StringComparer.Ordinal);
 
 	private static Resource CreateResource(ObservabilityHostProfile profile, string applicationName, string environmentName) =>
-		ObservabilityResource.Configure(ResourceBuilder.CreateEmpty(), profile, applicationName, environmentName).Build();
+		ObservabilityResource.Configure(ResourceBuilder.CreateEmpty(), profile, applicationName, environmentName)
+							 .Build();
 }

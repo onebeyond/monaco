@@ -29,6 +29,9 @@
     <Project Path="Monaco.Template.Backend.Common.BlobStorage.Tests/Monaco.Template.Backend.Common.BlobStorage.Tests.csproj" />
     <!--#endif -->
     <Project Path="Monaco.Template.Backend.Common.Domain.Tests/Monaco.Template.Backend.Common.Domain.Tests.csproj" />
+    <!--#if (apiService || workerService || apiGateway) -->
+    <Project Path="Monaco.Template.Backend.Common.Observability.Tests/Monaco.Template.Backend.Common.Observability.Tests.csproj" />
+    <!--#endif -->
   </Folder>
   <!--#endif -->
   <!--#endif -->

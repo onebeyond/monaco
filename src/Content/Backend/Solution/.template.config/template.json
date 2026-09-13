@@ -185,6 +185,11 @@
 			"**/logs/**",
 			"**/TestResults/**",
 			"Monaco.Template.Backend.ArchitectureTests/ObservabilityGuideTemplateGenerationTests.cs",
+			"Monaco.Template.Backend.Common.Observability.Tests/ObservabilityPackageGraphTests.cs",
+			"Monaco.Template.Backend.Common.Observability.Tests/ObservabilityTemplateDirectiveTests.cs",
+			"Monaco.Template.Backend.Common.Observability.Tests/ObservabilityGuideTokenTests.cs",
+			"Monaco.Template.Backend.Common.Observability.Tests/ParsedSolutionXml.cs",
+			"Monaco.Template.Backend.Common.Observability.Tests/TemplateDirectiveSource.cs",
 			"**/[Pp]ublish/**/*",
 				"**/.idea/**/*"
 			],
@@ -242,6 +247,7 @@
 						"Monaco.Template.Backend.Common.Domain.Tests/**/*",
 						"Monaco.Template.Backend.Common.Infrastructure/**/*",
 						"Monaco.Template.Backend.Common.Observability/**/*",
+						"Monaco.Template.Backend.Common.Observability.Tests/**/*",
 						"Monaco.Template.Backend.IntegrationTests/Tests/CompanyDependencyCorrelationTests.cs",
 						"Monaco.Template.Backend.Common.Tests/**/*"
 					]
@@ -256,16 +262,9 @@
 				"condition": "(!commonLibraries || (!apiService && !workerService && !apiGateway))",
 				"exclude": [
 					"Monaco.Template.Backend.Common.Observability/**/*",
-					"Monaco.Template.Backend.ArchitectureTests/ObservabilityResourceTests.cs",
-					"Monaco.Template.Backend.ArchitectureTests/ObservabilityConfigurationTests.cs"
+					"Monaco.Template.Backend.Common.Observability.Tests/**/*"
 				]
 			},
-				{
-					"condition": "(!commonLibraries || !apiService || !workerService || !apiGateway)",
-					"exclude": [
-						"Monaco.Template.Backend.ArchitectureTests/ObservabilityPackageGraphTests.cs"
-					]
-				},
 				{
 					"condition": "(!filesSupport)",
 					"exclude": [
