@@ -1,10 +1,11 @@
 ﻿using Monaco.Template.Backend.Common.Domain.Model;
+using Monaco.Template.Backend.Common.Domain.Model.Contracts;
 using Monaco.Template.Backend.Domain.Model.ValueObjects;
 using Throw;
 
 namespace Monaco.Template.Backend.Domain.Model.Entities;
 
-public class Company : AggregateRoot
+public class Company : AggregateRoot, IAuditable
 {
 	public const int NameLength = 100;
 	public const int EmailLength = 255;
@@ -31,6 +32,11 @@ public class Company : AggregateRoot
 	public byte[] Version { get; } = null!;
 
 	public Address? Address { get; private set; }
+
+	public DateTimeOffset CreatedAtUtc { get; private set; }
+	public string? CreatedBy { get; private set; }
+	public DateTimeOffset? ModifiedAtUtc { get; private set; }
+	public string? ModifiedBy { get; private set; }
 #if (filesSupport)
 
 	private readonly List<Product> _products = [];

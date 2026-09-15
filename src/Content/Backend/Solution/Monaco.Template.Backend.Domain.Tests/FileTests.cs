@@ -1,4 +1,5 @@
 ﻿using AwesomeAssertions;
+using Monaco.Template.Backend.Common.Domain.Model.Contracts;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Monaco.Template.Backend.Domain.Tests.Factories.Entities;
 using Moq;
@@ -39,6 +40,11 @@ public class FileTests
 		sut.ContentType.Should().Be(contentType);
 		sut.IsTemp.Should().Be(isTemp);
 		sut.UploadedOn.Should().Be(uploadedOn);
+		sut.Should().BeAssignableTo<IAuditable>();
+		sut.CreatedAtUtc.Should().Be(default);
+		sut.CreatedBy.Should().BeNull();
+		sut.ModifiedAtUtc.Should().BeNull();
+		sut.ModifiedBy.Should().BeNull();
 	}
 
 	[Theory(DisplayName = "New File with empty name fails")]

@@ -1,4 +1,5 @@
 ﻿using AwesomeAssertions;
+using Monaco.Template.Backend.Common.Domain.Model.Contracts;
 using Monaco.Template.Backend.Domain.Model.Entities;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
@@ -18,6 +19,7 @@ public class CountryTests
 		var sut = new Country(name);
 
 		sut.Name.Should().Be(name);
+		sut.Should().NotBeAssignableTo<IAuditable>();
 	}
 
 	[Fact(DisplayName = "New country with empty name fails")]

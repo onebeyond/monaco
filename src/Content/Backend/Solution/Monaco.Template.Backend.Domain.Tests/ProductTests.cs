@@ -1,4 +1,5 @@
 ﻿using AwesomeAssertions;
+using Monaco.Template.Backend.Common.Domain.Model.Contracts;
 using Monaco.Template.Backend.Domain.Model.Entities;
 using Monaco.Template.Backend.Domain.Tests.Factories;
 using Moq;
@@ -46,6 +47,20 @@ public class ProductTests
 		   .Should()
 		   .Be(pictures.First());
 		sut.Version
+		   .Should()
+		   .BeNull();
+		sut.Should()
+		   .BeAssignableTo<IAuditable>();
+		sut.CreatedAtUtc
+		   .Should()
+		   .Be(default);
+		sut.CreatedBy
+		   .Should()
+		   .BeNull();
+		sut.ModifiedAtUtc
+		   .Should()
+		   .BeNull();
+		sut.ModifiedBy
 		   .Should()
 		   .BeNull();
 	}

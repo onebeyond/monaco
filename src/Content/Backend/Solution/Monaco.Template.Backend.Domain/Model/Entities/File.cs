@@ -1,9 +1,10 @@
 ﻿using Monaco.Template.Backend.Common.Domain.Model;
+using Monaco.Template.Backend.Common.Domain.Model.Contracts;
 using Throw;
 
 namespace Monaco.Template.Backend.Domain.Model.Entities;
 
-public abstract class File : AggregateRoot
+public abstract class File : AggregateRoot, IAuditable
 {
 	public const int NameLength = 300;
 	public const int ExtensionLength = 20;
@@ -42,13 +43,14 @@ public abstract class File : AggregateRoot
 	public virtual DateTime UploadedOn { get; protected set; }
 	public bool IsTemp { get; protected set; }
 
-	public virtual void MakePermanent()
-	{
-		IsTemp = false;
-	}
+	public DateTimeOffset CreatedAtUtc { get; private set; }
+	public string? CreatedBy { get; private set; }
+	public DateTimeOffset? ModifiedAtUtc { get; private set; }
+	public string? ModifiedBy { get; private set; }
 
-	public virtual void MarkForRemoval()
-	{
+	public virtual void MakePermanent() =>
+		IsTemp = false;
+
+	public virtual void MarkForRemoval() =>
 		IsTemp = true;
-	}
 }

@@ -1,4 +1,5 @@
 ﻿using AwesomeAssertions;
+using Monaco.Template.Backend.Common.Domain.Model.Contracts;
 using Monaco.Template.Backend.Domain.Model.Entities;
 using Monaco.Template.Backend.Domain.Model.ValueObjects;
 using Monaco.Template.Backend.Domain.Tests.Factories;
@@ -29,6 +30,11 @@ public class CompanyTests
 		sut.WebSiteUrl.Should().Be(webSiteUrl);
 		sut.Address.Should().Be(address);
 		sut.Version.Should().BeNull();
+		sut.Should().BeAssignableTo<IAuditable>();
+		sut.CreatedAtUtc.Should().Be(default);
+		sut.CreatedBy.Should().BeNull();
+		sut.ModifiedAtUtc.Should().BeNull();
+		sut.ModifiedBy.Should().BeNull();
 	}
 
 	[Theory(DisplayName = "New company with empty name fails")]

@@ -92,5 +92,17 @@ public class ImageTests
 		sut.Thumbnail
 		   .Should()
 		   .Be(thumbnail);
+		sut.CreatedAtUtc
+		   .Should()
+		   .Be(default);
+		sut.CreatedBy
+		   .Should()
+		   .BeNull();
+		sut.ModifiedAtUtc
+		   .Should()
+		   .BeNull();
+		sut.ModifiedBy
+		   .Should()
+		   .BeNull();
 	}
 }

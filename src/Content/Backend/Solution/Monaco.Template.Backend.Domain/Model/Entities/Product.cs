@@ -1,9 +1,10 @@
 ﻿using Monaco.Template.Backend.Common.Domain.Model;
+using Monaco.Template.Backend.Common.Domain.Model.Contracts;
 using Throw;
 
 namespace Monaco.Template.Backend.Domain.Model.Entities;
 
-public class Product : AggregateRoot
+public class Product : AggregateRoot, IAuditable
 {
 	public const int TitleLength = 100;
 	public const int DescriptionLength = 500;
@@ -46,6 +47,11 @@ public class Product : AggregateRoot
 
 	public Guid DefaultPictureId { get; private set; }
 	public virtual Image DefaultPicture { get; private set; } = null!;
+
+	public DateTimeOffset CreatedAtUtc { get; private set; }
+	public string? CreatedBy { get; private set; }
+	public DateTimeOffset? ModifiedAtUtc { get; private set; }
+	public string? ModifiedBy { get; private set; }
 
 	public virtual void Update(string title,
 							   string description,

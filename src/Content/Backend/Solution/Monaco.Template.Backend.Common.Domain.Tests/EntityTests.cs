@@ -1,5 +1,6 @@
 ﻿using AwesomeAssertions;
 using Monaco.Template.Backend.Common.Domain.Model;
+using Monaco.Template.Backend.Common.Domain.Model.Contracts;
 using Monaco.Template.Backend.Common.Domain.Tests.Factories;
 using Monaco.Template.Backend.Common.Domain.Tests.Factories.Entities;
 using System.Diagnostics.CodeAnalysis;
@@ -18,6 +19,8 @@ public class EntityTests
 		sut.Id
 		   .Should()
 		   .BeEmpty();
+		sut.Should()
+		   .NotBeAssignableTo<IAuditable>();
 	}
 
 	[Theory(DisplayName = "New entity with parameters succeeds")]

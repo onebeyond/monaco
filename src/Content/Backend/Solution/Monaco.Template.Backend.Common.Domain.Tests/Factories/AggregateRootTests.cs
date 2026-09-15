@@ -1,5 +1,6 @@
 ﻿using AwesomeAssertions;
 using Monaco.Template.Backend.Common.Domain.Model;
+using Monaco.Template.Backend.Common.Domain.Model.Contracts;
 using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
@@ -16,6 +17,8 @@ public class AggregateRootTests
 		sut.DomainEvents
 		   .Should()
 		   .BeEmpty();
+		sut.Should()
+		   .NotBeAssignableTo<IAuditable>();
 	}
 
 	[Theory(DisplayName = "Add Domain Event succeeds")]

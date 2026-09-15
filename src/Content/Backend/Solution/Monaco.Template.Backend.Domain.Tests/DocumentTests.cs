@@ -46,5 +46,17 @@ public class DocumentTests
 		sut.IsTemp
 		   .Should()
 		   .Be(isTemp);
+		sut.CreatedAtUtc
+		   .Should()
+		   .Be(default);
+		sut.CreatedBy
+		   .Should()
+		   .BeNull();
+		sut.ModifiedAtUtc
+		   .Should()
+		   .BeNull();
+		sut.ModifiedBy
+		   .Should()
+		   .BeNull();
 	}
 }
