@@ -11,6 +11,8 @@ namespace Monaco.Template.Backend.Common.Domain.Model.Contracts;
 /// </remarks>
 public interface IAuditable
 {
+	const int ActorMaxLength = 512;
+
 	DateTimeOffset CreatedAtUtc { get; }
 
 	string? CreatedBy { get; }

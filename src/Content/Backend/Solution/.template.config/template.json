@@ -177,6 +177,8 @@
 			"exclude": [
 				"**/[Bb]in/**",
 				"**/[Oo]bj/**",
+				"_TemplateArtifacts/**",
+				"Monaco.Template.Backend.Application.Tests/Persistence/MigrationVariantArtifactTests.cs",
 				".template.config/**/*",
 				"**/*.filelist",
 				"**/*.user",

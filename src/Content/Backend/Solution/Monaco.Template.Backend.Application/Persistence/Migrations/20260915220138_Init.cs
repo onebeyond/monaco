@@ -36,6 +36,10 @@ namespace Monaco.Template.Backend.Application.Persistence.Migrations
                     ContentType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     UploadedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsTemp = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true),
+                    ModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true),
                     Discriminator = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
                     DateTaken = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Dimensions_Height = table.Column<int>(type: "int", nullable: true),
@@ -106,7 +110,11 @@ namespace Monaco.Template.Backend.Application.Persistence.Migrations
                     Address_City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     Address_County = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     Address_PostCode = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
-                    Address_CountryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    Address_CountryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true),
+                    ModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -171,7 +179,11 @@ namespace Monaco.Template.Backend.Application.Persistence.Migrations
                     Price = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
                     Version = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
                     CompanyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    DefaultPictureId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    DefaultPictureId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true),
+                    ModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset(7)", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true)
                 },
                 constraints: table =>
                 {

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Monaco.Template.Backend.Application.Persistence;
 
@@ -11,9 +12,11 @@ using Monaco.Template.Backend.Application.Persistence;
 namespace Monaco.Template.Backend.Application.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260915223219_Init")]
+    partial class Init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1231,162 +1234,6 @@ namespace Monaco.Template.Backend.Application.Persistence.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Monaco.Template.Backend.Domain.Model.Entities.File", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset(7)");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
-
-                    b.Property<string>("Extension")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<bool>("IsTemp")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
-                        .HasColumnType("datetimeoffset(7)");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<long>("Size")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("UploadedOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("File", (string)null);
-
-                    b.HasDiscriminator<string>("Discriminator").IsComplete(true).HasValue("File");
-
-                    b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("Monaco.Template.Backend.Domain.Model.Entities.Product", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CompanyId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset(7)");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<Guid>("DefaultPictureId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
-                        .HasColumnType("datetimeoffset(7)");
-
-                    b.Property<string>("ModifiedBy")
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
-
-                    b.Property<decimal>("Price")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<byte[]>("Version")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CompanyId");
-
-                    b.HasIndex("DefaultPictureId")
-                        .IsUnique();
-
-                    b.HasIndex("Title");
-
-                    b.ToTable("Product");
-                });
-
-            modelBuilder.Entity("ProductPicture", b =>
-                {
-                    b.Property<Guid>("PicturesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("PicturesId", "ProductId");
-
-                    b.HasIndex("PicturesId")
-                        .IsUnique();
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("ProductPicture");
-                });
-
-            modelBuilder.Entity("Monaco.Template.Backend.Domain.Model.Entities.Document", b =>
-                {
-                    b.HasBaseType("Monaco.Template.Backend.Domain.Model.Entities.File");
-
-                    b.HasDiscriminator().HasValue("Document");
-                });
-
-            modelBuilder.Entity("Monaco.Template.Backend.Domain.Model.Entities.Image", b =>
-                {
-                    b.HasBaseType("Monaco.Template.Backend.Domain.Model.Entities.File");
-
-                    b.Property<DateTime?>("DateTaken")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("ThumbnailId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasIndex("ThumbnailId")
-                        .IsUnique()
-                        .HasFilter("[ThumbnailId] IS NOT NULL");
-
-                    b.HasDiscriminator().HasValue("Image");
-                });
-
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.OutboxMessage", b =>
                 {
                     b.HasOne("MassTransit.EntityFrameworkCoreIntegration.OutboxState", null)
@@ -1444,97 +1291,6 @@ namespace Monaco.Template.Backend.Application.Persistence.Migrations
                         });
 
                     b.Navigation("Address");
-                });
-
-            modelBuilder.Entity("Monaco.Template.Backend.Domain.Model.Entities.Product", b =>
-                {
-                    b.HasOne("Monaco.Template.Backend.Domain.Model.Entities.Company", "Company")
-                        .WithMany("Products")
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Monaco.Template.Backend.Domain.Model.Entities.Image", "DefaultPicture")
-                        .WithOne()
-                        .HasForeignKey("Monaco.Template.Backend.Domain.Model.Entities.Product", "DefaultPictureId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Company");
-
-                    b.Navigation("DefaultPicture");
-                });
-
-            modelBuilder.Entity("ProductPicture", b =>
-                {
-                    b.HasOne("Monaco.Template.Backend.Domain.Model.Entities.Image", null)
-                        .WithMany()
-                        .HasForeignKey("PicturesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Monaco.Template.Backend.Domain.Model.Entities.Product", null)
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Monaco.Template.Backend.Domain.Model.Entities.Image", b =>
-                {
-                    b.HasOne("Monaco.Template.Backend.Domain.Model.Entities.Image", "Thumbnail")
-                        .WithOne()
-                        .HasForeignKey("Monaco.Template.Backend.Domain.Model.Entities.Image", "ThumbnailId");
-
-                    b.OwnsOne("Monaco.Template.Backend.Domain.Model.ValueObjects.GpsPosition", "Position", b1 =>
-                        {
-                            b1.Property<Guid>("ImageId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<float>("Latitude")
-                                .HasColumnType("real");
-
-                            b1.Property<float>("Longitude")
-                                .HasColumnType("real");
-
-                            b1.HasKey("ImageId");
-
-                            b1.ToTable("File");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ImageId");
-                        });
-
-                    b.OwnsOne("Monaco.Template.Backend.Domain.Model.ValueObjects.ImageDimensions", "Dimensions", b1 =>
-                        {
-                            b1.Property<Guid>("ImageId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<int>("Height")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Width")
-                                .HasColumnType("int");
-
-                            b1.HasKey("ImageId");
-
-                            b1.ToTable("File");
-
-                            b1.WithOwner()
-                                .HasForeignKey("ImageId");
-                        });
-
-                    b.Navigation("Dimensions")
-                        .IsRequired();
-
-                    b.Navigation("Position");
-
-                    b.Navigation("Thumbnail");
-                });
-
-            modelBuilder.Entity("Monaco.Template.Backend.Domain.Model.Entities.Company", b =>
-                {
-                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }

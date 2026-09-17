@@ -38,5 +38,7 @@ internal sealed class FileEntityConfiguration : IEntityTypeConfiguration<File>
 
 		builder.Property(x => x.IsTemp)
 			   .IsRequired();
+
+		builder.ConfigureAuditableFields();
 	}
 }

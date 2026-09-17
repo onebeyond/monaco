@@ -26,6 +26,7 @@ internal sealed class ProductEntityConfiguration : IEntityTypeConfiguration<Prod
 		builder.Property(x => x.Version)
 			   .IsRowVersion();
 
+		builder.ConfigureAuditableFields();
 
 		builder.HasOne(x => x.DefaultPicture)
 			   .WithOne()

@@ -26,6 +26,8 @@ internal sealed class CompanyEntityConfiguration : IEntityTypeConfiguration<Comp
 
 		builder.Property(x => x.Version)
 			   .IsRowVersion();
+
+		builder.ConfigureAuditableFields();
 		#if (filesSupport)
 
 		builder.HasMany(x => x.Products)
