@@ -248,6 +248,7 @@
 						"Monaco.Template.Backend.Common.Domain/**/*",
 						"Monaco.Template.Backend.Common.Domain.Tests/**/*",
 						"Monaco.Template.Backend.Common.Infrastructure/**/*",
+						"Monaco.Template.Backend.Common.Infrastructure.Tests/**/*",
 						"Monaco.Template.Backend.Common.Observability/**/*",
 						"Monaco.Template.Backend.Common.Observability.Tests/**/*",
 						"Monaco.Template.Backend.IntegrationTests/Tests/CompanyDependencyCorrelationTests.cs",

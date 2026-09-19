@@ -9,8 +9,10 @@ using Monaco.Template.Backend.Common.Api.Auth;
 #endif
 using Monaco.Template.Backend.Common.Api.Cors;
 using Monaco.Template.Backend.Api.Endpoints.Extensions;
+using Monaco.Template.Backend.Api.Persistence;
 using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Common.Api.OpenApi;
+using Monaco.Template.Backend.Common.Infrastructure.Persistence;
 using Monaco.Template.Backend.Common.Observability;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +28,8 @@ builder.Services
 #endif
 
 builder.Services
+	   .AddHttpContextAccessor()
+	   .AddScoped<IPersistenceActorProvider, ApiPersistenceActorProvider>()
 	   .AddProblemDetails()
 	   .ConfigureApplication(options =>
 							 {

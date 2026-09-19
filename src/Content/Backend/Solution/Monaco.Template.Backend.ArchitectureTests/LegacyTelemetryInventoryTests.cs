@@ -40,10 +40,8 @@ public sealed class LegacyTelemetryInventoryTests
 	private static string FindSolutionDirectory()
 	{
 		for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
-		{
 			if (File.Exists(Path.Combine(directory.FullName, "Monaco.Template.Backend.slnx")))
 				return directory.FullName;
-		}
 
 		throw new DirectoryNotFoundException("Could not locate Monaco.Template.Backend.slnx from the test output directory.");
 	}

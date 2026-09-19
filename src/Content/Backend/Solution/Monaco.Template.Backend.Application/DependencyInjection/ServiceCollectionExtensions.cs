@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 #if (filesSupport)
 using Monaco.Template.Backend.Application.Services;
 using Monaco.Template.Backend.Application.Services.Contracts;
@@ -12,6 +13,7 @@ using System.Reflection;
 using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Application.ResiliencePipelines;
 using Monaco.Template.Backend.Common.Infrastructure.Context;
+using Monaco.Template.Backend.Common.Infrastructure.Persistence;
 #if (filesSupport)
 using Monaco.Template.Backend.Common.BlobStorage.Extensions;
 #endif
@@ -47,6 +49,8 @@ public static class ServiceCollectionExtensions
 																								  .UseCompatibilityLevel(160))	// SQL Server 2022 = 160 - SQL Server 2025 = 170
 															.UseLazyLoadingProxies())
 					.AddScoped<BaseDbContext, AppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
+			services.TryAddSingleton(TimeProvider.System);
+			services.AddSingleton<PersistenceActorFallbackDiagnostics>();
 #if (filesSupport)
 			services.RegisterBlobStorageService(opts =>
 												{

@@ -3,12 +3,15 @@ using MassTransit;
 using Monaco.Template.Backend.Application.Persistence;
 #endif
 using Monaco.Template.Backend.Application.DependencyInjection;
+using Monaco.Template.Backend.Common.Infrastructure.Persistence;
 using Monaco.Template.Backend.Common.Observability;
 using Monaco.Template.Backend.Worker;
+using Monaco.Template.Backend.Worker.Persistence;
 
 var builder = Host.CreateApplicationBuilder(args);
 var configuration = builder.Configuration;
 builder.Services
+	   .AddScoped<IPersistenceActorProvider, WorkerPersistenceActorProvider>()
 	   .ConfigureApplication(options =>
 							 {
 								 options.EntityFramework.ConnectionString = configuration.GetConnectionString("AppDbContext")!;
