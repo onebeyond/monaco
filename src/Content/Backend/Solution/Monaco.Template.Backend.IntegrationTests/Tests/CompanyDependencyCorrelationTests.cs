@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Data.Common;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
@@ -8,7 +7,6 @@ using AwesomeAssertions;
 using Google.Protobuf;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -17,6 +15,7 @@ using Monaco.Template.Backend.Api.DTOs;
 using Monaco.Template.Backend.Application.Persistence;
 using Monaco.Template.Backend.Domain.Model.Entities;
 using Monaco.Template.Backend.IntegrationTests.Apis;
+using Monaco.Template.Backend.IntegrationTests.Infrastructure;
 
 namespace Monaco.Template.Backend.IntegrationTests.Tests;
 
@@ -152,7 +151,7 @@ public sealed class CompanyDependencyCorrelationTests(AppFixture fixture) : Inte
 																								{
 																									services.RemoveAll<DbContextOptions<AppDbContext>>();
 																									services.AddDbContext<AppDbContext>(options => options.UseSqlServer(Fixture.SqlConnectionString)
-																																						  .AddInterceptors(new FailingDbCommandInterceptor()));
+																																						  .AddInterceptors(new CompanyInsertRaiserrorInterceptor()));
 																								}));
 		var api = GetApi<ICompaniesApi>(factory);
 		var name = $"company-{Guid.NewGuid():N}";
@@ -214,20 +213,6 @@ public sealed class CompanyDependencyCorrelationTests(AppFixture fixture) : Inte
 
 		public void Dispose()
 		{
-		}
-	}
-
-	private sealed class FailingDbCommandInterceptor : DbCommandInterceptor
-	{
-		public override ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(DbCommand command,
-																						 CommandEventData eventData,
-																						 InterceptionResult<DbDataReader> result,
-																						 CancellationToken cancellationToken = default)
-		{
-			if (command.CommandText.Contains("INSERT INTO [Company]", StringComparison.Ordinal))
-				command.CommandText = "RAISERROR ('test persistence fault', 16, 1);";
-
-			return ValueTask.FromResult(result);
 		}
 	}
 
