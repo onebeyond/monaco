@@ -179,6 +179,7 @@
 				"**/[Oo]bj/**",
 				"_TemplateArtifacts/**",
 				"Monaco.Template.Backend.Application.Tests/Persistence/MigrationVariantArtifactTests.cs",
+				"Monaco.Template.Backend.Application.Tests/Persistence/AttributionCompositionBoundaryTests.cs",
 				".template.config/**/*",
 				"**/*.filelist",
 				"**/*.user",
