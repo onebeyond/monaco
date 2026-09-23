@@ -368,8 +368,29 @@
 						"Monaco.Template.Backend.Worker/**/*",
 						"Monaco.Template.Backend.Api/**/*"
 					]
+				},
+				{
+					"condition": "(!filesSupport || !massTransitIntegration)",
+					"exclude": [
+						"Monaco.Template.Backend.Application/Persistence/Migrations/**"
+					]
 				}
 			]
+		},
+		{
+			"source": "./_TemplateArtifacts/MigrationVariants/Core/",
+			"target": "./Monaco.Template.Backend.Application/Persistence/Migrations/",
+			"condition": "(!filesSupport && !massTransitIntegration)"
+		},
+		{
+			"source": "./_TemplateArtifacts/MigrationVariants/FilesOnly/",
+			"target": "./Monaco.Template.Backend.Application/Persistence/Migrations/",
+			"condition": "(filesSupport && !massTransitIntegration)"
+		},
+		{
+			"source": "./_TemplateArtifacts/MigrationVariants/MessagingOnly/",
+			"target": "./Monaco.Template.Backend.Application/Persistence/Migrations/",
+			"condition": "(!filesSupport && massTransitIntegration)"
 		}
 	],
 	"guids": [

@@ -14,6 +14,12 @@
 
   <!--#endif-->
   <ItemGroup>
+    <!--#if (!apiService && workerService)-->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <!--#endif-->
     <!--#if (massTransitIntegration)-->
     <PackageReference Include="MassTransit.Azure.ServiceBus.Core" />
     <PackageReference Include="MassTransit.RabbitMQ" />
