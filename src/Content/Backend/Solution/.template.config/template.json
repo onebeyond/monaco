@@ -188,6 +188,9 @@
 			"**/logs/**",
 			"**/TestResults/**",
 			"Monaco.Template.Backend.ArchitectureTests/ObservabilityGuideTemplateGenerationTests.cs",
+			"Monaco.Template.Backend.ArchitectureTests/SupportedRuntimeShapeCompositionTests.cs",
+			"Monaco.Template.Backend.ArchitectureTests/CSharpCompositionSyntax.cs",
+			"Monaco.Template.Backend.ArchitectureTests/Directory.Build.props",
 			"Monaco.Template.Backend.Common.Observability.Tests/ObservabilityPackageGraphTests.cs",
 			"Monaco.Template.Backend.Common.Observability.Tests/ObservabilityTemplateDirectiveTests.cs",
 			"Monaco.Template.Backend.Common.Observability.Tests/ObservabilityGuideTokenTests.cs",
@@ -207,7 +210,8 @@
 					"condition": "(!apiGateway)",
 					"exclude": [
 						"Monaco.Template.Backend.Common.ApiGateway/**/*",
-						"Monaco.Template.Backend.IntegrationTests/Tests/GatewayHostProfileMetricsTests.cs"
+						"Monaco.Template.Backend.IntegrationTests/Tests/GatewayHostProfileMetricsTests.cs",
+						"Monaco.Template.Backend.IntegrationTests/Tests/GatewayBoundaryExceptionDiagnosticsTests.cs"
 					]
 				},
 				{
@@ -218,6 +222,7 @@
 						"Monaco.Template.Backend.IntegrationTests/Apis/**/*",
 						"Monaco.Template.Backend.IntegrationTests/Factories/ApiWebApplicationFactory.cs",
 						"Monaco.Template.Backend.IntegrationTests/Tests/ApiHostProfileMetricsTests.cs",
+						"Monaco.Template.Backend.IntegrationTests/Tests/BoundaryExceptionDiagnosticsTests.cs",
 						"Monaco.Template.Backend.IntegrationTests/Tests/CompanyDependencyCorrelationTests.cs",
 						"Monaco.Template.Backend.IntegrationTests/Tests/AuditableStampLifecycleTests.cs",
 						"Monaco.Template.Backend.IntegrationTests/Tests/CompaniesTests.cs",

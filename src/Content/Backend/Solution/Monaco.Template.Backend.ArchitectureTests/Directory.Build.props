@@ -1,0 +1,11 @@
+<Project>
+  <!--
+    Producer-only. This file is excluded from template generation.
+    The version stays here so Directory.Packages.props, which is copied into every shape, does not gain Microsoft.CodeAnalysis.CSharp.
+  -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+  </ItemGroup>
+</Project>
