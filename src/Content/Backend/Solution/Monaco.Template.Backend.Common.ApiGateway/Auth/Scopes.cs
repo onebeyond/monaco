@@ -7,6 +7,7 @@ public static class Scopes
 	#if (filesSupport)
 	public const string FilesRead = "files:read";
 	public const string FilesWrite = "files:write";
+	public const string ProductsWrite = "products:write";
 	#endif
 
 	public static List<string> List =>
@@ -15,7 +16,8 @@ public static class Scopes
 		CompaniesWrite,
 		#if (filesSupport)
 		FilesRead,
-		FilesWrite
+		FilesWrite,
+		ProductsWrite
 		#endif
 	];
 }

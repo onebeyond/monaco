@@ -1,0 +1,108 @@
+
+[*.{appxmanifest,axml,config,cql,cs,csproj,dbml,discomap,dtd,jsproj,lsproj,njsproj,nuspec,proj,props,resw,resx,sql,StyleCop,targets,tasks,vbproj,xml,xsd}]
+indent_style = tab
+indent_size = tab
+tab_width = 4
+
+[*.{asax,ascx,aspx,axaml,cshtml,htm,html,master,paml,razor,skin,vb,xaml,xamlx,xoml}]
+indent_style = space
+indent_size = 4
+tab_width = 4
+
+[*]
+
+# Microsoft .NET properties
+csharp_preferred_modifier_order = public, private, protected, internal, file, new, static, abstract, virtual, closed, sealed, readonly, override, safe, unsafe, extern, volatile, async, required:suggestion
+csharp_style_prefer_utf8_string_literals = true:suggestion
+csharp_style_var_elsewhere = true:suggestion
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+dotnet_style_parentheses_in_arithmetic_binary_operators = never_if_unnecessary:none
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:none
+dotnet_style_parentheses_in_relational_binary_operators = never_if_unnecessary:none
+dotnet_style_predefined_type_for_locals_parameters_members = true:suggestion
+dotnet_style_predefined_type_for_member_access = true:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggestion
+
+# ReSharper properties
+resharper_align_first_arg_by_paren = true
+resharper_align_linq_query = true
+resharper_align_multiline_array_and_object_initializer = true
+resharper_align_multiline_binary_patterns = true
+resharper_align_multiline_calls_chain = true
+resharper_align_multiline_expression = true
+resharper_align_multiline_extends_list = true
+resharper_align_multiline_list_pattern = true
+resharper_align_multiline_parameter = true
+resharper_align_multiline_property_pattern = true
+resharper_align_multiline_switch_expression = true
+resharper_align_multiline_type_parameter_constraints = true
+resharper_align_multiline_type_parameter_list = true
+resharper_align_multiple_declaration = true
+resharper_align_tuple_components = true
+resharper_allow_comment_after_lbrace = true
+resharper_constructor_or_destructor_body = expression_body
+resharper_csharp_alignment_tab_fill_style = optimal_fill
+resharper_csharp_allow_far_alignment = true
+resharper_csharp_indent_style = tab
+resharper_csharp_max_line_length = 250
+resharper_csharp_stick_comment = false
+resharper_csharp_use_indent_from_vs = false
+resharper_csharp_wrap_arguments_style = chop_if_long
+resharper_csharp_wrap_extends_list_style = chop_if_long
+resharper_csharp_wrap_parameters_style = chop_if_long
+resharper_indent_anonymous_method_block = true
+resharper_indent_nested_fixed_stmt = true
+resharper_indent_nested_foreach_stmt = true
+resharper_indent_nested_for_stmt = true
+resharper_indent_nested_lock_stmt = true
+resharper_indent_nested_usings_stmt = true
+resharper_indent_nested_while_stmt = true
+resharper_keep_existing_expr_member_arrangement = false
+resharper_keep_existing_initializer_arrangement = false
+resharper_keep_existing_invocation_parens_arrangement = false
+resharper_keep_existing_lambda_and_anonymous_function_parens_arrangement = false
+resharper_keep_existing_list_patterns_arrangement = false
+resharper_keep_existing_primary_constructor_declaration_parens_arrangement = false
+resharper_keep_existing_switch_expression_arrangement = false
+resharper_local_function_body = expression_body
+resharper_max_array_initializer_elements_on_line = 3
+resharper_max_formal_parameters_on_line = 2
+resharper_max_initializer_elements_on_line = 3
+resharper_max_invocation_arguments_on_line = 2
+resharper_max_lambda_and_anonymous_function_parameters_on_line = 2
+resharper_max_primary_constructor_parameters_on_line = 2
+resharper_method_or_operator_body = expression_body
+resharper_object_creation_when_type_not_evident = target_typed
+resharper_place_accessor_with_attrs_holder_on_single_line = true
+resharper_place_expr_method_on_single_line = false
+resharper_place_expr_property_on_single_line = false
+resharper_wrap_after_primary_constructor_declaration_lpar = false
+resharper_wrap_after_property_in_chained_method_calls = true
+resharper_wrap_array_initializer_style = chop_if_long
+resharper_wrap_before_binary_pattern_op = false
+resharper_wrap_chained_binary_expressions = chop_if_long
+resharper_wrap_chained_binary_patterns = chop_if_long
+resharper_wrap_chained_method_calls = chop_if_long
+resharper_wrap_lambda_and_anonymous_function_parameters_style = chop_if_long
+resharper_wrap_list_pattern = chop_if_long
+
+# ReSharper inspection severities
+resharper_arrange_constructor_or_destructor_body_highlighting = hint
+resharper_arrange_local_function_body_highlighting = hint
+resharper_arrange_method_or_operator_body_highlighting = hint
+resharper_arrange_redundant_parentheses_highlighting = hint
+resharper_arrange_this_qualifier_highlighting = hint
+resharper_arrange_type_member_modifiers_highlighting = hint
+resharper_arrange_type_modifiers_highlighting = hint
+resharper_built_in_type_reference_style_for_member_access_highlighting = hint
+resharper_built_in_type_reference_style_highlighting = hint
+resharper_redundant_base_qualifier_highlighting = warning
+resharper_remove_redundant_braces_highlighting = hint
+resharper_suggest_var_or_type_built_in_types_highlighting = hint
+resharper_suggest_var_or_type_elsewhere_highlighting = hint
+resharper_suggest_var_or_type_simple_types_highlighting = hint

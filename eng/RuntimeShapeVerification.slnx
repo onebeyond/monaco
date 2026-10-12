@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Monaco.Eng.RuntimeShapeVerification/Monaco.Eng.RuntimeShapeVerification.csproj" />
+  <Project Path="Monaco.Eng.RuntimeShapeVerification.WorkerHook/Monaco.Eng.RuntimeShapeVerification.WorkerHook.csproj" />
+</Solution>
