@@ -44,15 +44,22 @@ public static class ServiceCollectionExtensions
 																		.Contains(typeof(INonInjectable)) &&
 																 !filter.ValidatorType.IsAbstract,
 											   includeInternalTypes: true)
+#if (apiService || workerService)
 					.AddScoped<AuditableSaveChangesInterceptor>()
+#endif
 					.AddDbContext<AppDbContext>((sp, opts) => opts.UseSqlServer(optionsValue.EntityFramework.ConnectionString,
 																				sqlOptions => sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(3), null)
 																										.UseCompatibilityLevel(160))	// SQL Server 2022 = 160 - SQL Server 2025 = 170
 																  .UseLazyLoadingProxies()
-																  .AddInterceptors(sp.GetRequiredService<AuditableSaveChangesInterceptor>()))
+#if (apiService || workerService)
+																  .AddInterceptors(sp.GetRequiredService<AuditableSaveChangesInterceptor>())
+#endif
+																  )
 					.AddScoped<BaseDbContext, AppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
 			services.TryAddSingleton(TimeProvider.System);
+#if (apiService || workerService)
 			services.AddSingleton<PersistenceActorFallbackDiagnostics>();
+#endif
 #if (filesSupport)
 			services.RegisterBlobStorageService(opts =>
 												{

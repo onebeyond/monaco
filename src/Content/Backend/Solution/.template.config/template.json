@@ -189,6 +189,7 @@
 			"**/TestResults/**",
 			"Monaco.Template.Backend.ArchitectureTests/ObservabilityGuideTemplateGenerationTests.cs",
 			"Monaco.Template.Backend.ArchitectureTests/SupportedRuntimeShapeCompositionTests.cs",
+			"Monaco.Template.Backend.ArchitectureTests/StaticEdgeTruthfulnessTests.cs",
 			"Monaco.Template.Backend.ArchitectureTests/CSharpCompositionSyntax.cs",
 			"Monaco.Template.Backend.ArchitectureTests/Directory.Build.props",
 			"Monaco.Template.Backend.Common.Observability.Tests/ObservabilityPackageGraphTests.cs",
@@ -203,7 +204,8 @@
 				{
 					"condition": "(!apiService && !workerService && !apiGateway)",
 					"exclude": [
-						"OBSERVABILITY.md"
+						"OBSERVABILITY.md",
+						"Monaco.Template.Backend.Api.http"
 					]
 				},
 				{

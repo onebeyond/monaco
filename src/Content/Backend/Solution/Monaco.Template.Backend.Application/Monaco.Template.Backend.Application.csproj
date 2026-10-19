@@ -6,7 +6,7 @@
 
   <!--#if (templateDebug)-->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>$(DefineConstants);auth;commonLibraries;filesSupport;massTransitIntegration</DefineConstants>
+    <DefineConstants>$(DefineConstants);apiService;auth;commonLibraries;filesSupport;massTransitIntegration;workerService</DefineConstants>
   </PropertyGroup>
 
   <!--#endif-->

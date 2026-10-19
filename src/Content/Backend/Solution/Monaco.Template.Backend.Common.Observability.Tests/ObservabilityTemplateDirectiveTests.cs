@@ -226,10 +226,22 @@ public sealed class ObservabilityTemplateDirectiveTests
 	}
 
 	[Fact(DisplayName = "Directory.Packages.props gates Common package versions on !commonLibraries")]
-	public void DirectoryPackagesPropsGatesCommonPackageVersionsOnNotCommonLibraries() =>
+	public void DirectoryPackagesPropsGatesCommonPackageVersionsOnNotCommonLibraries()
+	{
+		foreach (var package in new[]
+								{
+									"Monaco.Template.Backend.Common.Api",
+									"Monaco.Template.Backend.Common.Application",
+									"Monaco.Template.Backend.Common.Infrastructure",
+									"Monaco.Template.Backend.Common.Observability",
+									"Monaco.Template.Backend.Common.Tests"
+								})
+			TemplateDirectiveSource.AssertPathGatedBy("Directory.Packages.props", "!commonLibraries", package);
+
 		TemplateDirectiveSource.AssertPathGatedBy("Directory.Packages.props",
-												  "!commonLibraries",
-												  "Monaco.Template.Backend.Common.Observability");
+												  "commonLibraries && (apiService || workerService || apiGateway)",
+												  "OpenTelemetry.Exporter.OpenTelemetryProtocol");
+	}
 
 	[Fact(DisplayName = "Shared composition source keeps unified OTLP and HTTP identity boundary tokens")]
 	public void SharedCompositionSourceKeepsUnifiedOtlpAndHttpIdentityBoundaryTokens()
