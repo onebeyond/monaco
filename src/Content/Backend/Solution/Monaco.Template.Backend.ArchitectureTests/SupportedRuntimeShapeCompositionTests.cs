@@ -880,6 +880,69 @@ public sealed class SupportedRuntimeShapeCompositionTests : IClassFixture<Suppor
 				 .Should()
 				 .NotContain("## Worker-only solutions", Because(shape));
 
+		var http = options.Api || options.Gateway;
+		var messaging = options is { Common: true, MassTransit: true
+								   } && (options.Api || options.Worker);
+		var metrics = options.Common;
+		var attribution = options.Common && (options.Api || options.Worker);
+		var leanApi = options is
+					  {
+						  Api: true, Worker: false, Gateway: false, Auth: false, MassTransit: false, Files: false, Tests: true, Common: true
+					  };
+		var publisherApi = options is
+						   {
+							   Api: true, Worker: false, Gateway: false, Auth: false, MassTransit: true, Files: true, Tests: true, Common: true
+						   };
+
+		AssertGuideHeading(shape, http, "## HTTP causality");
+		AssertGuideHeading(shape, messaging, "## Messaging navigation");
+		AssertGuideHeading(shape, metrics, "## Host metrics");
+		AssertGuideHeading(shape, metrics, "## Instrumentation availability");
+		AssertGuideHeading(shape, attribution, "## Persistence attribution");
+		AssertGuideHeading(shape, attribution, "## Migration selection");
+		AssertGuideHeading(shape, leanApi, "## LOCAL-R3-LEAN-API");
+		AssertGuideHeading(shape, publisherApi, "## LOCAL-R4-PUBLISHER-API");
+		AssertGuideHeading(shape, !options.Common, "## External package handoff");
+		AssertGuideHeading(shape, options is { Gateway: true, Api: false, Worker: false
+											 }, "## Static-only Gateway output");
+		AssertGuideHeading(shape, options is { Worker: true, Api: false, Gateway: false, Tests: true
+											 }, "## Static-only Worker output");
+
+		AssertGuideHeading(shape, http, "adds no custom propagator");
+		AssertGuideHeading(shape, metrics, "not properties of one trace");
+		AssertGuideHeading(shape, metrics, "not a Monaco governance inventory");
+		AssertGuideHeading(shape, attribution, "nullable, default, or backfill");
+		AssertGuideHeading(shape, attribution, "no universal executable procedure");
+		AssertGuideHeading(shape, options is { Common: true, MassTransit: true, Worker: true, Files: true
+											 }, "LongRunningProcessCompleted");
+		AssertGuideHeading(shape, options is { Common: true, MassTransit: true, Api: true, Worker: false
+											 }, "No Worker consumes the message.");
+		AssertGuideHeading(shape, options is { Common: true, MassTransit: true, Worker: true, Api: false
+											 }, "This solution has no API publish walkthrough.");
+		if (options.Api)
+			shape.Guide
+				 .Should()
+				 .NotContain("This Gateway output has no database client, persistence stamps, or successful-company counter.", Because(shape));
+		AssertGuideHeading(shape, leanApi, "routed Core `Init`");
+		AssertGuideHeading(shape, publisherApi, "publish through the outbox");
+		AssertGuideHeading(shape, options is { Auth: true, Api: true, Common: true
+											 }, "Raw authenticated request context");
+		shape.Guide
+			 .Should()
+			 .NotContain("UJ-1", Because(shape));
+		shape.Guide
+			 .Should()
+			 .NotContain("does not promise that the solution builds or starts", Because(shape));
+		if (options is { Common: true, MassTransit: true
+					   } && (options.Api || options.Worker))
+			shape.Guide
+				 .Should()
+				 .Contain("`MassTransit` meter", Because(shape));
+		else
+			shape.Guide
+				 .Should()
+				 .NotContain("`MassTransit` meter", Because(shape));
+
 		if (options.Gateway)
 			AssertGatewayClaimsNoDatabaseOrCompanyMetrics(shape);
 
@@ -897,6 +960,18 @@ public sealed class SupportedRuntimeShapeCompositionTests : IClassFixture<Suppor
 									  "GatewayBoundaryExceptionDiagnosticsTests",
 									  options.Gateway);
 		}
+	}
+
+	private static void AssertGuideHeading(GeneratedRuntimeShape shape, bool present, string heading)
+	{
+		if (present)
+			shape.Guide
+				 .Should()
+				 .Contain(heading, Because(shape));
+		else
+			shape.Guide
+				 .Should()
+				 .NotContain(heading, Because(shape));
 	}
 
 	private static void AssertGatewayClaimsNoDatabaseOrCompanyMetrics(GeneratedRuntimeShape shape)

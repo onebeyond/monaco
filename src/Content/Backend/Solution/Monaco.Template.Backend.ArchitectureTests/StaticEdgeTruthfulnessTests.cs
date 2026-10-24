@@ -8,7 +8,7 @@ namespace Monaco.Template.Backend.ArchitectureTests;
 public sealed class StaticEdgeTruthfulnessTests : IClassFixture<StaticEdgeTruthfulnessTests.StaticEdgeHiveFixture>
 {
 	private const string GuideShellHeading = "# Local observability";
-	private const string StaticShapeAnchor = "<!-- OBSERVABILITY: 5.4 STATIC-SHAPE-BOUNDARIES -->";
+	private const string NoBuildOrStartPromise = "This guide does not promise that the solution builds or starts.";
 	private const string GuidePostActionText = "Review OBSERVABILITY.md for the generated local-observability guidance.";
 	private const string CoreInitFileName = "20260915223105_Init.cs";
 	private const string CoreInitDesignerFileName = "20260915223105_Init.Designer.cs";
@@ -243,7 +243,139 @@ public sealed class StaticEdgeTruthfulnessTests : IClassFixture<StaticEdgeTruthf
 			 .Contain(GuideShellHeading, shape.Id);
 		shape.Guide
 			 .Should()
-			 .Contain(StaticShapeAnchor, shape.Id);
+			 .Contain(NoBuildOrStartPromise, shape.Id);
+		shape.Guide
+			 .Should()
+			 .NotContain("UJ-1", shape.Id);
+
+		if (!shape.Options.Common)
+		{
+			shape.Guide
+				 .Should()
+				 .Contain("## External package handoff", shape.Id);
+			shape.Guide
+				 .Should()
+				 .Contain("Generation already emits the external package reference", shape.Id);
+			shape.Guide
+				 .Should()
+				 .Contain("## HTTP causality", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## Host metrics", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## Instrumentation availability", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## Persistence attribution", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## Migration selection", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## Messaging navigation", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## LOCAL-R3-LEAN-API", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## LOCAL-R4-PUBLISHER-API", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## Static-only Gateway output", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## Static-only Worker output", shape.Id);
+		}
+
+		if (shape.Options is
+			{
+				Gateway: true, Api: false, Worker: false
+			})
+		{
+			shape.Guide
+				 .Should()
+				 .Contain("## Static-only Gateway output", shape.Id);
+			shape.Guide
+				 .Should()
+				 .Contain("## HTTP causality", shape.Id);
+			shape.Guide
+				 .Should()
+				 .Contain("This Gateway output has no database client, persistence stamps, or successful-company counter.", shape.Id);
+			shape.Guide
+				 .Should()
+				 .Contain("## Host metrics", shape.Id);
+			shape.Guide
+				 .Should()
+				 .Contain("## Instrumentation availability", shape.Id);
+			shape.Guide
+				 .Should()
+				 .Contain("not a Monaco governance inventory", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## Persistence attribution", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## Migration selection", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## Messaging navigation", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## Successful company creations", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("native SQL Client instrumentation", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("`MassTransit` meter", shape.Id);
+		}
+
+		if (shape.Options is
+			{
+				Worker: true, Api: false, Gateway: false, Tests: true
+			})
+		{
+			shape.Guide
+				 .Should()
+				 .Contain("## Static-only Worker output", shape.Id);
+			shape.Guide
+				 .Should()
+				 .Contain("pre-existing invalid edge", shape.Id);
+			shape.Guide
+				 .Should()
+				 .Contain("Worker composition is coupled to the API", shape.Id);
+			shape.Guide
+				 .Should()
+				 .Contain("## Messaging navigation", shape.Id);
+			shape.Guide
+				 .Should()
+				 .Contain("## Host metrics", shape.Id);
+			shape.Guide
+				 .Should()
+				 .Contain("## Instrumentation availability", shape.Id);
+			shape.Guide
+				 .Should()
+				 .Contain("## Persistence attribution", shape.Id);
+			shape.Guide
+				 .Should()
+				 .Contain("## Migration selection", shape.Id);
+			shape.Guide
+				 .Should()
+				 .Contain("no universal executable procedure", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## HTTP causality", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## Create a Company and inspect local observability", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## LOCAL-R3-LEAN-API", shape.Id);
+			shape.Guide
+				 .Should()
+				 .NotContain("## LOCAL-R4-PUBLISHER-API", shape.Id);
+		}
 	}
 
 	private static void AssertStampRegistrationAbsent(SupportedRuntimeShapeCompositionTests.GeneratedRuntimeShape shape)

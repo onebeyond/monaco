@@ -166,7 +166,8 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 
 			Assert.Contains("<File Path=\"OBSERVABILITY.md\" />", Solution, StringComparison.Ordinal);
 			Assert.Contains(GuidePointer, Cli, StringComparison.Ordinal);
-			Assert.Contains("| High-fidelity telemetry boundary below | 2.6 |", guide, StringComparison.Ordinal);
+			Assert.Contains("## High-fidelity telemetry boundary", guide, StringComparison.Ordinal);
+			Assert.Contains("The Aspire CLI is the only telemetry-specific prerequisite introduced by this guide.", guide, StringComparison.Ordinal);
 			Assert.DoesNotContain("OBSERVABILITY: 2.6 HIGH-FIDELITY-BOUNDARY", guide, StringComparison.Ordinal);
 			Assert.Contains("filtering, redaction, sanitization, identity treatment, transformation, sampling, cardinality controls, routing, transport, storage, access, retention, and alerting", guide, StringComparison.Ordinal);
 			Assert.Contains("does not certify consumer outcomes", guide, StringComparison.Ordinal);

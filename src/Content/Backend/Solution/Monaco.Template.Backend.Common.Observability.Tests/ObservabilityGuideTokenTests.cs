@@ -27,13 +27,33 @@ public sealed class ObservabilityGuideTokenTests
 		guide.Should().Contain("normal ASP.NET Core and selected instrumentation behavior");
 	}
 
-	[Fact(DisplayName = "Generated local observability guide documents Story 2.4 production routing and preserves later placeholders")]
-	public void GeneratedLocalObservabilityGuideDocumentsStory24ProductionRoutingAndPreservesLaterPlaceholders()
+	[Fact(DisplayName = "Generated local observability guide documents production routing and directive-gated operations sections")]
+	public void GeneratedLocalObservabilityGuideDocumentsProductionRoutingAndDirectiveGatedOperationsSections()
 	{
 		var guide = ReadGuide();
 
-		Assert.Contains("| Production routing below | 2.4 |", guide, StringComparison.Ordinal);
 		Assert.DoesNotContain("OBSERVABILITY: 2.4 PRODUCTION-ROUTING", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("OBSERVABILITY: 3.", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("OBSERVABILITY: 4.5", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("OBSERVABILITY: 5.1", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("OBSERVABILITY: 5.3", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("OBSERVABILITY: 5.4", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("OBSERVABILITY: 5.5", guide, StringComparison.Ordinal);
+		guide.Should().Contain("<!--" + IfDirective + " (apiService || apiGateway) -->\n## HTTP causality");
+		guide.Should().Contain("<!--" + IfDirective + " (commonLibraries && massTransitIntegration && (apiService || workerService)) -->\n## Messaging navigation");
+		guide.Should().Contain("<!--" + IfDirective + " (commonLibraries) -->\n## Host metrics");
+		guide.Should().Contain("<!--" + IfDirective + " (commonLibraries) -->\n## Instrumentation availability");
+		guide.Should().Contain("<!--" + IfDirective + " (commonLibraries && (apiService || workerService)) -->\n## Persistence attribution");
+		guide.Should().Contain("<!--" + IfDirective + " (commonLibraries && (apiService || workerService)) -->\n## Migration selection");
+		guide.Should().Contain("<!--" + IfDirective + " (apiService && !workerService && !apiGateway && !auth && !massTransitIntegration && !filesSupport && tests && commonLibraries) -->\n## LOCAL-R3-LEAN-API");
+		guide.Should().Contain("<!--" + IfDirective + " (apiService && !workerService && !apiGateway && !auth && massTransitIntegration && filesSupport && tests && commonLibraries) -->\n## LOCAL-R4-PUBLISHER-API");
+		guide.Should().Contain("<!--" + IfDirective + " (!commonLibraries) -->\n## External package handoff");
+		guide.Should().Contain("<!--" + IfDirective + " (apiGateway && !apiService && !workerService) -->\n## Static-only Gateway output");
+		guide.Should().Contain("<!--" + IfDirective + " (workerService && !apiService && !apiGateway && tests) -->\n## Static-only Worker output");
+		guide.Should().Contain("nullable, default, or backfill");
+		guide.Should().Contain("no universal executable procedure");
+		guide.Should().Contain("not a Monaco governance inventory");
+		guide.Should().Contain("<!--" + IfDirective + " (auth) -->\nASP.NET instrumentation may also export");
 
 		var sectionStart = guide.IndexOf("## Production signal routing", StringComparison.Ordinal);
 		Assert.True(sectionStart >= 0, "Expected the production-routing section in the guide.");
@@ -53,14 +73,6 @@ public sealed class ObservabilityGuideTokenTests
 		Assert.DoesNotContain("User Secrets", section, StringComparison.Ordinal);
 
 		Assert.Contains("## Authenticated request identity", guide, StringComparison.Ordinal);
-		Assert.Contains("OBSERVABILITY: 3.1-3.3 CAUSAL-DIAGNOSIS", guide, StringComparison.Ordinal);
-		Assert.Contains("OBSERVABILITY: 3.4 HOST-METRICS", guide, StringComparison.Ordinal);
-		Assert.Contains("OBSERVABILITY: 3.5 INSTRUMENTATION-GOVERNANCE", guide, StringComparison.Ordinal);
-		Assert.Contains("OBSERVABILITY: 4.5 PERSISTENCE-ATTRIBUTION", guide, StringComparison.Ordinal);
-		Assert.Contains("OBSERVABILITY: 5.1 MIGRATIONS", guide, StringComparison.Ordinal);
-		Assert.Contains("OBSERVABILITY: 5.3 REDUCED-API-VERIFICATION", guide, StringComparison.Ordinal);
-		Assert.Contains("OBSERVABILITY: 5.4 STATIC-SHAPE-BOUNDARIES", guide, StringComparison.Ordinal);
-		Assert.Contains("OBSERVABILITY: 5.5 CONSOLIDATION", guide, StringComparison.Ordinal);
 	}
 
 	[Fact(DisplayName = "Generated local observability guide truthfully documents Story 2.1 failure isolation")]
@@ -101,8 +113,11 @@ public sealed class ObservabilityGuideTokenTests
 		Assert.Contains("only telemetry-specific prerequisite", guide, StringComparison.Ordinal);
 		Assert.Contains("SQL Server, RabbitMQ, Blob/Azurite, identity/Keycloak, migrations", guide, StringComparison.Ordinal);
 		Assert.Contains("provision and verify them separately", guide, StringComparison.Ordinal);
-		Assert.DoesNotContain("<!--" + IfDirective + " (commonLibraries)", guide, StringComparison.Ordinal);
-		Assert.DoesNotContain("<!--" + IfDirective + " (!commonLibraries)", guide, StringComparison.Ordinal);
+		var shell = guide.IndexOf("# Local observability", StringComparison.Ordinal);
+		var commonGate = guide.IndexOf("<!--" + IfDirective + " (commonLibraries)", StringComparison.Ordinal);
+		var packageGate = guide.IndexOf("<!--" + IfDirective + " (!commonLibraries)", StringComparison.Ordinal);
+		Assert.True(shell >= 0 && shell < commonGate, "The guide shell stays outside the Common-library gates.");
+		Assert.True(shell >= 0 && shell < packageGate, "The guide shell stays outside the external-package gate.");
 		Assert.DoesNotContain("static external-observability handoff", guide, StringComparison.Ordinal);
 		Assert.DoesNotContain("--allow-anonymous", guide, StringComparison.Ordinal);
 		Assert.Equal(CountOccurrences(guide, "<!--" + IfDirective), CountOccurrences(guide, "<!--" + EndIfDirective + " -->"));

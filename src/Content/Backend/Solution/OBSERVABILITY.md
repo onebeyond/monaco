@@ -56,31 +56,148 @@ The OTLP/gRPC receiver remains loopback-only. Access the viewer in a browser onl
 
 ## Common-library delivery
 
-Every Runtime Host uses the same complete Common dependency contract. `--commonLibraries true` generates those projects as source; `--commonLibraries false` restores the declared package set from a compatible feed you own. The Boolean changes dependency delivery only: it does not change observability composition, configuration, host capability, this guide, or the manual post-action. No feed is configured for you, and no feed credentials, tokens, or secrets are retained.
+Every Runtime Host uses the same complete Common dependency contract. `--commonLibraries true` generates those projects as source; `--commonLibraries false` restores the declared package set from a compatible feed you own. The Boolean changes dependency delivery only: it does not change observability composition, configuration, host capability, or the manual post-action. No feed is configured for you, and no feed credentials, tokens, or secrets are retained.
 
 The declared package set is versioned `0.0.1-alpha1` and its package IDs embed this solution's name (`<SolutionName>.Common.*`), so it cannot come pre-published. To stock your feed, generate a source-mode solution with the same `--name`, run `dotnet pack` on its `Common.*` projects, and publish the resulting packages to your feed. Package-mode output then restores from that feed; the generated `nuget.config` does not clear ambient sources, so an organization-level feed works without editing generated files.
 
-## Future-owned guide sections
+<!--#if (apiService || apiGateway) -->
+## HTTP causality
 
-The following deterministic insertion points reserve sequence and ownership for later stories. They are intentionally capability-neutral until their owning story supplies content.
+Native W3C propagation is framework-owned. Monaco adds no custom propagator, does not read or write `traceparent` or `tracestate`, and adds no custom header, wrapper Activity, ActivitySource, or OpenTelemetry YARP adapter.
+<!--#if (apiService) -->
+The API follows native ASP.NET Core server instrumentation. Pivot a successful Company creation from the application log's native TraceId and SpanId to the API request and its sanitized SqlClient spans. Do not expect raw SQL, parameters, connection data, request or response bodies, credentials, headers, wrapper spans, or duplicate dependency spans.
+<!--#endif -->
+<!--#if (apiGateway) -->
+The Gateway follows native ASP.NET Core server instrumentation, then `Yarp.ReverseProxy` forwarding, then native HttpClient. A downstream 503 may be examined through that native HttpClient telemetry. Monaco does not add an application dependency log for the forwarded hop.
+<!--#endif -->
+<!--#if (apiService && apiGateway) -->
+Navigate the distinct resources `<solution>.Common.ApiGateway` and `<solution>.Api`.
+<!--#endif -->
+<!--#if (apiGateway && !apiService) -->
+This Gateway output has no database client, persistence stamps, or successful-company counter.
+<!--#endif -->
+<!--#endif -->
 
-| Placeholder | Owning story |
-|---|---|
-| Runtime host profiles below | 1.4 |
-| Configuration and routing below | 1.5 |
-| Successful company creations below | 1.6 |
-| Local first run below | 1.7 |
-| Failure isolation below | 2.1 |
-| High-fidelity telemetry boundary below | 2.6 |
-| Production routing below | 2.4 |
-| `<!-- OBSERVABILITY: 3.1-3.3 CAUSAL-DIAGNOSIS -->` | 3.1-3.3 |
-| `<!-- OBSERVABILITY: 3.4 HOST-METRICS -->` | 3.4 |
-| `<!-- OBSERVABILITY: 3.5 INSTRUMENTATION-GOVERNANCE -->` | 3.5 |
-| `<!-- OBSERVABILITY: 4.5 PERSISTENCE-ATTRIBUTION -->` | 4.5 |
-| `<!-- OBSERVABILITY: 5.1 MIGRATIONS -->` | 5.1 |
-| `<!-- OBSERVABILITY: 5.3 REDUCED-API-VERIFICATION -->` | 5.3 |
-| `<!-- OBSERVABILITY: 5.4 STATIC-SHAPE-BOUNDARIES -->` | 5.4 |
-| `<!-- OBSERVABILITY: 5.5 CONSOLIDATION -->` | 5.5 |
+<!--#if (commonLibraries && massTransitIntegration && (apiService || workerService)) -->
+## Messaging navigation
+
+Operators follow native MassTransit publish and transport activity by TraceId. Parent-child and span links are both valid. Monaco does not install a MassTransit OpenTelemetry adapter and does not ship a production retry, fault, or error-queue policy. A consumer-owned Collector or backend owns filtering, redaction, cardinality, and retry or fault policy.
+<!--#if (workerService) -->
+Follow native consume activity on the Worker as part of that same TraceId.
+<!--#if (filesSupport) -->
+The Worker completion log is EventId `2000` / `LongRunningProcessCompleted`, with the literal `Long-running process command completed.`
+<!--#endif -->
+An unhandled consume exception keeps ordinary `ILogger` exception context and native consumer error status.
+<!--#endif -->
+<!--#if (apiService && workerService) -->
+The API resource is `<solution>.Api` and the Worker resource is `<solution>.Worker`.
+<!--#if (filesSupport) -->
+Product creation follows this path through the EF bus outbox.
+<!--#endif -->
+<!--#endif -->
+<!--#if (apiService && !workerService) -->
+No Worker consumes the message. Do not claim consumer completion or retry completion.
+<!--#endif -->
+<!--#if (workerService && !apiService) -->
+This solution has no API publish walkthrough.
+<!--#endif -->
+<!--#endif -->
+
+<!--#if (commonLibraries) -->
+## Host metrics
+
+Metrics are aggregate supporting context on the one OTLP path, not properties of one trace. Do not join a Metric series to a single Company or Product trace as if it were a span attribute. Monaco installs no Metric View, meter allow-list, attribute suppression, buckets, or series ceilings. A consumer-owned Collector or backend owns filtering and cardinality.
+<!--#if (apiService) -->
+The API exposes Runtime (`System.Runtime`), ASP.NET through `AddAspNetCoreInstrumentation()`, HttpClient (`System.Net.Http`), SqlClient (`OpenTelemetry.Instrumentation.SqlClient`), and the Application meter (`Monaco.Template.Backend.Application`, including `company.successful_creations`).
+<!--#if (massTransitIntegration) -->
+The API also exposes the `MassTransit` meter.
+<!--#endif -->
+<!--#if (auth) -->
+ASP.NET instrumentation may also export `Microsoft.AspNetCore.Authentication` and `Microsoft.AspNetCore.Authorization` meters when the shared framework emits them. Raw authenticated request context remains the validated claim enrichment described below, and only when authentication is enabled.
+<!--#endif -->
+<!--#endif -->
+<!--#if (workerService) -->
+The Worker exposes Runtime (`System.Runtime`), HttpClient (`System.Net.Http`), and SqlClient (`OpenTelemetry.Instrumentation.SqlClient`). It does not expose ASP.NET instrumentation or the Application meter.
+<!--#if (massTransitIntegration) -->
+The Worker also exposes the `MassTransit` meter.
+<!--#endif -->
+<!--#endif -->
+<!--#if (apiGateway) -->
+The Gateway exposes Runtime (`System.Runtime`), ASP.NET through `AddAspNetCoreInstrumentation()` (including `Microsoft.AspNetCore.Authentication` and `Microsoft.AspNetCore.Authorization` meters when the shared framework emits them), and HttpClient (`System.Net.Http`). It does not register a database client, MassTransit, Blob, a YARP meter, or the Application meter.
+<!--#endif -->
+<!--#endif -->
+
+<!--#if (commonLibraries) -->
+## Instrumentation availability
+
+Selected native instrumentation is the composition already registered for each host. This section records availability only. It does not approve, restrict, allow, reject, suppress, bound, or transform fields, instruments, attributes, buckets, or cardinality, and it is not a Monaco governance inventory. Package upgrades stay an ordinary version pin plus the existing behavioral tests. A consumer-owned Collector, receiver, or backend owns filtering, redaction, sanitization, cardinality, and compliance. A signal is available only when `OTEL_SDK_DISABLED` is not set and that signal is enabled.
+<!--#if (apiService) -->
+The API registers ASP.NET traces (`Microsoft.AspNetCore`) and metrics, HttpClient traces and meters, SqlClient traces and the `OpenTelemetry.Instrumentation.SqlClient` meter, the Runtime meter, and the Application meter. Monaco adds no EF Core instrumentation, process instrumentation, or Application ActivitySource.
+<!--#if (massTransitIntegration) -->
+The API registers the `MassTransit` meter and source.
+<!--#endif -->
+<!--#endif -->
+<!--#if (workerService) -->
+The Worker registers HttpClient traces and meters, SqlClient traces and meter, and the Runtime meter. It does not register ASP.NET, YARP, or the Application meter.
+<!--#if (massTransitIntegration) -->
+The Worker registers the `MassTransit` meter and source.
+<!--#endif -->
+<!--#endif -->
+<!--#if (apiGateway) -->
+The Gateway registers ASP.NET traces and metrics, HttpClient traces and meters, the Runtime meter, and YARP traces (`Yarp.ReverseProxy`) only. It does not register a YARP meter, a database client, MassTransit, Blob sources, or the Application meter.
+<!--#endif -->
+<!--#if (filesSupport) -->
+File transfer uses HttpClient only. Monaco adds no Blob ActivitySource.
+<!--#endif -->
+<!--#endif -->
+
+<!--#if (commonLibraries && (apiService || workerService)) -->
+## Persistence attribution
+
+Current-row stamps are opt-in metadata on Company. Creation sets `CreatedAtUtc` and `CreatedBy` and leaves both modification fields null. An eligible later modification preserves creation and sets both modification fields. Stamps share the tracked EF unit of work. They are not mutation history, deletion evidence, tamper evidence, or a compliance-grade audit trail. Actors can be linkable personal data: omit them from public DTOs and Operational Telemetry. Actor-fallback diagnostics may expose only a fixed code, the failure stage, a bounded `hostRole`, and an aggregate `suppressedCount`. Renaming the generated solution changes future machine actors (`system:<solution>.Api` or `service:<solution>.Worker`), not stored history. Automatic stamps apply only through the tracked save pipeline. Direct SQL, `ExecuteUpdate`, other bulk APIs, hard deletion, read or access activity, and `ExecuteDeleteAsync` are outside this behavior. History tables, event stores, and compliance packs stay consumer-owned.
+<!--#if (filesSupport) -->
+Product and File carry the same stamps. File shares them through TPH.
+<!--#endif -->
+<!--#if (apiGateway) -->
+The Gateway does not register persistence attribution.
+<!--#endif -->
+<!--#endif -->
+
+<!--#if (commonLibraries && (apiService || workerService)) -->
+## Migration selection
+
+Apply the one routed Init trio as-is. Existing-database stamp adoption is a consumer decision: nullable, default, or backfill, plus deployment order, rollback, access, and retention. Monaco publishes no universal executable procedure.
+<!--#endif -->
+
+<!--#if (apiService && !workerService && !apiGateway && !auth && !massTransitIntegration && !filesSupport && tests && commonLibraries) -->
+## LOCAL-R3-LEAN-API
+
+Apply the routed Core `Init` migration and start only the API. Create a Company, then repeat a validation failure. On success, locate this API's logs, the request trace, sanitized SqlClient spans, applicable automatic metrics, and one `company.successful_creations` increment. A validation failure commits no Company and does not increment the counter. Confirm the Core current-row stamp on the successful commit.
+<!--#endif -->
+
+<!--#if (apiService && !workerService && !apiGateway && !auth && massTransitIntegration && filesSupport && tests && commonLibraries) -->
+## LOCAL-R4-PUBLISHER-API
+
+Apply the routed `Init` migration and start only the API. Create a Company, then persist a Product and a File and publish through the outbox. Locate this API's logs, the causal trace, applicable metrics, the Company counter, and publication evidence. Do not claim consumer completion or retry completion.
+<!--#endif -->
+
+<!--#if (!commonLibraries) -->
+## External package handoff
+
+This solution restores Common libraries, including Observability, from a compatible feed you own. Generation already emits the external package reference, the applicable profile and boundary calls, and the `Observability` and `OTEL` settings. Publish or supply that package yourself. This guide does not promise that the solution builds or starts.
+<!--#endif -->
+
+<!--#if (apiGateway && !apiService && !workerService) -->
+## Static-only Gateway output
+
+This Gateway-only guide is generated source. It is not evidence that the solution was built or started. This guide does not promise that the solution builds or starts.
+<!--#endif -->
+
+<!--#if (workerService && !apiService && !apiGateway && tests) -->
+## Static-only Worker output
+
+This Worker output enables tests and omits the API. That combination is a pre-existing invalid edge: Worker composition is coupled to the API. A build or start failure here is not an observability defect. This guide does not promise that the solution builds or starts.
+<!--#endif -->
 
 <!--#if (apiService && workerService) -->
 ## Create a Company and inspect local observability
