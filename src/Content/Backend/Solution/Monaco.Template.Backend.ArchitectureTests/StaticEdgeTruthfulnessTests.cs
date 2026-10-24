@@ -11,6 +11,9 @@ public sealed class StaticEdgeTruthfulnessTests : IClassFixture<StaticEdgeTruthf
 	private const string StaticShapeAnchor = "<!-- OBSERVABILITY: 5.4 STATIC-SHAPE-BOUNDARIES -->";
 	private const string GuidePostActionText = "Review OBSERVABILITY.md for the generated local-observability guidance.";
 	private const string CoreInitFileName = "20260915223105_Init.cs";
+	private const string CoreInitDesignerFileName = "20260915223105_Init.Designer.cs";
+	private const string CoreSnapshotFileName = "AppDbContextModelSnapshot.cs";
+	private const string FullInitFileName = "20260328183658_Init.cs";
 
 	private readonly StaticEdgeHiveFixture _hive;
 
@@ -77,14 +80,15 @@ public sealed class StaticEdgeTruthfulnessTests : IClassFixture<StaticEdgeTruthf
 		apiCsproj.Should()
 				 .Contain($"{shape.Name}.Common.Api\"", shape.Id);
 		apiCsproj.Should()
-				 .Contain($"{shape.Name}.Common.Api.Application", shape.Id);
+				 .Contain($"PackageReference Include=\"{shape.Name}.Common.Api.Application\"", shape.Id);
 		var applicationCsproj = shape.ReadText("Application", $"{shape.Name}.Application.csproj");
 		applicationCsproj.Should()
-						 .Contain($"{shape.Name}.Common.Application", shape.Id);
+						 .Contain($"PackageReference Include=\"{shape.Name}.Common.Application\"", shape.Id);
 		applicationCsproj.Should()
-						 .Contain($"{shape.Name}.Common.Infrastructure", shape.Id);
+						 .Contain($"PackageReference Include=\"{shape.Name}.Common.Infrastructure\"", shape.Id);
 		applicationCsproj.Should()
-						 .Contain($"{shape.Name}.Common.BlobStorage", shape.Id);
+						 .Contain($"PackageReference Include=\"{shape.Name}.Common.BlobStorage\"", shape.Id);
+		AssertStampRegistrationPresent(shape);
 		shape.PackageVersions
 			 .Should()
 			 .Contain($"{shape.Name}.Common.Api", shape.Id);
@@ -138,6 +142,8 @@ public sealed class StaticEdgeTruthfulnessTests : IClassFixture<StaticEdgeTruthf
 		generated.Should()
 				 .NotContain("OTEL_", shape.Id);
 		generated.Should()
+				 .NotContain("OpenTelemetry", shape.Id);
+		generated.Should()
 				 .NotContain("\"Observability\"", shape.Id);
 
 		AssertStampRegistrationAbsent(shape);
@@ -153,7 +159,13 @@ public sealed class StaticEdgeTruthfulnessTests : IClassFixture<StaticEdgeTruthf
 		shape.FileExists("Application", "Persistence", "Migrations", CoreInitFileName)
 			 .Should()
 			 .BeTrue(shape.Id);
-		shape.FileExists("Application", "Persistence", "Migrations", "20260915220138_Init.cs")
+		shape.FileExists("Application", "Persistence", "Migrations", CoreInitDesignerFileName)
+			 .Should()
+			 .BeTrue(shape.Id);
+		shape.FileExists("Application", "Persistence", "Migrations", CoreSnapshotFileName)
+			 .Should()
+			 .BeTrue(shape.Id);
+		shape.FileExists("Application", "Persistence", "Migrations", FullInitFileName)
 			 .Should()
 			 .BeFalse(shape.Id);
 	}
@@ -179,6 +191,7 @@ public sealed class StaticEdgeTruthfulnessTests : IClassFixture<StaticEdgeTruthf
 		var shape = _hive.E4;
 
 		AssertGuideShell(shape, _hive.GenerationLog(shape));
+		AssertStampRegistrationPresent(shape);
 		shape.ProjectDirectoryExists("Api")
 			 .Should()
 			 .BeFalse(shape.Id);
@@ -248,12 +261,23 @@ public sealed class StaticEdgeTruthfulnessTests : IClassFixture<StaticEdgeTruthf
 		CSharpCompositionSyntax.ContainsIdentifier(applicationDi, "PersistenceActorFallbackDiagnostics")
 							   .Should()
 							   .BeFalse(shape.Id);
-		CSharpCompositionSyntax.ContainsIdentifier(applicationDi, "IPersistenceActorProvider")
-							   .Should()
-							   .BeFalse(shape.Id);
 		CSharpCompositionSyntax.Invokes(applicationDi, "AddDbContext")
 							   .Should()
 							   .BeTrue(shape.Id);
+	}
+
+	private static void AssertStampRegistrationPresent(SupportedRuntimeShapeCompositionTests.GeneratedRuntimeShape shape)
+	{
+		var applicationDi = shape.ReadText("Application", "DependencyInjection", "ServiceCollectionExtensions.cs");
+		CSharpCompositionSyntax.CountGenericInvocations(applicationDi, "AddScoped", "AuditableSaveChangesInterceptor")
+							   .Should()
+							   .Be(1, shape.Id);
+		CSharpCompositionSyntax.Invokes(applicationDi, "AddInterceptors")
+							   .Should()
+							   .BeTrue(shape.Id);
+		CSharpCompositionSyntax.CountGenericInvocations(applicationDi, "AddSingleton", "PersistenceActorFallbackDiagnostics")
+							   .Should()
+							   .Be(1, shape.Id);
 	}
 
 	private static string GeneratedText(SupportedRuntimeShapeCompositionTests.GeneratedRuntimeShape shape)
@@ -277,59 +301,67 @@ public sealed class StaticEdgeTruthfulnessTests : IClassFixture<StaticEdgeTruthf
 		public StaticEdgeHiveFixture()
 		{
 			_hivePath = Path.Combine(_root, "hive");
-			Directory.CreateDirectory(_hivePath);
-			RunDotnet($"new install \"{FindTemplateSourceDirectory()}\" --debug:custom-hive \"{_hivePath}\"");
+			try
+			{
+				Directory.CreateDirectory(_hivePath);
+				RunDotnet($"new install \"{FindTemplateSourceDirectory()}\" --debug:custom-hive \"{_hivePath}\"");
 
-			E1 = Generate("E1",
-						  new SupportedRuntimeShapeCompositionTests.ShapeOptions(true, true, false, true, true, true, false, false, false),
-						  "--tests",
-						  "false",
-						  "--commonLibraries",
-						  "false",
-						  "--keycloakConfig",
-						  "false");
-			E2 = Generate("E2",
-						  new SupportedRuntimeShapeCompositionTests.ShapeOptions(false, false, false, false, false, false, false, true, false),
-						  "--apiService",
-						  "false",
-						  "--workerService",
-						  "false",
-						  "--auth",
-						  "false",
-						  "--massTransitIntegration",
-						  "false",
-						  "--filesSupport",
-						  "false",
-						  "--tests",
-						  "false",
-						  "--keycloakConfig",
-						  "false");
-			E3 = Generate("E3",
-						  new SupportedRuntimeShapeCompositionTests.ShapeOptions(false, false, true, false, false, false, false, true, false),
-						  "--apiService",
-						  "false",
-						  "--workerService",
-						  "false",
-						  "--apiGateway",
-						  "true",
-						  "--auth",
-						  "false",
-						  "--massTransitIntegration",
-						  "false",
-						  "--filesSupport",
-						  "false",
-						  "--tests",
-						  "false",
-						  "--keycloakConfig",
-						  "false");
-			E4 = Generate("E4",
-						  new SupportedRuntimeShapeCompositionTests.ShapeOptions(false, true, false, false, true, true, true, true, false),
-						  "--apiService",
-						  "false",
-						  "--auth",
-						  "false",
-						  "--keycloakConfig",
-						  "false");
+				E1 = Generate("E1",
+							  new SupportedRuntimeShapeCompositionTests.ShapeOptions(true, true, false, true, true, true, false, false, false),
+							  "--tests",
+							  "false",
+							  "--commonLibraries",
+							  "false",
+							  "--keycloakConfig",
+							  "false");
+				E2 = Generate("E2",
+							  new SupportedRuntimeShapeCompositionTests.ShapeOptions(false, false, false, false, false, false, false, true, false),
+							  "--apiService",
+							  "false",
+							  "--workerService",
+							  "false",
+							  "--auth",
+							  "false",
+							  "--massTransitIntegration",
+							  "false",
+							  "--filesSupport",
+							  "false",
+							  "--tests",
+							  "false",
+							  "--keycloakConfig",
+							  "false");
+				E3 = Generate("E3",
+							  new SupportedRuntimeShapeCompositionTests.ShapeOptions(false, false, true, false, false, false, false, true, false),
+							  "--apiService",
+							  "false",
+							  "--workerService",
+							  "false",
+							  "--apiGateway",
+							  "true",
+							  "--auth",
+							  "false",
+							  "--massTransitIntegration",
+							  "false",
+							  "--filesSupport",
+							  "false",
+							  "--tests",
+							  "false",
+							  "--keycloakConfig",
+							  "false");
+				E4 = Generate("E4",
+							  new SupportedRuntimeShapeCompositionTests.ShapeOptions(false, true, false, false, true, true, true, true, false),
+							  "--apiService",
+							  "false",
+							  "--auth",
+							  "false",
+							  "--keycloakConfig",
+							  "false");
+			}
+			catch
+			{
+				DeleteRoot();
+				throw;
+			}
 		}
 
 		public SupportedRuntimeShapeCompositionTests.GeneratedRuntimeShape E1 { get; }
@@ -340,7 +372,10 @@ public sealed class StaticEdgeTruthfulnessTests : IClassFixture<StaticEdgeTruthf
 		public string GenerationLog(SupportedRuntimeShapeCompositionTests.GeneratedRuntimeShape shape) =>
 			_logs[shape.Id];
 
-		public void Dispose()
+		public void Dispose() =>
+			DeleteRoot();
+
+		private void DeleteRoot()
 		{
 			try
 			{
@@ -387,7 +422,13 @@ public sealed class StaticEdgeTruthfulnessTests : IClassFixture<StaticEdgeTruthf
 			var standardError = process.StandardError.ReadToEndAsync();
 			if (!process.WaitForExit(CommandTimeoutMilliseconds))
 			{
-				process.Kill(entireProcessTree: true);
+				try
+				{
+					process.Kill(entireProcessTree: true);
+				}
+				catch (InvalidOperationException)
+				{ }
+
 				throw new TimeoutException($"'dotnet {arguments}' did not finish within {CommandTimeoutMilliseconds / 1000} seconds.");
 			}
 

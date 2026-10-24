@@ -947,6 +947,9 @@ public sealed class SupportedRuntimeShapeCompositionTests : IClassFixture<Suppor
 		CSharpCompositionSyntax.CountAuditableInterceptorRegistrations(applicationDi)
 							   .Should()
 							   .Be(1, Because(shape));
+		CSharpCompositionSyntax.CountGenericInvocations(applicationDi, "AddSingleton", "PersistenceActorFallbackDiagnostics")
+							   .Should()
+							   .Be(1, Because(shape));
 
 		var companyConfig = shape.ReadText("Application", "Persistence", "EntityConfigurations", "CompanyEntityConfiguration.cs");
 		CSharpCompositionSyntax.Invokes(companyConfig, "ConfigureAuditableFields")

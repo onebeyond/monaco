@@ -231,16 +231,29 @@ public sealed class ObservabilityTemplateDirectiveTests
 		foreach (var package in new[]
 								{
 									"Monaco.Template.Backend.Common.Api",
+									"Monaco.Template.Backend.Common.Api.Application",
 									"Monaco.Template.Backend.Common.Application",
+									"Monaco.Template.Backend.Common.BlobStorage",
+									"Monaco.Template.Backend.Common.Domain",
 									"Monaco.Template.Backend.Common.Infrastructure",
 									"Monaco.Template.Backend.Common.Observability",
 									"Monaco.Template.Backend.Common.Tests"
 								})
 			TemplateDirectiveSource.AssertPathGatedBy("Directory.Packages.props", "!commonLibraries", package);
 
-		TemplateDirectiveSource.AssertPathGatedBy("Directory.Packages.props",
-												  "commonLibraries && (apiService || workerService || apiGateway)",
-												  "OpenTelemetry.Exporter.OpenTelemetryProtocol");
+		foreach (var package in new[]
+								{
+									"Microsoft.Extensions.Configuration.Binder",
+									"OpenTelemetry.Exporter.OpenTelemetryProtocol",
+									"OpenTelemetry.Extensions.Hosting",
+									"OpenTelemetry.Instrumentation.AspNetCore",
+									"OpenTelemetry.Instrumentation.Http",
+									"OpenTelemetry.Instrumentation.Runtime",
+									"OpenTelemetry.Instrumentation.SqlClient"
+								})
+			TemplateDirectiveSource.AssertPathGatedBy("Directory.Packages.props",
+													  "commonLibraries && (apiService || workerService || apiGateway)",
+													  package);
 	}
 
 	[Fact(DisplayName = "Shared composition source keeps unified OTLP and HTTP identity boundary tokens")]
