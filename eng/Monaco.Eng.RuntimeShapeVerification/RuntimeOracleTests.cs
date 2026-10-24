@@ -129,6 +129,9 @@ public sealed class RuntimeOracleTests
 		OtlpSignalReceiver? receiver = null;
 		try
 		{
+			if (mode == DestinationMode.ReceiverUnavailable)
+				await OtlpSignalReceiver.EnsureDevelopmentPortFreeAsync();
+
 			receiver = mode switch
 					   {
 						   DestinationMode.ReceiverAvailable => await OtlpSignalReceiver.StartDevelopmentAsync(),

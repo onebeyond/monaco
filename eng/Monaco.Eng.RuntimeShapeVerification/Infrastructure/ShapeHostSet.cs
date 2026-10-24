@@ -378,7 +378,7 @@ internal sealed class ShapeHostSet : IAsyncDisposable
 		try
 		{
 			var otlp = mode == DestinationMode.ProductionOverride
-						   ? productionReceiver!.ProductionOverrideConfiguration(headers: "Authorization=Bearer runtime-shape-verify")
+						   ? productionReceiver!.ProductionOverrideConfiguration(headers: $"Authorization={OtlpSignalReceiver.ProductionAuthorization}")
 						   : null;
 			var config = HostConfiguration.InfrastructureOverrides(shape,
 																   infra,
@@ -437,13 +437,14 @@ internal sealed class ShapeHostSet : IAsyncDisposable
 				await set._apiProcess.WaitForReadyAsync(new(new(set.ApiBaseAddress), "health"));
 			}
 
-			if (shape.Options is { Worker: true, MassTransit: true })
+			if (shape.Options.Worker)
 			{
-				// Messaging Workers run out-of-process. The startup hook removes the duplicate
-				// Worker BackgroundService bus start and arms retry/stamp seams.
+				// Out of process, ApplicationName is the generated assembly, so service.name
+				// stays {name}.Worker without an OTEL_SERVICE_NAME override.
 				var raw = new Dictionary<string, string?>(StringComparer.Ordinal)
 						  {
-							  ["DOTNET_STARTUP_HOOKS"] = DeployWorkerHook(shape), ["OTEL_SERVICE_NAME"] = shape.ServiceName("Worker"), ["RUNTIME_SHAPE_HOOK_LOG"] = Path.Combine(Path.GetTempPath(), $"hook-{shape.Id}.log")
+							  ["DOTNET_STARTUP_HOOKS"] = DeployWorkerHook(shape),
+							  ["RUNTIME_SHAPE_HOOK_LOG"] = Path.Combine(Path.GetTempPath(), $"hook-{shape.Id}.log")
 						  };
 				if (armConsumeRetry)
 				{
@@ -451,7 +452,7 @@ internal sealed class ShapeHostSet : IAsyncDisposable
 					raw["RUNTIME_SHAPE_RETRY_MARKER"] = set.RetryMarkerPath;
 				}
 
-				if (shape.Shape == RuntimeShape.WorkerConsumer)
+				if (shape.Shape is RuntimeShape.WorkerConsumer or RuntimeShape.WorkerBaseline)
 				{
 					set.StampMarkerPath = Path.Combine(Path.GetTempPath(), $"stamp-{shape.Id}-{Guid.NewGuid():N}.txt");
 					raw["RUNTIME_SHAPE_STAMP"] = "1";
@@ -465,17 +466,8 @@ internal sealed class ShapeHostSet : IAsyncDisposable
 																  "http://127.0.0.1:0",
 																  config,
 																  raw);
-				await set._workerProcess.WaitForOutputAsync("Bus started", TimeSpan.FromSeconds(90));
-			}
-			else if (shape.Options.Worker)
-			{
-				set.SetProcessEnvironment("OTEL_SERVICE_NAME", shape.ServiceName("Worker"));
-				var (workerHost, workerEnv) = GeneratedHostBootstrap.Start(shape,
-																		   "Worker",
-																		   config);
-				set._hosts.Add(workerHost);
-				set._environmentScopes.Add(workerEnv);
-				set.WorkerServices = workerHost.Services;
+				var readinessText = shape.Options.MassTransit ? "Bus started" : "Application started";
+				await set._workerProcess.WaitForOutputAsync(readinessText, TimeSpan.FromSeconds(90));
 			}
 
 			return set;

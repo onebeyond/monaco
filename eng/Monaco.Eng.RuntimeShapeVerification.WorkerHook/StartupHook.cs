@@ -93,27 +93,19 @@ public static class StartupHook
 			}
 
 			Log("services-matched");
-
-			var marker = Environment.GetEnvironmentVariable("RUNTIME_SHAPE_RETRY_MARKER");
-			if (!string.IsNullOrEmpty(marker))
-			{
-				collection.AddSingleton(new OneShotFailure(marker));
-				collection.AddSingleton<IConfigureReceiveEndpoint, OneShotRetryConfiguration>();
-				collection.AddTransient(typeof(IPipelineBehavior<,>), typeof(OneShotBehavior<,>));
-			}
-
-			if (string.Equals(Environment.GetEnvironmentVariable("RUNTIME_SHAPE_STAMP"),
-							  "1",
-							  StringComparison.Ordinal))
-				collection.AddHostedService<FixtureStampService>();
+			ConfigureGeneratedWorker(collection);
 		}
 
 		private static void AddWorkerServices(HostBuilderContext _, IServiceCollection collection)
 		{
 			Log("add-worker-services");
+			ConfigureGeneratedWorker(collection);
+		}
 
-			// Same race as the in-process harness: Worker.StartAsync and MassTransitHostedService
-			// both call IBusControl.StartAsync. Keep MassTransit; drop the BackgroundService Worker.
+		private static void ConfigureGeneratedWorker(IServiceCollection collection)
+		{
+			// Worker.StartAsync and MassTransitHostedService both call IBusControl.StartAsync.
+			// Keep MassTransit; drop the BackgroundService Worker.
 			collection.Configure<HostOptions>(options => options.ServicesStartConcurrently = false);
 			foreach (var descriptor in collection.ToList()
 												 .Where(descriptor => descriptor.ServiceType == typeof(IHostedService))
@@ -134,12 +126,7 @@ public static class StartupHook
 
 			var marker = Environment.GetEnvironmentVariable("RUNTIME_SHAPE_RETRY_MARKER");
 			if (!string.IsNullOrEmpty(marker))
-			{
-				collection.AddSingleton(new OneShotFailure(marker));
-				collection.AddSingleton<IConfigureReceiveEndpoint, OneShotRetryConfiguration>();
-				collection.AddTransient(typeof(IPipelineBehavior<,>), typeof(OneShotBehavior<,>));
-				Log("retry-armed");
-			}
+				ArmOneShotRetry(collection, marker);
 
 			if (string.Equals(Environment.GetEnvironmentVariable("RUNTIME_SHAPE_STAMP"),
 							  "1",
@@ -149,6 +136,14 @@ public static class StartupHook
 				Log("stamp-armed");
 			}
 		}
+	}
+
+	private static void ArmOneShotRetry(IServiceCollection collection, string marker)
+	{
+		collection.AddSingleton(new OneShotFailure(marker));
+		collection.AddSingleton<IConfigureReceiveEndpoint, OneShotRetryConfiguration>();
+		collection.AddTransient(typeof(IPipelineBehavior<,>), typeof(OneShotBehavior<,>));
+		Log("retry-armed");
 	}
 
 	private sealed class OneShotFailure

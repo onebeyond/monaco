@@ -1,7 +1,5 @@
 using AwesomeAssertions;
-using Microsoft.Extensions.DependencyInjection;
 using Monaco.Eng.RuntimeShapeVerification.Infrastructure;
-using Monaco.Eng.RuntimeShapeVerification.WorkerHook;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Monaco.Eng.RuntimeShapeVerification.Drivers;
@@ -15,35 +13,47 @@ internal static class WorkerBaselineDriver
 											OtlpSignalReceiver? receiver,
 											DestinationMode mode)
 	{
-		hosts.WorkerServices.Should().NotBeNull();
+		hosts.WorkerServices.Should().BeNull();
 		hosts.ApiClient.Should().BeNull();
-		Directory.Exists(shape.ProjectDir("Api")).Should().BeFalse();
-		Directory.Exists(shape.ProjectDir("Messages")).Should().BeFalse();
-		Directory.Exists(shape.ProjectDir("IntegrationTests")).Should().BeFalse();
-
-		// The baseline Worker has no messaging tables; absence of the Messages project is the no-message guarantee.
 		shape.Options.MassTransit.Should().BeFalse();
 
-		using (var scope = hosts.WorkerServices!.CreateScope())
-		{
-			var companyId = await GeneratedCompanyStamp.SaveAsync(scope.ServiceProvider,
-																  CancellationToken.None,
-																  shape.Name);
-			var (createdBy, createdAt) = await GeneratedDbAccess.ReadCompanyStampAsync(sql, companyId);
-			createdBy.Should().NotBeNullOrWhiteSpace();
-			createdAt.Should().NotBeNull();
-		}
+		hosts.StampMarkerPath.Should().NotBeNull();
+		await WaitUntilAsync(() => Task.FromResult(File.Exists(hosts.StampMarkerPath!)), attempts: 300);
+		var stampedId = Guid.Parse((await File.ReadAllTextAsync(hosts.StampMarkerPath!)).Trim());
+		var (createdBy, createdAt) = await GeneratedDbAccess.ReadCompanyStampAsync(sql, stampedId);
+		createdBy.Should().NotBeNullOrWhiteSpace();
+		createdAt.Should().NotBeNull();
+		(await GeneratedDbAccess.CountCompaniesAsync(sql)).Should().Be(1);
 
 		if (mode != DestinationMode.ReceiverUnavailable)
 		{
 			receiver.Should().NotBeNull();
-			await receiver.WaitUntilAsync(() => receiver.HasSignalKindsFor(shape.ServiceName("Worker")), attempts: 900);
-			receiver.HasSignalKindsFor(shape.ServiceName("Worker")).Should().BeTrue();
+			await receiver.WaitUntilAsync(() => receiver.HasSignalKindsFor(shape.ServiceName("Worker")),
+										  attempts: 900,
+										  describe: receiver.Describe);
+			receiver.HasSignalKindsFor(shape.ServiceName("Worker")).Should().BeTrue(receiver.Describe());
+			if (mode == DestinationMode.ProductionOverride)
+				receiver.SawAuthorization(OtlpSignalReceiver.ProductionAuthorization)
+						.Should()
+						.BeTrue(receiver.Describe());
 			receiver.HasCounter(shape.ServiceName("Worker"),
 								shape.ApplicationMeterName,
 								"company.successful_creations")
 					.Should()
 					.BeFalse();
 		}
+	}
+
+	private static async Task WaitUntilAsync(Func<Task<bool>> predicate, int attempts)
+	{
+		for (var attempt = 0; attempt < attempts; attempt++)
+		{
+			if (await predicate())
+				return;
+			await Task.Delay(100);
+		}
+
+		if (!await predicate())
+			throw new TimeoutException("Worker baseline evidence was not observed in time.");
 	}
 }

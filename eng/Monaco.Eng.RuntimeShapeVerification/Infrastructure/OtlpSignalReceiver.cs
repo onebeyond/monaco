@@ -31,7 +31,12 @@ public sealed class OtlpSignalReceiver : IAsyncDisposable
 		HttpEndpoint = application.Urls.Single();
 	}
 
+	public const string ProductionAuthorization = "Bearer runtime-shape-verify";
+
 	public string HttpEndpoint { get; }
+
+	public static Task EnsureDevelopmentPortFreeAsync() =>
+		FreeHostPortAsync();
 
 	public static async Task<OtlpSignalReceiver> StartDevelopmentAsync()
 	{
@@ -122,7 +127,9 @@ public sealed class OtlpSignalReceiver : IAsyncDisposable
 								 {
 									 await using var body = new MemoryStream();
 									 await context.Request.Body.CopyToAsync(body);
-									 entries.Enqueue(new(context.Request.Path, body.ToArray()));
+									 entries.Enqueue(new(context.Request.Path,
+														 body.ToArray(),
+														 context.Request.Headers.Authorization.ToString()));
 									 context.Response.StatusCode = StatusCodes.Status200OK;
 								 });
 		await app.StartAsync();
@@ -146,13 +153,44 @@ public sealed class OtlpSignalReceiver : IAsyncDisposable
 	public void Clear() =>
 		_entries.Clear();
 
-	public async Task WaitUntilAsync(Func<bool> predicate, int attempts = 150)
+	public async Task WaitUntilAsync(Func<bool> predicate, int attempts = 150, Func<string>? describe = null)
 	{
 		for (var attempt = 0; attempt < attempts && !predicate(); attempt++)
 			await Task.Delay(100);
 
 		if (!predicate())
-			throw new TimeoutException("OTLP receiver did not observe the expected payload in time.");
+			throw new TimeoutException($"OTLP receiver did not observe the expected payload in time. {describe?.Invoke()}");
+	}
+
+	public bool SawAuthorization(string expected) =>
+		_entries.Any(entry => string.Equals(entry.Authorization, expected, StringComparison.Ordinal));
+
+	public double? CounterSum(string serviceName, string meterName, string instrumentName)
+	{
+		double? max = null;
+		foreach (var sum in _entries.Where(entry => entry.Path == "/v1/metrics")
+									.SelectMany(entry => SafeDecode(() => OtlpProtobuf.ReadCounterSums(entry.Payload))))
+		{
+			if (sum.ServiceName != serviceName || sum.MeterName != meterName || sum.Name != instrumentName)
+				continue;
+
+			max = max is null ? sum.Value : Math.Max(max.Value, sum.Value);
+		}
+
+		return max;
+	}
+
+	public string Describe()
+	{
+		var services = GetServiceNames()
+					   .Concat(GetLogs().Select(log => log.ServiceName))
+					   .Where(name => name.Length > 0)
+					   .Distinct(StringComparer.Ordinal);
+		var sums = _entries.Where(entry => entry.Path == "/v1/metrics")
+						   .SelectMany(entry => SafeDecode(() => OtlpProtobuf.ReadCounterSums(entry.Payload)))
+						   .Where(sum => sum.Name == "company.successful_creations" || sum.MeterName.EndsWith(".Application", StringComparison.Ordinal))
+						   .Select(sum => $"{sum.ServiceName}/{sum.MeterName}/{sum.Name}={sum.Value.ToString(CultureInfo.InvariantCulture)}");
+		return $"services=[{string.Join(", ", services)}] company=[{string.Join(", ", sums)}] entries={_entries.Count}";
 	}
 
 	public IReadOnlyCollection<string> GetServiceNames() =>
@@ -224,7 +262,7 @@ public sealed class OtlpSignalReceiver : IAsyncDisposable
 			}
 	}
 
-	private sealed record OtlpEntry(string Path, byte[] Payload);
+	private sealed record OtlpEntry(string Path, byte[] Payload, string Authorization);
 }
 
 [ExcludeFromCodeCoverage]
@@ -238,6 +276,9 @@ internal sealed record DecodedMetricsResource(string ServiceName, IReadOnlyList<
 
 [ExcludeFromCodeCoverage]
 internal sealed record DecodedInstrument(string MeterName, string Name);
+
+[ExcludeFromCodeCoverage]
+internal sealed record DecodedCounterSum(string ServiceName, string MeterName, string Name, double Value);
 
 [ExcludeFromCodeCoverage]
 internal static class OtlpProtobuf
@@ -330,6 +371,79 @@ internal static class OtlpProtobuf
 		}
 
 		return logs;
+	}
+
+	internal static IReadOnlyList<DecodedCounterSum> ReadCounterSums(byte[] payload)
+	{
+		var sums = new List<DecodedCounterSum>();
+		foreach (var resourceMetrics in ReadRepeatedMessages(payload, fieldNumber: 1))
+		{
+			var serviceName = string.Empty;
+			foreach (var (field, message) in ReadFields(resourceMetrics))
+				switch (field)
+				{
+					case 1:
+						serviceName = ReadServiceName(message);
+						break;
+					case 2:
+						var meterName = string.Empty;
+						foreach (var (scopeField, scopeMessage) in ReadFields(message))
+							switch (scopeField)
+							{
+								case 1:
+									meterName = ReadInstrumentationScopeName(scopeMessage);
+									break;
+								case 2:
+									var metricName = string.Empty;
+									double? value = null;
+									foreach (var (metricField, metricMessage) in ReadFields(scopeMessage))
+										switch (metricField)
+										{
+											case 1:
+												metricName = Encoding.UTF8.GetString(metricMessage);
+												break;
+											case 7:
+												value = MaxSum(metricMessage);
+												break;
+										}
+
+									if (metricName.Length > 0 && value is not null)
+										sums.Add(new(serviceName, meterName, metricName, value.Value));
+									break;
+							}
+
+						break;
+				}
+		}
+
+		return sums;
+	}
+
+	private static double? MaxSum(byte[] sumPayload)
+	{
+		double? max = null;
+		foreach (var (field, message) in ReadFields(sumPayload))
+		{
+			if (field != 1)
+				continue;
+
+			foreach (var (pointField, pointMessage) in ReadFields(message))
+			{
+				// OTLP NumberDataPoint stores integer sums in field 6 (sfixed64). Field 5 is exemplars.
+				double? point = pointField switch
+								{
+									4 when pointMessage.Length == 8 => BitConverter.ToDouble(pointMessage, 0),
+									6 when pointMessage.Length == 8 => BitConverter.ToInt64(pointMessage, 0),
+									_ => null
+								};
+				if (point is null)
+					continue;
+
+				max = max is null ? point : Math.Max(max.Value, point.Value);
+			}
+		}
+
+		return max;
 	}
 
 	internal static IReadOnlyList<DecodedMetricsResource> ReadMetrics(byte[] payload)

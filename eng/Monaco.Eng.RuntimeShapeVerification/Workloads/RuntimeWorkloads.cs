@@ -30,6 +30,7 @@ internal static class RuntimeWorkloads
 
 		var sql = infra.CreateIsolatedConnectionString($"{shape.Id}-{mode}");
 		await GeneratedDbAccess.MigrateViaEfAsync(shape, sql);
+		var hostBinaries = mode == DestinationMode.ProductionOverride ? SnapshotHostBinaries(shape) : null;
 		var armRetry = shape.Options is { Worker: true, MassTransit: true, Api: true };
 		await using var hosts = await ShapeHostSet.StartAsync(shape, infra, sql, mode, mode == DestinationMode.ProductionOverride ? receiver : null, armRetry);
 
@@ -57,13 +58,32 @@ internal static class RuntimeWorkloads
 				break;
 			case RuntimeShape.WorkerConsumer:
 				await WorkerConsumerDriver.ExecuteAsync(shape, hosts, infra, sql, receiver, mode);
+				AssertAbsences(shape, expectGateway: false);
 				break;
 			case RuntimeShape.WorkerBaseline:
 				await WorkerBaselineDriver.ExecuteAsync(shape, hosts, sql, receiver, mode);
+				AssertAbsences(shape, expectGateway: false);
 				break;
 			default:
 				throw new ArgumentOutOfRangeException(nameof(shape), shape.Shape, "Unknown runtime shape.");
 		}
+
+		if (hostBinaries is not null)
+			foreach (var (path, written) in hostBinaries)
+				File.GetLastWriteTimeUtc(path).Should().Be(written, $"{path} must stay the DA binary when only OTEL_EXPORTER_OTLP_* changes.");
+	}
+
+	private static Dictionary<string, DateTime> SnapshotHostBinaries(GeneratedShape shape)
+	{
+		var stamps = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
+		foreach (var suffix in new[] { "Api", "Worker", "Common.ApiGateway" })
+		{
+			var path = shape.BuiltDll(suffix);
+			if (File.Exists(path))
+				stamps[path] = File.GetLastWriteTimeUtc(path);
+		}
+
+		return stamps;
 	}
 
 	private static async Task RunFullApiWorkerAsync(GeneratedShape shape,
@@ -79,6 +99,7 @@ internal static class RuntimeWorkloads
 		createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 		companyId.Should().NotBeNull();
 		await AssertCompanyStampAsync(sql, companyId!.Value);
+		(await GeneratedDbAccess.CountCompaniesAsync(sql)).Should().Be(1);
 
 		var (productId, fileId) = await ApiCalls.CreateProductWithSeededImageAsync(entryClient, companyId.Value);
 		await AssertProductAndFileStampsAsync(sql, productId, fileId);
@@ -93,7 +114,15 @@ internal static class RuntimeWorkloads
 		AssertAbsences(shape, expectGateway);
 		await AssertSignalsAsync(shape, receiver, mode, expectGateway);
 		if (mode != DestinationMode.ReceiverUnavailable)
+		{
 			await AssertCompanyCounterAsync(shape, receiver!);
+			if (expectGateway)
+				receiver!.HasCounter(shape.ServiceName("Common.ApiGateway"),
+									 shape.ApplicationMeterName,
+									 "company.successful_creations")
+						 .Should()
+						 .BeFalse("the Gateway must not claim the Company counter");
+		}
 	}
 
 	private static async Task RunLeanApiAsync(GeneratedShape shape,
@@ -113,7 +142,9 @@ internal static class RuntimeWorkloads
 
 		var count = await GeneratedDbAccess.CountCompaniesByNameAsync(sql, companyName);
 		count.Should().Be(1);
+		(await GeneratedDbAccess.CountCompaniesAsync(sql)).Should().Be(1, "validation failure must not commit a company");
 
+		AssertNotLabeledCanonicalJourney(shape);
 		AssertAbsences(shape, expectGateway: false);
 		await AssertSignalsAsync(shape, receiver, mode, expectGateway: false);
 		if (mode != DestinationMode.ReceiverUnavailable)
@@ -134,6 +165,7 @@ internal static class RuntimeWorkloads
 		createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 		companyId.Should().NotBeNull();
 		await AssertCompanyStampAsync(sql, companyId!.Value);
+		(await GeneratedDbAccess.CountCompaniesAsync(sql)).Should().Be(1);
 
 		var sawOutbox = false;
 		var outboxProbe = Task.Run(async () =>
@@ -154,6 +186,7 @@ internal static class RuntimeWorkloads
 		sawOutbox.Should().BeTrue("The publisher API must show outbox publication after Product create.");
 		(await GeneratedDbAccess.CountInboxDeliveredAsync(sql)).Should().Be(0, "The publisher API must not claim consumer completion.");
 
+		AssertNotLabeledCanonicalJourney(shape);
 		AssertAbsences(shape, expectGateway: false);
 		await AssertSignalsAsync(shape, receiver, mode, expectGateway: false);
 		if (mode != DestinationMode.ReceiverUnavailable)
@@ -161,19 +194,26 @@ internal static class RuntimeWorkloads
 	}
 
 
+	private static void AssertNotLabeledCanonicalJourney(GeneratedShape shape)
+	{
+		var guide = Path.Combine(shape.OutputDirectory, "OBSERVABILITY.md");
+		File.Exists(guide).Should().BeTrue($"{shape.Id} keeps the generated operations guide.");
+		File.ReadAllText(guide).Should().NotContain("UJ-1");
+	}
+
 	private static void AssertAbsences(GeneratedShape shape, bool expectGateway)
 	{
 		Directory.Exists(shape.ProjectDir("Common.ApiGateway")).Should().Be(expectGateway);
-		if (!shape.Options.Worker)
-			Directory.Exists(shape.ProjectDir("Worker")).Should().BeFalse();
-		if (!shape.Options.Api)
-			Directory.Exists(shape.ProjectDir("Api")).Should().BeFalse();
-		if (!shape.Options.Tests)
-			Directory.Exists(shape.ProjectDir("IntegrationTests")).Should().BeFalse();
-		if (!shape.Options.MassTransit)
-			Directory.Exists(shape.ProjectDir("Messages")).Should().BeFalse();
-		if (!shape.Options.Auth)
-			Directory.Exists(Path.Combine(shape.ProjectDir("Api"), "Auth")).Should().BeFalse();
+		Directory.Exists(shape.ProjectDir("Api")).Should().Be(shape.Options.Api);
+		Directory.Exists(shape.ProjectDir("Worker")).Should().Be(shape.Options.Worker);
+		Directory.Exists(shape.ProjectDir("Messages")).Should().Be(shape.Options.MassTransit);
+		Directory.Exists(shape.ProjectDir("Common.BlobStorage")).Should().Be(shape.Options.Files);
+		File.Exists(Path.Combine(shape.OutputDirectory, "realm-export-template.json")).Should().Be(shape.Options.Keycloak);
+		if (shape.Options.Api)
+			Directory.Exists(Path.Combine(shape.ProjectDir("Api"), "Auth")).Should().Be(shape.Options.Auth);
+
+		foreach (var testsProject in new[] { "IntegrationTests", "Application.Tests", "Domain.Tests", "ArchitectureTests", "Common.Observability.Tests" })
+			Directory.Exists(shape.ProjectDir(testsProject)).Should().Be(shape.Options.Tests, $"{shape.Id} {testsProject}");
 	}
 
 	private static async Task AssertSignalsAsync(GeneratedShape shape,
@@ -196,20 +236,29 @@ internal static class RuntimeWorkloads
 		if (expectGateway)
 			expected.Add(shape.ServiceName("Common.ApiGateway"));
 
-		await receiver.WaitUntilAsync(() => expected.All(receiver.HasSignalKindsFor), attempts: SignalWaitAttempts);
+		await receiver.WaitUntilAsync(() => expected.All(receiver.HasSignalKindsFor),
+									  attempts: SignalWaitAttempts,
+									  describe: receiver.Describe);
 		foreach (var name in expected)
-			receiver.HasSignalKindsFor(name).Should().BeTrue(name);
+			receiver.HasSignalKindsFor(name).Should().BeTrue($"{name} {receiver.Describe()}");
 
 		if (!expectGateway)
 			receiver.GetServiceNames().Should().NotContain(name => name.EndsWith(".Common.ApiGateway", StringComparison.Ordinal));
+
+		if (mode == DestinationMode.ProductionOverride)
+			receiver.SawAuthorization(OtlpSignalReceiver.ProductionAuthorization)
+					.Should()
+					.BeTrue($"production override must send OTEL_EXPORTER_OTLP_HEADERS. {receiver.Describe()}");
 	}
 
 	private static async Task AssertCompanyCounterAsync(GeneratedShape shape, OtlpSignalReceiver receiver)
 	{
 		var apiName = shape.ServiceName("Api");
-		await receiver.WaitUntilAsync(() => receiver.HasCounter(apiName, shape.ApplicationMeterName, "company.successful_creations"),
-									  attempts: SignalWaitAttempts);
-		receiver.HasCounter(apiName, shape.ApplicationMeterName, "company.successful_creations").Should().BeTrue();
+		await receiver.WaitUntilAsync(() => receiver.CounterSum(apiName, shape.ApplicationMeterName, "company.successful_creations") is >= 0.999 and <= 1.001,
+									  attempts: SignalWaitAttempts,
+									  describe: receiver.Describe);
+		var sum = receiver.CounterSum(apiName, shape.ApplicationMeterName, "company.successful_creations");
+		sum.Should().BeApproximately(1d, 0.001, receiver.Describe());
 	}
 
 	private static async Task AssertCompanyStampAsync(string sql, Guid companyId)

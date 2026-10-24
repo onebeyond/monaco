@@ -38,6 +38,19 @@ internal static class GeneratedDbAccess
 				reader.IsDBNull(1) ? null : reader.GetDateTimeOffset(1));
 	}
 
+	internal static async Task<int> CountCompaniesAsync(string connectionString)
+	{
+		await using var connection = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
+		await connection.OpenAsync();
+		await using var command = connection.CreateCommand();
+		command.CommandText = """
+							  SELECT COUNT(1)
+							  FROM Company
+							  """;
+		var result = await command.ExecuteScalarAsync();
+		return Convert.ToInt32(result);
+	}
+
 	internal static async Task<int> CountCompaniesByNameAsync(string connectionString, string name)
 	{
 		await using var connection = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
@@ -122,6 +135,8 @@ internal static class GeneratedDbAccess
 		return Convert.ToInt32(result);
 	}
 
+	private static int _efToolRestored;
+
 	internal static async Task MigrateViaEfAsync(GeneratedShape shape, string connectionString)
 	{
 		var applicationProject = Path.Combine(shape.ProjectDir("Application"), $"{shape.Name}.Application.csproj");
@@ -131,6 +146,7 @@ internal static class GeneratedDbAccess
 			throw new FileNotFoundException($"EF startup project not found for {shape.Id}.", startupProject);
 
 		var monacoRoot = FindMonacoRoot();
+		await EnsureEfToolRestoredAsync(monacoRoot);
 		var startInfo = new ProcessStartInfo("dotnet",
 											 $"tool run dotnet-ef -- database update --project \"{applicationProject}\" --startup-project \"{startupProject}\" --connection \"{connectionString}\"")
 						{
@@ -146,5 +162,28 @@ internal static class GeneratedDbAccess
 		await process.WaitForExitAsync();
 		if (process.ExitCode != 0)
 			throw new InvalidOperationException($"dotnet ef database update failed ({process.ExitCode}):{Environment.NewLine}{stdout}{stderr}");
+	}
+
+	private static async Task EnsureEfToolRestoredAsync(string monacoRoot)
+	{
+		if (Volatile.Read(ref _efToolRestored) == 1)
+			return;
+
+		var startInfo = new ProcessStartInfo("dotnet", "tool restore")
+						{
+							WorkingDirectory = monacoRoot,
+							RedirectStandardOutput = true,
+							RedirectStandardError = true,
+							UseShellExecute = false,
+							CreateNoWindow = true
+						};
+		using var process = Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start dotnet tool restore.");
+		var stdout = await process.StandardOutput.ReadToEndAsync();
+		var stderr = await process.StandardError.ReadToEndAsync();
+		await process.WaitForExitAsync();
+		if (process.ExitCode != 0)
+			throw new InvalidOperationException($"dotnet tool restore failed ({process.ExitCode}):{Environment.NewLine}{stdout}{stderr}");
+
+		Volatile.Write(ref _efToolRestored, 1);
 	}
 }

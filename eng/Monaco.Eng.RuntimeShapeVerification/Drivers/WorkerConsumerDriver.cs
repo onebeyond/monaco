@@ -33,12 +33,19 @@ internal static class WorkerConsumerDriver
 		var (createdBy, createdAt) = await GeneratedDbAccess.ReadCompanyStampAsync(sql, stampedId);
 		createdBy.Should().NotBeNullOrWhiteSpace();
 		createdAt.Should().NotBeNull();
+		(await GeneratedDbAccess.CountCompaniesAsync(sql)).Should().Be(1);
 
 		if (mode != DestinationMode.ReceiverUnavailable)
 		{
 			receiver.Should().NotBeNull();
-			await receiver.WaitUntilAsync(() => receiver.HasSignalKindsFor(shape.ServiceName("Worker")), attempts: 900);
-			receiver.HasSignalKindsFor(shape.ServiceName("Worker")).Should().BeTrue();
+			await receiver.WaitUntilAsync(() => receiver.HasSignalKindsFor(shape.ServiceName("Worker")),
+										  attempts: 900,
+										  describe: receiver.Describe);
+			receiver.HasSignalKindsFor(shape.ServiceName("Worker")).Should().BeTrue(receiver.Describe());
+			if (mode == DestinationMode.ProductionOverride)
+				receiver.SawAuthorization(OtlpSignalReceiver.ProductionAuthorization)
+						.Should()
+						.BeTrue(receiver.Describe());
 			receiver.HasCounter(shape.ServiceName("Worker"),
 								shape.ApplicationMeterName,
 								"company.successful_creations")
