@@ -910,7 +910,7 @@ public sealed class SupportedRuntimeShapeCompositionTests : IClassFixture<Suppor
 
 		AssertGuideHeading(shape, http, "adds no custom propagator");
 		AssertGuideHeading(shape, metrics, "not properties of one trace");
-		AssertGuideHeading(shape, metrics, "not a Monaco governance inventory");
+		AssertGuideHeading(shape, metrics, "not a governance inventory");
 		AssertGuideHeading(shape, attribution, "nullable, default, or backfill");
 		AssertGuideHeading(shape, attribution, "no universal executable procedure");
 		AssertGuideHeading(shape, options is { Common: true, MassTransit: true, Worker: true, Files: true

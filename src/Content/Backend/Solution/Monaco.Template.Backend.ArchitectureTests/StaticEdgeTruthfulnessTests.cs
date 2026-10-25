@@ -310,7 +310,7 @@ public sealed class StaticEdgeTruthfulnessTests : IClassFixture<StaticEdgeTruthf
 				 .Contain("## Instrumentation availability", shape.Id);
 			shape.Guide
 				 .Should()
-				 .Contain("not a Monaco governance inventory", shape.Id);
+				 .Contain("not a governance inventory", shape.Id);
 			shape.Guide
 				 .Should()
 				 .NotContain("## Persistence attribution", shape.Id);

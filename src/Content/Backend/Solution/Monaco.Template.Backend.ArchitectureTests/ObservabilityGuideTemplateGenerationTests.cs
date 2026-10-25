@@ -106,6 +106,46 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 		Assert.Equal(apiAuthority, gatewayAuthority);
 	}
 
+	[Fact(DisplayName = "Generated host appsettings keep Microsoft log levels and name the Gateway YARP category")]
+	public void GeneratedHostAppsettingsKeepMicrosoftLogLevelsAndNameTheGatewayYarpCategory()
+	{
+		var output = _hive.Generate("LogCategories", "--apiGateway", "true");
+
+		AssertLogLevel(output, "LogCategories.Api", "appsettings.json", "Microsoft", "Warning");
+		AssertLogLevel(output, "LogCategories.Api", "appsettings.Development.json", "Microsoft", "Information");
+		AssertLogLevel(output, "LogCategories.Worker", "appsettings.json", "Microsoft", "Warning");
+		AssertLogLevel(output, "LogCategories.Worker", "appsettings.Development.json", "Microsoft", "Information");
+		AssertLogLevel(output, "LogCategories.Common.ApiGateway", "appsettings.json", "Microsoft", "Warning");
+		AssertLogLevel(output, "LogCategories.Common.ApiGateway", "appsettings.json", "Yarp.ReverseProxy", "Warning");
+		AssertLogLevelAbsent(output, "LogCategories.Common.ApiGateway", "appsettings.json", "Yarp");
+		AssertLogLevel(output, "LogCategories.Common.ApiGateway", "appsettings.Development.json", "Microsoft", "Information");
+		AssertLogLevelAbsent(output, "LogCategories.Common.ApiGateway", "appsettings.Development.json", "Yarp");
+		AssertLogLevelAbsent(output, "LogCategories.Common.ApiGateway", "appsettings.Development.json", "Yarp.ReverseProxy");
+	}
+
+	private static void AssertLogLevel(GeneratedShape output, string project, string fileName, string category, string expected)
+	{
+		var actual = ReadLogLevel(output, project, fileName, category);
+		Assert.True(actual == expected, $"{project}/{fileName} Logging:LogLevel:{category} is '{actual}', expected '{expected}'.");
+	}
+
+	private static void AssertLogLevelAbsent(GeneratedShape output, string project, string fileName, string category)
+	{
+		var actual = ReadLogLevel(output, project, fileName, category);
+		Assert.True(actual is null, $"{project}/{fileName} Logging:LogLevel:{category} is present with '{actual}'.");
+	}
+
+	private static string? ReadLogLevel(GeneratedShape output, string project, string fileName, string category)
+	{
+		var jsonContent = File.ReadAllText(Path.Combine(output.OutputDirectory, project, fileName));
+		using var document = System.Text.Json.JsonDocument.Parse(jsonContent, new System.Text.Json.JsonDocumentOptions { CommentHandling = System.Text.Json.JsonCommentHandling.Skip });
+		return document.RootElement.TryGetProperty("Logging", out var logging)
+			   && logging.TryGetProperty("LogLevel", out var logLevel)
+			   && logLevel.TryGetProperty(category, out var level)
+				   ? level.GetString()
+				   : null;
+	}
+
 	private static string? ExtractSsoAuthority(string jsonContent)
 	{
 		using var document = System.Text.Json.JsonDocument.Parse(jsonContent, new System.Text.Json.JsonDocumentOptions { CommentHandling = System.Text.Json.JsonCommentHandling.Skip });
@@ -171,6 +211,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 			Assert.DoesNotContain("OBSERVABILITY: 2.6 HIGH-FIDELITY-BOUNDARY", guide, StringComparison.Ordinal);
 			Assert.Contains("filtering, redaction, sanitization, identity treatment, transformation, sampling, cardinality controls, routing, transport, storage, access, retention, and alerting", guide, StringComparison.Ordinal);
 			Assert.Contains("does not certify consumer outcomes", guide, StringComparison.Ordinal);
+			Assert.DoesNotContain("Monaco", guide, StringComparison.OrdinalIgnoreCase);
 			Assert.Contains("compliance requirements", guide, StringComparison.Ordinal);
 			Assert.DoesNotContain("<!--#if", guide, StringComparison.Ordinal);
 			Assert.DoesNotContain("Static non-turnkey boundary", guide, StringComparison.Ordinal);

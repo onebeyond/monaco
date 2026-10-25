@@ -4,9 +4,9 @@ This is the authoritative guide for local observability in this solution. Every 
 
 ## Prerequisites
 
-The Aspire CLI is the only telemetry-specific prerequisite introduced by this guide. SQL Server, RabbitMQ, Blob/Azurite, identity/Keycloak, migrations, and any other selected-feature setup remain Monaco prerequisites; provision and verify them separately from observability verification.
+The Aspire CLI is the only telemetry-specific prerequisite introduced by this guide. SQL Server, RabbitMQ, Blob/Azurite, identity/Keycloak, migrations, and any other selected-feature setup remain this solution's prerequisites; provision and verify them separately from observability verification.
 
-With Monaco's normal application prerequisites in place, install the current stable Aspire CLI using the command for your shell:
+With this solution's normal application prerequisites in place, install the current stable Aspire CLI using the command for your shell:
 
 macOS/Linux:
 
@@ -28,7 +28,7 @@ aspire --version
 
 ### Reproducible reference baseline
 
-Use this optional procedure only when reproducing Monaco's reference baseline. Consumers are not hard-pinned: a later stable core becomes supported only after the compatibility smoke has passed and Monaco deliberately updates the tested version.
+Use this optional procedure only when reproducing the reference baseline verified for this solution. Consumers are not hard-pinned: a later stable core becomes supported only after the compatibility smoke has passed and the tested version in this guide is updated.
 
 macOS/Linux:
 
@@ -63,12 +63,12 @@ The declared package set is versioned `0.0.1-alpha1` and its package IDs embed t
 <!--#if (apiService || apiGateway) -->
 ## HTTP causality
 
-Native W3C propagation is framework-owned. Monaco adds no custom propagator, does not read or write `traceparent` or `tracestate`, and adds no custom header, wrapper Activity, ActivitySource, or OpenTelemetry YARP adapter.
+Native W3C propagation is framework-owned. This solution adds no custom propagator, does not read or write `traceparent` or `tracestate`, and adds no custom header, wrapper Activity, ActivitySource, or OpenTelemetry YARP adapter.
 <!--#if (apiService) -->
 The API follows native ASP.NET Core server instrumentation. Pivot a successful Company creation from the application log's native TraceId and SpanId to the API request and its sanitized SqlClient spans. Do not expect raw SQL, parameters, connection data, request or response bodies, credentials, headers, wrapper spans, or duplicate dependency spans.
 <!--#endif -->
 <!--#if (apiGateway) -->
-The Gateway follows native ASP.NET Core server instrumentation, then `Yarp.ReverseProxy` forwarding, then native HttpClient. A downstream 503 may be examined through that native HttpClient telemetry. Monaco does not add an application dependency log for the forwarded hop.
+The Gateway follows native ASP.NET Core server instrumentation, then `Yarp.ReverseProxy` forwarding, then native HttpClient. A downstream 503 may be examined through that native HttpClient telemetry. This solution does not add an application dependency log for the forwarded hop.
 <!--#endif -->
 <!--#if (apiService && apiGateway) -->
 Navigate the distinct resources `<solution>.Common.ApiGateway` and `<solution>.Api`.
@@ -81,7 +81,7 @@ This Gateway output has no database client, persistence stamps, or successful-co
 <!--#if (commonLibraries && massTransitIntegration && (apiService || workerService)) -->
 ## Messaging navigation
 
-Operators follow native MassTransit publish and transport activity by TraceId. Parent-child and span links are both valid. Monaco does not install a MassTransit OpenTelemetry adapter and does not ship a production retry, fault, or error-queue policy. A consumer-owned Collector or backend owns filtering, redaction, cardinality, and retry or fault policy.
+Operators follow native MassTransit publish and transport activity by TraceId. Parent-child and span links are both valid. This solution does not install a MassTransit OpenTelemetry adapter and does not ship a production retry, fault, or error-queue policy. A consumer-owned Collector or backend owns filtering, redaction, cardinality, and retry or fault policy.
 <!--#if (workerService) -->
 Follow native consume activity on the Worker as part of that same TraceId.
 <!--#if (filesSupport) -->
@@ -106,7 +106,7 @@ This solution has no API publish walkthrough.
 <!--#if (commonLibraries) -->
 ## Host metrics
 
-Metrics are aggregate supporting context on the one OTLP path, not properties of one trace. Do not join a Metric series to a single Company or Product trace as if it were a span attribute. Monaco installs no Metric View, meter allow-list, attribute suppression, buckets, or series ceilings. A consumer-owned Collector or backend owns filtering and cardinality.
+Metrics are aggregate supporting context on the one OTLP path, not properties of one trace. Do not join a Metric series to a single Company or Product trace as if it were a span attribute. This solution installs no Metric View, meter allow-list, attribute suppression, buckets, or series ceilings. A consumer-owned Collector or backend owns filtering and cardinality.
 <!--#if (apiService) -->
 The API exposes Runtime (`System.Runtime`), ASP.NET through `AddAspNetCoreInstrumentation()`, HttpClient (`System.Net.Http`), SqlClient (`OpenTelemetry.Instrumentation.SqlClient`), and the Application meter (`Monaco.Template.Backend.Application`, including `company.successful_creations`).
 <!--#if (massTransitIntegration) -->
@@ -130,9 +130,9 @@ The Gateway exposes Runtime (`System.Runtime`), ASP.NET through `AddAspNetCoreIn
 <!--#if (commonLibraries) -->
 ## Instrumentation availability
 
-Selected native instrumentation is the composition already registered for each host. This section records availability only. It does not approve, restrict, allow, reject, suppress, bound, or transform fields, instruments, attributes, buckets, or cardinality, and it is not a Monaco governance inventory. Package upgrades stay an ordinary version pin plus the existing behavioral tests. A consumer-owned Collector, receiver, or backend owns filtering, redaction, sanitization, cardinality, and compliance. A signal is available only when `OTEL_SDK_DISABLED` is not set and that signal is enabled.
+Selected native instrumentation is the composition already registered for each host. This section records availability only. It does not approve, restrict, allow, reject, suppress, bound, or transform fields, instruments, attributes, buckets, or cardinality, and it is not a governance inventory. Package upgrades stay an ordinary version pin plus the existing behavioral tests. A consumer-owned Collector, receiver, or backend owns filtering, redaction, sanitization, cardinality, and compliance. A signal is available only when `OTEL_SDK_DISABLED` is not set and that signal is enabled.
 <!--#if (apiService) -->
-The API registers ASP.NET traces (`Microsoft.AspNetCore`) and metrics, HttpClient traces and meters, SqlClient traces and the `OpenTelemetry.Instrumentation.SqlClient` meter, the Runtime meter, and the Application meter. Monaco adds no EF Core instrumentation, process instrumentation, or Application ActivitySource.
+The API registers ASP.NET traces (`Microsoft.AspNetCore`) and metrics, HttpClient traces and meters, SqlClient traces and the `OpenTelemetry.Instrumentation.SqlClient` meter, the Runtime meter, and the Application meter. This solution adds no EF Core instrumentation, process instrumentation, or Application ActivitySource.
 <!--#if (massTransitIntegration) -->
 The API registers the `MassTransit` meter and source.
 <!--#endif -->
@@ -147,7 +147,7 @@ The Worker registers the `MassTransit` meter and source.
 The Gateway registers ASP.NET traces and metrics, HttpClient traces and meters, the Runtime meter, and YARP traces (`Yarp.ReverseProxy`) only. It does not register a YARP meter, a database client, MassTransit, Blob sources, or the Application meter.
 <!--#endif -->
 <!--#if (filesSupport) -->
-File transfer uses HttpClient only. Monaco adds no Blob ActivitySource.
+File transfer uses HttpClient only. This solution adds no Blob ActivitySource.
 <!--#endif -->
 <!--#endif -->
 
@@ -166,7 +166,7 @@ The Gateway does not register persistence attribution.
 <!--#if (commonLibraries && (apiService || workerService)) -->
 ## Migration selection
 
-Apply the one routed Init trio as-is. Existing-database stamp adoption is a consumer decision: nullable, default, or backfill, plus deployment order, rollback, access, and retention. Monaco publishes no universal executable procedure.
+Apply the one routed Init trio as-is. Existing-database stamp adoption is a consumer decision: nullable, default, or backfill, plus deployment order, rollback, access, and retention. This guide includes no universal executable procedure.
 <!--#endif -->
 
 <!--#if (apiService && !workerService && !apiGateway && !auth && !massTransitIntegration && !filesSupport && tests && commonLibraries) -->
@@ -228,36 +228,36 @@ This Worker-only solution has no interactive API/Scalar Company walkthrough and 
 
 ## Configuration and routing
 
-Configuration is resolved once during startup from the normal .NET provider order: `appsettings.json`, environment-specific JSON, Development User Secrets, environment variables, then command-line arguments. For the same key, the last provider wins; an empty winning value is missing and does not reveal a lower-priority value. Providers are not reloaded and Monaco does not rebuild telemetry after startup.
+Configuration is resolved once during startup from the normal .NET provider order: `appsettings.json`, environment-specific JSON, Development User Secrets, environment variables, then command-line arguments. For the same key, the last provider wins; an empty winning value is missing and does not reveal a lower-priority value. Providers are not reloaded and this solution does not rebuild telemetry after startup.
 
-Use only the neutral `Observability` section for Monaco-owned controls:
+Use only the neutral `Observability` section for this solution's controls:
 
 | Key | Default | Accepted value | Malformed behavior |
 |---|---|---|---|
 | `Observability:Signals:{Traces,Metrics,Logs}:Enabled` | `true` | `true` or `false` (case-insensitive) | Startup fails |
 
-Standard OpenTelemetry controls remain root keys, not `Monaco:*` aliases. `OTEL_SDK_DISABLED=true` dominates every Signal/exporter setting and creates no OpenTelemetry providers; Console and DI `ILogger` remain available. Other values and settings follow the selected OpenTelemetry SDK's behavior without Monaco validation or reinterpretation.
+Standard OpenTelemetry controls remain root keys, not aliases under a solution-specific prefix. `OTEL_SDK_DISABLED=true` dominates every Signal/exporter setting and creates no OpenTelemetry providers; Console and DI `ILogger` remain available. Other values and settings follow the selected OpenTelemetry SDK's behavior without local validation or reinterpretation.
 
 The common OTLP controls include `OTEL_EXPORTER_OTLP_{ENDPOINT,PROTOCOL,HEADERS,TIMEOUT,COMPRESSION}`. Signal-specific `OTEL_EXPORTER_OTLP_TRACES_*`, `..._METRICS_*`, and `..._LOGS_*` settings retain their normal SDK precedence. Development defaults use `http://localhost:4317` and `grpc`.
 
-Resource, sampling, batching, retry, timeout, header, transport, logging, and other standard settings use the pinned SDK and instrumentation packages directly. Monaco does not publish an exhaustive supported-key list, impose fixed ranges, validate destination security, or certify a resulting telemetry stream for any consumer.
+Resource, sampling, batching, retry, timeout, header, transport, logging, and other standard settings use the pinned SDK and instrumentation packages directly. This guide does not list every supported key, impose fixed ranges, validate destination security, or certify a resulting telemetry stream.
 
 ## Telemetry failure isolation
 
 Operational Telemetry is best-effort diagnostic evidence. An unavailable or impaired OTLP receiver does not control Company commit, in-process business Counter recording, readiness, or host startup. Connection refusal, receiver timeout, authorization or throttling responses, malformed receiver responses, and saturation can lose telemetry, while Console logging remains available through the normal DI `ILogger` route.
 
-Queueing, batching, retry, timeout, export, and shutdown behavior come from the selected OpenTelemetry SDK and its standard configuration. Monaco adds no preflight, retry or queue policy, exporter diagnostic throttle, hosted policy service, or custom flush coordinator. Graceful shutdown uses the ordinary SDK lifecycle, and abrupt termination can lose in-flight telemetry.
+Queueing, batching, retry, timeout, export, and shutdown behavior come from the selected OpenTelemetry SDK and its standard configuration. This solution adds no preflight, retry or queue policy, exporter diagnostic throttle, hosted policy service, or custom flush coordinator. Graceful shutdown uses the ordinary SDK lifecycle, and abrupt termination can lose in-flight telemetry.
 
 When the receiver recovers, normal SDK exporting resumes without restarting the Runtime Host. Telemetry receipt and exact recovery timing are not business correctness conditions.
 
 ## High-fidelity telemetry boundary
 
-Monaco publishes applicable native instrumentation, ordinary structured log state and scopes, formatted messages, exception information, and application instruments without a Monaco content-governance layer. It does not filter, redact, sanitize, transform, sample, or bound telemetry through processors, SQL modes, identity modes, Metric Views, attribute policies, or cardinality ceilings. High-fidelity telemetry can therefore contain information that is sensitive in a consumer's environment.
+This solution emits applicable native instrumentation, ordinary structured log state and scopes, formatted messages, exception information, and application instruments without a content-governance layer. It does not filter, redact, sanitize, transform, sample, or bound telemetry through processors, SQL modes, identity modes, Metric Views, attribute policies, or cardinality ceilings. High-fidelity telemetry can therefore contain information that is sensitive in a consumer's environment.
 
-A consumer-owned Collector or compatible downstream pipeline is the enforcement point for filtering, redaction, sanitization, identity treatment, transformation, sampling, cardinality controls, routing, transport, storage, access, retention, and alerting. Assess and configure that pipeline for its recipients and compliance requirements; Monaco does not certify consumer outcomes.
+A consumer-owned Collector or compatible downstream pipeline is the enforcement point for filtering, redaction, sanitization, identity treatment, transformation, sampling, cardinality controls, routing, transport, storage, access, retention, and alerting. Assess and configure that pipeline for its recipients and compliance requirements; This solution does not certify consumer outcomes.
 
 <!--#if (apiService || workerService) -->
-API and Worker use the selected native SQL Client instrumentation without Monaco query-text rewriting or suppression. Monaco does not enable EF Core sensitive-data logging; consumers remain responsible for evaluating the telemetry their selected SDK and runtime configuration produce.
+API and Worker use the selected native SQL Client instrumentation without query-text rewriting or suppression. This solution does not enable EF Core sensitive-data logging; consumers remain responsible for evaluating the telemetry their selected SDK and runtime configuration produce.
 <!--#endif -->
 
 <!--#if (apiGateway) -->
@@ -267,7 +267,7 @@ Gateway has no SQL instrumentation.
 <!--#if (apiService || apiGateway) -->
 ## HTTP exception boundaries
 
-For an unexpected API or Gateway request failure, Monaco writes an ordinary structured error log with the original exception and returns HTTP 500. Span status, exception events, and exported exception fields follow normal ASP.NET Core and selected instrumentation behavior; Monaco does not reshape or suppress them.
+For an unexpected API or Gateway request failure, this solution writes an ordinary structured error log with the original exception and returns HTTP 500. Span status, exception events, and exported exception fields follow normal ASP.NET Core and selected instrumentation behavior; this solution does not reshape or suppress them.
 <!--#endif -->
 
 ## Production signal routing
@@ -276,14 +276,14 @@ Every enabled Signal leaves each Runtime Host through the same single unified OT
 
 Per-Signal settings and common settings follow their selected-SDK precedence after .NET configuration providers resolve each key. For `http/protobuf`, the SDK expands a common base endpoint to `/v1/traces`, `/v1/metrics`, and `/v1/logs`; a signal-specific endpoint is used according to SDK behavior.
 
-A single compatible receiver that accepts every enabled Signal is sufficient: one Collector hop may independently route, filter, transform, authenticate, or forward each Signal onward. When enabled Signals must reach divergent destinations, provide consumer-owned routing such as your own Collector pipeline or equivalent infrastructure. Monaco does not deploy or configure a production Collector, backend, dashboard, retention policy, alerting system, or vendor-specific topology; destination clarity and production receiver infrastructure remain consumer-owned.
+A single compatible receiver that accepts every enabled Signal is sufficient: one Collector hop may independently route, filter, transform, authenticate, or forward each Signal onward. When enabled Signals must reach divergent destinations, provide consumer-owned routing such as your own Collector pipeline or equivalent infrastructure. This solution does not deploy or configure a production Collector, backend, dashboard, retention policy, alerting system, or vendor-specific topology; destination clarity and production receiver infrastructure remain consumer-owned.
 
 Consumers own production transport security, receiver authentication, credentials, topology, and destination validation.
 
 <!--#if (auth) -->
 ## Authenticated request identity
 
-When authentication is enabled, the API and Gateway attach the first non-empty raw validated `sub` claim as `user.id`, using the native ASP.NET Core entry Activity and correlated request-scoped Operational Logs. For every validated claim, in enumeration order and including duplicates, they emit one `user.claim` event with raw `user.claim.type`, `user.claim.value`, `user.claim.value_type`, `user.claim.issuer`, and `user.claim.original_issuer`. The same ordered immutable sequence of raw claim records is carried as `user.claims` in the request log scope. Monaco enriches the native entry Activity rather than creating a wrapper span.
+When authentication is enabled, the API and Gateway attach the first non-empty raw validated `sub` claim as `user.id`, using the native ASP.NET Core entry Activity and correlated request-scoped Operational Logs. For every validated claim, in enumeration order and including duplicates, they emit one `user.claim` event with raw `user.claim.type`, `user.claim.value`, `user.claim.value_type`, `user.claim.issuer`, and `user.claim.original_issuer`. The same ordered immutable sequence of raw claim records is carried as `user.claims` in the request log scope. This solution enriches the native entry Activity rather than creating a wrapper span.
 
 Enrichment reads only the post-authentication validated principal; it does not inspect raw tokens, headers, cookies, queries, bodies, authentication tickets, client credentials, or client certificates. An authenticated principal with no non-empty `sub` still contributes its raw claim events and `user.claims` scope without `user.id`; unauthenticated requests have no identity enrichment. The Worker profile does not perform request identity enrichment.
 
@@ -302,7 +302,7 @@ After a committed Company creation, open the Dashboard's Metrics view and locate
 <!--#endif -->
 ## Runtime host profiles and resource identity
 
-Each generated Runtime Host emits Operational Logs, Traces, and Metrics through Monaco's shared OpenTelemetry composition and one unified OTLP exporter path. Ordinary application logging stays on the built-in DI `ILogger` route: Console logging remains enabled, and OpenTelemetry receives the same event without a second logger, custom correlation fields, or manual spans.
+Each generated Runtime Host emits Operational Logs, Traces, and Metrics through this solution's shared OpenTelemetry composition and one unified OTLP exporter path. Ordinary application logging stays on the built-in DI `ILogger` route: Console logging remains enabled, and OpenTelemetry receives the same event without a second logger, custom correlation fields, or manual spans.
 
 <!--#if (apiService) -->
 ### API profile
@@ -326,4 +326,4 @@ The Gateway profile registers Runtime, ASP.NET Core, and HttpClient instrumentat
 
 Every enabled Signal in one process uses the same startup-immutable resource. Its generated `service.name` fallback is `<solution>.Api`, `<solution>.Worker`, or `<solution>.Common.ApiGateway` for the applicable host, and `service.namespace` falls back to `<solution>`. Precedence is exact: generated fallbacks, then `OTEL_RESOURCE_ATTRIBUTES` collisions, then `OTEL_SERVICE_NAME` for final `service.name` precedence.
 
-Resource environment overrides use the selected OpenTelemetry SDK detector without Monaco validation or content filtering. Consumer deployment is responsible for the attributes it supplies and for downstream governance.
+Resource environment overrides use the selected OpenTelemetry SDK detector without further validation or content filtering. Consumer deployment is responsible for the attributes it supplies and for downstream governance.

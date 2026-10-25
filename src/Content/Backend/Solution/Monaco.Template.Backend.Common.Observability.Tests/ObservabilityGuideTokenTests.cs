@@ -52,7 +52,7 @@ public sealed class ObservabilityGuideTokenTests
 		guide.Should().Contain("<!--" + IfDirective + " (workerService && !apiService && !apiGateway && tests) -->\n## Static-only Worker output");
 		guide.Should().Contain("nullable, default, or backfill");
 		guide.Should().Contain("no universal executable procedure");
-		guide.Should().Contain("not a Monaco governance inventory");
+		guide.Should().Contain("not a governance inventory");
 		guide.Should().Contain("<!--" + IfDirective + " (auth) -->\nASP.NET instrumentation may also export");
 
 		var sectionStart = guide.IndexOf("## Production signal routing", StringComparison.Ordinal);
@@ -133,7 +133,7 @@ public sealed class ObservabilityGuideTokenTests
 		Assert.Contains("<!--" + IfDirective + " (workerService) -->\n### Worker profile", guide, StringComparison.Ordinal);
 		Assert.Contains("<!--" + IfDirective + " (apiGateway) -->\n### Gateway profile", guide, StringComparison.Ordinal);
 		Assert.Contains("generated fallbacks, then `OTEL_RESOURCE_ATTRIBUTES` collisions, then `OTEL_SERVICE_NAME`", guide, StringComparison.Ordinal);
-		Assert.Contains("selected OpenTelemetry SDK detector without Monaco validation or content filtering", guide, StringComparison.Ordinal);
+		Assert.Contains("selected OpenTelemetry SDK detector without further validation or content filtering", guide, StringComparison.Ordinal);
 		Assert.Contains("Consumer deployment is responsible", guide, StringComparison.Ordinal);
 		Assert.DoesNotContain("static external-observability handoff", guide, StringComparison.Ordinal);
 	}
@@ -167,6 +167,23 @@ public sealed class ObservabilityGuideTokenTests
 		Assert.Contains("Consumer infrastructure owns filtering", guide, StringComparison.Ordinal);
 		Assert.DoesNotContain("HmacSha256", guide, StringComparison.Ordinal);
 		Assert.DoesNotContain("Observability:Identity", guide, StringComparison.Ordinal);
+	}
+
+	[Fact(DisplayName = "Generated local observability guide reads leftover passages as this solution's document")]
+	public void GeneratedLocalObservabilityGuideReadsLeftoverPassagesAsThisSolutionsDocument()
+	{
+		var guide = ReadGuide();
+
+		Assert.Contains("Use this optional procedure only when reproducing the reference baseline verified for this solution. Consumers are not hard-pinned: a later stable core becomes supported only after the compatibility smoke has passed and the tested version in this guide is updated.", guide, StringComparison.Ordinal);
+		Assert.Contains("Standard OpenTelemetry controls remain root keys, not aliases under a solution-specific prefix. `OTEL_SDK_DISABLED=true` dominates every Signal/exporter setting and creates no OpenTelemetry providers; Console and DI `ILogger` remain available. Other values and settings follow the selected OpenTelemetry SDK's behavior without local validation or reinterpretation.", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("Monaco", guide.Replace("Monaco.Template.Backend", "Acme", StringComparison.Ordinal), StringComparison.OrdinalIgnoreCase);
+		Assert.Contains("Resource, sampling, batching, retry, timeout, header, transport, logging, and other standard settings use the pinned SDK and instrumentation packages directly. This guide does not list every supported key, impose fixed ranges, validate destination security, or certify a resulting telemetry stream.", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("Monaco's reference baseline", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("Monaco deliberately updates", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("without Monaco validation or reinterpretation", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("Monaco does not publish an exhaustive supported-key list", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("CONFIGURATION-MATRIX", guide, StringComparison.Ordinal);
+		Assert.DoesNotContain("source repository", guide, StringComparison.Ordinal);
 	}
 
 	private static string ReadGuide() =>
