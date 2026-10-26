@@ -185,6 +185,24 @@ public partial class MigrationVariantArtifactTests
 		}
 	}
 
+	[Fact(DisplayName = "SQL Server image lock has the adopted repository, tag, and digest")]
+	public void SqlServerImageLockHasAdoptedRepositoryTagAndDigest()
+	{
+		var productRoot = FindProductRoot();
+		productRoot.Should().NotBeNull();
+
+		var lockPath = Path.Combine(productRoot!, "eng", "mssql-server-image.lock.json");
+		using var document = JsonDocument.Parse(File.ReadAllText(lockPath));
+		var root = document.RootElement;
+		root.ValueKind.Should().Be(JsonValueKind.Object);
+
+		var names = root.EnumerateObject().Select(property => property.Name).ToArray();
+		names.Should().Equal("repository", "provenanceTag", "manifestDigest");
+		root.GetProperty("repository").GetString().Should().Be("mcr.microsoft.com/mssql/server");
+		root.GetProperty("provenanceTag").GetString().Should().Be("2022-CU26-ubuntu-22.04");
+		root.GetProperty("manifestDigest").GetString().Should().Be("sha256:ba4c8329f48fb8f02e1416be6a930ebfd71268caee78aa985f3af4315e457c89");
+	}
+
 	private static void AssertFingerprint(Trio trio,
 										  string[] expectedTables,
 										  bool companyStamps,
@@ -287,6 +305,20 @@ public partial class MigrationVariantArtifactTests
 		while (directory is not null)
 		{
 			if (File.Exists(Path.Combine(directory.FullName, "Monaco.Template.Backend.slnx")))
+				return directory.FullName;
+			directory = directory.Parent;
+		}
+
+		return null;
+	}
+
+	private static string? FindProductRoot()
+	{
+		var directory = new DirectoryInfo(AppContext.BaseDirectory);
+		while (directory is not null)
+		{
+			if (File.Exists(Path.Combine(directory.FullName, ".config", "dotnet-tools.json")) &&
+				File.Exists(Path.Combine(directory.FullName, "eng", "mssql-server-image.lock.json")))
 				return directory.FullName;
 			directory = directory.Parent;
 		}
