@@ -187,7 +187,6 @@
 				"**/.vs/**/*",
 			"**/logs/**",
 			"**/TestResults/**",
-			"Monaco.Template.Backend.ArchitectureTests/ObservabilityGuideTemplateGenerationTests.cs",
 			"Monaco.Template.Backend.ArchitectureTests/SupportedRuntimeShapeCompositionTests.cs",
 			"Monaco.Template.Backend.ArchitectureTests/StaticEdgeTruthfulnessTests.cs",
 			"Monaco.Template.Backend.ArchitectureTests/CSharpCompositionSyntax.cs",

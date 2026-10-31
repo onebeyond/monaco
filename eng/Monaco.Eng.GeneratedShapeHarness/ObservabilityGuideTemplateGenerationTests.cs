@@ -1,22 +1,30 @@
-using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using AwesomeAssertions;
+using Xunit;
 
-namespace Monaco.Template.Backend.ArchitectureTests;
+namespace Monaco.Eng.GeneratedShapeHarness;
 
+[Collection(GeneratedShapeCollectionFixture.Name)]
 [ExcludeFromCodeCoverage]
 [Trait("Architecture Tests", "Observability")]
-public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<ObservabilityGuideTemplateGenerationTests.TemplateHiveFixture>
+public sealed class ObservabilityGuideTemplateGenerationTests
 {
 	private const string GuidePointer = "Review OBSERVABILITY.md for the generated local-observability guidance.";
 
-	private readonly TemplateHiveFixture _hive;
+	private readonly GeneratedShapeHarness _harness;
 
-	public ObservabilityGuideTemplateGenerationTests(TemplateHiveFixture hive) => _hive = hive;
+	public ObservabilityGuideTemplateGenerationTests(GeneratedShapeCollectionFixture fixture) => _harness = fixture.Harness;
+
+	private GeneratedShape Generate(string name, params string[] parameters)
+	{
+		var generated = _harness.Generate(name, parameters);
+		return new GeneratedShape(name, generated.OutputDirectory, generated.CliOutput);
+	}
 
 	[Fact(DisplayName = "Default Runtime Host output contains the guide, the Solution Item, and the manual instructions")]
 	public void DefaultHostOutputContainsTheGuideContract()
 	{
-		var output = _hive.Generate("GuideContractDefaultHost");
+		var output = Generate("GuideContractDefaultHost");
 
 		output.AssertGuidePresent();
 		output.AssertSuccessfulCompanyCounterPresent();
@@ -30,7 +38,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 	[Fact(DisplayName = "No-host output omits the guide, the Solution Item, and the manual instructions")]
 	public void NoHostOutputOmitsTheGuideContract()
 	{
-		var output = _hive.Generate("GuideContractNoHost", "--apiService", "false", "--workerService", "false", "--apiGateway", "false");
+		var output = Generate("GuideContractNoHost", "--apiService", "false", "--workerService", "false", "--apiGateway", "false");
 
 		Assert.False(File.Exists(output.GuidePath), $"No-host output must not contain OBSERVABILITY.md: {output.GuidePath}");
 		Assert.DoesNotContain("<File Path=\"OBSERVABILITY.md\" />", output.Solution, StringComparison.Ordinal);
@@ -41,7 +49,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 	[Fact(DisplayName = "Package delivery output keeps the complete observability guide")]
 	public void PackageDeliveryOutputKeepsTheGuideContract()
 	{
-		var output = _hive.Generate("GuideContractPackages", "--commonLibraries", "false");
+		var output = Generate("GuideContractPackages", "--commonLibraries", "false");
 
 		output.AssertGuidePresent();
 		output.AssertHttpExceptionBoundaryGuidePresent();
@@ -51,7 +59,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 	[Fact(DisplayName = "Gateway-only output contains the guide, the Solution Item, and the manual instructions")]
 	public void GatewayOnlyOutputContainsTheGuideContract()
 	{
-		var output = _hive.Generate("GuideContractGatewayOnly", "--apiService", "false", "--workerService", "false", "--apiGateway", "true");
+		var output = Generate("GuideContractGatewayOnly", "--apiService", "false", "--workerService", "false", "--apiGateway", "true");
 
 		output.AssertGuidePresent();
 		output.AssertSuccessfulCompanyCounterAbsent();
@@ -64,7 +72,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 	[Fact(DisplayName = "Worker-only output omits the successful-company counter guidance")]
 	public void WorkerOnlyOutputOmitsSuccessfulCompanyCounterGuidance()
 	{
-		var output = _hive.Generate("GuideContractWorkerOnly", "--apiService", "false", "--workerService", "true", "--apiGateway", "false");
+		var output = Generate("GuideContractWorkerOnly", "--apiService", "false", "--workerService", "true", "--apiGateway", "false");
 
 		output.AssertGuidePresent();
 		output.AssertSuccessfulCompanyCounterAbsent();
@@ -76,7 +84,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 	[Fact(DisplayName = "Full output with Gateway contains the local observability walkthrough")]
 	public void FullOutputWithGatewayContainsCanonicalLocalFirstRunTask()
 	{
-		var output = _hive.Generate("GuideContractFullGateway", "--apiGateway", "true");
+		var output = Generate("GuideContractFullGateway", "--apiGateway", "true");
 
 		output.AssertCanonicalLocalFirstRunTask("GuideContractFullGateway.Api", "GuideContractFullGateway.Worker", "GuideContractFullGateway.Common.ApiGateway");
 	}
@@ -84,7 +92,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 	[Fact(DisplayName = "Full output without tests contains the local observability walkthrough")]
 	public void FullOutputWithoutTestsContainsCanonicalLocalFirstRunTask()
 	{
-		var output = _hive.Generate("GuideContractFullWithoutTests", "--tests", "false");
+		var output = Generate("GuideContractFullWithoutTests", "--tests", "false");
 
 		output.AssertCanonicalLocalFirstRunTask("GuideContractFullWithoutTests.Api", "GuideContractFullWithoutTests.Worker");
 		output.AssertGuideDoesNotContain("GuideContractFullWithoutTests.Common.ApiGateway");
@@ -93,7 +101,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 	[Fact(DisplayName = "Generated Gateway and API shapes have equal SSO:Authority values")]
 	public void GeneratedGatewayAndApiShapesHaveEqualSsoAuthorityValues()
 	{
-		var output = _hive.Generate("IssuerEquality", "--apiGateway", "true");
+		var output = Generate("IssuerEquality", "--apiGateway", "true");
 
 		var apiSettings = File.ReadAllText(Path.Combine(output.OutputDirectory, "IssuerEquality.Api", "appsettings.json"));
 		var gatewaySettings = File.ReadAllText(Path.Combine(output.OutputDirectory, "IssuerEquality.Common.ApiGateway", "appsettings.json"));
@@ -109,7 +117,7 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 	[Fact(DisplayName = "Generated host appsettings keep Microsoft log levels and name the Gateway YARP category")]
 	public void GeneratedHostAppsettingsKeepMicrosoftLogLevelsAndNameTheGatewayYarpCategory()
 	{
-		var output = _hive.Generate("LogCategories", "--apiGateway", "true");
+		var output = Generate("LogCategories", "--apiGateway", "true");
 
 		AssertLogLevel(output, "LogCategories.Api", "appsettings.json", "Microsoft", "Warning");
 		AssertLogLevel(output, "LogCategories.Api", "appsettings.Development.json", "Microsoft", "Information");
@@ -157,14 +165,14 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 	[Fact(DisplayName = "Worker-only output states the local walkthrough boundary")]
 	public void WorkerOnlyOutputStatesLocalWalkthroughBoundary()
 	{
-		var r5Output = _hive.Generate("GuideContractWorkerR5",
+		var r5Output = Generate("GuideContractWorkerR5",
 									  "--apiService", "false",
 									  "--workerService", "true",
 									  "--apiGateway", "false",
 									  "--massTransitIntegration", "true",
 									  "--filesSupport", "true",
 									  "--tests", "false");
-		var r6Output = _hive.Generate("GuideContractWorkerR6",
+		var r6Output = Generate("GuideContractWorkerR6",
 									  "--apiService", "false",
 									  "--workerService", "true",
 									  "--apiGateway", "false",
@@ -304,83 +312,4 @@ public sealed class ObservabilityGuideTemplateGenerationTests : IClassFixture<Ob
 			Assert.True(File.Exists(ApplicationDiagnosticsPath), $"Expected ApplicationDiagnostics.cs in {ApplicationDiagnosticsPath}.");
 	}
 
-	public sealed class TemplateHiveFixture : IDisposable
-	{
-		private const int CommandTimeoutMilliseconds = 180_000;
-
-		private readonly string _root = Path.Combine(Path.GetTempPath(), $"monaco-guide-template-tests-{Guid.NewGuid():N}");
-		private readonly string _hivePath;
-
-		public TemplateHiveFixture()
-		{
-			_hivePath = Path.Combine(_root, "hive");
-			Directory.CreateDirectory(_hivePath);
-			RunDotnet($"new install \"{FindTemplateSourceDirectory()}\" --debug:custom-hive \"{_hivePath}\"");
-		}
-
-		public GeneratedShape Generate(string name, params string[] parameters)
-		{
-			var outputDirectory = Path.Combine(_root, name);
-			var arguments = $"new monaco-backend-solution --name \"{name}\" --output \"{outputDirectory}\" --debug:custom-hive \"{_hivePath}\"";
-			if (parameters.Length > 0)
-				arguments += $" {string.Join(" ", parameters)}";
-
-			return new GeneratedShape(name, outputDirectory, RunDotnet(arguments));
-		}
-
-		public void Dispose()
-		{
-			try
-			{
-				Directory.Delete(_root, recursive: true);
-			}
-			catch (IOException)
-			{
-				// Best effort: locked files from the CLI are cleaned up with the temp directory later.
-			}
-			catch (UnauthorizedAccessException)
-			{
-				// Best effort: locked files from the CLI are cleaned up with the temp directory later.
-			}
-		}
-
-		private static string RunDotnet(string arguments)
-		{
-			var startInfo = new ProcessStartInfo("dotnet", arguments)
-							{
-								RedirectStandardOutput = true,
-								RedirectStandardError = true,
-								UseShellExecute = false,
-								CreateNoWindow = true,
-								Environment =
-								{
-									["DOTNET_CLI_TELEMETRY_OPTOUT"] = "1",
-									["DOTNET_NOLOGO"] = "1",
-									["DOTNET_SKIP_FIRST_TIME_EXPERIENCE"] = "1"
-								}
-							};
-
-			using var process = Process.Start(startInfo)!;
-			var standardOutput = process.StandardOutput.ReadToEndAsync();
-			var standardError = process.StandardError.ReadToEndAsync();
-			if (!process.WaitForExit(CommandTimeoutMilliseconds))
-			{
-				process.Kill(entireProcessTree: true);
-				throw new TimeoutException($"'dotnet {arguments}' did not finish within {CommandTimeoutMilliseconds / 1000} seconds.");
-			}
-
-			var combined = standardOutput.GetAwaiter().GetResult() + standardError.GetAwaiter().GetResult();
-			Assert.True(process.ExitCode == 0, $"'dotnet {arguments}' failed with exit code {process.ExitCode}:{Environment.NewLine}{combined}");
-			return combined;
-		}
-
-		private static string FindTemplateSourceDirectory()
-		{
-			for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
-				if (File.Exists(Path.Combine(directory.FullName, ".template.config", "template.json")))
-					return directory.FullName;
-
-			throw new DirectoryNotFoundException("Could not locate the template source directory containing .template.config/template.json.");
-		}
-	}
 }
