@@ -17,23 +17,7 @@ internal static class WorkerConsumerDriver
 											OtlpSignalReceiver? receiver,
 											DestinationMode mode)
 	{
-		hosts.ApiClient.Should().BeNull();
-		hosts.WorkerServices.Should().BeNull();
-		Directory.Exists(shape.ProjectDir("Api")).Should().BeFalse();
-		Directory.Exists(shape.ProjectDir("IntegrationTests")).Should().BeFalse();
-
-		var companyId = Guid.NewGuid();
-		await PublishProductCreatedAsync(shape, infra, companyId);
-		await WaitUntilAsync(async () => await GeneratedDbAccess.CountInboxDeliveredAsync(sql) > 0, attempts: 300);
-		(await GeneratedDbAccess.CountInboxDeliveredAsync(sql)).Should().BeGreaterThan(0);
-
-		hosts.StampMarkerPath.Should().NotBeNull();
-		await WaitUntilAsync(() => Task.FromResult(File.Exists(hosts.StampMarkerPath!)), attempts: 300);
-		var stampedId = Guid.Parse(await File.ReadAllTextAsync(hosts.StampMarkerPath!));
-		var (createdBy, createdAt) = await GeneratedDbAccess.ReadCompanyStampAsync(sql, stampedId);
-		createdBy.Should().NotBeNullOrWhiteSpace();
-		createdAt.Should().NotBeNull();
-		(await GeneratedDbAccess.CountCompaniesAsync(sql)).Should().Be(1);
+		await RunBusinessAsync(shape, hosts, infra, sql);
 
 		if (mode != DestinationMode.ReceiverUnavailable)
 		{
@@ -52,6 +36,30 @@ internal static class WorkerConsumerDriver
 					.Should()
 					.BeFalse();
 		}
+	}
+
+	internal static async Task RunBusinessAsync(GeneratedShape shape,
+												 ShapeHostSet hosts,
+												 InfrastructureFixture infra,
+												 string sql)
+	{
+		hosts.ApiClient.Should().BeNull();
+		hosts.WorkerServices.Should().BeNull();
+		Directory.Exists(shape.ProjectDir("Api")).Should().BeFalse();
+		Directory.Exists(shape.ProjectDir("IntegrationTests")).Should().BeFalse();
+
+		var companyId = Guid.NewGuid();
+		await PublishProductCreatedAsync(shape, infra, companyId);
+		await WaitUntilAsync(async () => await GeneratedDbAccess.CountInboxDeliveredAsync(sql) > 0, attempts: 300);
+		(await GeneratedDbAccess.CountInboxDeliveredAsync(sql)).Should().BeGreaterThan(0);
+
+		hosts.StampMarkerPath.Should().NotBeNull();
+		await WaitUntilAsync(() => Task.FromResult(File.Exists(hosts.StampMarkerPath!)), attempts: 300);
+		var stampedId = Guid.Parse(await File.ReadAllTextAsync(hosts.StampMarkerPath!));
+		var (createdBy, createdAt) = await GeneratedDbAccess.ReadCompanyStampAsync(sql, stampedId);
+		createdBy.Should().NotBeNullOrWhiteSpace();
+		createdAt.Should().NotBeNull();
+		(await GeneratedDbAccess.CountCompaniesAsync(sql)).Should().Be(1);
 	}
 
 	private static IBusControl? _publisher;

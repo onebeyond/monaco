@@ -147,8 +147,9 @@ internal static class GeneratedDbAccess
 
 		var monacoRoot = FindMonacoRoot();
 		await EnsureEfToolRestoredAsync(monacoRoot);
+		// The hive already built this shape. A design-time rebuild here repeats that compile on every row.
 		var startInfo = new ProcessStartInfo("dotnet",
-											 $"tool run dotnet-ef -- database update --project \"{applicationProject}\" --startup-project \"{startupProject}\" --connection \"{connectionString}\"")
+											 $"tool run dotnet-ef -- database update --no-build --project \"{applicationProject}\" --startup-project \"{startupProject}\" --connection \"{connectionString}\"")
 						{
 							WorkingDirectory = monacoRoot,
 							RedirectStandardOutput = true,
@@ -156,12 +157,7 @@ internal static class GeneratedDbAccess
 							UseShellExecute = false,
 							CreateNoWindow = true
 						};
-		using var process = Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start dotnet ef.");
-		var stdout = await process.StandardOutput.ReadToEndAsync();
-		var stderr = await process.StandardError.ReadToEndAsync();
-		await process.WaitForExitAsync();
-		if (process.ExitCode != 0)
-			throw new InvalidOperationException($"dotnet ef database update failed ({process.ExitCode}):{Environment.NewLine}{stdout}{stderr}");
+		await RunCapturedAsync(startInfo, "dotnet ef database update");
 	}
 
 	private static async Task EnsureEfToolRestoredAsync(string monacoRoot)
@@ -177,13 +173,19 @@ internal static class GeneratedDbAccess
 							UseShellExecute = false,
 							CreateNoWindow = true
 						};
-		using var process = Process.Start(startInfo) ?? throw new InvalidOperationException("Failed to start dotnet tool restore.");
-		var stdout = await process.StandardOutput.ReadToEndAsync();
-		var stderr = await process.StandardError.ReadToEndAsync();
-		await process.WaitForExitAsync();
-		if (process.ExitCode != 0)
-			throw new InvalidOperationException($"dotnet tool restore failed ({process.ExitCode}):{Environment.NewLine}{stdout}{stderr}");
-
+		await RunCapturedAsync(startInfo, "dotnet tool restore");
 		Volatile.Write(ref _efToolRestored, 1);
+	}
+
+	private static async Task RunCapturedAsync(ProcessStartInfo startInfo, string failure)
+	{
+		using var process = Process.Start(startInfo) ?? throw new InvalidOperationException($"Failed to start {failure}.");
+		var stdoutTask = process.StandardOutput.ReadToEndAsync();
+		var stderrTask = process.StandardError.ReadToEndAsync();
+		await process.WaitForExitAsync();
+		var stdout = await stdoutTask;
+		var stderr = await stderrTask;
+		if (process.ExitCode != 0)
+			throw new InvalidOperationException($"{failure} failed ({process.ExitCode}):{Environment.NewLine}{stdout}{stderr}");
 	}
 }

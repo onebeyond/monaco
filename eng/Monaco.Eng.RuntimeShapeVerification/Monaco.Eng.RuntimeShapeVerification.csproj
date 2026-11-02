@@ -32,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Monaco.Eng.FaultOtlpReceiver\Monaco.Eng.FaultOtlpReceiver.csproj" />
     <ProjectReference Include="..\Monaco.Eng.RuntimeShapeVerification.WorkerHook\Monaco.Eng.RuntimeShapeVerification.WorkerHook.csproj" />
   </ItemGroup>
 

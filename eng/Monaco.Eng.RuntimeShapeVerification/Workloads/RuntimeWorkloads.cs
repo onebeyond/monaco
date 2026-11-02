@@ -13,7 +13,7 @@ namespace Monaco.Eng.RuntimeShapeVerification.Workloads;
 internal static class RuntimeWorkloads
 {
 	// Default metric export interval is 60s when no OTEL_* schedule overrides are allowed.
-	private const int SignalWaitAttempts = 900;
+	internal const int SignalWaitAttempts = 900;
 
 	internal static async Task ExecuteAsync(GeneratedShape shape,
 											InfrastructureFixture infra,
@@ -94,6 +94,26 @@ internal static class RuntimeWorkloads
 													DestinationMode mode,
 													bool expectGateway)
 	{
+		await RunFullApiWorkerBusinessAsync(shape, hosts, sql, entryClient, expectGateway);
+		await AssertSignalsAsync(shape, receiver, mode, expectGateway);
+		if (mode != DestinationMode.ReceiverUnavailable)
+		{
+			await AssertCompanyCounterAsync(shape, receiver!);
+			if (expectGateway)
+				receiver!.HasCounter(shape.ServiceName("Common.ApiGateway"),
+									 shape.ApplicationMeterName,
+									 "company.successful_creations")
+						 .Should()
+						 .BeFalse("the Gateway must not claim the Company counter");
+		}
+	}
+
+	internal static async Task RunFullApiWorkerBusinessAsync(GeneratedShape shape,
+															  ShapeHostSet hosts,
+															  string sql,
+															  HttpClient entryClient,
+															  bool expectGateway)
+	{
 		var companyName = $"co-{Guid.NewGuid():N}";
 		var (createResponse, companyId) = await ApiCalls.CreateCompanyAsync(entryClient, companyName, $"{Guid.NewGuid():N}@example.test");
 		createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -112,17 +132,6 @@ internal static class RuntimeWorkloads
 		(await GeneratedDbAccess.CountInboxDeliveredAsync(sql)).Should().BeGreaterThan(0);
 
 		AssertAbsences(shape, expectGateway);
-		await AssertSignalsAsync(shape, receiver, mode, expectGateway);
-		if (mode != DestinationMode.ReceiverUnavailable)
-		{
-			await AssertCompanyCounterAsync(shape, receiver!);
-			if (expectGateway)
-				receiver!.HasCounter(shape.ServiceName("Common.ApiGateway"),
-									 shape.ApplicationMeterName,
-									 "company.successful_creations")
-						 .Should()
-						 .BeFalse("the Gateway must not claim the Company counter");
-		}
 	}
 
 	private static async Task RunLeanApiAsync(GeneratedShape shape,
@@ -201,7 +210,7 @@ internal static class RuntimeWorkloads
 		File.ReadAllText(guide).Should().NotContain("UJ-1");
 	}
 
-	private static void AssertAbsences(GeneratedShape shape, bool expectGateway)
+	internal static void AssertAbsences(GeneratedShape shape, bool expectGateway)
 	{
 		Directory.Exists(shape.ProjectDir("Common.ApiGateway")).Should().Be(expectGateway);
 		Directory.Exists(shape.ProjectDir("Api")).Should().Be(shape.Options.Api);

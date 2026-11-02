@@ -343,6 +343,15 @@ internal static class HostConfiguration
 	}
 }
 
+internal enum RuntimeHostRole
+{
+	Api,
+	Worker,
+	Gateway
+}
+
+internal sealed record RuntimeHostOverlay(RuntimeHostRole Role, IReadOnlyDictionary<string, string?> Environment);
+
 [ExcludeFromCodeCoverage]
 internal sealed class ShapeHostSet : IAsyncDisposable
 {
@@ -364,12 +373,34 @@ internal sealed class ShapeHostSet : IAsyncDisposable
 	public HttpClient? GatewayClient { get; private set; }
 	public string? ApiBaseAddress { get; private set; }
 
+	internal int? ProcessId(RuntimeHostRole role) =>
+		Find(role)?.ProcessId;
+
+	internal bool HasExited(RuntimeHostRole role) =>
+		Find(role)?.HasExited ?? throw new InvalidOperationException($"Host {role} is not running.");
+
+	internal string Output(RuntimeHostRole role) =>
+		Find(role)?.Output ?? throw new InvalidOperationException($"Host {role} is not running.");
+
+	private ProcessHost? Find(RuntimeHostRole role) =>
+		role switch
+		{
+			RuntimeHostRole.Api => _apiProcess,
+			RuntimeHostRole.Worker => _workerProcess,
+			RuntimeHostRole.Gateway => _gatewayProcess,
+			_ => null
+		};
+
+	private static IReadOnlyDictionary<string, string?>? OverlayFor(RuntimeHostOverlay? overlay, RuntimeHostRole role) =>
+		overlay is { } value && value.Role == role ? value.Environment : null;
+
 	public static async Task<ShapeHostSet> StartAsync(GeneratedShape shape,
 													  InfrastructureFixture infra,
 													  string sqlConnectionString,
 													  DestinationMode mode,
 													  OtlpSignalReceiver? productionReceiver,
-													  bool armConsumeRetry)
+													  bool armConsumeRetry,
+													  RuntimeHostOverlay? hostOverlay = null)
 	{
 		// Prior cells (or aborted startups) must not leave API/Gateway/Worker exporters alive.
 		OrphanHostKiller.KillRuntimeShapeHosts();
@@ -405,7 +436,8 @@ internal sealed class ShapeHostSet : IAsyncDisposable
 				set._apiProcess = await ProcessHost.StartAsync(apiDll,
 															   shape.ProjectDir("Api"),
 															   apiUrl,
-															   config);
+															   config,
+															   environmentOverlay: OverlayFor(hostOverlay, RuntimeHostRole.Api));
 				set.ApiBaseAddress = apiUrl.TrimEnd('/') + "/";
 				set.ApiClient = new() { BaseAddress = new(set.ApiBaseAddress) };
 				await set._apiProcess.WaitForReadyAsync(new(new(set.ApiBaseAddress), "health"));
@@ -417,7 +449,8 @@ internal sealed class ShapeHostSet : IAsyncDisposable
 				set._gatewayProcess = await ProcessHost.StartAsync(gatewayDll,
 																   shape.ProjectDir("Common.ApiGateway"),
 																   gatewayUrl,
-																   gatewayConfig);
+																   gatewayConfig,
+																   environmentOverlay: OverlayFor(hostOverlay, RuntimeHostRole.Gateway));
 				set.GatewayClient = new() { BaseAddress = new(gatewayUrl.TrimEnd('/') + "/") };
 				// The generated Gateway has no health endpoint; YARP answers GET /health with 404 once it is listening.
 				await set._gatewayProcess.WaitForReadyAsync(new(new(gatewayUrl.TrimEnd('/') + "/"), "health"),
@@ -431,7 +464,8 @@ internal sealed class ShapeHostSet : IAsyncDisposable
 				set._apiProcess = await ProcessHost.StartAsync(apiDll,
 															   shape.ProjectDir("Api"),
 															   set._apiListenUrl,
-															   config);
+															   config,
+															   environmentOverlay: OverlayFor(hostOverlay, RuntimeHostRole.Api));
 				set.ApiBaseAddress = set._apiListenUrl.TrimEnd('/') + "/";
 				set.ApiClient = new() { BaseAddress = new(set.ApiBaseAddress) };
 				await set._apiProcess.WaitForReadyAsync(new(new(set.ApiBaseAddress), "health"));
@@ -465,7 +499,8 @@ internal sealed class ShapeHostSet : IAsyncDisposable
 																  shape.ProjectDir("Worker"),
 																  "http://127.0.0.1:0",
 																  config,
-																  raw);
+																  raw,
+																  OverlayFor(hostOverlay, RuntimeHostRole.Worker));
 				var readinessText = shape.Options.MassTransit ? "Bus started" : "Application started";
 				await set._workerProcess.WaitForOutputAsync(readinessText, TimeSpan.FromSeconds(90));
 			}
@@ -580,17 +615,36 @@ internal sealed class ShapeHostSet : IAsyncDisposable
 internal sealed class ProcessHost : IAsyncDisposable
 {
 	private readonly Process _process;
+	private readonly Lock _outputGate = new();
 	private readonly StringBuilder _stdout = new();
 	private readonly StringBuilder _stderr = new();
 
-	private ProcessHost(Process process) =>
+	private ProcessHost(Process process)
+	{
 		_process = process;
+		ProcessId = process.Id;
+	}
+
+	internal int ProcessId { get; }
+
+	internal bool HasExited =>
+		_process.HasExited;
+
+	internal string Output
+	{
+		get
+		{
+			lock (_outputGate)
+				return _stdout.ToString() + _stderr.ToString();
+		}
+	}
 
 	internal static async Task<ProcessHost> StartAsync(string dllPath,
 													   string contentRoot,
 													   string urls,
 													   IReadOnlyDictionary<string, string?> environment,
-													   IReadOnlyDictionary<string, string?>? rawEnvironment = null)
+													   IReadOnlyDictionary<string, string?>? rawEnvironment = null,
+													   IReadOnlyDictionary<string, string?>? environmentOverlay = null)
 	{
 		var startInfo = new ProcessStartInfo("dotnet", $"\"{dllPath}\"")
 						{
@@ -629,22 +683,34 @@ internal sealed class ProcessHost : IAsyncDisposable
 				startInfo.Environment[pair.Key] = pair.Value;
 			}
 
+		// The Development OTLP endpoint is already inherited. The overlay replaces it on this host only.
+		if (environmentOverlay is not null)
+			foreach (var pair in environmentOverlay)
+			{
+				if (pair.Value is null)
+					continue;
+
+				startInfo.Environment[pair.Key] = pair.Value;
+			}
+
 		var host = new ProcessHost(Process.Start(startInfo) ?? throw new InvalidOperationException($"Failed to start {dllPath}"));
 		host._process.OutputDataReceived += (_, eventArgs) =>
 											{
 												if (eventArgs.Data is not null)
-													host._stdout.AppendLine(eventArgs.Data);
+													lock (host._outputGate)
+														host._stdout.AppendLine(eventArgs.Data);
 											};
 		host._process.ErrorDataReceived += (_, eventArgs) =>
 										   {
 											   if (eventArgs.Data is not null)
-												   host._stderr.AppendLine(eventArgs.Data);
+												   lock (host._outputGate)
+													   host._stderr.AppendLine(eventArgs.Data);
 										   };
 		host._process.BeginOutputReadLine();
 		host._process.BeginErrorReadLine();
 		await Task.Delay(500);
 		return host._process.HasExited
-				   ? throw new InvalidOperationException($"Host exited early ({host._process.ExitCode}): {host._stdout} {host._stderr}")
+				   ? throw new InvalidOperationException($"Host exited early ({host._process.ExitCode}): {host.Output}")
 				   : host;
 	}
 
@@ -654,16 +720,15 @@ internal sealed class ProcessHost : IAsyncDisposable
 		while (DateTime.UtcNow < deadline)
 		{
 			if (_process.HasExited)
-				throw new InvalidOperationException($"Host process exited while waiting for '{text}' (code {_process.ExitCode}). Stderr: {_stderr} Stdout: {_stdout}");
+				throw new InvalidOperationException($"Host process exited while waiting for '{text}' (code {_process.ExitCode}). {Output}");
 
-			if (_stdout.ToString().Contains(text, StringComparison.Ordinal) ||
-				_stderr.ToString().Contains(text, StringComparison.Ordinal))
+			if (Output.Contains(text, StringComparison.Ordinal))
 				return;
 
 			await Task.Delay(200);
 		}
 
-		throw new TimeoutException($"Did not observe '{text}'. Stderr: {_stderr} Stdout: {_stdout}");
+		throw new TimeoutException($"Did not observe '{text}'. {Output}");
 	}
 
 	internal async Task WaitForReadyAsync(Uri healthUrl, bool acceptAnyHttpResponse = false)
@@ -672,7 +737,7 @@ internal sealed class ProcessHost : IAsyncDisposable
 		for (var attempt = 0; attempt < 90; attempt++)
 		{
 			if (_process.HasExited)
-				throw new InvalidOperationException($"Host process exited while waiting for readiness (code {_process.ExitCode}). Stderr: {_stderr} Stdout: {_stdout}");
+				throw new InvalidOperationException($"Host process exited while waiting for readiness (code {_process.ExitCode}). {Output}");
 
 			try
 			{
@@ -688,7 +753,7 @@ internal sealed class ProcessHost : IAsyncDisposable
 			await Task.Delay(250);
 		}
 
-		throw new TimeoutException($"Process host did not become ready at {healthUrl}. Stderr: {_stderr} Stdout: {_stdout}");
+		throw new TimeoutException($"Process host did not become ready at {healthUrl}. {Output}");
 	}
 
 	public async ValueTask DisposeAsync()
