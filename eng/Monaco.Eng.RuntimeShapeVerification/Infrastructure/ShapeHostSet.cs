@@ -639,6 +639,25 @@ internal sealed class ProcessHost : IAsyncDisposable
 		}
 	}
 
+	internal static void ApplyExportOverlay(IDictionary<string, string?> environment,
+											 IReadOnlyDictionary<string, string?> overlay)
+	{
+		// Signal-specific variables outrank OTEL_EXPORTER_OTLP_ENDPOINT. The host inherits them from this process.
+		foreach (var signal in new[] { "TRACES", "METRICS", "LOGS" })
+		{
+			environment.Remove($"OTEL_EXPORTER_OTLP_{signal}_ENDPOINT");
+			environment.Remove($"OTEL_EXPORTER_OTLP_{signal}_PROTOCOL");
+		}
+
+		foreach (var pair in overlay)
+		{
+			if (pair.Value is null)
+				continue;
+
+			environment[pair.Key] = pair.Value;
+		}
+	}
+
 	internal static async Task<ProcessHost> StartAsync(string dllPath,
 													   string contentRoot,
 													   string urls,
@@ -685,13 +704,7 @@ internal sealed class ProcessHost : IAsyncDisposable
 
 		// The Development OTLP endpoint is already inherited. The overlay replaces it on this host only.
 		if (environmentOverlay is not null)
-			foreach (var pair in environmentOverlay)
-			{
-				if (pair.Value is null)
-					continue;
-
-				startInfo.Environment[pair.Key] = pair.Value;
-			}
+			ApplyExportOverlay(startInfo.Environment, environmentOverlay);
 
 		var host = new ProcessHost(Process.Start(startInfo) ?? throw new InvalidOperationException($"Failed to start {dllPath}"));
 		host._process.OutputDataReceived += (_, eventArgs) =>
