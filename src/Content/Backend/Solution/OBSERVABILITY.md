@@ -242,6 +242,8 @@ The common OTLP controls include `OTEL_EXPORTER_OTLP_{ENDPOINT,PROTOCOL,HEADERS,
 
 Resource, sampling, batching, retry, timeout, header, transport, logging, and other standard settings use the pinned SDK and instrumentation packages directly. This guide does not list every supported key, impose fixed ranges, validate destination security, or certify a resulting telemetry stream.
 
+An Operational Log may include a TraceId for a trace that was not sampled and not exported. That TraceId is correlation context, not an exported trace.
+
 ## Telemetry failure isolation
 
 Operational Telemetry is best-effort diagnostic evidence. An unavailable or impaired OTLP receiver does not control Company commit, in-process business Counter recording, readiness, or host startup. Connection refusal, receiver timeout, authorization or throttling responses, malformed receiver responses, and saturation can lose telemetry, while Console logging remains available through the normal DI `ILogger` route.

@@ -400,7 +400,8 @@ internal sealed class ShapeHostSet : IAsyncDisposable
 													  DestinationMode mode,
 													  OtlpSignalReceiver? productionReceiver,
 													  bool armConsumeRetry,
-													  RuntimeHostOverlay? hostOverlay = null)
+													  RuntimeHostOverlay? hostOverlay = null,
+													  IReadOnlyDictionary<string, string?>? childEnvironment = null)
 	{
 		// Prior cells (or aborted startups) must not leave API/Gateway/Worker exporters alive.
 		OrphanHostKiller.KillRuntimeShapeHosts();
@@ -437,7 +438,8 @@ internal sealed class ShapeHostSet : IAsyncDisposable
 															   shape.ProjectDir("Api"),
 															   apiUrl,
 															   config,
-															   environmentOverlay: OverlayFor(hostOverlay, RuntimeHostRole.Api));
+															   environmentOverlay: OverlayFor(hostOverlay, RuntimeHostRole.Api),
+															   childEnvironment: childEnvironment);
 				set.ApiBaseAddress = apiUrl.TrimEnd('/') + "/";
 				set.ApiClient = new() { BaseAddress = new(set.ApiBaseAddress) };
 				await set._apiProcess.WaitForReadyAsync(new(new(set.ApiBaseAddress), "health"));
@@ -450,7 +452,8 @@ internal sealed class ShapeHostSet : IAsyncDisposable
 																   shape.ProjectDir("Common.ApiGateway"),
 																   gatewayUrl,
 																   gatewayConfig,
-																   environmentOverlay: OverlayFor(hostOverlay, RuntimeHostRole.Gateway));
+																   environmentOverlay: OverlayFor(hostOverlay, RuntimeHostRole.Gateway),
+																   childEnvironment: childEnvironment);
 				set.GatewayClient = new() { BaseAddress = new(gatewayUrl.TrimEnd('/') + "/") };
 				// The generated Gateway has no health endpoint; YARP answers GET /health with 404 once it is listening.
 				await set._gatewayProcess.WaitForReadyAsync(new(new(gatewayUrl.TrimEnd('/') + "/"), "health"),
@@ -465,7 +468,8 @@ internal sealed class ShapeHostSet : IAsyncDisposable
 															   shape.ProjectDir("Api"),
 															   set._apiListenUrl,
 															   config,
-															   environmentOverlay: OverlayFor(hostOverlay, RuntimeHostRole.Api));
+															   environmentOverlay: OverlayFor(hostOverlay, RuntimeHostRole.Api),
+															   childEnvironment: childEnvironment);
 				set.ApiBaseAddress = set._apiListenUrl.TrimEnd('/') + "/";
 				set.ApiClient = new() { BaseAddress = new(set.ApiBaseAddress) };
 				await set._apiProcess.WaitForReadyAsync(new(new(set.ApiBaseAddress), "health"));
@@ -500,7 +504,8 @@ internal sealed class ShapeHostSet : IAsyncDisposable
 																  "http://127.0.0.1:0",
 																  config,
 																  raw,
-																  OverlayFor(hostOverlay, RuntimeHostRole.Worker));
+																  OverlayFor(hostOverlay, RuntimeHostRole.Worker),
+																  childEnvironment);
 				var readinessText = shape.Options.MassTransit ? "Bus started" : "Application started";
 				await set._workerProcess.WaitForOutputAsync(readinessText, TimeSpan.FromSeconds(90));
 			}
@@ -639,6 +644,18 @@ internal sealed class ProcessHost : IAsyncDisposable
 		}
 	}
 
+	internal static void ApplyChildEnvironment(IDictionary<string, string?> environment,
+											   IReadOnlyDictionary<string, string?> childEnvironment)
+	{
+		foreach (var pair in childEnvironment)
+		{
+			if (pair.Value is null)
+				environment.Remove(pair.Key);
+			else
+				environment[pair.Key] = pair.Value;
+		}
+	}
+
 	internal static void ApplyExportOverlay(IDictionary<string, string?> environment,
 											 IReadOnlyDictionary<string, string?> overlay)
 	{
@@ -663,7 +680,8 @@ internal sealed class ProcessHost : IAsyncDisposable
 													   string urls,
 													   IReadOnlyDictionary<string, string?> environment,
 													   IReadOnlyDictionary<string, string?>? rawEnvironment = null,
-													   IReadOnlyDictionary<string, string?>? environmentOverlay = null)
+													   IReadOnlyDictionary<string, string?>? environmentOverlay = null,
+													   IReadOnlyDictionary<string, string?>? childEnvironment = null)
 	{
 		var startInfo = new ProcessStartInfo("dotnet", $"\"{dllPath}\"")
 						{
@@ -705,6 +723,10 @@ internal sealed class ProcessHost : IAsyncDisposable
 		// The Development OTLP endpoint is already inherited. The overlay replaces it on this host only.
 		if (environmentOverlay is not null)
 			ApplyExportOverlay(startInfo.Environment, environmentOverlay);
+
+		// Child-only. A null value drops an inherited key so one row cannot leak a sampler argument into the next.
+		if (childEnvironment is not null)
+			ApplyChildEnvironment(startInfo.Environment, childEnvironment);
 
 		var host = new ProcessHost(Process.Start(startInfo) ?? throw new InvalidOperationException($"Failed to start {dllPath}"));
 		host._process.OutputDataReceived += (_, eventArgs) =>

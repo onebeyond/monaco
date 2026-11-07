@@ -206,25 +206,40 @@ public sealed class OtlpSignalReceiver : IAsyncDisposable
 		GetMetrics().Any(metric => metric.ServiceName == serviceName) &&
 		GetLogs().Any(log => log.ServiceName == serviceName);
 
+	internal bool HasSpans(string serviceName) =>
+		GetSpans().Any(span => span.ServiceName == serviceName);
+
+	internal bool HasLogs(string serviceName) =>
+		GetLogs().Any(log => log.ServiceName == serviceName);
+
+	internal bool HasMetrics(string serviceName) =>
+		GetMetrics().Any(metric => metric.ServiceName == serviceName);
+
+	internal bool HasMeterPoint(string serviceName, string meterName) =>
+		GetMetrics()
+			.Where(resource => resource.ServiceName == serviceName)
+			.SelectMany(resource => resource.Instruments)
+			.Any(instrument => instrument.MeterName == meterName);
+
 	public bool HasCounter(string serviceName, string meterName, string instrumentName) =>
 		GetMetrics()
 			.Where(resource => resource.ServiceName == serviceName)
 			.SelectMany(resource => resource.Instruments)
 			.Any(instrument => instrument.MeterName == meterName && instrument.Name == instrumentName);
 
-	private IReadOnlyList<DecodedSpan> GetSpans() =>
+	internal IReadOnlyList<DecodedSpan> GetSpans() =>
 	[
 		.. _entries.Where(entry => entry.Path == "/v1/traces")
 				   .SelectMany(entry => SafeDecode(() => OtlpProtobuf.ReadSpans(entry.Payload)))
 	];
 
-	private IReadOnlyList<DecodedLogRecord> GetLogs() =>
+	internal IReadOnlyList<DecodedLogRecord> GetLogs() =>
 	[
 		.. _entries.Where(entry => entry.Path == "/v1/logs")
 				   .SelectMany(entry => SafeDecode(() => OtlpProtobuf.ReadLogs(entry.Payload)))
 	];
 
-	private IReadOnlyList<DecodedMetricsResource> GetMetrics() =>
+	internal IReadOnlyList<DecodedMetricsResource> GetMetrics() =>
 	[
 		.. _entries.Where(entry => entry.Path == "/v1/metrics")
 				   .SelectMany(entry => SafeDecode(() => OtlpProtobuf.ReadMetrics(entry.Payload)))
@@ -266,7 +281,7 @@ public sealed class OtlpSignalReceiver : IAsyncDisposable
 }
 
 [ExcludeFromCodeCoverage]
-internal sealed record DecodedSpan(string ServiceName, string ScopeName, string Name);
+internal sealed record DecodedSpan(string ServiceName, string ScopeName, string Name, string TraceId, string SpanId, string ParentSpanId);
 
 [ExcludeFromCodeCoverage]
 internal sealed record DecodedLogRecord(string ServiceName, string TraceId, string Body);
@@ -319,12 +334,32 @@ internal static class OtlpProtobuf
 				spans.AddRange(spanPayloads.Select(spanPayload =>
 												   {
 													   var name = string.Empty;
+													   var traceId = string.Empty;
+													   var spanId = string.Empty;
+													   var parentSpanId = string.Empty;
 													   foreach (var (field, message) in ReadFields(spanPayload))
-														   if (field == 5)
-															   name = Encoding.UTF8.GetString(message);
+														   switch (field)
+														   {
+															   case 1:
+																   traceId = ToHex(message);
+																   break;
+															   case 2:
+																   spanId = ToHex(message);
+																   break;
+															   case 4:
+																   parentSpanId = ToHex(message);
+																   break;
+															   case 5:
+																   name = Encoding.UTF8.GetString(message);
+																   break;
+														   }
+
 													   return new DecodedSpan(serviceName,
 																			  scopeName,
-																			  name);
+																			  name,
+																			  traceId,
+																			  spanId,
+																			  parentSpanId);
 												   }));
 			}
 		}
@@ -357,7 +392,7 @@ internal static class OtlpProtobuf
 											body = ReadAnyValue(logMessage);
 											break;
 										case 9:
-											traceId = Convert.ToHexString(logMessage).ToLowerInvariant();
+											traceId = ToHex(logMessage);
 											break;
 									}
 
@@ -495,6 +530,9 @@ internal static class OtlpProtobuf
 
 		return string.Empty;
 	}
+
+	private static string ToHex(byte[] message) =>
+		Convert.ToHexString(message).ToLowerInvariant();
 
 	private static string ReadInstrumentationScopeName(byte[] payload)
 	{
