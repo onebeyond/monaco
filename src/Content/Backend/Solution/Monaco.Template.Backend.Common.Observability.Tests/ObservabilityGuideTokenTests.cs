@@ -18,9 +18,14 @@ public sealed class ObservabilityGuideTokenTests
 		Assert.Contains("## High-fidelity telemetry boundary", guide, StringComparison.Ordinal);
 		Assert.Contains("does not filter, redact, sanitize, transform, sample, or bound", guide, StringComparison.Ordinal);
 		Assert.Contains("consumer-owned Collector", guide, StringComparison.Ordinal);
-		Assert.Contains("filtering, redaction, sanitization, identity treatment, transformation, sampling, cardinality controls, routing, transport, storage, access, retention, and alerting", guide, StringComparison.Ordinal);
+		Assert.Contains("filtering, redaction, sanitization, identity treatment, hashing, transformation, sampling policy, cardinality controls, routing, transport, storage, access, retention, and alerting", guide, StringComparison.Ordinal);
+		Assert.Contains("hashing", guide, StringComparison.Ordinal);
+		Assert.Contains("sampling policy", guide, StringComparison.Ordinal);
 		Assert.Contains("does not certify consumer outcomes", guide, StringComparison.Ordinal);
 		Assert.Contains("compliance requirements", guide, StringComparison.Ordinal);
+		var policy = guide.IndexOf("sampling policy", StringComparison.Ordinal);
+		var beforePolicy = guide[..policy];
+		Assert.Equal(0, CountOccurrences(beforePolicy, "<!--" + IfDirective) - CountOccurrences(beforePolicy, "<!--" + EndIfDirective));
 		Assert.Contains("Gateway has no SQL instrumentation", guide, StringComparison.Ordinal);
 		guide.Should().Contain("<!--" + IfDirective + " (apiService || apiGateway) -->\n## HTTP exception boundaries");
 		guide.Should().Contain("ordinary structured error log");

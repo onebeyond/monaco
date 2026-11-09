@@ -217,7 +217,9 @@ public sealed class ObservabilityGuideTemplateGenerationTests
 			Assert.Contains("## High-fidelity telemetry boundary", guide, StringComparison.Ordinal);
 			Assert.Contains("The Aspire CLI is the only telemetry-specific prerequisite introduced by this guide.", guide, StringComparison.Ordinal);
 			Assert.DoesNotContain("OBSERVABILITY: 2.6 HIGH-FIDELITY-BOUNDARY", guide, StringComparison.Ordinal);
-			Assert.Contains("filtering, redaction, sanitization, identity treatment, transformation, sampling, cardinality controls, routing, transport, storage, access, retention, and alerting", guide, StringComparison.Ordinal);
+			Assert.Contains("filtering, redaction, sanitization, identity treatment, hashing, transformation, sampling policy, cardinality controls, routing, transport, storage, access, retention, and alerting", guide, StringComparison.Ordinal);
+			Assert.Contains("hashing", guide, StringComparison.Ordinal);
+			Assert.Contains("sampling policy", guide, StringComparison.Ordinal);
 			Assert.Contains("does not certify consumer outcomes", guide, StringComparison.Ordinal);
 			Assert.DoesNotContain("Monaco", guide, StringComparison.OrdinalIgnoreCase);
 			Assert.Contains("compliance requirements", guide, StringComparison.Ordinal);

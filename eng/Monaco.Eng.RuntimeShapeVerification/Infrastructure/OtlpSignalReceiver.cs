@@ -281,10 +281,23 @@ public sealed class OtlpSignalReceiver : IAsyncDisposable
 }
 
 [ExcludeFromCodeCoverage]
-internal sealed record DecodedSpan(string ServiceName, string ScopeName, string Name, string TraceId, string SpanId, string ParentSpanId);
+internal sealed record DecodedAttribute(string Key, string Value);
 
 [ExcludeFromCodeCoverage]
-internal sealed record DecodedLogRecord(string ServiceName, string TraceId, string Body);
+internal sealed record DecodedSpanEvent(string Name, IReadOnlyList<DecodedAttribute> Attributes);
+
+[ExcludeFromCodeCoverage]
+internal sealed record DecodedSpan(string ServiceName,
+								   string ScopeName,
+								   string Name,
+								   string TraceId,
+								   string SpanId,
+								   string ParentSpanId,
+								   IReadOnlyList<DecodedAttribute> Attributes,
+								   IReadOnlyList<DecodedSpanEvent> Events);
+
+[ExcludeFromCodeCoverage]
+internal sealed record DecodedLogRecord(string ServiceName, string TraceId, string Body, IReadOnlyList<DecodedAttribute> Attributes);
 
 [ExcludeFromCodeCoverage]
 internal sealed record DecodedMetricsResource(string ServiceName, IReadOnlyList<DecodedInstrument> Instruments);
@@ -337,6 +350,8 @@ internal static class OtlpProtobuf
 													   var traceId = string.Empty;
 													   var spanId = string.Empty;
 													   var parentSpanId = string.Empty;
+													   var attributes = new List<DecodedAttribute>();
+													   var events = new List<DecodedSpanEvent>();
 													   foreach (var (field, message) in ReadFields(spanPayload))
 														   switch (field)
 														   {
@@ -352,6 +367,12 @@ internal static class OtlpProtobuf
 															   case 5:
 																   name = Encoding.UTF8.GetString(message);
 																   break;
+															   case 9:
+																   attributes.Add(ReadAttribute(message));
+																   break;
+															   case 11:
+																   events.Add(ReadSpanEvent(message));
+																   break;
 														   }
 
 													   return new DecodedSpan(serviceName,
@@ -359,7 +380,9 @@ internal static class OtlpProtobuf
 																			  name,
 																			  traceId,
 																			  spanId,
-																			  parentSpanId);
+																			  parentSpanId,
+																			  attributes,
+																			  events);
 												   }));
 			}
 		}
@@ -385,11 +408,15 @@ internal static class OtlpProtobuf
 							{
 								var body = string.Empty;
 								var traceId = string.Empty;
+								var attributes = new List<DecodedAttribute>();
 								foreach (var (logField, logMessage) in ReadFields(scopeMessage))
 									switch (logField)
 									{
 										case 5:
 											body = ReadAnyValue(logMessage);
+											break;
+										case 6:
+											attributes.Add(ReadAttribute(logMessage));
 											break;
 										case 9:
 											traceId = ToHex(logMessage);
@@ -398,7 +425,8 @@ internal static class OtlpProtobuf
 
 								logs.Add(new(serviceName,
 											 traceId,
-											 body));
+											 body,
+											 attributes));
 							}
 
 						break;
@@ -541,6 +569,30 @@ internal static class OtlpProtobuf
 				return Encoding.UTF8.GetString(message);
 
 		return string.Empty;
+	}
+
+	private static DecodedSpanEvent ReadSpanEvent(byte[] payload)
+	{
+		var name = string.Empty;
+		var attributes = new List<DecodedAttribute>();
+		foreach (var (field, message) in ReadFields(payload))
+			switch (field)
+			{
+				case 2:
+					name = Encoding.UTF8.GetString(message);
+					break;
+				case 3:
+					attributes.Add(ReadAttribute(message));
+					break;
+			}
+
+		return new(name, attributes);
+	}
+
+	private static DecodedAttribute ReadAttribute(byte[] payload)
+	{
+		var attribute = ReadKeyValue(payload);
+		return new(attribute.Key, attribute.Value);
 	}
 
 	private static KeyValuePair<string, string> ReadKeyValue(byte[] payload)

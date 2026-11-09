@@ -232,7 +232,13 @@ public sealed class ObservabilityCompiledCompositionTests
 									 name.Contains("Redact", StringComparison.OrdinalIgnoreCase) ||
 									 name.Contains("Hmac", StringComparison.OrdinalIgnoreCase) ||
 									 name.Contains("Preflight", StringComparison.OrdinalIgnoreCase) ||
-									 name.Contains("SecretProvider", StringComparison.OrdinalIgnoreCase));
+									 name.Contains("SecretProvider", StringComparison.OrdinalIgnoreCase) ||
+									 name.Contains("SetDbStatement", StringComparison.Ordinal) ||
+									 name.Contains("ResourceKey", StringComparison.Ordinal) ||
+									 name.Contains("AllowList", StringComparison.Ordinal) ||
+									 name.Contains("SeriesCeiling", StringComparison.Ordinal) ||
+									 name.Contains("CardinalityLimit", StringComparison.Ordinal) ||
+									 name.Contains("ObservabilityConfigurationDiagnostics", StringComparison.Ordinal));
 		memberNames.Should()
 				   .NotContain("AddProcessor")
 				   .And
@@ -250,7 +256,14 @@ public sealed class ObservabilityCompiledCompositionTests
 				   .And
 				   .NotContain("AddMassTransitInstrumentation")
 				   .And
-				   .NotContain("ConfigureMassTransit");
+				   .NotContain("ConfigureMassTransit")
+				   .And
+				   .NotContain(name => name.Contains("SetDbStatement", StringComparison.Ordinal) ||
+									   name.Contains("ResourceKey", StringComparison.Ordinal) ||
+									   name.Contains("AllowList", StringComparison.Ordinal) ||
+									   name.Contains("SeriesCeiling", StringComparison.Ordinal) ||
+									   name.Contains("CardinalityLimit", StringComparison.Ordinal) ||
+									   name.Contains("ObservabilityConfigurationDiagnostics", StringComparison.Ordinal));
 		typeof(ObservabilityHostBuilderExtensions).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
 												  .Select(method => method.Name)
 												  .Should()

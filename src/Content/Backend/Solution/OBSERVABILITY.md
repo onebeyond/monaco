@@ -256,7 +256,7 @@ When the receiver recovers, normal SDK exporting resumes without restarting the 
 
 This solution emits applicable native instrumentation, ordinary structured log state and scopes, formatted messages, exception information, and application instruments without a content-governance layer. It does not filter, redact, sanitize, transform, sample, or bound telemetry through processors, SQL modes, identity modes, Metric Views, attribute policies, or cardinality ceilings. High-fidelity telemetry can therefore contain information that is sensitive in a consumer's environment.
 
-A consumer-owned Collector or compatible downstream pipeline is the enforcement point for filtering, redaction, sanitization, identity treatment, transformation, sampling, cardinality controls, routing, transport, storage, access, retention, and alerting. Assess and configure that pipeline for its recipients and compliance requirements; This solution does not certify consumer outcomes.
+A consumer-owned Collector or compatible downstream pipeline is the enforcement point for filtering, redaction, sanitization, identity treatment, hashing, transformation, sampling policy, cardinality controls, routing, transport, storage, access, retention, and alerting. Assess and configure that pipeline for its recipients and compliance requirements; This solution does not certify consumer outcomes.
 
 <!--#if (apiService || workerService) -->
 API and Worker use the selected native SQL Client instrumentation without query-text rewriting or suppression. This solution does not enable EF Core sensitive-data logging; consumers remain responsible for evaluating the telemetry their selected SDK and runtime configuration produce.
