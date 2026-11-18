@@ -34,8 +34,11 @@ public sealed class GeneratedShape
 
 public sealed class GeneratedShapeHarness : IAsyncDisposable
 {
+	public const string ProvisionRootVariable = "MONACO_TIER1_PROVISION_ROOT";
+
 	private const int CommandTimeoutMilliseconds = 600_000;
 	private const string PackageIdentity = "Monaco.Template";
+	private const string CliLogSuffix = ".cli.txt";
 
 	private static readonly JsonSerializerOptions JsonOptions = new()
 	{
@@ -49,6 +52,7 @@ public sealed class GeneratedShapeHarness : IAsyncDisposable
 	private GeneratedShape[] _provisioned = [];
 	private readonly string _templateEngineBaseline;
 	private bool _disposed;
+	private bool _deleteOnDispose = true;
 	private int _packCount;
 	private bool _templateEngineUnchanged = true;
 
@@ -105,6 +109,14 @@ public sealed class GeneratedShapeHarness : IAsyncDisposable
 															 CancellationToken cancellationToken) =>
 		ProvisionAsync(productRoot, protocolInvocation, afterEachShape: null, cancellationToken);
 
+	internal static GeneratedShapeHarness Attach(string tempRoot)
+	{
+		var harness = new GeneratedShapeHarness(FindProductRoot(), Path.GetFullPath(tempRoot), "tier1");
+		harness._deleteOnDispose = false;
+		harness.LoadPackedTree();
+		return harness;
+	}
+
 	public GeneratedShape Generate(string name, params string[] parameters) =>
 		GenerateAsync(name, name, parameters, CancellationToken.None).GetAwaiter().GetResult();
 
@@ -117,7 +129,8 @@ public sealed class GeneratedShapeHarness : IAsyncDisposable
 
 			_disposed = true;
 			KillRegisteredProcesses();
-			DeleteTree(TempRoot);
+			if (_deleteOnDispose)
+				DeleteTree(TempRoot);
 		}
 
 		await Task.CompletedTask;
@@ -377,6 +390,52 @@ public sealed class GeneratedShapeHarness : IAsyncDisposable
 		return full;
 	}
 
+	private void LoadPackedTree()
+	{
+		if (!Directory.Exists(HivePath))
+			throw new DirectoryNotFoundException($"Hive not found at {HivePath}.");
+
+		var packages = Directory.GetFiles(TempRoot, $"{PackageIdentity}.*.nupkg");
+		if (packages.Length != 1)
+			throw new InvalidOperationException($"Expected one {PackageIdentity} nupkg under {TempRoot}, found {packages.Length}.");
+
+		PackagePath = packages[0];
+		PackageId = PackageIdentity;
+		var fileName = Path.GetFileNameWithoutExtension(PackagePath);
+		var prefix = PackageIdentity + ".";
+		if (!fileName.StartsWith(prefix, StringComparison.Ordinal) || fileName.Length == prefix.Length)
+			throw new InvalidOperationException($"Could not read the package version from '{fileName}'.");
+
+		PackageVersion = fileName[prefix.Length..];
+		PackageSha256 = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(PackagePath))).ToLowerInvariant();
+		var evidence = Path.Combine(EvidenceDirectory, "R1.json");
+		if (File.Exists(evidence))
+		{
+			using var document = JsonDocument.Parse(File.ReadAllText(evidence));
+			if (document.RootElement.TryGetProperty("sourceSha", out var sha))
+				SourceSha = sha.GetString() ?? "";
+		}
+
+		foreach (var definition in ShapeCatalog.All)
+		{
+			var outputDirectory = Path.Combine(TempRoot, "shapes", definition.Id);
+			if (!Directory.Exists(outputDirectory))
+				throw new DirectoryNotFoundException($"Shape '{definition.Id}' was not generated at {outputDirectory}.");
+
+			var cliPath = Path.Combine(EvidenceDirectory, definition.Id + CliLogSuffix);
+			var cli = File.Exists(cliPath) ? File.ReadAllText(cliPath) : "";
+			_shapes.Add(new GeneratedShape(definition.Id,
+										   definition.Id,
+										   outputDirectory,
+										   definition.Options,
+										   definition.Arguments,
+										   cli));
+		}
+
+		_provisioned = _shapes.ToArray();
+		_packCount = 1;
+	}
+
 	private async Task PackAndInstallAsync(CancellationToken cancellationToken)
 	{
 		var nuspec = Path.Combine(ProductRoot, "src", "Monaco.Template.nuspec");
@@ -447,6 +506,7 @@ public sealed class GeneratedShapeHarness : IAsyncDisposable
 		var shape = new GeneratedShape(shapeId, solutionName, outputDirectory, options, arguments, result.Output);
 		_shapes.Add(shape);
 		WriteEvidence(shape, "shape", result.ExitCode, workingDirectory: null, output: null);
+		File.WriteAllText(Path.Combine(EvidenceDirectory, shapeId + CliLogSuffix), result.Output);
 		return shape;
 	}
 

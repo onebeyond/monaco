@@ -425,13 +425,31 @@ public sealed class StaticEdgeTruthfulnessTests : IClassFixture<StaticEdgeTruthf
 	public sealed class StaticEdgeHiveFixture : IDisposable
 	{
 		private const int CommandTimeoutMilliseconds = 180_000;
+		private const string ProvisionRootVariable = "MONACO_TIER1_PROVISION_ROOT";
 
-		private readonly string _root = Path.Combine(Path.GetTempPath(), $"monaco-static-edge-tests-{Guid.NewGuid():N}");
+		private readonly string _root;
 		private readonly Dictionary<string, string> _logs = new(StringComparer.Ordinal);
 		private readonly string _hivePath;
+		private readonly bool _ownsRoot;
 
 		public StaticEdgeHiveFixture()
 		{
+			var provisionRoot = Environment.GetEnvironmentVariable(ProvisionRootVariable);
+			if (!string.IsNullOrWhiteSpace(provisionRoot))
+			{
+				// Tier 1 already generated these trees. Reading them must not pack, generate, or delete that root.
+				_root = provisionRoot;
+				_hivePath = "";
+				_ownsRoot = false;
+				E1 = Bind("E1", new SupportedRuntimeShapeCompositionTests.ShapeOptions(true, true, false, true, true, true, false, false, false));
+				E2 = Bind("E2", new SupportedRuntimeShapeCompositionTests.ShapeOptions(false, false, false, false, false, false, false, true, false));
+				E3 = Bind("E3", new SupportedRuntimeShapeCompositionTests.ShapeOptions(false, false, true, false, false, false, false, true, false));
+				E4 = Bind("E4", new SupportedRuntimeShapeCompositionTests.ShapeOptions(false, true, false, false, true, true, true, true, false));
+				return;
+			}
+
+			_ownsRoot = true;
+			_root = Path.Combine(Path.GetTempPath(), $"monaco-static-edge-tests-{Guid.NewGuid():N}");
 			_hivePath = Path.Combine(_root, "hive");
 			try
 			{
@@ -504,8 +522,11 @@ public sealed class StaticEdgeTruthfulnessTests : IClassFixture<StaticEdgeTruthf
 		public string GenerationLog(SupportedRuntimeShapeCompositionTests.GeneratedRuntimeShape shape) =>
 			_logs[shape.Id];
 
-		public void Dispose() =>
-			DeleteRoot();
+		public void Dispose()
+		{
+			if (_ownsRoot)
+				DeleteRoot();
+		}
 
 		private void DeleteRoot()
 		{
@@ -517,6 +538,14 @@ public sealed class StaticEdgeTruthfulnessTests : IClassFixture<StaticEdgeTruthf
 			{ }
 			catch (UnauthorizedAccessException)
 			{ }
+		}
+
+		private SupportedRuntimeShapeCompositionTests.GeneratedRuntimeShape Bind(string id,
+																					 SupportedRuntimeShapeCompositionTests.ShapeOptions options)
+		{
+			var outputDirectory = Path.Combine(_root, "shapes", id);
+			_logs[id] = File.ReadAllText(Path.Combine(_root, "evidence", id + ".cli.txt"));
+			return new SupportedRuntimeShapeCompositionTests.GeneratedRuntimeShape(id, id, outputDirectory, options);
 		}
 
 		private SupportedRuntimeShapeCompositionTests.GeneratedRuntimeShape Generate(string id,

@@ -1368,12 +1368,33 @@ public sealed class SupportedRuntimeShapeCompositionTests : IClassFixture<Suppor
 	public sealed class RuntimeShapeHiveFixture : IDisposable
 	{
 		private const int CommandTimeoutMilliseconds = 180_000;
+		private const string ProvisionRootVariable = "MONACO_TIER1_PROVISION_ROOT";
 
-		private readonly string _root = Path.Combine(Path.GetTempPath(), $"monaco-runtime-shape-tests-{Guid.NewGuid():N}");
+		private readonly string _root;
 		private readonly string _hivePath;
+		private readonly bool _ownsRoot;
 
 		public RuntimeShapeHiveFixture()
 		{
+			var provisionRoot = Environment.GetEnvironmentVariable(ProvisionRootVariable);
+			if (!string.IsNullOrWhiteSpace(provisionRoot))
+			{
+				// Tier 1 already generated these trees. Reading them must not pack, generate, or delete that root.
+				_root = provisionRoot;
+				_hivePath = "";
+				_ownsRoot = false;
+				R1 = Bind("R1", new ShapeOptions(true, true, false, true, true, true, true, true, true));
+				R2 = Bind("R2", new ShapeOptions(true, true, true, true, true, true, true, true, true));
+				R3 = Bind("R3", new ShapeOptions(true, false, false, false, false, false, true, true, false));
+				R4 = Bind("R4", new ShapeOptions(true, false, false, false, true, true, true, true, false));
+				R5 = Bind("R5", new ShapeOptions(false, true, false, false, true, true, false, true, false));
+				R6 = Bind("R6", new ShapeOptions(false, true, false, false, false, false, false, true, false));
+				R7 = Bind("R7", new ShapeOptions(true, true, false, true, true, true, false, true, true));
+				return;
+			}
+
+			_ownsRoot = true;
+			_root = Path.Combine(Path.GetTempPath(), $"monaco-runtime-shape-tests-{Guid.NewGuid():N}");
 			_hivePath = Path.Combine(_root, "hive");
 			Directory.CreateDirectory(_hivePath);
 			RunDotnet($"new install \"{FindTemplateSourceDirectory()}\" --debug:custom-hive \"{_hivePath}\"");
@@ -1443,6 +1464,9 @@ public sealed class SupportedRuntimeShapeCompositionTests : IClassFixture<Suppor
 
 		public void Dispose()
 		{
+			if (!_ownsRoot)
+				return;
+
 			try
 			{
 				Directory.Delete(_root, recursive: true);
@@ -1452,6 +1476,9 @@ public sealed class SupportedRuntimeShapeCompositionTests : IClassFixture<Suppor
 			catch (UnauthorizedAccessException)
 			{ }
 		}
+
+		private GeneratedRuntimeShape Bind(string id, ShapeOptions options) =>
+			new(id, id, Path.Combine(_root, "shapes", id), options);
 
 		private GeneratedRuntimeShape Generate(string id, ShapeOptions options, params string[] parameters)
 		{

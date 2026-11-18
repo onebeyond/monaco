@@ -16,8 +16,17 @@ public sealed class GeneratedShapeCollectionFixture : IAsyncLifetime
 
 	public GeneratedShapeHarness Harness { get; private set; } = null!;
 
-	public async Task InitializeAsync() =>
+	public async Task InitializeAsync()
+	{
+		var provisionRoot = Environment.GetEnvironmentVariable(GeneratedShapeHarness.ProvisionRootVariable);
+		if (!string.IsNullOrWhiteSpace(provisionRoot))
+		{
+			Harness = GeneratedShapeHarness.Attach(provisionRoot);
+			return;
+		}
+
 		Harness = await GeneratedShapeHarness.ProvisionAsync(GeneratedShapeHarness.FindProductRoot(), Protocol, CancellationToken.None);
+	}
 
 	public async Task DisposeAsync()
 	{

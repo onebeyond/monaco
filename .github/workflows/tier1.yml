@@ -1,0 +1,29 @@
+name: Tier 1
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  tier1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.x
+    - name: Install Mono
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y mono-complete
+    - name: Setup NuGet CLI
+      uses: nuget/setup-nuget@v2
+      with:
+        nuget-version: 'latest'
+    - name: Run Tier 1
+      run: dotnet run --project eng/Monaco.Eng.Tier1/Monaco.Eng.Tier1.csproj

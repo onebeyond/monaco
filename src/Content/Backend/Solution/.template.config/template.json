@@ -180,6 +180,7 @@
 				"_TemplateArtifacts/**",
 				"Monaco.Template.Backend.Application.Tests/Persistence/MigrationVariantArtifactTests.cs",
 				"Monaco.Template.Backend.Application.Tests/Persistence/AttributionCompositionBoundaryTests.cs",
+				"Monaco.Template.Backend.Application.Tests/Persistence/MigrationMaintenanceCommandTests.cs",
 				".template.config/**/*",
 				"**/*.filelist",
 				"**/*.user",

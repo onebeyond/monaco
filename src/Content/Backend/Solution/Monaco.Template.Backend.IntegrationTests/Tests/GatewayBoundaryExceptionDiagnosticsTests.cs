@@ -129,6 +129,14 @@ public sealed class GatewayBoundaryExceptionDiagnosticsTests
 		var response = await client.SendAsync(request);
 
 		response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
+		// The server activity stops after the response is returned. Export can arrive from the client span first.
+		for (var attempt = 0;
+			 attempt < 50 && !activities.Any(activity => activity.TraceId == incomingContext.TraceId &&
+														 activity.SourceName == "Microsoft.AspNetCore" &&
+														 activity.ParentSpanId == incomingContext.SpanId);
+			 attempt++)
+			await Task.Delay(100);
+
 		var trace = activities.Where(activity => activity.TraceId == incomingContext.TraceId).ToArray();
 		var gatewayServer = trace.Should().ContainSingle(activity => activity.SourceName == "Microsoft.AspNetCore" && activity.ParentSpanId == incomingContext.SpanId).Which;
 		var yarpForward = trace.Should().ContainSingle(activity => activity.SourceName == "Yarp.ReverseProxy" && activity.ParentSpanId == gatewayServer.SpanId).Which;
